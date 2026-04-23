@@ -1,18 +1,18 @@
 # COC Sync Marker — kailash-coc-py
-timestamp: 2026-04-23T09:00:00Z
+timestamp: 2026-04-23T01:05:02.949Z
 source: loom/.claude
 variant: py
-clis: ["claude", "codex", "gemini"]
+clis: ["claude","codex","gemini"]
 stats:
-  updated: 0
-  created: 1645
-  unchanged: 0
-  composed: 1
-  preserved: 2             # CLAUDE.md + README.md (template-owned)
+  updated: 3
+  created: 17
+  unchanged: 1646
+  composed: 170
+  preserved: 2
   baselines_emitted:
-    cc: 0                  # CLAUDE.md is preserved, not emitted
-    codex: 1               # AGENTS.md
-    gemini: 1              # GEMINI.md
+    cc: 0
+    codex: 1
+    gemini: 1
   cli_artifacts:
     codex:
       prompts: 29
@@ -22,5 +22,5 @@ stats:
       skills: 34
       agents: 22
   mcp_guard:
-    policies_populated: false   # intentionally false — see coc-sync.md Step 6.6 § G3
-    predicates_extracted: 0     # pending Phase H3+ runtime wiring
+    policies_populated: false
+    predicates_extracted: 0

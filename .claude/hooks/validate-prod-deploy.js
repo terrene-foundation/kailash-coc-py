@@ -18,7 +18,7 @@
 
 const fs = require("fs");
 const path = require("path");
-const { execFileSync } = require("child_process");
+const { execSync } = require("child_process");
 
 const TIMEOUT_MS = 5000;
 const timeout = setTimeout(() => {
@@ -99,9 +99,9 @@ async function main() {
     if (command.includes("--skip-staging")) {
       console.error(
         "\n" +
-        "[DEPLOY HOOK] WARNING: --skip-staging detected.\n" +
-        "[DEPLOY HOOK] Allowing direct production deploy WITHOUT staging verification.\n" +
-        "[DEPLOY HOOK] You MUST document the reason in deploy/deployment-config.md.\n"
+          "[DEPLOY HOOK] WARNING: --skip-staging detected.\n" +
+          "[DEPLOY HOOK] Allowing direct production deploy WITHOUT staging verification.\n" +
+          "[DEPLOY HOOK] You MUST document the reason in deploy/deployment-config.md.\n",
       );
       clearTimeout(timeout);
       process.exit(0);
@@ -111,7 +111,7 @@ async function main() {
     // Locate repo root by walking up from cwd or script location
     let repoRoot;
     try {
-      repoRoot = execFileSync("git", ["rev-parse", "--show-toplevel"], {
+      repoRoot = execSync("git rev-parse --show-toplevel", {
         encoding: "utf8",
         timeout: 3000,
       }).trim();
@@ -128,19 +128,19 @@ async function main() {
     if (!fs.existsSync(markerPath)) {
       console.error(
         "\n" +
-        "╔══════════════════════════════════════════════════════════╗\n" +
-        "║  BLOCKED: Production deploy without staging             ║\n" +
-        "║                                                          ║\n" +
-        "║  Run staging first:                                      ║\n" +
-        "║    bash deploy/scripts/promote.sh                        ║\n" +
-        "║                                                          ║\n" +
-        "║  Or step-by-step on the server:                          ║\n" +
-        "║    bash deploy/scripts/stage.sh                          ║\n" +
-        "║    bash deploy/scripts/deploy.sh                         ║\n" +
-        "║                                                          ║\n" +
-        "║  Emergency bypass (document the reason afterward):       ║\n" +
-        "║    Add --skip-staging to your command                    ║\n" +
-        "╚══════════════════════════════════════════════════════════╝\n"
+          "╔══════════════════════════════════════════════════════════╗\n" +
+          "║  BLOCKED: Production deploy without staging             ║\n" +
+          "║                                                          ║\n" +
+          "║  Run staging first:                                      ║\n" +
+          "║    bash deploy/scripts/promote.sh                        ║\n" +
+          "║                                                          ║\n" +
+          "║  Or step-by-step on the server:                          ║\n" +
+          "║    bash deploy/scripts/stage.sh                          ║\n" +
+          "║    bash deploy/scripts/deploy.sh                         ║\n" +
+          "║                                                          ║\n" +
+          "║  Emergency bypass (document the reason afterward):       ║\n" +
+          "║    Add --skip-staging to your command                    ║\n" +
+          "╚══════════════════════════════════════════════════════════╝\n",
       );
       clearTimeout(timeout);
       process.exit(2); // Block
@@ -151,7 +151,7 @@ async function main() {
     const marker = fs.readFileSync(markerPath, "utf8").trim();
     let currentCommit;
     try {
-      currentCommit = execFileSync("git", ["rev-parse", "HEAD"], {
+      currentCommit = execSync("git rev-parse HEAD", {
         cwd: repoRoot,
         encoding: "utf8",
         timeout: 3000,
@@ -167,16 +167,16 @@ async function main() {
     if (!marker.includes(shortHash)) {
       console.error(
         "\n" +
-        "╔══════════════════════════════════════════════════════════╗\n" +
-        "║  BLOCKED: Staging marker is stale                        ║\n" +
-        "║                                                          ║\n" +
-        "║  Code has changed since staging last passed.             ║\n" +
-        `║  Current commit: ${shortHash.padEnd(42)}║\n` +
-        `║  Staging marker: ${marker.substring(0, 7).padEnd(42)}║\n` +
-        "║                                                          ║\n" +
-        "║  Re-run staging:                                         ║\n" +
-        "║    bash deploy/scripts/promote.sh                        ║\n" +
-        "╚══════════════════════════════════════════════════════════╝\n"
+          "╔══════════════════════════════════════════════════════════╗\n" +
+          "║  BLOCKED: Staging marker is stale                        ║\n" +
+          "║                                                          ║\n" +
+          "║  Code has changed since staging last passed.             ║\n" +
+          `║  Current commit: ${shortHash.padEnd(42)}║\n` +
+          `║  Staging marker: ${marker.substring(0, 7).padEnd(42)}║\n` +
+          "║                                                          ║\n" +
+          "║  Re-run staging:                                         ║\n" +
+          "║    bash deploy/scripts/promote.sh                        ║\n" +
+          "╚══════════════════════════════════════════════════════════╝\n",
       );
       clearTimeout(timeout);
       process.exit(2); // Block
@@ -185,7 +185,7 @@ async function main() {
 
     // Staging verified and current — allow production deploy
     console.error(
-      `[DEPLOY HOOK] Staging verified (${shortHash}). Allowing production deploy.`
+      `[DEPLOY HOOK] Staging verified (${shortHash}). Allowing production deploy.`,
     );
     clearTimeout(timeout);
     process.exit(0);

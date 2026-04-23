@@ -81,6 +81,33 @@ Fixture: `.claude/fixtures/validator-13/` (migrated from `workspaces/` in Phase 
 - Loom wrapper override: `-c project_doc_max_bytes=65536` (2× default — verified legal, no documented hard ceiling above this)
 - Emitted size: **~53,620 B** steady-state post-F4 (9 CRIT rules). WARN tier between 32,768 and 61,440; BLOCK above.
 
+## Hook Path Resolution
+
+**Codex does NOT export `$CODEX_PROJECT_DIR`.** Verified 2026-04-23 against `developers.openai.com/codex/config-advanced`: the docs describe hook stdin payload fields (`thread-id`, `cwd`) but NO process-level environment variable for the project root. A `.codex/hooks.json` command like `node $CODEX_PROJECT_DIR/.claude/hooks/session-start.js` silently becomes `node /.claude/hooks/session-start.js` (empty expansion) and exits with `MODULE_NOT_FOUND`.
+
+Correct pattern in `.codex/hooks.json`:
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ./.claude/hooks/session-start.js"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+Assumption: Codex invokes the hook process with `cwd = project_root`. This is the observed behavior (2026-04-23) but not explicitly guaranteed by the docs. If Codex later changes to invoke hooks from an arbitrary cwd, the hook scripts themselves are robust: every script reads JSON from stdin and extracts `cwd` from the payload, so they resolve repo-relative paths correctly even when `process.cwd()` drifts. The risk is only at the `node ./.claude/hooks/<name>.js` LAUNCH — the node binary won't find the script.
+
+Contrast with Gemini: `$GEMINI_PROJECT_DIR` IS exported (verified at `geminicli.com/docs/hooks/`) alongside `$GEMINI_PLANS_DIR` and `$GEMINI_SESSION_ID`. `.gemini/settings.json` uses it; that path stays.
+
 ## Parity Contract With cc-architect / gemini-architect
 
 Per `rules/cross-cli-parity.md`:
