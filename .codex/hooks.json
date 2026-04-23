@@ -1,0 +1,46 @@
+{
+  "$comment": "Template for .codex/hooks.json emitted to Codex-aware USE templates. IMPORTANT: Codex hooks fire on Bash tool invocations only. apply_patch, Write, and MCP tool calls do NOT fire PreToolUse/PostToolUse events — those are enforced via .claude/codex-mcp-guard/server.js. See .claude/agents/codex-architect.md § Hooks Coverage for details.",
+
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node $CODEX_PROJECT_DIR/.claude/hooks/session-start.js"
+          }
+        ]
+      }
+    ],
+
+    "UserPromptSubmit": [],
+
+    "PreToolUse": [
+      {
+        "matcher": "shell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node $CODEX_PROJECT_DIR/.claude/hooks/validate-bash-command.js"
+          }
+        ]
+      }
+    ],
+
+    "PermissionRequest": [],
+
+    "PostToolUse": [
+      {
+        "matcher": "shell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node $CODEX_PROJECT_DIR/.claude/hooks/integration-hygiene.js"
+          }
+        ]
+      }
+    ],
+
+    "Stop": []
+  }
+}

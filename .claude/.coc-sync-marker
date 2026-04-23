@@ -1,0 +1,12 @@
+# COC Sync Marker — kailash-coc-py
+timestamp: 2026-04-22T19:01:28.860546Z
+source: loom/.claude
+variant: py
+clis: ['claude', 'codex', 'gemini']
+stats:
+  updated: 0
+  created: 687
+  unchanged: 0
+  composed: 1
+  baselines_emitted: 2
+  preserved: 0
