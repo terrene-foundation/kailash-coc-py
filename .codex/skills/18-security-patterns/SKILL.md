@@ -111,6 +111,87 @@ When making outbound HTTP requests to user-supplied URLs:
 
 Reference implementation: See the Nexus webhook transport source for a working `_validate_target_url()` pattern.
 
+## Canonical Anchor Form (Cross-SDK)
+
+Audit-chain anchors (hash-linked records proving the ordering of audited events) MUST use a single **canonical-form helper** as the source of truth for the byte sequence that gets hashed. The failure mode this prevents: every chain-verify path that re-derives the canonical form in-module silently accepts a divergent byte layout, breaking cross-SDK chain compatibility without surfacing an error until an anchor minted by one SDK is verified by another.
+
+### MUST: Canonical-Form Helper Is The Single Source Of Truth
+
+Every write path that mints an anchor AND every verify path (range-verify, anchor-chain-verify) MUST route through the shared canonical-form helper. In-module re-implementation of the canonical byte layout is BLOCKED.
+
+```python
+# Python (kailash-py) — DO — route through the shared canonical-form helper
+from kailash.audit.canonical import canonical_anchor_input, canonical_json_dumps
+
+payload_bytes = canonical_anchor_input(
+    prev_hash=prev,
+    sequence=seq,
+    tenant_id=tenant,
+    event=canonical_json_dumps(event_dict),
+)
+h = sha256_hex(payload_bytes)
+```
+
+```rust
+// Rust (kailash-rs) — DO — route through the shared canonical-form helper
+use kailash_audit::canonical::{canonical_anchor_input, canonical_json_serialize};
+
+let payload_bytes = canonical_anchor_input(
+    prev_hash, sequence, tenant_id,
+    &canonical_json_serialize(&event)?,
+);
+let h = sha256_hex(&payload_bytes);
+```
+
+```
+# DO NOT — in-module re-implementation
+# The following shape silently diverges from the shared canonical-form
+# helper as soon as its field order / delimiter / encoding evolves:
+#   python:
+#     payload = f"{prev_hash}|{sequence}|{tenant_id}|{json.dumps(event)}"
+#     h = hashlib.sha256(payload.encode()).hexdigest()
+#   rust:
+#     let payload = format!("{}|{}|{}|{}", prev_hash, sequence, tenant_id, serde_json::to_string(&event)?);
+#     let h = sha256_hex(payload.as_bytes());
+```
+
+**Why:** A chain's cross-SDK compatibility is fully defined by the canonical byte layout of each anchor's input. The moment a verify path re-derives that layout from scratch, the canonical-form contract has two authors — and the two drift. Verification against the shared helper + byte-stable test vectors is the single structural defense. See `test-vectors/audit-chain-canonical.json` for the shared fixture that both SDKs MUST serialize byte-identically.
+
+### MUST: Constant-Time Comparison On Hash Equality
+
+Every hash comparison in a verify path MUST use a constant-time comparison primitive. String `==` / `!=` on an attacker-influenced hash input is a timing oracle that leaks prefix-match length, allowing an attacker to forge an anchor hash one byte at a time across many verify attempts.
+
+```python
+# Python (kailash-py) — DO
+import hmac
+if not hmac.compare_digest(expected_hash, computed_hash):
+    raise ChainVerifyError("hash mismatch")
+```
+
+```rust
+// Rust (kailash-rs) — DO — route through the constant-time comparison primitive
+use kailash_core::crypto::constant_time_eq;
+if !constant_time_eq(expected_hash, &computed_hash) {
+    return Err(ChainVerifyError::HashMismatch);
+}
+```
+
+```
+# DO NOT — variable-time equality on attacker-influenced input
+# Python:
+if expected_hash == computed_hash: ...
+# Rust:
+if expected_hash == computed_hash { ... }
+```
+
+**Why:** Variable-time string / slice equality short-circuits at the first differing byte. On a verify endpoint that returns quickly-vs-slowly based on prefix match, an attacker submits crafted anchor hashes and measures response time to reconstruct the expected hash byte-by-byte. Constant-time comparison walks the full length regardless of the first-diff position; each SDK exposes one approved constant-time-equality primitive (Python: `hmac.compare_digest`; Rust: the SDK's `constant_time_eq` helper, backed by an audited constant-time crate) — routing every hash-verify site through the SDK primitive keeps the enforcement point singular. Error messages on mismatch MUST NOT echo expected/found hash values — the error body is itself a side channel.
+
+### MUST: Verify Paths Reach Production Call Sites
+
+Every range-verify and anchor-chain-verify surface MUST have at least one production call site in the framework's hot path — not only in tests. An anchor chain whose verify path is never called in production is the orphan failure mode (see `rules/orphan-detection.md`): the chain mints fine, operators believe tamper-detection is running, nothing ever runs the check.
+
+**Cross-SDK test vector:** both SDKs' canonical-form helpers MUST produce byte-identical output for the fixture at `test-vectors/audit-chain-canonical.json`. A regression test in each SDK loads the fixture, runs its helper, and asserts equality to the recorded golden output. Drift in either direction is a HIGH finding.
+
 ## Error Message Security
 
 Never return raw exception messages to clients — they leak file paths, class names, database URLs.

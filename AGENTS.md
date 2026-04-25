@@ -8,27 +8,18 @@ scope: baseline
 
 # Agent Orchestration Rules
 
+See `.claude/guides/rule-extracts/agents.md` for full evidence, extended examples, and post-mortems.
+
 
 ## Specialist Delegation (MUST)
 
-When working with Kailash frameworks, MUST consult the relevant specialist:
+When working with Kailash frameworks, MUST consult the relevant specialist: **dataflow-specialist** (DB/DataFlow), **nexus-specialist** (API/deployment), **kaizen-specialist** (AI agents), **mcp-specialist** (MCP integration), **mcp-platform-specialist** (FastMCP platform), **pact-specialist** (governance), **ml-specialist** (ML lifecycle), **align-specialist** (LLM fine-tuning). See `rules/framework-first.md` for the domain-to-framework binding.
 
-- **dataflow-specialist**: Database or DataFlow work
-- **nexus-specialist**: API or deployment work
-- **kaizen-specialist**: AI agent work
-- **mcp-specialist**: MCP integration work
-- **mcp-platform-specialist**: FastMCP platform server, contributor plugins, security tiers
-- **pact-specialist**: Organizational governance work
-- **ml-specialist**: ML lifecycle, feature stores, training, drift monitoring, AutoML
-- **align-specialist**: LLM fine-tuning, LoRA adapters, alignment methods, model serving
-
-**Applies when**: Creating workflows, modifying DB models, setting up endpoints, building agents, implementing governance, training ML models, fine-tuning LLMs, configuring MCP platform server.
-
-**Why:** Framework specialists encode hard-won patterns and constraints that generalist agents miss, leading to subtle misuse of DataFlow, Nexus, or Kaizen APIs.
+**Why:** Framework specialists encode hard-won patterns and constraints generalist agents miss, leading to subtle misuse of DataFlow, Nexus, or Kaizen APIs.
 
 ## Specs Context in Delegation (MUST)
 
-Every specialist delegation prompt MUST include relevant spec file content from `specs/`. Read `specs/_index.md`, select relevant files, include them inline. See `rules/specs-authority.md` MUST Rule 7 for the full protocol and examples.
+Every specialist delegation prompt MUST include relevant spec file content from `specs/`. Read `specs/_index.md`, select relevant files, include them inline. See `rules/specs-authority.md` MUST Rule 7 for the full protocol.
 
 **Why:** Specialists without domain context produce technically correct but intent-misaligned output (e.g., schemas without tenant_id because multi-tenancy wasn't communicated).
 
@@ -39,11 +30,9 @@ Every specialist delegation prompt MUST include relevant spec file content from 
 3. **`decide-framework` skill** → Choose approach
 4. Then appropriate specialist
 
-**Applies when**: Feature spans multiple files, unclear requirements, multiple valid approaches.
-
 ## Parallel Execution
 
-When multiple independent operations are needed, launch agents in parallel using Task tool, wait for all, aggregate results. MUST NOT run sequentially when parallel is possible.
+When multiple independent operations are needed, launch agents in parallel via the CLI's delegation primitive, wait for all, aggregate results. MUST NOT run sequentially when parallel is possible.
 
 **Why:** Sequential execution of independent operations wastes the autonomous execution multiplier, turning a 1-session task into a multi-session bottleneck.
 
@@ -51,86 +40,80 @@ When multiple independent operations are needed, launch agents in parallel using
 
 Reviews happen at COC phase boundaries, not per-edit. Skip only when explicitly told to.
 
-**Why:** Skipping lets gaps propagate to downstream repos where they are far more expensive to fix. Evidence: 0052-DISCOVERY §3.3 — six commits shipped without review because gates were "recommended." Background agents make MUST gates nearly free.
+**Why:** Skipping gate reviews lets analysis gaps, security holes, and naming violations propagate to downstream repos where they are far more expensive to fix.
 
-| Gate                             | After Phase          | Enforcement | Review                                                                         |
-| -------------------------------- | -------------------- | ----------- | ------------------------------------------------------------------------------ |
-| Analysis complete                | `/analyze`           | RECOMMENDED | **reviewer**: Are findings complete? Gaps?                                     |
-| Plan approved                    | `/todos`             | RECOMMENDED | **reviewer**: Does plan cover requirements?                                    |
-| Implementation done              | `/implement`         | **MUST**    | **reviewer** + **security-reviewer**: Run as parallel background agents.       |
+| Gate                | After Phase  | Enforcement | Review                                                                                                          |
+| ------------------- | ------------ | ----------- | --------------------------------------------------------------------------------------------------------------- |
+| Analysis complete   | `/analyze`   | RECOMMENDED | **reviewer**: Are findings complete? Gaps?                                                                      |
+| Plan approved       | `/todos`     | RECOMMENDED | **reviewer**: Does plan cover requirements?                                                                     |
+| Implementation done | `/implement` | **MUST**    | **reviewer** + **security-reviewer**: Parallel background agents.                                               |
 | ... | ... |
 
-**BLOCKED responses when skipping MUST gates:**
+**Background agent pattern for MUST gates** — review costs near-zero parent context. See **Examples § Quality Gates — Background Agent Pattern** below for the CLI-specific delegation syntax.
 
-- "Skipping review to save time"
-- "Reviews will happen in a follow-up session"
-- "The changes are straightforward, no review needed"
-- "Already reviewed informally during implementation"
+**BLOCKED responses when skipping MUST gates:** "Skipping review to save time" / "Reviews will happen in a follow-up session" / "The changes are straightforward, no review needed" / "Already reviewed informally during implementation".
 
-**Background agent pattern for MUST gates** — the review costs nearly zero parent context. See **Examples § Quality Gates — Background Agent Pattern** below for the CLI-specific syntax.
+### MUST: Reviewer Prompts Include Mechanical AST/Grep Sweep
 
-### MUST: Reviewer Prompts Include Mechanical AST/Grep Sweep, Not Only Diff Review
+Every gate-level reviewer prompt MUST include explicit mechanical sweeps that verify ABSOLUTE state (not only the diff). LLM-judgment review catches what's wrong with new code; mechanical sweeps catch what's missing from OLD code the spec also touched.
 
-Every gate-level reviewer prompt MUST include explicit mechanical sweeps that verify ABSOLUTE state (not only the diff). LLM-judgment review of the diff catches what's wrong with the new code; mechanical sweeps catch what's missing from the OLD code that the spec also touched.
+See **Examples § Reviewer Mechanical Sweeps** below for the DO / DO NOT delegation block.
 
-See **Examples § Reviewer Mechanical Sweeps** below for the DO / DO NOT delegation block — the surrounding syntax differs per CLI runtime, so it lives in the overlay-replaceable `examples` slot.
-
-**Why:** Gate reviewers are constrained by the diff they're shown. The orphan failure mode of `rules/orphan-detection.md` §1 is invisible at diff-level. A 4-second `grep -c` sweep catches what 5 minutes of LLM judgment misses. See `skills/30-claude-code-patterns/worktree-orchestration.md § Reviewer Prompts` for the kailash-ml 0.12.0 post-mortem.
+**Why:** Reviewers are constrained by the diff. The orphan failure mode in `orphan-detection.md` §1 is invisible at diff-level. A 4-second `grep -c` catches what 5 minutes of LLM judgment misses. See guide for full evidence.
 
 ## Zero-Tolerance
 
-Pre-existing failures MUST be fixed (see `rules/zero-tolerance.md` Rule 1). No workarounds for SDK bugs — deep dive and fix directly (Rule 4).
+Pre-existing failures MUST be fixed (`rules/zero-tolerance.md` Rule 1). No workarounds for SDK bugs — deep-dive and fix directly (Rule 4).
 
-**Why:** Workarounds create parallel implementations that diverge from the SDK, doubling maintenance cost and masking the root bug from being fixed.
+**Why:** Workarounds create parallel implementations that diverge from the SDK, doubling maintenance cost.
 
 ## MUST: Worktree Isolation for Compiling Agents
 
-When launching agents that compile (Rust `cargo`, Python `.venv` installs, JS `node_modules`), MUST use the CLI's worktree-isolation primitive to avoid build directory lock contention. See **Examples § Worktree Isolation for Compiling Agents** below for the CLI-specific delegation syntax.
+Agents that compile (Rust `cargo`, Python editable installs at scale) MUST use the CLI's worktree-isolation primitive to avoid build-directory lock contention.
 
-**Why:** Cargo holds an exclusive filesystem lock on `target/`. Two cargo processes in the same directory serialize completely. See `rules/worktree-isolation.md` + `skills/30-claude-code-patterns/worktree-orchestration.md § Rule 1`.
+See **Examples § Worktree Isolation for Compiling Agents** below for the CLI-specific delegation syntax.
+
+**Why:** Cargo uses an exclusive filesystem lock on `target/`. Worktrees give each agent its own `target/`. See `skills/30-claude-code-patterns/worktree-orchestration.md` for the full 5-layer protocol — worktree isolation is necessary but not sufficient.
 
 ## MUST: Worktree Prompts Use Relative Paths Only
 
-Any absolute path in a worktree-isolation delegation prompt MUST be anchored to the pinned worktree path — absolute paths pointing to the parent checkout are BLOCKED.
+When prompting an agent with worktree isolation, the orchestrator MUST reference files via paths RELATIVE to the repo root — never absolute paths starting with `/Users/` or `/home/`.
 
 See **Examples § Worktree Prompts Use Relative Paths Only** below for the DO / DO NOT delegation syntax.
 
-**Why:** Worktree-isolation primitives set cwd inside the worktree but file-write tools accept any absolute path — parent-rooted paths resolve there regardless of cwd. See `skills/30-claude-code-patterns/worktree-orchestration.md § Rule 2` for the 2026-04-19 three-shard ml-specialist post-mortem (Shard A lost 300+ LOC).
+**Why:** Worktree isolation sets cwd to the worktree; absolute paths point back to the parent checkout, silently defeating isolation. Session 2026-04-19: 2 of 3 parallel shards wrote to MAIN; one lost 300+ LOC when its empty worktree auto-cleaned. See guide + `skills/30-claude-code-patterns/worktree-orchestration.md` § Rule 2 for full post-mortem.
 
 ## MUST: Recover Orphan Writes From Zero-Commit Worktree Agents
 
-When an `isolation: "worktree"` agent reports completion but the branch has zero commits AND the worktree has been auto-cleaned, the parent orchestrator MUST inspect the MAIN checkout for orphaned untracked files via `git status --short` BEFORE concluding the work was lost. Absolute-path writes from the agent resolve to the MAIN checkout cwd — the files are NOT lost; they are orphaned, uncommitted, and reachable. Abandoning orphans and re-launching the agent is BLOCKED.
+When a worktree-isolated agent reports completion but the branch has zero commits AND the worktree has been auto-cleaned, the parent orchestrator MUST inspect the MAIN checkout for orphaned untracked files BEFORE concluding the work was lost. Absolute-path writes from the agent resolve to the MAIN checkout cwd — the files are NOT lost; they are orphaned, uncommitted, and reachable via `git status` on the parent.
 
-**Why:** `git status` surfaces orphans the moment you look. The first four rationalizations discard 1000+ LOC per occurrence; the fifth conflates branch-name aesthetics with provenance — `recovery/` grep surfaces this rescue class across history; `feat/` does not. See `skills/30-claude-code-patterns/worktree-orchestration.md § Rule 2a` for the 4-step protocol + 2026-04-20 PR #574 post-mortem (1129 LOC of `alignment.py` recovered from MAIN).
+**Why:** The first three rationalizations lose 1000+ LOC of real work every time an absolute-path agent truncates. The fourth is false because `git status` reveals the orphans. The fifth conflates branch-name aesthetics with provenance traceability — `recovery/` grep surfaces this class of rescue across history; `feat/` does not.
 
 ## MUST: Worktree Agents Commit Incremental Progress
 
-Every agent launched with `isolation: "worktree"` MUST receive an explicit instruction to `git commit` after each major milestone, not only at completion. The orchestrator MUST verify the branch has ≥1 commit before declaring the agent's work landed. **This applies to every worktree agent regardless of task type** — compile work, prose drafting, one-line config edits, markdown briefs, and one-off spikes all exhibit the same failure mode.
+Every worktree-isolated agent MUST receive an explicit instruction in its prompt to `git commit` after each milestone. The orchestrator MUST verify the branch has ≥1 commit before declaring the agent's work landed.
 
-**Why:** Worktree auto-cleanup deletes worktrees with zero commits. Truncation mid-message before commit loses 100% of output. See `skills/30-claude-code-patterns/worktree-orchestration.md § Rule 3` for the 2026-04-19 three-shard compile post-mortem (3 of 3 truncated, 2 lost work) AND `rules/worktree-isolation.md` § Rule 5 for the 2026-04-21 non-compile post-mortem (11 drafted briefs + pytest.ini diagnosis lost).
+**Why:** Worktrees with zero commits are silently deleted. Session 2026-04-19: Shard A wrote 300+ LOC, truncated mid-message, zero commits, work lost. See guide + `skills/30-claude-code-patterns/worktree-orchestration.md` § Rule 3.
 
 ## MUST: Verify Agent Deliverables Exist After Exit
 
-When an agent reports completion of a file-writing task, the parent orchestrator MUST `ls` or read the claimed file before trusting the completion claim. Agent "done" messages are NOT evidence of file creation.
+When an agent reports completion of a file-writing task, the parent MUST read the claimed file before trusting the completion claim.
 
 See **Examples § Verify Agent Deliverables Exist After Exit** below for the CLI-specific file-read verification syntax.
 
-**Why:** Budget exhaustion truncates the final write; agent emits "Now let me write X..." with no tool call. `ls` is O(1) — silent no-op into loud retry. See `rules/worktree-isolation.md` Rule 3 + `skills/30-claude-code-patterns/worktree-orchestration.md § Rule 4` (kaizen round 6, ml-specialist round 7).
+**Why:** Session 2026-04-19 logged 2 occurrences of agents hitting budget mid-message and reporting success with zero files on disk. The file-read check is O(1) and converts silent no-op into loud retry.
 
 ## MUST: Parallel-Worktree Package Ownership Coordination
 
-When two or more parallel agents' worktrees touch the SAME sub-package, the orchestrator MUST designate ONE agent as the **version owner** AND tell every other agent: "do NOT edit `packages/<pkg>/pyproject.toml` (or `Cargo.toml`), the package's `__version__` / crate version, or `packages/<pkg>/CHANGELOG.md`".
+When launching two or more parallel agents whose worktrees touch the SAME sub-package, the orchestrator MUST designate ONE agent as **version owner** (pyproject.toml + `__init__.py::__version__` + CHANGELOG) AND tell every sibling explicitly: "do NOT edit those files". Integration belongs to the orchestrator.
 
-**Why:** Parallel agents see the same base SHA and independently bump version + write top-level CHANGELOG entries. Git picks one; the other's prose is discarded. Pre-declared ownership is O(one-line-in-prompt). See `skills/30-claude-code-patterns/worktree-orchestration.md § Rule 5`.
+**Why:** Parallel agents see the same base SHA; each independently bumps `version` and writes a top-level CHANGELOG entry. Merge picks one — discarding the other's prose silently. One-sentence exclusion clause prevents O(manual) reconciliation.
 
 ## MUST NOT
 
-- Framework work without specialist — **Why:** Misuse produces code that looks correct but violates invariants (pool sharing, session lifecycle, trust boundaries).
-- Sequential when parallel is possible — **Why:** See Parallel Execution above.
-- Raw SQL when DataFlow exists — **Why:** Bypasses DataFlow's access controls, audit logging, and dialect portability.
-- Custom API when Nexus exists — **Why:** Misses Nexus's session management, rate limiting, multi-channel deployment.
-- Custom agents when Kaizen exists — **Why:** Bypasses Kaizen's signature validation, tool safety, structured reasoning.
-- Custom governance when PACT exists — **Why:** Lacks PACT's D/T/R accountability grammar and verification gradient.
+- **Framework work without specialist** — misuse violates invariants (pool sharing, session lifecycle, trust boundaries).
+- **Sequential when parallel is possible** — wastes the autonomous execution multiplier.
+- **Raw SQL / custom API / custom agents / custom governance** — see `rules/framework-first.md` and guide for per-framework rationale. Framework specialists auto-invoke on matching work.
 
 
 
@@ -142,21 +125,9 @@ When two or more parallel agents' worktrees touch the SAME sub-package, the orch
 
 ### Worktree Isolation for Compiling Agents
 
-```
-# DO: codex_agent(agent="ml-specialist", isolation="worktree", prompt="implement feature X...")
-# DO NOT: two agents sharing target/ serialize on cargo's exclusive lock
-```
-
 ### Worktree Prompts Use Relative Paths Only
 
 ### Verify Agent Deliverables Exist After Exit
-
-```python
-# DO — verify after codex_agent() returns
-read_file("/abs/path/src/feature.py")  # raises if missing → retry
-
-# DO NOT — trust completion message
-```
 
 
 ---
@@ -401,14 +372,14 @@ All protected repos require PRs to main. Direct push is rejected by GitHub.
 
 **Why:** Direct pushes bypass CI checks and code review, allowing broken or unreviewed code to reach the release branch.
 
-| Repository                                    | Branch | Protection          |
-| --------------------------------------------- | ------ | ------------------- |
-| `terrene-foundation/kailash-py`               | `main` | Full (admin bypass) |
-| `terrene-foundation/kailash-coc-claude-py`    | `main` | Full (admin bypass) |
-| `terrene-foundation/kailash-coc-claude-rs`    | `main` | Full (admin bypass) |
-| `esperie/kailash-rs`                          | `main` | Full (admin bypass) |
-| `terrene-foundation/kailash-prism`            | `main` | Full (admin bypass) |
-| `terrene-foundation/kailash-coc-claude-prism` | `main` | Full (admin bypass) |
+| Repository                                    | Branch | Protection                                         |
+| --------------------------------------------- | ------ | -------------------------------------------------- |
+| `terrene-foundation/kailash-py`               | `main` | Full (admin bypass)                                |
+| `terrene-foundation/kailash-coc-claude-py`    | `main` | Full (admin bypass) — legacy (archival 2026-10-22) |
+| `terrene-foundation/kailash-coc-claude-rs`    | `main` | Full (admin bypass) — legacy (archival 2026-10-22) |
+| ... | ... |
+
+**New multi-CLI USE repos (`kailash-coc-py`, `kailash-coc-rs`)**: created 2026-04-23 as net-new repos (not rename) per migration r3 directive. Flipped to public + branch protection applied 2026-04-23 (1 approving review required, force-push + deletion blocked, admin bypass retained). Posture matches legacy `kailash-coc-claude-{py,rs}` rows.
 
 **Owner workflow**: Branch → commit → push → PR → `gh pr merge <N> --admin --merge --delete-branch`
 
@@ -516,8 +487,9 @@ scope: baseline
 
 # Security Rules
 
-
 ALL code changes in the repository.
+
+See `.claude/guides/rule-extracts/security.md` for extended examples, exhaustive sanitizer contract examples, and multi-site kwarg plumbing full post-mortem.
 
 ## No Hardcoded Secrets
 
@@ -533,13 +505,13 @@ All database queries MUST use parameterized queries or ORM.
 
 ## Credential Decode Helpers
 
-Connection strings carry credentials in URL-encoded form. Decoding them at a call site with `unquote(parsed.password)` is BLOCKED — every decode site MUST route through a shared helper module so the validation logic lives in exactly one place and drift between sites is impossible.
+Connection strings carry credentials in URL-encoded form. Decoding them at a call site with `unquote(parsed.password)` is BLOCKED — every decode site MUST route through a shared helper module so validation logic lives in one place.
 
 ### 1. Null-Byte Rejection At Every Credential Decode Site (MUST)
 
 Every URL parsing site that extracts `user`/`password` from `urlparse(connection_string)` MUST route through a single shared helper that rejects null bytes after percent-decoding. Hand-rolled `unquote(parsed.password)` at a call site is BLOCKED.
 
-**Why:** A crafted `mysql://user:%00bypass@host/db` decodes to `\x00bypass`; the MySQL C client truncates credentials at the first null byte and the driver sends an empty password, succeeding against any row in `mysql.user` with an empty `authentication_string`. Drift between sites that have the check and sites that don't is unauditable without a single helper.
+**Why:** A crafted `mysql://user:%00bypass@host/db` decodes to `\x00bypass`; the MySQL C client truncates credentials at the first null byte and the driver sends an empty password. Drift between sites with/without the check is unauditable without a single helper. See guide for full evidence.
 
 ### 2. Pre-Encoder Consolidation (MUST)
 
@@ -577,29 +549,27 @@ All user-generated content MUST be encoded before display in HTML templates, JSO
 
 DataFlow's input sanitizer (`packages/kailash-dataflow/src/dataflow/core/nodes.py::sanitize_sql_input`) is a defense-in-depth display-path safety net, NOT the primary SQLi defense. Parameter binding (`$N` / `%s` / `?`) is the primary defense — see § Parameterized Queries above.
 
-The sanitizer's contract is fixed:
-
 ### 1. String Inputs MUST Be Token-Replaced, Not Quote-Escaped
 
 For declared-string fields, the sanitizer MUST replace dangerous SQL keyword sequences with grep-able sentinel tokens (`STATEMENT_BLOCKED`, `DROP_TABLE`, `UNION_SELECT`, etc.). Quote-escaping (`'` → `''`) is BLOCKED.
 
-**Why:** Token-replace makes attacker intent grep-able post-incident (`grep STATEMENT_BLOCKED audit.log`). Quote-escape preserves the payload as data, masking that an attack was attempted. The actual injection defense is parameter binding; the sanitizer is the audit trail.
+**Why:** Token-replace makes attacker intent grep-able post-incident (`grep STATEMENT_BLOCKED audit.log`). Quote-escape preserves the payload as data, masking the attack. Sanitizer is the audit trail; parameter binding is the defense.
 
 ### 2. Type-Confusion MUST Raise, Not Silently Coerce
 
-For declared-string fields receiving `dict` / `list` / `set` / `tuple` values, the sanitizer MUST raise `ValueError("parameter type mismatch: …")`. Silent coercion via `str(value)` is BLOCKED — it lets a nested structure bypass the string-only sanitizer.
+For declared-string fields receiving `dict` / `list` / `set` / `tuple` values, the sanitizer MUST raise `ValueError("parameter type mismatch: …")`. Silent coercion via `str(value)` is BLOCKED.
 
-**Why:** A malicious upstream node that passes `{"injection": "'; DROP TABLE …"}` for a field declared as `str` bypasses every string-only check. Raising at the type-confusion boundary closes the bypass; coercion-to-string converts a structural attack into an unaudited storage event.
+**Why:** A malicious upstream node passing `{"injection": "'; DROP TABLE …"}` for a str-declared field bypasses every string-only check. Raising at the type-confusion boundary closes the bypass; coercion-to-string converts a structural attack into an unaudited storage event.
 
 ### 3. Safe Types Are Returned As-Is
 
-Values of declared-safe types (`int`, `float`, `bool`, `Decimal`, `datetime`, `date`, `time`) MUST pass through unchanged. `dict` and `list` MUST also pass through unchanged when the field's declared type is `dict` or `list` (JSON / array columns). Bug #515 documents this: premature `json.dumps()` on dict/list breaks parameter binding in `AsyncSQLDatabaseNode`.
+Values of declared-safe types (`int`, `float`, `bool`, `Decimal`, `datetime`, `date`, `time`) MUST pass through unchanged. `dict` and `list` MUST also pass through unchanged when the field's declared type is `dict` or `list` (JSON / array columns). Bug #515: premature `json.dumps()` on dict/list breaks parameter binding.
 
 ## Multi-Site Kwarg Plumbing
 
 When a security-relevant kwarg (classification policy, tenant scope, clearance context, audit correlation ID) is plumbed through a helper, EVERY call site of that helper MUST be updated in the SAME PR. Updating the "primary" call site and deferring siblings is BLOCKED.
 
-**Why:** A helper that takes a security-relevant kwarg has the kwarg precisely because the unqualified call leaks or misbehaves. Leaving any sibling call site on the unqualified signature ships the exact failure mode the kwarg was introduced to fix; the "safe default" is by definition the insecure default (otherwise the kwarg would not exist). The fix is mechanical — `grep -rn 'helper_name(' .` and patch every hit in the same PR.
+**Why:** A helper takes a security-relevant kwarg precisely because the unqualified call leaks or misbehaves. Leaving any sibling on the unqualified signature ships the exact failure mode the kwarg was introduced to fix; the "safe default" is by definition the insecure default. Fix is mechanical: `grep -rn 'helper_name(' .` + patch every hit.
 
 ## Kailash-Specific Security
 
@@ -610,7 +580,6 @@ When a security-relevant kwarg (classification policy, tenant scope, clearance c
 ## Exceptions
 
 Security exceptions require: written justification, security-reviewer approval, documentation, and time-limited remediation plan.
-
 
 ---
 
@@ -623,10 +592,9 @@ scope: baseline
 
 # Worktree Isolation Rules
 
+See `.claude/guides/rule-extracts/worktree-isolation.md` for extended examples, post-mortem prose, and session evidence for all 6 MUST rules.
 
-This rule targets **orchestrator behavior** — the parent session that spawns agents with `isolation: "worktree"`. It governs session-spawn-time decisions (what to pass in the delegation prompt, how to verify deliverables), NOT file-edit-time behavior. It loads universally because orchestration happens in sessions that rarely edit the `agents/`, `commands/`, or rule files it used to be path-scoped to — exactly the sessions where its absence caused the failure mode to recur.
-
-Agents launched with `isolation: "worktree"` run in their own git worktree so parallel jobs do not fight over the same resources. The original motivation was compile-heavy contention (Rust `target/`, Python `.venv/`, JS `node_modules/`) but **the rule applies to every worktree agent regardless of whether it compiles** — prose-drafting, config edits, markdown briefs, one-line pytest.ini fixes all exhibit the same failure mode. When an agent drifts back to the main checkout — because the system prompt didn't pin cwd, because absolute paths were copied from the orchestrator, because the tool defaulted to `process.cwd()` — the isolation silently breaks: two workers overwrite each other's changes, one commits the other's half-done code, and the "parallel" session produces garbage that only surfaces at `/redteam` or (more often) post-hoc when the lost work is noticed missing.
+Agents launched with `isolation: "worktree"` run in their own git worktree so parallel compile/test jobs do not fight over the same `target/` or `.venv/`. The isolation is only real if the agent actually edits files inside its assigned worktree path. When an agent drifts back to the main checkout — because the system prompt didn't pin cwd, because absolute paths were copied from the orchestrator, because the tool defaulted to `process.cwd()` — the isolation silently breaks.
 
 This rule mandates a self-verification step at agent start AND a pre-flight check in the orchestrator's delegation prompt. The verification is cheap (one `git status`) and the failure mode is expensive (a whole session's worth of parallel work corrupted).
 
@@ -634,41 +602,39 @@ This rule mandates a self-verification step at agent start AND a pre-flight chec
 
 ### 1. Orchestrator Prompts MUST Pin The Worktree Path
 
-Any delegation that uses worktree isolation MUST include the absolute worktree path in the prompt AND MUST instruct the agent to verify `git -C <worktree> status` at the start of its run. Passing the isolation flag without the explicit path is BLOCKED.
+Any delegation that uses `isolation: "worktree"` MUST include the absolute worktree path in the prompt AND MUST instruct the agent to verify `git -C <worktree> status` at the start of its run. Passing the isolation flag without the explicit path is BLOCKED.
 
-See **Examples § Rule 1 — Orchestrator Prompts Pin The Worktree Path** below for the DO / DO NOT delegation syntax.
-
-**Why:** The `isolation: "worktree"` flag creates the worktree but does not pin every tool call inside it — file-writing tools that accept absolute paths will happily write to the main checkout if the orchestrator's prompt uses a main-checkout path. Multiple specialist agents (ml, dataflow, kaizen) drifted back to the main tree during parallel sessions; the corruption was only caught by `git status` after the fact. One-line verification at agent start converts a silent corruption into a loud refusal.
+**Why:** The `isolation: "worktree"` flag creates the worktree but does not pin every tool call inside it — file-writing tools accepting absolute paths will write to the main checkout if the prompt uses a main-checkout path. One-line verification at agent start converts silent corruption into a loud refusal. See guide for 2026-04-19 post-mortem.
 
 ### 2. Specialist Agents MUST Self-Verify Cwd At Start
 
 Every specialist agent file (`.claude/agents/**/*.md`) that may be launched with `isolation: "worktree"` MUST include a "Working Directory Self-Check" step at the top of its process section. The check prints the resolved cwd and the git branch, and refuses to proceed if either is unexpected.
 
-**Why:** The orchestrator's pinned-path instruction can be lost to context compression across long delegation chains; a self-check inside the specialist file is a belt-and-suspenders guarantee that survives prompt truncation. Verified cost: one git call (~30 ms). Verified benefit: prevents the parallel-specialist drift seen in long sessions across compile-heavy languages (Rust cargo locks, Python `.venv` install races, JS `node_modules` writes).
+**Why:** The orchestrator's pinned-path instruction can be lost to context compression across long delegation chains; a self-check inside the specialist file is a belt-and-suspenders guarantee that survives prompt truncation. One git call (~30 ms) prevents specialist drift.
 
 ### 3. Parent MUST Verify Deliverables Exist After Agent Exit
 
-When an agent reports completion of a file-writing task, the parent orchestrator MUST verify the claimed files exist at the worktree path via the CLI's filesystem-read primitive before trusting the completion claim. Agent completion messages are NOT evidence of file creation.
+When an agent reports completion of a file-writing task, the parent orchestrator MUST verify the claimed files exist at the worktree path via `ls` or `Read` before trusting the completion claim. Agent completion messages are NOT evidence of file creation.
 
-See **Examples § Rule 3 — Parent Verifies Deliverables After Agent Exit** below for the DO / DO NOT delegation syntax.
+**Why:** Agents hit budget mid-message and emit "Now let me write X..." without having written X. Kaizen round 6 and ml-specialist round 7 both reported success with zero files on disk. `ls` check is O(1) and converts silent no-op into loud retry.
 
-**Why:** Agents hit their budget mid-message and emit "Now let me write X..." without having written X. Multi-agent sessions have logged repeated occurrences (kaizen-specialist round 6, ml-specialist round 7) where an agent reported success with zero files on disk. An `ls` check is O(1) and converts "silent no-op" into "loud retry".
+### 4. Parallel-Launch Burst Size Limit (Waves of ≤3)
 
-### 4. Worktree Prompts MUST NOT Reference The Parent-Checkout Path
+When launching multiple Opus agents with `isolation: "worktree"` in a single orchestration turn, the parent MUST launch them in waves of ≤3, NOT a single burst of 4+. Bursts of 4+ simultaneous Opus agents hit Anthropic server-side rate limiting and ALL fail at 30–45s elapsed. Rate-limit failures exit the agent before it commits anything.
 
-Any absolute path in a worktree-isolation delegation prompt MUST be anchored to the pinned worktree path (see Rule 1). Absolute paths pointing to the parent checkout (`/Users/<you>/repos/<project>/<subpath>` with no worktree prefix) are BLOCKED — agents resolve them against the filesystem root, silently bypassing the worktree and writing into the parent. Relative paths are the safer default because they always resolve to the agent's cwd (the worktree).
+**Why:** Empirically 4–6 concurrent Opus worktree agents from one parent exceeds server-side throttle; every agent in the burst dies before committing. Recovery is worse than serialization (re-launch + orphan recovery > waiting one wave). Evidence: 2026-04-23 M10 launch — 6 agents all died at 34–45s; waves of 3 completed cleanly. See guide for agent hashes.
 
-See **Examples § Rule 4 — Worktree Prompts Do Not Reference Parent-Checkout Path** below for the DO / DO NOT delegation syntax.
+### 5. Pre-Flight Merge-Base Check Before Worktree Launch
 
-**Why:** `isolation: "worktree"` runs the agent with cwd set to the worktree, but file-write tools accept any absolute path — an absolute path that points to the parent resolves there regardless of cwd. Session 2026-04-19 logged 2 of 3 parallel ml-specialist shards writing to main before self-correcting (Shard B) or losing work entirely (Shard A's 300+ LOC of sklearn array-API impl was lost when its empty worktree auto-cleaned). Only one self-corrected; the failure mode is not agent-detectable by default.
+Before launching a worktree agent, the orchestrator MUST create the worktree's branch from the current `HEAD` of the feat/main branch the work will merge back into — NOT from a stale commit the agent happens to pick up. The orchestrator MUST verify `git merge-base <new-branch> <target-branch>` equals the CURRENT tip of `<target-branch>` at launch time. Launching without the merge-base check is BLOCKED.
 
-### 5. Worktree Agents MUST Commit Incremental Progress
+**Why:** `git worktree add` without explicit base defaults to whatever branch HEAD was last set — can be pre-merge commit from hours ago. Stale-base worktrees merge cleanly only when packages don't overlap; otherwise 3-way merge silently discards one shard's edits. Merge-base check converts invisible drift into loud pre-flight abort. Evidence: 2026-04-23 M10 launch — 5 of 6 worktrees branched from pre-W30-merge SHA. See guide.
 
-Every agent launched with worktree isolation MUST receive an explicit instruction in its prompt to `git commit` after each major milestone (each file written, each test batch passed, each draft brief completed, each config edit made), NOT only at completion. The orchestrator MUST then verify the branch has ≥1 commit before declaring the agent's work landed. Worktrees with zero commits auto-clean on agent exit and the work is unrecoverable — **this applies equally to compile work, prose/markdown drafting, one-line config edits, and every other agent task; "my agent is just writing markdown, commit discipline is overkill" is BLOCKED.**
+### 6. Worktree Branch Name MUST Match Prompt's Declared Name
 
-See **Examples § Rule 5 — Worktree Agents Commit Incremental Progress** below for the DO / DO NOT delegation syntax.
+When the orchestrator prompt specifies a branch name (e.g. `feat/w31-core-ml-nodes`), the worktree MUST be created with that exact branch name — NOT the harness default `worktree-agent-<hash>`. The orchestrator MUST pass `-b <branch>` explicitly to `git worktree add`, AND the agent prompt MUST verify `git rev-parse --abbrev-ref HEAD` matches the declared name before committing.
 
-**Why:** Worktree auto-cleanup silently deletes worktrees with zero commits on their branch. An agent that writes perfect code / prose / config but truncates mid-message before committing loses 100% of its output. Post-hoc file-existence verification (Rule 3) catches orphan files in main but CANNOT recover files that were only in a cleaned-up worktree. Sessions 2026-04-19 (compile-heavy: 3 of 3 parallel ml-specialist shards truncated at 250-370k tokens; 2 lost work) AND 2026-04-21 (non-compile: 11 drafted markdown briefs + a verified pytest.ini diagnosis lost when two worktree agents reported "done" without committing) demonstrate the same failure across both task types. The only reliable defense is instructing the agent to commit as it goes regardless of whether the task compiles or not.
+**Why:** Branch names are the primary `git log --grep` surface for tracing a shard back to its plan — `feat/w31-core-ml-nodes-observability` surfaces in history; `worktree-agent-aa7fb6a6` surfaces only as meaningless hash. Post-merge audits cannot enumerate "did every planned shard land?" via grep when half use harness defaults. Evidence: 2026-04-23 — 3 of 6 M10 shards got hash-default names; audit had to pull from working-memory table.
 
 ## MUST NOT
 
@@ -684,25 +650,6 @@ See **Examples § Rule 5 — Worktree Agents Commit Incremental Progress** below
 
 **Why:** `process.cwd()` resolves to whatever the Claude Code process was launched with (the main checkout), not the worktree; relative paths inherit the same problem.
 
-## Relationship To Other Rules
-
-- `rules/agents.md` § "MUST: Worktree Isolation for Compiling Agents" — companion rule; this file is the verification layer for the isolation directive there.
-- `rules/zero-tolerance.md` Rule 2 — a completed-looking file that doesn't exist is a stub under a different name.
-- `rules/testing.md` § "Verified Numerical Claims In Session Notes" — same principle, applied to file deliverables.
-
-
-
-## Examples
-
-### Rule 1 — Orchestrator Prompts Pin The Worktree Path
-
-### Rule 3 — Parent Verifies Deliverables After Agent Exit
-
-### Rule 4 — Worktree Prompts Do Not Reference Parent-Checkout Path
-
-### Rule 5 — Worktree Agents Commit Incremental Progress
-
-
 ---
 
 # zero-tolerance.md
@@ -714,53 +661,54 @@ scope: baseline
 
 # Zero-Tolerance Rules
 
+See `.claude/guides/rule-extracts/zero-tolerance.md` for extended BLOCKED-pattern examples and Phase 5 audit evidence.
 
 ## Scope
 
 ALL sessions, ALL agents, ALL code, ALL phases. ABSOLUTE and NON-NEGOTIABLE.
 
-## Rule 1: Pre-Existing Failures, Warnings, and Notices MUST Be Resolved Immediately
+## Rule 1: Pre-Existing Failures, Warnings, And Notices MUST Be Resolved Immediately
 
 If you found it, you own it. Fix it in THIS run — do not report, log, or defer.
 
-**Applies to** — "found it" includes, with equal weight:
+**Applies to** ("found it" includes, with equal weight):
 
 - Test failures, build errors, type errors
-- Compiler warnings, linter warnings, deprecation notices
-- WARN/ERROR entries in the workspace's logs since the previous gate
-- Runtime warnings emitted during the session (`DeprecationWarning`, `ResourceWarning`, `RuntimeWarning`)
-- Peer-dependency warnings, missing-module warnings, version-resolution warnings
+- Compiler / linter warnings, deprecation notices
+- WARN/ERROR in workspace logs since previous gate
+- Runtime warnings (`DeprecationWarning`, `ResourceWarning`, `RuntimeWarning`)
+- Peer-dependency / missing-module / version-resolution warnings
 
-A warning is not "less broken" than an error. It is an error that the framework chose to keep running through. Both are owed.
+A warning is not "less broken" than an error. It is an error the framework chose to keep running through.
 
-**Process:**
+**Process:** diagnose root cause → fix → regression test → verify (`pytest` or project test cmd) → commit.
 
-1. Diagnose root cause
-2. Implement the fix
-3. Write a regression test
-4. Verify with `pytest` (or the project's test command)
-5. Include in current or dedicated commit
+**Why:** Deferring creates a ratchet — every session inherits more failures; codebase degrades faster than any single session can fix. Warnings are the leading indicator: today's `DeprecationWarning` is next quarter's "it stopped working when we upgraded".
 
-**Why:** Deferring broken code creates a ratchet where every session inherits more failures, and the codebase degrades faster than any single session can fix. Warnings are the leading indicator: today's `DeprecationWarning` is next quarter's "it stopped working when we upgraded".
+**Mechanism:** The log-triage protocol in `rules/observability.md` Rule 5 has concrete scan commands. If `observability.md` isn't loaded (config-file edits), MUST still scan most recent test runner + build output for WARN+ entries before reporting any gate complete.
 
-**Mechanism:** The log-triage protocol in `rules/observability.md` MUST Rule 5 provides the concrete commands for scanning test runner output, build tool output, and `*.log` files. If `observability.md` is not loaded (e.g., editing a config file), the agent MUST still scan the most recent test runner and build tool output for WARN+ entries before reporting any gate as complete.
-
-**Exceptions:**
-
-- User explicitly says "skip this issue."
-- Upstream third-party deprecation that cannot be resolved by updating or configuring the dependency in this session. Required disposition: pinned version with documented reason OR upstream issue link OR todo with explicit owner. Silent dismissal is still BLOCKED.
+**Exceptions:** User explicitly says "skip this"; OR upstream third-party deprecation unresolvable in this session → pinned version + documented reason OR upstream issue link OR todo with explicit owner. Silent dismissal still BLOCKED.
 
 ### Rule 1a: Scanner-Surface Symmetry
 
-Findings reported by a security scanner on a PR scan MUST be treated identically to findings reported on a main scan. The argument "this also exists on main, therefore not introduced here" is BLOCKED.
+Findings reported by a security scanner on a PR scan MUST be treated identically to findings on a main scan. "This also exists on main, therefore not introduced here" is BLOCKED.
 
-**Why:** "Same on main" is the institutional ratchet that defers fixes forever. Rule 1 already covers this in spirit; an explicit scanner-surface clause closes the rationalization gap.
+**Why:** "Same on main" is the institutional ratchet that defers fixes forever. Rule 1 covers this in spirit; an explicit scanner-surface clause closes the rationalization gap. See guide for `__all__` / `__getattr__` second-instance variant (PR #506).
 
-**Second instance — CodeQL `py/modification-of-default-value` via lazy `__getattr__` in `__all__`:**
+### Rule 1b: Scanner Deferral Requires Tracking Issue + Runtime-Safety Proof
 
-**Why:** A PR adding new `__all__` entries that are only resolvable via lazy `__getattr__` will be flagged by CodeQL even when grandfathered entries use the same pattern. The fix is to eager-import the NEW entries (closing the flag for this PR), not to argue "main does this too." The grandfathered entries remain a separate workstream and are NOT justification for adding more of the same.
+Rule 1a mandates that scanner findings MUST be fixed, not dismissed. A LEGITIMATE deferral disposition exists for findings that are provably runtime-safe AND require architectural refactor out of release-scope — but ONLY if all four conditions are met. Missing any one of them, the "deferral" IS silent dismissal under a different name and is BLOCKED.
 
-## Rule 2: No Stubs, Placeholders, or Deferred Implementation
+Required conditions (ALL four):
+
+1. **Runtime-safety proof** — the finding is verified safe (e.g., every cyclic import is `TYPE_CHECKING`-guarded; the "unsafe" path is unreachable at runtime). Verification is a PR comment citing the guard lines.
+2. **Tracking issue** — filed against the repo with title `codeql: defer <rule-id> — <short-context>`, body including acceptance criteria for the full fix.
+3. **Release PR body link** — the tracking issue is linked from the release PR's body with explicit "deferred, safe per #<issue>" language.
+4. **Release-specialist agreement** — release-specialist confirms the deferral in review OR user explicitly overrides with "full fix".
+
+**Why:** Without written runtime-safety proof + tracking issue + release PR link + release-specialist signoff, a "deferred" finding is indistinguishable from a silent dismissal — nothing forces the follow-up and nothing surfaces the backlog. The four conditions are the structural defense: verification is the grep-able claim; the tracking issue is the workstream; the release PR link is the audit trail; the release-specialist signoff is the human gate. Rule 1a blocks dismissal; Rule 1b documents the ONLY legitimate path to defer.
+
+## Rule 2: No Stubs, Placeholders, Or Deferred Implementation
 
 Production code MUST NOT contain:
 
@@ -769,96 +717,23 @@ Production code MUST NOT contain:
 - `pass # placeholder`, empty function bodies
 - `return None # not implemented`
 
-**No simulated/fake data:**
-
-- `simulated_data`, `fake_response`, `dummy_value`
-- Hardcoded mock responses pretending to be real API calls
-- `return {"status": "ok"}` as placeholder for real logic
-
-**Frontend mock data is a stub:**
-
-- `MOCK_*`, `FAKE_*`, `DUMMY_*`, `SAMPLE_*` constants
-- `generate*()` / `mock*()` functions producing synthetic data
-- `Math.random()` used for display data
+**No simulated/fake data:** `simulated_data`, `fake_response`, `dummy_value`, hardcoded mock responses, placeholder dicts. **Frontend mock is a stub too:** `MOCK_*`, `FAKE_*`, `DUMMY_*`, `SAMPLE_*` constants; `generate*()` / `mock*()` producing synthetic display data; `Math.random()` for UI.
 
 **Why:** Frontend mock data is invisible to Python detection but has the same effect — users see fake data presented as real.
 
-**Extended examples (DataFlow 2.0 Phase 5 audit):** these patterns passed prior audits but were caught by the Phase 5 wiring sweep. They are equally BLOCKED.
+**Extended BLOCKED patterns** (Phase 5 audit + kailash-ml-audit W33b) — see guide for full code examples:
 
-- **Fake encryption** — a class that takes an `encryption_key` parameter, stores it, and does nothing with it:
+- **Fake encryption** — class stores `encryption_key` but `set()` writes plaintext. Audit trail shows "encrypted"; disk shows plaintext.
+- **Fake transaction** — `@contextmanager` named `transaction` that commits after every statement (no BEGIN/COMMIT/rollback).
+- **Fake health** — `/health` returns 200 without probing DB/Redis. Orchestrators make routing decisions on lies.
+- **Fake classification / redaction** — `@classify(REDACT)` stored but never enforced on read. Documented security control ships as no-op.
+- **Fake tenant isolation** — `multi_tenant=True` flag with cache key missing `tenant_id` dimension.
+- **Fake integration via missing handoff field** — frozen dataclass on pipeline's critical path omits the field the NEXT primitive needs. Each primitive's unit tests pass (each constructs its own fixture); the advertised 3-line pipeline breaks on every fresh install. Fix: add missing field; populate at every return site; add Tier-2 E2E regression (see `rules/testing.md` § End-to-End Pipeline Regression). Evidence: kailash-ml W33b `TrainingResult(frozen=True)` without `trainable`; `km.register` raised `ValueError` on fresh install.
+- **Fake metrics** — silent no-op counters because `prometheus_client` missing + no startup warning. Dashboards empty while operators believe they're reporting.
 
-  ```python
-  # BLOCKED — "encrypted" store that writes plaintext
-  class EncryptedStore:
-      def __init__(self, encryption_key: str):
-          self._key = encryption_key
-      def set(self, k, v):
-          self._backend.set(k, v)  # no encryption applied
-  ```
+## Rule 3: No Silent Fallbacks Or Error Hiding
 
-  **Why:** Operators pass a real key and assume data is encrypted at rest. The audit trail shows "encrypted store used"; the disk shows plaintext.
-
-- **Fake transaction** — a context manager that looks like a transaction but commits after every statement:
-
-  ```python
-  # BLOCKED — misnamed context manager
-  @contextmanager
-  def transaction(self):
-      yield  # no BEGIN, no COMMIT, no rollback on exception
-  ```
-
-  **Why:** Callers write `with db.transaction(): ...` expecting atomicity; partial failure leaves half-committed state.
-
-- **Fake health** — a health endpoint that returns 200 without checking anything:
-
-  ```python
-  # BLOCKED — always-green health endpoint
-  @router.get("/health")
-  async def health():
-      return {"status": "healthy"}  # no DB probe, no Redis ping, no nothing
-  ```
-
-  **Why:** Load balancers and orchestrators use the health endpoint to decide routing and restart decisions. A fake-healthy endpoint masks real outages.
-
-- **Fake classification / redaction** — a `@classify("email", REDACT)` decorator that stores the classification but never enforces it on read:
-
-  ```python
-  # BLOCKED — classify promises redaction but read path ignores it
-  @db.model
-  class User:
-      @classify("email", PII, REDACT)
-      email: str
-  # user = db.express.read("User", uid)
-  # user.email  ← still returns the raw PII
-  ```
-
-  **Why:** Documented as a security control; ships as a no-op. The Phase 5.10 audit found this had been non-functional for an unknown period.
-
-- **Fake tenant isolation** — a `multi_tenant=True` flag that silently uses a shared cache key:
-
-  ```python
-  # BLOCKED — multi_tenant flag with no tenant dimension in key
-  @db.model(multi_tenant=True)
-  class Document: ...
-  # cache_key = f"dataflow:v1:Document:{id}"  ← tenant_id missing
-  ```
-
-  **Why:** See `rules/tenant-isolation.md`. This is the Phase 5.7 orphan pattern surfaced at the cache key layer.
-
-- **Fake metrics** — a metrics class where every counter is a no-op because `prometheus_client` isn't installed but there's no warning:
-  ```python
-  # BLOCKED — silent no-op metrics
-  try:
-      from prometheus_client import Counter
-  except ImportError:
-      Counter = lambda *a, **k: _NoOp()
-  # User thinks /fabric/metrics is reporting; it's empty
-  ```
-  **Why:** Operators rely on dashboards. A silent no-op metrics layer removes the observability contract without any signal. The Phase 5.12 fix emits a loud startup WARN AND an explanatory body from the `/fabric/metrics` endpoint.
-
-## Rule 3: No Silent Fallbacks or Error Hiding
-
-- `except: pass` (bare except with pass) — BLOCKED
+- `except: pass` (bare except + pass) — BLOCKED
 - `catch(e) {}` (empty catch) — BLOCKED
 - `except Exception: return None` without logging — BLOCKED
 
@@ -868,19 +743,19 @@ Production code MUST NOT contain:
 
 ### Rule 3a: Typed Delegate Guards For None Backing Objects
 
-Any delegate method that forwards to a lazily-assigned backing object MUST guard with a typed error before access. Allowing `AttributeError` to propagate from `None.method()` is BLOCKED.
+Any delegate method forwarding to a lazily-assigned backing object MUST guard with a typed error before access. Allowing `AttributeError` to propagate from `None.method()` is BLOCKED.
 
-**Why:** Opaque `AttributeError` blocks N tests at once with no actionable message; a typed guard turns the failure into a one-line fix instruction.
+**Why:** Opaque `AttributeError` blocks N tests at once with no actionable message; typed guard turns the failure into a one-line fix instruction.
 
-## Rule 4: No Workarounds for Core SDK Issues
+## Rule 4: No Workarounds For Core SDK Issues
 
-When you encounter a bug in the Kailash SDK, file a GitHub issue on the SDK repository with a minimal reproduction. Use a supported alternative pattern if one exists.
+This is a BUILD repo. You have the source. Fix bugs directly.
 
-**Why:** Workarounds create a parallel implementation that diverges from the SDK, doubling maintenance cost and masking the root bug from being fixed.
+**Why:** Workarounds create parallel implementations that diverge from the SDK, doubling maintenance cost and masking the root bug.
 
 **BLOCKED:** Naive re-implementations, post-processing, downgrading.
 
-## Rule 5: Version Consistency on Release
+## Rule 5: Version Consistency On Release
 
 ALL version locations updated atomically:
 
@@ -892,14 +767,13 @@ ALL version locations updated atomically:
 ## Rule 6: Implement Fully
 
 - ALL methods, not just the happy path
-- If an endpoint exists, it returns real data
-- If a service is referenced, it is functional
+- If endpoint exists, it returns real data
+- If service is referenced, it is functional
 - Never leave "will implement later" comments
 - If you cannot implement: ask the user what it should do, then do it. If user says "remove it," delete the function.
 
 **Test files excluded:** `test_*`, `*_test.*`, `*.test.*`, `*.spec.*`, `__tests__/`
 
-**Why:** Half-implemented features present working UI with broken backend, causing users to trust outputs that are silently incomplete or wrong.
+**Why:** Half-implemented features present working UI with broken backend — users trust outputs that are silently incomplete or wrong.
 
-**Iterative TODOs:** Permitted when actively tracked.
-
+**Iterative TODOs:** Permitted when actively tracked (workspace todos, issue-linked).

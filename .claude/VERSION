@@ -1,0 +1,80 @@
+{
+  "version": "1.0.3",
+  "type": "coc-use-template",
+  "description": "COC USE template for Python SDK projects — multi-CLI (claude + codex + gemini)",
+  "released": "2026-04-25",
+  "upstream": {
+    "name": "kailash",
+    "type": "coc-source",
+    "version": "2.8.30",
+    "build_version": "2.10.0",
+    "synced_at": "2026-04-25T11:00:00Z",
+    "sdk_packages": {
+      "kailash": "2.10.0",
+      "kailash-dataflow": "2.1.2",
+      "kailash-nexus": "2.3.0",
+      "kailash-kaizen": "2.13.1",
+      "kailash-pact": "0.10.0",
+      "kailash-mcp": "0.2.9",
+      "kailash-ml": "1.1.1",
+      "kailash-align": "0.6.0",
+      "kaizen-agents": "0.9.4"
+    }
+  },
+  "changelog": [
+    {
+      "version": "1.0.3",
+      "date": "2026-04-25",
+      "summary": "Sync loom 2.8.30 — kailash-py /codify proposal 2026-04-25 (kailash-kaizen 2.13.0→2.13.1 hotfix postmortem). 2 entries, both classified GLOBAL: NEW MUST 'MUST: __init__.py Module-Scope Imports Honor The Manifest' in rules/dependencies.md + 'Latent failures count' clause extending rules/build-repo-release-discipline.md Rule 2. SDK pin sweep captured in VERSION: kailash 2.9.1→2.10.0, kailash-nexus 2.2.0→2.3.0, kailash-kaizen 2.12.2→2.13.1 (PyPI-live post-2026-04-25 hotfix). Multi-CLI baselines AGENTS.md/GEMINI.md regeneration deferred to next emit cycle (rule body changes are inside slot:neutral-body so cross-CLI parity preserved by design; baseline line count delta is +35 lines on the 9-rule baseline, well under the 61440B WARN cap).",
+      "changes": [
+        "GLOBAL rules/dependencies.md +33 lines (156→189). New MUST sub-rule. Mirror-applied from loom global.",
+        "GLOBAL rules/build-repo-release-discipline.md +2 lines (165→167). 'Latent failures count' paragraph + amended Why. Mirror-applied.",
+        "SDK PIN SWEEP (captured in VERSION.json.upstream.sdk_packages): kailash 2.9.1→2.10.0, kailash-nexus 2.2.0→2.3.0, kailash-kaizen 2.12.2→2.13.1. Other packages held at prior pins per variants/py/rules/deployment.md (kailash-dataflow 2.2.0 BUILD-only). No root pyproject.toml in this template — downstream USE projects apply pins per their own pyproject.",
+        "VERSION: template 1.0.2→1.0.3; upstream.version 2.8.29→2.8.30; upstream.build_version 2.9.1→2.10.0; synced_at 2026-04-25T05:15:00Z→2026-04-25T11:00:00Z."
+      ]
+    },
+    {
+      "version": "1.0.2",
+      "date": "2026-04-25",
+      "summary": "Sync loom 2.8.29 — frontmatter regression sweep + Validator 14 (emission-time rule-frontmatter enforcement) + SDK pin sweep to PyPI-resolvable tips. 9 rule files had frontmatter restored or added per rule-authoring.md Rule 7: 4 baseline rules (agents, orphan-detection, security, zero-tolerance) had frontmatter stripped by 2.8.27 rule-extraction cycle; 8 path-scoped rules (agent-reasoning, cross-sdk-inspection, dependencies, observability, patterns, python-environment, specs-authority, testing) had `paths:` only with no `priority:`/`scope:`; worktree-isolation.md was demoted from baseline to path-scoped by 2.8.27 regression. Multi-CLI baselines AGENTS.md + GEMINI.md regenerated from 5 rules (344 lines, 4 rules silently dropped) to 9 rules (779 lines, 48322B each). All 48 rule files now pass Rule 7 audit. SDK pin sweep captured in VERSION for downstream USE-project reference; this template has no root pyproject.toml (multi-CLI scaffold).",
+      "changes": [
+        "FRONTMATTER RESTORATION (4 baseline rules): agents.md, orphan-detection.md, security.md, zero-tolerance.md — frontmatter stripped by 2.8.27 extraction cycle, reinstated at canonical values.",
+        "FRONTMATTER BACKFILL (8 path-scoped rules): agent-reasoning.md, cross-sdk-inspection.md, dependencies.md, observability.md, patterns.md, python-environment.md, specs-authority.md, testing.md — added priority:10/scope:path-scoped.",
+        "REGRESSION FIX (worktree-isolation.md): restored from path-scoped demotion to priority:0/scope:baseline.",
+        "MULTI-CLI BASELINE REGENERATION: AGENTS.md + GEMINI.md regenerated via emit.mjs --all. Line count 344→779 (5→9 rules). Newly-surfaced baselines: agents.md, security.md, worktree-isolation.md, zero-tolerance.md — all 4 were silently dropped from 2.8.28's baselines because their frontmatter was missing. Codex + Gemini users of the multi-CLI template now get full baseline rule surface at session start (48322B per file, 78% of 61440B tier-WARN cap).",
+        "NEW validator in loom emit.mjs — Validator 14 enforces rule-authoring.md Rule 7 at emission-time. Future missing-frontmatter regressions BLOCK emission instead of silent-drop.",
+        "SDK PIN SWEEP (captured in VERSION.json.upstream.sdk_packages): kailash 2.8.12→2.9.1, dataflow 2.0.12→2.1.2, nexus 2.1.1→2.2.0, kaizen 2.11.0→2.12.2, pact 0.9.0→0.10.0, mcp 0.2.8→0.2.9, ml 0.17.0→1.1.1 (major: M1 foundations), align 0.4.0→0.6.0, kaizen-agents 0.9.3→0.9.4. No root pyproject.toml in this template — downstream USE projects apply pins per their own pyproject.",
+        "VERSION: template 1.0.1→1.0.2; upstream.version 2.8.28→2.8.29; upstream.build_version 2.8.12→2.9.1."
+      ]
+    },
+    {
+      "version": "1.0.1",
+      "date": "2026-04-24",
+      "summary": "Sync loom 2.8.28 — 5 rule extensions from kailash-py proposal entries 21-25 (release-cycle + CodeQL round-2 codify). No SDK pin deltas; no new files. Rules updated in .claude/rules/: patterns.md (PEP 562 callable-module coexistence), python-environment.md (Py3.11+ threading.Lock factory gotcha), orphan-detection.md (Rule 6b TYPE_CHECKING for lazy __getattr__ exports), zero-tolerance.md (Rule 1b scanner-deferral with tracking-issue + runtime-safety proof), deployment.md (bi-directional sibling-package CI at bridge boundaries). All 5 are path-scoped or have path-scoped frontmatter, so root AGENTS.md + GEMINI.md baseline composition unchanged.",
+      "changes": [
+        "NEW § rules/patterns.md 'Callable Module + Subpackage Coexistence (MUST — PEP 562)' (+36 lines).",
+        "NEW MUST Rule 5 rules/python-environment.md 'Python 3.11+ Lock Factory Gotcha' (+25 lines).",
+        "NEW Rule 6b rules/orphan-detection.md 'TYPE_CHECKING Block For Lazy __getattr__ Exports' (+33 lines).",
+        "NEW Rule 1b rules/zero-tolerance.md 'Scanner Deferral Requires Tracking Issue + Runtime-Safety Proof' (+39 lines, extends Rule 1a).",
+        "NEW § variants/py/rules/deployment.md 'Bi-Directional At Bridge Boundaries (MUST)' (+37 lines, extends existing Sibling-Package CI rule).",
+        "No SDK pin deltas. Root baseline files (AGENTS.md, GEMINI.md) preserved — the 5 rules are all path-scoped, not in baseline composition."
+      ]
+    },
+    {
+      "version": "1.0.0",
+      "date": "2026-04-23",
+      "summary": "Initial VERSION file for multi-CLI USE template. Synced loom 2.8.27 (PY CYCLE 6 — kailash-ml 1.0.0 M1 foundations + deferred-codify backlog). 17 net-new artifact files (10 guides/rule-extracts + 3 kaizen sub-files + 2 skills sub-files + 2 security skills); 59 updates across agents/rules/skills/commands. 8 new M1 pattern MUST clauses integrated (worktree burst≤3, pre-flight merge-base, branch-name match, specs amend-in-place, E2E regression tier, fake-integration handoff, paired async-ness, __all__ reconciliation). Multi-CLI baselines (AGENTS.md + GEMINI.md) regenerated from 5 baseline rules (19187B each, byte-identical neutral-body — cross-cli-parity Rule 1 PASS). .codex-mcp-guard/policies.json installed.",
+      "changes": [
+        "17 net-new files added: 10 guides/rule-extracts/{agent-reasoning,agents,dependencies,observability,python-environment,security,specs-authority,testing,worktree-isolation,zero-tolerance}.md; 3 skills/04-kaizen/{kaizen-key-concepts,kaizen-provider-config-v25,kaizen-wrapper-composition}.md; skills/10-deployment-git/multi-package-release-wave.md; skills/34-kailash-ml/m1-release-wave.md; skills/18-security-patterns/{dataflow-rls-posture,rls-security-definer-preauth-carveout}.md.",
+        "59 updates across agents (15 files — frameworks, analysis, implementation, quality, release, frontend, management, open-source-strategist), rules (16 files including git.md, testing.md, zero-tolerance.md, worktree-isolation.md, specs-authority.md, agents.md, orphan-detection.md, patterns.md, security.md), skills (26 SKILL.md + dataflow + kaizen + worktree-orchestration), commands (codify.md, cli-audit.md).",
+        "Variant-py overlay applied: rules/ci-runners.md pulled from variants/py/ (matches template context).",
+        "Multi-CLI baselines regenerated via .claude/bin/emit.mjs --all --lang py: AGENTS.md + GEMINI.md (19187B each, 5 baseline rules, validator-12 slot-round-trip PASS, cross-cli parity byte-identical).",
+        "CLI artifact emissions via .claude/bin/emit-cli-artifacts.mjs: .codex/{prompts,skills} (29 prompts + 34 skills), .gemini/{commands,skills,agents} (29 commands + 34 skills + 22 agents). Exclusions honored (codex: 1 command + 4 skills; gemini: 11 agents — cc-architect + management/* + loom-only specialists).",
+        ".codex-mcp-guard/policies.json installed (validator-13 PASS).",
+        "SDK version pins captured: kailash 2.8.12, dataflow 2.0.12, nexus 2.1.1, kaizen 2.11.0, pact 0.9.0, mcp 0.2.8, ml 0.17.0, align 0.4.0, kaizen-agents 0.9.3 (all PyPI-resolvable tips per 2026-04-21 Wave 1+2 release cycle).",
+        "Exclusions verified present: agents/management/{sync-reviewer,coc-sync,repo-ops,settings-manager}.md absent; commands/{repos,inspect,settings,sync-to-build}.md absent; rules/cross-sdk-inspection.md absent.",
+        "Hook integrity: 12/12 resolve ($CLAUDE_PROJECT_DIR expansion)."
+      ]
+    }
+  ]
+}
