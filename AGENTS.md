@@ -67,6 +67,14 @@ Pre-existing failures MUST be fixed (`rules/zero-tolerance.md` Rule 1). No worka
 
 **Why:** Workarounds create parallel implementations that diverge from the SDK, doubling maintenance cost.
 
+## MUST: Verify Specialist Tool Inventory Before Implementation Delegation
+
+When delegating IMPLEMENTATION work (any task involving file edits, commits, build/test invocation, version bumps), the orchestrator MUST select a specialist whose declared tool set includes `Edit` AND `Bash`. Read-only specialists (`security-reviewer`, `analyst`, `reviewer`, `gold-standards-validator`, `value-auditor`) MUST NOT be delegated implementation tasks — their tool set is `Read, Write, Grep, Glob` (and a few have `Task`), with no Edit + no Bash. Pure-research / pure-review delegations are fine.
+
+See **Examples § Tool Inventory Verification** below for the CLI-specific delegation syntax and the specialist tool-inventory table.
+
+**Why:** Read-only specialists halt mid-instruction at file-edit boundaries with no recovery — the agent emits "Now let me wire X" then exits with zero tool calls because Edit is not available, OR fabricates commit-style language without actually committing (violating `git.md` § "Commit-Message Claim Accuracy"). Either outcome wastes one full shard's budget AND requires re-launch with a tools-equipped specialist. Verifying tool inventory pre-launch is O(1); re-launch + re-read of all context is O(N) on shard size.
+
 ## MUST: Worktree Isolation for Compiling Agents
 
 Agents that compile (Rust `cargo`, Python editable installs at scale) MUST use the CLI's worktree-isolation primitive to avoid build-directory lock contention.
@@ -125,9 +133,21 @@ When launching two or more parallel agents whose worktrees touch the SAME sub-pa
 
 ### Worktree Isolation for Compiling Agents
 
+```
+# DO: codex_agent(agent="ml-specialist", isolation="worktree", prompt="implement feature X...")
+# DO NOT: two agents sharing target/ serialize on cargo's exclusive lock
+```
+
 ### Worktree Prompts Use Relative Paths Only
 
 ### Verify Agent Deliverables Exist After Exit
+
+```python
+# DO — verify after codex_agent() returns
+read_file("/abs/path/src/feature.py")  # raises if missing → retry
+
+# DO NOT — trust completion message
+```
 
 
 ---
@@ -365,6 +385,20 @@ Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
 Format: `type/description` (e.g., `feat/add-auth`, `fix/api-timeout`)
 
 **Why:** Inconsistent branch names prevent CI pattern-matching rules and make `git branch --list` unreadable across contributors.
+
+### Release-Prep PRs MUST Use `release/v*` Branch Convention (MUST)
+
+Any PR whose diff is metadata-only — version anchors (`pyproject.toml` / `Cargo.toml`, `__init__.py::__version__` / lib.rs `pub const VERSION`), `CHANGELOG.md`, spec/doc version-line updates, and CHANGELOG-paired spec updates — MUST be opened from a branch named `release/v<X.Y.Z>`. Using `feat/`, `fix/`, `chore/`, or any other prefix on a release-prep PR is BLOCKED.
+
+**Why:** Every PR-gate workflow that adopts the `ci-runners.md` § "MUST: Release-prep skip" pattern checks `if: !startsWith(github.head_ref, 'release/')`. Branching from `release/v*` triggers the auto-skip and saves ~45 min × matrix-size of CI minutes per release-prep PR. Branching from anything else burns the full PR-gate matrix on a diff that has no code surface to verify. Evidence: kailash-rs PR #602 (2026-04-25) used `feat/v3.23.0-release-prep` and consumed ~73 min of GitHub-billable runner time on a metadata-only diff that should have skipped to ~0 min. The cross-reference exists in `ci-runners.md` but is path-scoped to `.github/workflows/**`, so it does not load when an agent is choosing a branch name. This clause cross-references the rule from `git.md` (always-loaded baseline) so branch-naming decisions surface the cost lever.
+
+**If the release-prep work IS NOT metadata-only** (e.g., folds in a code fix as part of the same PR), split: keep the code fix on a `feat/` or `fix/` branch with its own PR; cut the release-prep on a separate `release/v*` branch that only updates anchors + CHANGELOG. Two PRs, one with full CI, one near-zero.
+
+### Pre-FIRST-Push CI Parity Discipline (MUST)
+
+Before the FIRST `git push` that creates a remote branch (which opens the door to PR-gate CI), the agent MUST run the project's local CI parity command set. The discipline already exists in language-specific rules (`build-speed.md` § "Run Full CI Job-Set Locally Before Admin-Merge" for Rust; equivalents for Python: `pre-commit run --all-files` + `mypy --strict` + `pytest`) — this clause extends the same gate to the FIRST push, not just admin-merge.
+
+**Why:** Each push to an open PR retriggers the full PR-gate matrix. With `concurrency: cancel-in-progress: true` on the workflow, prior in-flight runs are cancelled — but **the cancelled runs are still billed for the wall-clock minutes already consumed before cancellation**. kailash-rs PR #598 (2026-04-25) had a 71-minute Workspace Tests run cancelled mid-flight by a fix-up push; those 71 min were charged. Pre-flighting the local commands takes ~5-10 minutes once + amortized seconds on incremental re-runs; the alternative is N × 45 min of billed CI per fix-up cycle. Local discipline is strictly cheaper. The rule extends to the FIRST push because by the time admin-merge is invoked, every previous fix-up cycle has already burned billable minutes.
 
 ## Branch Protection
 

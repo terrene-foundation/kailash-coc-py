@@ -1,27 +1,42 @@
 {
-  "version": "1.0.3",
+  "version": "1.0.4",
   "type": "coc-use-template",
   "description": "COC USE template for Python SDK projects — multi-CLI (claude + codex + gemini)",
-  "released": "2026-04-25",
+  "released": "2026-04-26",
   "upstream": {
     "name": "kailash",
     "type": "coc-source",
-    "version": "2.8.30",
-    "build_version": "2.10.0",
-    "synced_at": "2026-04-25T11:00:00Z",
+    "version": "2.9.0",
+    "build_version": "2.11.1",
+    "synced_at": "2026-04-26T00:00:00Z",
     "sdk_packages": {
-      "kailash": "2.10.0",
-      "kailash-dataflow": "2.1.2",
+      "kailash": "2.11.1",
+      "kailash-dataflow": "2.3.1",
       "kailash-nexus": "2.3.0",
       "kailash-kaizen": "2.13.1",
-      "kailash-pact": "0.10.0",
-      "kailash-mcp": "0.2.9",
+      "kailash-pact": "0.11.0",
+      "kailash-mcp": "0.2.10",
       "kailash-ml": "1.1.1",
       "kailash-align": "0.6.0",
       "kaizen-agents": "0.9.4"
     }
   },
   "changelog": [
+    {
+      "version": "1.0.4",
+      "date": "2026-04-26",
+      "summary": "Sync loom 2.9.0 — PY CYCLE 8 + RS CYCLE 5 dual-SDK convergence. 4 global rule files updated: rules/agents.md (added MUST 'Verify Specialist Tool Inventory' + Examples table), rules/build-repo-release-discipline.md (added MUST Rule 5 PR Review Sub-Package Version Bump Sweep), rules/git.md (added Release-Prep release/v* convention + Pre-FIRST-Push CI Parity Discipline), rules/ci-runners.md (added Rule 6a Binding-CI paths-ignore + Rule 7 Workflow Crons Cost Footer + Rule 8 Release PRs Skip PR-Gate Suite). Multi-CLI baselines AGENTS.md/GEMINI.md regenerated via emit.mjs --all --lang py: 779→813/817 lines, both WARN tier (~52.7KB) — within v6 §2.2 steady-state band [32768, 61440). Validator 14 PASS. SDK pin sweep captured in VERSION: kailash 2.10.0→2.11.1, kailash-dataflow 2.1.2→2.3.1, kailash-mcp 0.2.9→0.2.10, kailash-pact 0.10.0→0.11.0.",
+      "changes": [
+        "GLOBAL rules/agents.md mirror-applied from loom global (Tool Inventory MUST + Examples table for 17+ specialists).",
+        "GLOBAL rules/build-repo-release-discipline.md mirror-applied (Rule 5 PR Review Sub-Package Version Bump Sweep).",
+        "GLOBAL rules/git.md mirror-applied (Release-Prep release/v* + Pre-FIRST-Push CI Parity).",
+        "GLOBAL rules/ci-runners.md mirror-applied (Rule 6a + Rule 7 + Rule 8).",
+        "AGENTS.md regenerated: 779→813 lines, 52783B WARN tier.",
+        "GEMINI.md regenerated: 779→817 lines, 52754B WARN tier.",
+        "Validator 14 (rule-frontmatter pair consistency) PASS.",
+        "SDK PIN SWEEP (captured in VERSION.json.upstream.sdk_packages): kailash 2.10.0→2.11.1, kailash-dataflow 2.1.2→2.3.1, kailash-mcp 0.2.9→0.2.10, kailash-pact 0.10.0→0.11.0. Held: kailash-kaizen 2.13.1, kailash-nexus 2.3.0, kailash-ml 1.1.1, kailash-align 0.6.0, kaizen-agents 0.9.4. No root pyproject.toml in this template — downstream USE projects apply pins per their own pyproject."
+      ]
+    },
     {
       "version": "1.0.3",
       "date": "2026-04-25",
