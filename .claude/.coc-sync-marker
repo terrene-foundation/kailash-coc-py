@@ -1,52 +1,77 @@
-# COC Sync Marker — kailash-coc-py
-timestamp: 2026-04-26T14:56:04.111Z
+# COC Sync Marker — kailash-coc-py (multi-CLI)
+timestamp: 2026-04-28T12:05:00+08:00
 source: loom/.claude
-loom_version: 2.9.1
+loom_version: 2.9.5
 variant: py
-clis: [claude, codex, gemini]
+clis: ["claude", "codex", "gemini"]
 stats:
-  updated: 0
-  created: 0
-  unchanged: 1700
-  composed: 171
-  variant_replacements: 0
-  variant_only: 24
-  preserved: 2
+  artifacts_total: 1666   # .claude/ + .codex/ + .gemini/ trees
+  composed: 2             # rules/deployment.md, rules/ci-runners.md (slot-keyed py overlays)
+  variant_full_overlays: 174   # py FULL-FILE replacements applied
+  variant_only_added: 18       # py-only files (no global)
+  preserved:
+    - CLAUDE.md (template-owned)
+    - settings.json (per-template hook paths)
+    - VERSION (template-owned)
+    - README.md
+    - scripts/
   baselines_emitted:
-    cc: 0
-    codex: 1
-    gemini: 1
+    cc: 0           # CLAUDE.md preserved, not emitted
+    codex: 1        # AGENTS.md
+    gemini: 1       # GEMINI.md
   baseline_emission_bytes:
     block_cap_bytes: 61440
     warn_cap_bytes: 32768
     codex:
       rules: 9
-      bytes: 52783
+      bytes: 51245
       tier: WARN
-      headroom_bytes: 8657
-      headroom_pct: 14.09
+      headroom_bytes: 10195
+      headroom_pct: 16.59
     gemini:
       rules: 9
-      bytes: 52754
+      bytes: 51254
       tier: WARN
-      headroom_bytes: 8686
-      headroom_pct: 14.14
+      headroom_bytes: 10186
+      headroom_pct: 16.58
   cli_artifacts:
     codex:
-      prompts: 29
+      prompts: 30
       skills: 34
     gemini:
-      commands: 29
+      commands: 30
       skills: 34
       agents: 22
   mcp_guard:
-    policies_populated: false
+    policies_populated: false   # still gated — see Step 6.6 in coc-sync agent
     predicates_extracted: 0
-obsoleted_purged:
-  []  # idempotent run — no obsoleted paths present (already purged in prior sync)
-obsoleted_paths_declared: 3  # see .coc-obsoleted in this dir + manifest 'obsoleted:' section
-verification:
-  findings: 0
-  hooks_resolved: 12
-  hooks_total: 12
-
+files_purged:
+  - .claude/commands/decisive.md (renamed to autonomize.md per .coc-obsoleted v2.9.4)
+  - .codex/prompts/decisive.md
+  - .gemini/commands/decisive.toml
+files_added_this_sync:
+  - .claude/commands/autonomize.md
+  - .claude/commands/sweep.md
+  - .codex/prompts/autonomize.md
+  - .codex/prompts/sweep.md
+  - .gemini/commands/autonomize.toml
+  - .gemini/commands/sweep.toml
+files_updated_this_sync:
+  - .claude/rules/agents.md (slot:neutral-body wrapped, 196 lines)
+  - .claude/rules/testing.md (slot:neutral-body wrapped, 200 lines, cross-language __all__ AST clause)
+  - AGENTS.md (regenerated, 51245B, codex_agent overlay active)
+  - GEMINI.md (regenerated, 51254B, @specialist overlay active)
+validators:
+  validator_12_slot_round_trip: PASS
+  validator_13_codex_mcp_guard_bijection: PASS
+  validator_14_rule_frontmatter_consistency: PASS
+sdk_pin_diffs: none
+hooks_resolved: 12/12
+notes: |
+  Gate 2 distribute v2.9.5 — multi-CLI template. AGENTS.md + GEMINI.md
+  emitted via emit.mjs --lang py (WARN tier 51245/51254B, ~16.5% headroom).
+  CLI artifact trees regenerated via emit-cli-artifacts.mjs (codex prompts=30
+  skills=34, gemini commands=30 skills=34 agents=22, exclusions: 1 cmd / 4
+  skills / 11 agents per cli_emit_exclusions). Codex/Gemini variant overlays
+  for rules/agents.md picked up the new codex_agent(...) and @specialist
+  syntax respectively (per v2.9.5 sync-manifest).

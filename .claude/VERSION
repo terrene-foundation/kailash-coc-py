@@ -1,27 +1,59 @@
 {
-  "version": "1.0.7",
+  "version": "1.0.9",
   "type": "coc-use-template",
   "description": "COC USE template for Python SDK projects — multi-CLI (claude + codex + gemini)",
-  "released": "2026-04-27",
+  "released": "2026-04-28",
   "upstream": {
     "name": "kailash",
     "type": "coc-source",
-    "version": "2.9.3",
+    "version": "2.9.4",
     "build_version": "2.11.3",
-    "synced_at": "2026-04-27T16:00:00+00:00",
+    "synced_at": "2026-04-28T03:35:00+00:00",
     "sdk_packages": {
       "kailash": "2.11.3",
-      "kailash-dataflow": "2.3.1",
+      "kailash-dataflow": "2.3.2",
       "kailash-nexus": "2.3.0",
       "kailash-kaizen": "2.13.1",
       "kailash-pact": "0.11.0",
       "kailash-mcp": "0.2.10",
-      "kailash-ml": "1.4.2",
+      "kailash-ml": "1.5.1",
       "kailash-align": "0.7.0",
       "kaizen-agents": "0.9.4"
     }
   },
   "changelog": [
+    {
+      "version": "1.0.9",
+      "date": "2026-04-28",
+      "summary": "PATCH: Sync loom 2.9.4 — 3 follow-ups + /decisive→/autonomize rename + cross-CLI examples-slot gap CLOSED. (1) rules/agents.md slimmed 315→196 (≤200 cap). (2) rules/testing.md slimmed 293→200; new __all__/re-export sub-clause widened cross-language. (3) NEW variants/codex/rules/agents.md (full neutral-body overlay, codex_agent syntax) + variants/gemini/rules/agents.md (full neutral-body overlay, @specialist syntax) — closes the cross-CLI examples-slot gap flagged as SOFT-WARN tech debt in v1.0.8. AGENTS.md (Codex) + GEMINI.md (Gemini) regenerated; verification grep confirms zero CC `subagent_type=` leakage in non-CC baselines + new codex_agent / @specialist syntax active. (4) commands/decisive.md → commands/autonomize.md across all 3 CLI surfaces (.claude/commands/, .codex/prompts/, .gemini/commands/). decisive.* purged via .coc-obsoleted v2.9.4. AGENTS.md 51245B / 16.59% headroom; GEMINI.md 51254B / 16.58% headroom (both WARN tier, comfortably under 61440B block-cap).",
+      "changes": [
+        "GLOBAL rules/agents.md: 315→196 lines (≤200 cap). Slot:neutral-body wrapper applied so codex/gemini variants overlay full body.",
+        "GLOBAL rules/testing.md: 293→200 lines. Slot:neutral-body wrapper for cross-language variant overlay.",
+        "NEW variants/codex/rules/agents.md: full neutral-body overlay with codex_agent(...) syntax — eliminates CC syntax leakage into AGENTS.md (Codex baseline).",
+        "NEW variants/gemini/rules/agents.md: full neutral-body overlay with @specialist invocation syntax — eliminates CC syntax leakage into GEMINI.md (Gemini baseline).",
+        "RENAMED: .claude/commands/decisive.md → .claude/commands/autonomize.md + paired .codex/prompts/autonomize.md + .gemini/commands/autonomize.toml. PURGED: 3 decisive.* paths via .coc-obsoleted.",
+        "AGENTS.md regenerated: 51245B (was 54181B; smaller because slim rules now propagate through). WARN tier; headroom 7259→10195B (16.59%). codex_agent(...) overlay active; subagent_type leakage eliminated.",
+        "GEMINI.md regenerated: 51254B (was 54152B). WARN tier; headroom 7288→10186B (16.58%). @specialist invocation overlay active.",
+        "Validators 12/13/14 PASS. sdk-refs allowlist (Step 7.5): 19/19 idempotent. Hook integrity: 14/14 resolve."
+      ]
+    },
+    {
+      "version": "1.0.8",
+      "date": "2026-04-28",
+      "summary": "Sync loom 2.9.3 — W6+W7 codify cycle distribution + SDK pin refresh. 2 global rule files extended: rules/agents.md (+42 lines: new MUST 'Audit/Closure-Parity Verification Specialist Has Bash + Read' in neutral-body slot + matching Examples sub-section) — origin: kailash-py 2026-04-27 W6 /redteam Round 3 where Round-2 analyst FORWARDED 16/22 closure-parity rows for lack of Bash. rules/testing.md (+31 lines: new MUST '__all__ / Re-export Symbol Counts Use Structural Enumeration, Not Grep') — origin: same session, AST vs grep count mismatch in kailash_ml/__init__.py docstring. Multi-CLI baselines AGENTS.md + GEMINI.md regenerated via emit.mjs --all --lang py: ~52.7→54.2KB both WARN tier (~7.3KB headroom under 61440B block_cap). Validators 12/13/14 PASS. SDK pin sweep: kailash-dataflow 2.3.1→2.3.2 (W7-002 emit_train_end structural sanitization) + kailash-ml 1.4.2→1.5.1 (W7-001 LineageGraph implementation + 1.5.0/1.5.1 patches). FLAGGED FINDING (pre-existing, not regression): the new agents.md MUST sub-clause's Examples block uses CC `Agent(subagent_type=...)` syntax. No variants/codex/rules/agents.md or variants/gemini/rules/agents.md exists — same gap covers ALL of agents.md examples slot. Codex AGENTS.md + Gemini GEMINI.md inherit CC syntax verbatim. Per cross-cli-parity.md Rule 2 this is examples-slot drift = SOFT WARN, not BLOCK; neutral-body MUST clauses ARE byte-identical across all three CLIs (parity contract intact).",
+      "changes": [
+        "GLOBAL rules/agents.md mirror-applied (+42 lines, new MUST Audit/Closure-Parity sub-clause + Examples sub-section).",
+        "GLOBAL rules/testing.md mirror-applied (+31 lines, new MUST __all__ structural enumeration).",
+        "AGENTS.md regenerated: 52783→54181B (9 rules, WARN tier, 7259B headroom).",
+        "GEMINI.md regenerated: 52754→54152B (9 rules, WARN tier, 7288B headroom).",
+        "SDK PIN: kailash-dataflow 2.3.1→2.3.2 (W7-002).",
+        "SDK PIN: kailash-ml 1.4.2→1.5.1 (W7-001 + 1.5.x patches).",
+        "Validator 14 (rule-frontmatter pair consistency) PASS; validators 12+13 PASS.",
+        "sdk-refs allowlist (Step 7.5): idempotent — 19/19 found-and-allowlisted, 0 new entries appended.",
+        "Hook integrity: 14/14 hooks resolve under .claude/hooks/.",
+        "FLAGGED: cross-CLI examples-slot inheritance (pre-existing tech debt; SOFT WARN per cross-cli-parity Rule 2). Future: author variants/{codex,gemini}/rules/agents.md."
+      ]
+    },
     {
       "version": "1.0.7",
       "date": "2026-04-27",

@@ -8,7 +8,7 @@ scope: baseline
 
 # Agent Orchestration Rules
 
-See `.claude/guides/rule-extracts/agents.md` for full evidence, extended examples, and post-mortems.
+See `.claude/guides/rule-extracts/agents.md` for full evidence, extended examples, post-mortems, recovery-protocol commands, the gate-review table, and CLI-syntax variants.
 
 
 ## Specialist Delegation (MUST)
@@ -32,32 +32,21 @@ Every specialist delegation prompt MUST include relevant spec file content from 
 
 ## Parallel Execution
 
-When multiple independent operations are needed, launch agents in parallel via the CLI's delegation primitive, wait for all, aggregate results. MUST NOT run sequentially when parallel is possible.
+When multiple independent operations are needed, launch agents in parallel via Codex's native delegation primitive, wait for all, aggregate results. MUST NOT run sequentially when parallel is possible.
 
 **Why:** Sequential execution of independent operations wastes the autonomous execution multiplier, turning a 1-session task into a multi-session bottleneck.
 
 ## Quality Gates (MUST — Gate-Level Review)
 
-Reviews happen at COC phase boundaries, not per-edit. Skip only when explicitly told to.
+Reviews happen at COC phase boundaries, not per-edit. Skip only when explicitly told to. **MUST gates** are `/implement` and `/release`; reviewer + security-reviewer (and gold-standards-validator at `/release`) run as parallel background agents. RECOMMENDED gates run at `/analyze`, `/todos`, `/redteam`, `/codify`, and post-merge. See guide for the full gate table.
 
 **Why:** Skipping gate reviews lets analysis gaps, security holes, and naming violations propagate to downstream repos where they are far more expensive to fix.
-
-| Gate                | After Phase  | Enforcement | Review                                                                                                          |
-| ------------------- | ------------ | ----------- | --------------------------------------------------------------------------------------------------------------- |
-| Analysis complete   | `/analyze`   | RECOMMENDED | **reviewer**: Are findings complete? Gaps?                                                                      |
-| Plan approved       | `/todos`     | RECOMMENDED | **reviewer**: Does plan cover requirements?                                                                     |
-| Implementation done | `/implement` | **MUST**    | **reviewer** + **security-reviewer**: Parallel background agents.                                               |
-| ... | ... |
-
-**Background agent pattern for MUST gates** — review costs near-zero parent context. See **Examples § Quality Gates — Background Agent Pattern** below for the CLI-specific delegation syntax.
 
 **BLOCKED responses when skipping MUST gates:** "Skipping review to save time" / "Reviews will happen in a follow-up session" / "The changes are straightforward, no review needed" / "Already reviewed informally during implementation".
 
 ### MUST: Reviewer Prompts Include Mechanical AST/Grep Sweep
 
 Every gate-level reviewer prompt MUST include explicit mechanical sweeps that verify ABSOLUTE state (not only the diff). LLM-judgment review catches what's wrong with new code; mechanical sweeps catch what's missing from OLD code the spec also touched.
-
-See **Examples § Reviewer Mechanical Sweeps** below for the DO / DO NOT delegation block.
 
 **Why:** Reviewers are constrained by the diff. The orphan failure mode in `orphan-detection.md` §1 is invisible at diff-level. A 4-second `grep -c` catches what 5 minutes of LLM judgment misses. See guide for full evidence.
 
@@ -69,85 +58,57 @@ Pre-existing failures MUST be fixed (`rules/zero-tolerance.md` Rule 1). No worka
 
 ## MUST: Verify Specialist Tool Inventory Before Implementation Delegation
 
-When delegating IMPLEMENTATION work (any task involving file edits, commits, build/test invocation, version bumps), the orchestrator MUST select a specialist whose declared tool set includes `Edit` AND `Bash`. Read-only specialists (`security-reviewer`, `analyst`, `reviewer`, `gold-standards-validator`, `value-auditor`) MUST NOT be delegated implementation tasks — their tool set is `Read, Write, Grep, Glob` (and a few have `Task`), with no Edit + no Bash. Pure-research / pure-review delegations are fine.
+When delegating IMPLEMENTATION work (file edits, commits, build/test invocation, version bumps), the orchestrator MUST select a specialist whose declared tool set includes `Edit` AND `Bash`. Read-only specialists (`security-reviewer`, `analyst`, `reviewer`, `gold-standards-validator`, `value-auditor`) MUST NOT be delegated implementation tasks. Pure-research / pure-review delegations are fine. See guide for the specialist tool-inventory table and CLI-specific delegation syntax.
 
-See **Examples § Tool Inventory Verification** below for the CLI-specific delegation syntax and the specialist tool-inventory table.
+**Why:** Read-only specialists halt mid-instruction at file-edit boundaries — the agent emits "Now let me wire X" then exits with zero tool calls because Edit is unavailable. Verifying tool inventory pre-launch is O(1); re-launch is O(N) on shard size. See guide for cross-SDK rediscovery evidence.
 
-**Why:** Read-only specialists halt mid-instruction at file-edit boundaries with no recovery — the agent emits "Now let me wire X" then exits with zero tool calls because Edit is not available, OR fabricates commit-style language without actually committing (violating `git.md` § "Commit-Message Claim Accuracy"). Either outcome wastes one full shard's budget AND requires re-launch with a tools-equipped specialist. Verifying tool inventory pre-launch is O(1); re-launch + re-read of all context is O(N) on shard size.
+## MUST: Audit/Closure-Parity Verification Specialist Has Bash + Read
+
+When delegating a /redteam round whose mission includes **closure-parity verification** (mapping prior-wave findings to delivered code via `gh pr view`, `pytest --collect-only`, `grep`, `ast.parse()`, `find`), the orchestrator MUST select a specialist whose tool set includes `Bash` AND `Read`. Read-only analyst (`Read, Grep, Glob`) MUST NOT be assigned closure-parity verification — its tool set silently FORWARDS verification rows the next round must redo. Extends § "Verify Specialist Tool Inventory" above from IMPLEMENTATION to AUDIT delegation.
+
+**Why:** Tool-inventory mismatch costs one full audit round. Verifying pre-launch is O(1); re-launch is O(N) on row count. Origin: 2026-04-27 W6 /redteam Round 3 — analyst FORWARDED 16 of 22; pact-specialist (Bash) Round 3 converted all 16 to VERIFIED in one shard. The Rust audit toolkit substitutes `cargo expand` / `cargo doc --document-private-items` (JSON) / `syn::parse_file` for the Python introspection commands.
 
 ## MUST: Worktree Isolation for Compiling Agents
 
-Agents that compile (Rust `cargo`, Python editable installs at scale) MUST use the CLI's worktree-isolation primitive to avoid build-directory lock contention.
+Agents that compile (Rust `cargo`, Python editable installs at scale) MUST use Codex's worktree-isolation primitive to avoid build-directory lock contention.
 
-See **Examples § Worktree Isolation for Compiling Agents** below for the CLI-specific delegation syntax.
-
-**Why:** Cargo uses an exclusive filesystem lock on `target/`. Worktrees give each agent its own `target/`. See `skills/30-claude-code-patterns/worktree-orchestration.md` for the full 5-layer protocol — worktree isolation is necessary but not sufficient.
+**Why:** Cargo holds an exclusive filesystem lock on `target/`. Worktrees give each agent its own `target/`. See `skills/30-claude-code-patterns/worktree-orchestration.md` for the full 5-layer protocol — worktree isolation is necessary but not sufficient.
 
 ## MUST: Worktree Prompts Use Relative Paths Only
 
 When prompting an agent with worktree isolation, the orchestrator MUST reference files via paths RELATIVE to the repo root — never absolute paths starting with `/Users/` or `/home/`.
 
-See **Examples § Worktree Prompts Use Relative Paths Only** below for the DO / DO NOT delegation syntax.
-
-**Why:** Worktree isolation sets cwd to the worktree; absolute paths point back to the parent checkout, silently defeating isolation. Session 2026-04-19: 2 of 3 parallel shards wrote to MAIN; one lost 300+ LOC when its empty worktree auto-cleaned. See guide + `skills/30-claude-code-patterns/worktree-orchestration.md` § Rule 2 for full post-mortem.
+**Why:** Worktree isolation sets cwd to the worktree; absolute paths point back to the parent checkout, silently defeating isolation. See guide for 2026-04-19 post-mortem (300+ LOC lost).
 
 ## MUST: Recover Orphan Writes From Zero-Commit Worktree Agents
 
-When a worktree-isolated agent reports completion but the branch has zero commits AND the worktree has been auto-cleaned, the parent orchestrator MUST inspect the MAIN checkout for orphaned untracked files BEFORE concluding the work was lost. Absolute-path writes from the agent resolve to the MAIN checkout cwd — the files are NOT lost; they are orphaned, uncommitted, and reachable via `git status` on the parent.
+When a worktree-isolated agent reports completion but the branch has zero commits AND the worktree has been auto-cleaned, the parent MUST inspect the MAIN checkout for orphaned untracked files BEFORE concluding the work was lost. Absolute-path writes from the agent resolve to the MAIN checkout cwd — the files are NOT lost; they are orphaned, uncommitted, and reachable via `git status` on the parent.
 
-**Why:** The first three rationalizations lose 1000+ LOC of real work every time an absolute-path agent truncates. The fourth is false because `git status` reveals the orphans. The fifth conflates branch-name aesthetics with provenance traceability — `recovery/` grep surfaces this class of rescue across history; `feat/` does not.
+**Why:** Re-launching abandons real work every time an absolute-path agent truncates. `git status` reveals the orphans; `recovery/` grep surfaces this class of rescue across history. See guide for full 4-step protocol + PR #574 evidence (1129 LOC of `alignment.py` recovered).
 
 ## MUST: Worktree Agents Commit Incremental Progress
 
 Every worktree-isolated agent MUST receive an explicit instruction in its prompt to `git commit` after each milestone. The orchestrator MUST verify the branch has ≥1 commit before declaring the agent's work landed.
 
-**Why:** Worktrees with zero commits are silently deleted. Session 2026-04-19: Shard A wrote 300+ LOC, truncated mid-message, zero commits, work lost. See guide + `skills/30-claude-code-patterns/worktree-orchestration.md` § Rule 3.
+**Why:** Worktrees with zero commits are silently deleted. See guide for 2026-04-19 three-shard post-mortem.
 
 ## MUST: Verify Agent Deliverables Exist After Exit
 
-When an agent reports completion of a file-writing task, the parent MUST read the claimed file before trusting the completion claim.
+When an agent reports completion of a file-writing task, the parent MUST `ls` or `Read` the claimed file before trusting the completion claim.
 
-See **Examples § Verify Agent Deliverables Exist After Exit** below for the CLI-specific file-read verification syntax.
-
-**Why:** Session 2026-04-19 logged 2 occurrences of agents hitting budget mid-message and reporting success with zero files on disk. The file-read check is O(1) and converts silent no-op into loud retry.
+**Why:** Budget exhaustion truncates writes mid-message. The `ls` check is O(1) and converts silent no-op into loud retry.
 
 ## MUST: Parallel-Worktree Package Ownership Coordination
 
-When launching two or more parallel agents whose worktrees touch the SAME sub-package, the orchestrator MUST designate ONE agent as **version owner** (pyproject.toml + `__init__.py::__version__` + CHANGELOG) AND tell every sibling explicitly: "do NOT edit those files". Integration belongs to the orchestrator.
+When launching ≥2 parallel agents whose worktrees touch the SAME sub-package, the orchestrator MUST designate ONE agent as **version owner** (pyproject.toml + `__init__.py::__version__` + CHANGELOG) AND tell every sibling explicitly: "do NOT edit those files". Integration belongs to the orchestrator.
 
-**Why:** Parallel agents see the same base SHA; each independently bumps `version` and writes a top-level CHANGELOG entry. Merge picks one — discarding the other's prose silently. One-sentence exclusion clause prevents O(manual) reconciliation.
+**Why:** Parallel agents see the same base SHA; each independently bumps `version` and writes a CHANGELOG entry. Merge picks one — discarding the other's prose silently. See guide for kailash-ml 0.13.0 evidence (PRs #552, #553).
 
 ## MUST NOT
 
 - **Framework work without specialist** — misuse violates invariants (pool sharing, session lifecycle, trust boundaries).
 - **Sequential when parallel is possible** — wastes the autonomous execution multiplier.
-- **Raw SQL / custom API / custom agents / custom governance** — see `rules/framework-first.md` and guide for per-framework rationale. Framework specialists auto-invoke on matching work.
-
-
-
-## Examples
-
-### Quality Gates — Background Agent Pattern
-
-### Reviewer Mechanical Sweeps
-
-### Worktree Isolation for Compiling Agents
-
-```
-# DO: codex_agent(agent="ml-specialist", isolation="worktree", prompt="implement feature X...")
-# DO NOT: two agents sharing target/ serialize on cargo's exclusive lock
-```
-
-### Worktree Prompts Use Relative Paths Only
-
-### Verify Agent Deliverables Exist After Exit
-
-```python
-# DO — verify after codex_agent() returns
-read_file("/abs/path/src/feature.py")  # raises if missing → retry
-
-# DO NOT — trust completion message
-```
+- **Raw SQL / custom API / custom agents / custom governance** — see `rules/framework-first.md` and guide for per-framework rationale.
 
 
 ---
