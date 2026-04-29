@@ -1,59 +1,32 @@
-# COC Sync Marker — kailash-coc-py (multi-CLI)
-timestamp: 2026-04-29T14:20:00+00:00
+# COC Sync Marker — kailash-coc-py
+timestamp: 2026-04-29T11:17:46Z
 source: loom/.claude
-loom_version: 2.10.0
+loom_version: 2.10.2
 variant: py
 clis: ["claude", "codex", "gemini"]
+template_version: 1.0.14
 stats:
   files_updated_this_sync:
-    - .claude/rules/zero-tolerance.md (189 → 277 lines; Rule 2 fake-dispatch bullet + NEW Rule 3c + NEW Rule 6a)
-    - .claude/rules/schema-migration.md (202 → 231 lines; NEW Rule 1a /redteam DDL grep)
-    - .claude/rules/agents.md (196 → 236 lines; NEW MUST Parallel Brief-Claim Verification ≥3)
-    - .claude/rules/git.md (preserved at 295 lines from in-flight 2.9.7; new MUST `git reset --hard` clause)
-    - AGENTS.md (regenerated via emit.mjs --all --lang py; 52526 → 57459B)
-    - GEMINI.md (regenerated via emit.mjs --all --lang py; 52535 → 57468B)
+    - .claude/commands/codify.md (cc-architect rename completion; loom 2.10.2 source fix)
   files_added_this_sync: []
-  files_purged: []
-  composed: 2           # ci-runners.md + deployment.md (py variant slot overlays)
-  variant_full_overlays_unchanged: 0
-  preserved:
-    - CLAUDE.md (template-owned)
-    - settings.json (per-template hook paths; identical to source)
-    - VERSION (template-owned, bumped 1.0.12 → 1.0.13 with 2.10.0 sync changelog entry)
-    - README.md
-    - scripts/
-    - .codex/ (config tree unchanged this cycle — no commands/skills regenerated)
-    - .gemini/ (config tree unchanged this cycle)
-    - .codex-mcp-guard/ (unchanged)
-    - .claude/hooks/detect-package-manager.js (template-only legacy hook, not in source settings.json — preserved)
-  baselines_emitted:
-    cc: 0           # CLAUDE.md preserved, not emitted
-    codex: 1        # AGENTS.md regenerated (rule body changes in CRIT baseline)
-    gemini: 1       # GEMINI.md regenerated (rule body changes in CRIT baseline)
-  baseline_emission_bytes:
-    block_cap_bytes: 61440
-    warn_cap_bytes: 32768
-    codex:
-      rules: 9
-      bytes: 57459
-      tier: WARN
-      headroom_bytes: 3981
-      headroom_pct: 6.48
-      delta_bytes: +4933    # vs prior sync (52526B at v2.9.7 in-flight)
-    gemini:
-      rules: 9
-      bytes: 57468
-      tier: WARN
-      headroom_bytes: 3972
-      headroom_pct: 6.46
-      delta_bytes: +4933    # vs prior sync (52535B at v2.9.7 in-flight)
-    next_cycle_warning: |
-      Headroom is now ~6.5% (from ~14.5% before this cycle). The 5 new
-      MUST sub-clauses + Why paragraphs added ~5kB each to baseline emission;
-      the abridger preserves both. Next cycle that adds CRIT-baseline content
-      MUST extract or demote-to-path-scoped FIRST or risk crossing the
-      61440B block_cap.
-  cli_artifacts:           # unchanged from prior sync — no command/skill/agent diff in 2.10.0
+  files_purged:
+    - .claude/agents/claude-code-architect.md (obsoleted)
+    - .claude/projects/ (obsoleted)
+    - .claude/scheduled_tasks.lock (obsoleted)
+    - .claude/test-harness/ (obsoleted)
+    - .claude/learning/ (one-shot; loom-leaked, manifest-excluded but no auto-purge mechanism)
+  manifest_changes:
+    obsoleted_added:
+      - .claude/agents/claude-code-architect.md
+      - .claude/projects/
+      - .claude/scheduled_tasks.lock
+      - .claude/test-harness/
+    exclude_added:
+      - "projects/**"
+      - "scheduled_tasks.lock"
+      - "test-harness/**"
+  coc_obsoleted_emitted: 13 paths (16-line file with header)
+  cli_artifacts:
     codex:
       prompts: 30
       skills: 34
@@ -61,39 +34,8 @@ stats:
       commands: 30
       skills: 34
       agents: 22
-  hook_integrity:
-    referenced_in_settings: 12
-    resolve_on_disk: 12
-    extra_on_disk: 1       # detect-package-manager.js (template-only, not referenced)
-  cross_cli_parity:
-    rule_baseline_neutral_body: byte-identical across CC source + AGENTS.md + GEMINI.md
-    brief_verification_clause:
-      cc_source_agents_md_present: true
-      codex_agents_md_present: true
-      gemini_md_present: true
-    syntax_leakage:
-      agents_md_subagent_type_count: 0
-      gemini_md_subagent_type_count: 0
-      gemini_md_codex_agent_count: 0
-  sdk_pin_sweep:
-    bumped:
-      - kailash 2.11.3 → 2.12.0
-      - kailash-dataflow 2.3.3 → 2.4.0
-      - kailash-ml 1.5.1 → 1.6.0
-    held:
-      - kailash-mcp 0.2.10
-      - kailash-nexus 2.3.0
-      - kailash-kaizen 2.13.1
-      - kailash-pact 0.11.0
-      - kailash-align 0.7.0
-      - kaizen-agents 0.9.4
-    note: doc-only (no pyproject.toml in this template; pins live in upstream.sdk_packages of VERSION)
-  validators:
-    rule_frontmatter_pair_consistency: PASS  # validator-14
-    slot_round_trip_codex: PASS              # validator-12
-    slot_round_trip_gemini: PASS             # validator-12
-    cli_emit_exclusions_honored: PASS
-  sdk_refs_allowlist:
-    found_in_claude: 14
-    allowlisted: 31
-    new_entries_appended: 0    # idempotent
+notes: |
+  Surgical sync-hygiene patch (loom 2.10.2). Only modified artifact is
+  commands/codify.md (cc-architect rename completion). Stale state purged
+  across all 8 BUILD/USE consumers via new .coc-obsoleted entries.
+  No SDK pin updates this cycle (pure metadata + sync-hygiene patch).

@@ -1,14 +1,14 @@
 {
-  "version": "1.0.13",
+  "version": "1.0.14",
   "type": "coc-use-template",
-  "description": "COC USE template for Python SDK projects — multi-CLI (claude + codex + gemini)",
+  "description": "COC USE template for Python SDK projects \u2014 multi-CLI (claude + codex + gemini)",
   "released": "2026-04-29",
   "upstream": {
     "name": "kailash",
     "type": "coc-source",
-    "version": "2.10.0",
+    "version": "2.10.2",
     "build_version": "2.12.0",
-    "synced_at": "2026-04-29T14:20:00+00:00",
+    "synced_at": "2026-04-29T11:17:06Z",
     "sdk_packages": {
       "kailash": "2.12.0",
       "kailash-dataflow": "2.4.0",
@@ -23,47 +23,63 @@
   },
   "changelog": [
     {
+      "version": "1.0.14",
+      "date": "2026-04-29",
+      "summary": "Sync loom 2.10.2 \u2014 sync-hygiene remediation. (1) commands/codify.md cc-architect rename completion (lines 101 + 128 missed in v2.9.x rename). (2) 4 obsoleted-paths added to .coc-obsoleted: agents/claude-code-architect.md (rename), .claude/projects/, .claude/scheduled_tasks.lock, .claude/test-harness/ (loom-local pollution). (3) Paired exclude entries (projects/**, scheduled_tasks.lock, test-harness/**) so /sync prevents re-introduction. Surgical patch \u2014 only commands/codify.md changed in artifact set. Stale state purged via .coc-obsoleted contract.",
+      "changes": [
+        "FIX: .claude/commands/codify.md \u2014 cc-architect rename completion (loom 2.10.2 source fix; lines 101+128 in narrative).",
+        "PURGED via .coc-obsoleted: .claude/agents/claude-code-architect.md (rename remediation; agent file lingered post-rename).",
+        "PURGED via .coc-obsoleted: .claude/projects/ (Claude Code per-user state cache; never artifact-managed).",
+        "PURGED via .coc-obsoleted: .claude/scheduled_tasks.lock (Claude Code scheduled-task lock; never artifact-managed).",
+        "PURGED via .coc-obsoleted: .claude/test-harness/ (loom multi-CLI parity test fixtures; consumers do not run the harness).",
+        "ONE-SHOT PURGE: .claude/learning/ (loom-leaked from 2026-03-02; manifest excluded but no auto-purge mechanism for excluded paths).",
+        ".coc-obsoleted regenerated (16 lines = 13 obsoleted paths) so downstream consumers inherit the purge contract on next /sync.",
+        "MULTI-CLI EMIT: regenerated .codex/ (prompts=30, skills=34) + .gemini/ (commands=30, skills=34, agents=22) via emit-cli-artifacts.mjs to propagate the codify.md rename. Verified 0 stale claude-code-architect refs in regenerated codify files.",
+        "VERSION: template 1.0.13 \u2192 1.0.14; upstream loom 2.10.0 \u2192 2.10.2."
+      ]
+    },
+    {
       "version": "1.0.13",
       "date": "2026-04-29",
-      "summary": "MINOR: Sync loom 2.10.0 — 5 new global rule sub-clauses (zero-tolerance Rule 2 fake-dispatch + NEW Rule 3c + NEW Rule 6a; schema-migration NEW Rule 1a; agents NEW Parallel Brief-Claim Verification) bundled with the in-flight 2.9.7 git.md `git reset --hard` discipline rule + SDK pin sweep (kailash 2.11.3→2.12.0, kailash-dataflow 2.3.3→2.4.0, kailash-ml 1.5.1→1.6.0). All 5 sub-clauses live in slot:neutral-body wrappers, so cross-cli-parity Rule 1 is preserved — neutral-body byte-identical across CLAUDE.md (CC, via .claude/rules/), AGENTS.md (Codex), and GEMINI.md (Gemini). Variant overlays at variants/codex/rules/agents.md + variants/gemini/rules/agents.md carry the brief-verification example block with the correct delegation syntax per CLI (codex_agent / @specialist), so AGENTS.md and GEMINI.md ship NO CC `Agent(subagent_type=...)` syntax. Multi-CLI baselines regenerated via emit.mjs --all --lang py: AGENTS.md 52526 → 57459B (WARN, 6.48% headroom under 61440B block_cap), GEMINI.md 52535 → 57468B (WARN, 6.46% headroom). Both WARN tier; headroom tightened from ~14.5% to ~6.5% (cycle added ~5kB to baseline — projection in 2.10.0 changelog estimated ~9-10% but actual is tighter because the 5 new sub-clauses include MUST clauses + Why paragraphs the abridger preserves). Next cycle MUST extract before adding more baseline content. SDK pin sweep is doc-only — this template has no pyproject.toml; pins are referenced in upstream.sdk_packages of VERSION + downstream USE-project pyproject.toml files apply them per their own consumption.",
+      "summary": "MINOR: Sync loom 2.10.0 \u2014 5 new global rule sub-clauses (zero-tolerance Rule 2 fake-dispatch + NEW Rule 3c + NEW Rule 6a; schema-migration NEW Rule 1a; agents NEW Parallel Brief-Claim Verification) bundled with the in-flight 2.9.7 git.md `git reset --hard` discipline rule + SDK pin sweep (kailash 2.11.3\u21922.12.0, kailash-dataflow 2.3.3\u21922.4.0, kailash-ml 1.5.1\u21921.6.0). All 5 sub-clauses live in slot:neutral-body wrappers, so cross-cli-parity Rule 1 is preserved \u2014 neutral-body byte-identical across CLAUDE.md (CC, via .claude/rules/), AGENTS.md (Codex), and GEMINI.md (Gemini). Variant overlays at variants/codex/rules/agents.md + variants/gemini/rules/agents.md carry the brief-verification example block with the correct delegation syntax per CLI (codex_agent / @specialist), so AGENTS.md and GEMINI.md ship NO CC `Agent(subagent_type=...)` syntax. Multi-CLI baselines regenerated via emit.mjs --all --lang py: AGENTS.md 52526 \u2192 57459B (WARN, 6.48% headroom under 61440B block_cap), GEMINI.md 52535 \u2192 57468B (WARN, 6.46% headroom). Both WARN tier; headroom tightened from ~14.5% to ~6.5% (cycle added ~5kB to baseline \u2014 projection in 2.10.0 changelog estimated ~9-10% but actual is tighter because the 5 new sub-clauses include MUST clauses + Why paragraphs the abridger preserves). Next cycle MUST extract before adding more baseline content. SDK pin sweep is doc-only \u2014 this template has no pyproject.toml; pins are referenced in upstream.sdk_packages of VERSION + downstream USE-project pyproject.toml files apply them per their own consumption.",
       "changes": [
-        "GLOBAL: .claude/rules/zero-tolerance.md — Rule 2 § Extended BLOCKED Patterns gains `Fake dispatch` bullet; NEW Rule 3c `Documented Kwargs Accepted But Unused`; NEW Rule 6a `Remove Fully — Public-API Removal Requires Deprecation Cycle`. 189 → 277 lines (in target).",
-        "GLOBAL: .claude/rules/schema-migration.md — NEW Rule 1a `/redteam MUST Grep For Inline DDL Outside Migrations`. 202 → 231 lines.",
-        "GLOBAL: .claude/rules/agents.md — NEW MUST sub-clause `Parallel Brief-Claim Verification When Issue Count ≥ 3` in § Parallel Execution. 196 → 236 lines.",
-        "VARIANT (codex): .claude/variants/codex/rules/agents.md — brief-verification clause mirrored with codex_agent(...) delegation syntax for AGENTS.md emission.",
-        "VARIANT (gemini): .claude/variants/gemini/rules/agents.md — brief-verification clause mirrored with @specialist invocation syntax for GEMINI.md emission.",
-        "GLOBAL: .claude/rules/git.md — (carried over from in-flight 2.9.7) NEW MUST sub-clause `## git reset --hard MUST Verify Clean Working Tree`; preserved through 2.10.0 sync.",
-        "BASELINE EMIT: AGENTS.md regenerated via emit.mjs --all --lang py — 52526 → 57459B (WARN, 6.48% headroom under block_cap 61440).",
-        "BASELINE EMIT: GEMINI.md regenerated via emit.mjs --all --lang py — 52535 → 57468B (WARN, 6.46% headroom under block_cap 61440).",
+        "GLOBAL: .claude/rules/zero-tolerance.md \u2014 Rule 2 \u00a7 Extended BLOCKED Patterns gains `Fake dispatch` bullet; NEW Rule 3c `Documented Kwargs Accepted But Unused`; NEW Rule 6a `Remove Fully \u2014 Public-API Removal Requires Deprecation Cycle`. 189 \u2192 277 lines (in target).",
+        "GLOBAL: .claude/rules/schema-migration.md \u2014 NEW Rule 1a `/redteam MUST Grep For Inline DDL Outside Migrations`. 202 \u2192 231 lines.",
+        "GLOBAL: .claude/rules/agents.md \u2014 NEW MUST sub-clause `Parallel Brief-Claim Verification When Issue Count \u2265 3` in \u00a7 Parallel Execution. 196 \u2192 236 lines.",
+        "VARIANT (codex): .claude/variants/codex/rules/agents.md \u2014 brief-verification clause mirrored with codex_agent(...) delegation syntax for AGENTS.md emission.",
+        "VARIANT (gemini): .claude/variants/gemini/rules/agents.md \u2014 brief-verification clause mirrored with @specialist invocation syntax for GEMINI.md emission.",
+        "GLOBAL: .claude/rules/git.md \u2014 (carried over from in-flight 2.9.7) NEW MUST sub-clause `## git reset --hard MUST Verify Clean Working Tree`; preserved through 2.10.0 sync.",
+        "BASELINE EMIT: AGENTS.md regenerated via emit.mjs --all --lang py \u2014 52526 \u2192 57459B (WARN, 6.48% headroom under block_cap 61440).",
+        "BASELINE EMIT: GEMINI.md regenerated via emit.mjs --all --lang py \u2014 52535 \u2192 57468B (WARN, 6.46% headroom under block_cap 61440).",
         "Cross-CLI parity verification: AGENTS.md zero `subagent_type` leakage; GEMINI.md zero `subagent_type` and zero `codex_agent` leakage; brief-verification clause present in all three CLI surfaces with correct delegation syntax.",
-        "SDK PIN SWEEP (doc-only, captured in upstream.sdk_packages): kailash 2.11.3→2.12.0, kailash-dataflow 2.3.3→2.4.0, kailash-ml 1.5.1→1.6.0; held: kailash-mcp 0.2.10, kailash-nexus 2.3.0, kailash-kaizen 2.13.1, kailash-pact 0.11.0, kailash-align 0.7.0, kaizen-agents 0.9.4."
+        "SDK PIN SWEEP (doc-only, captured in upstream.sdk_packages): kailash 2.11.3\u21922.12.0, kailash-dataflow 2.3.3\u21922.4.0, kailash-ml 1.5.1\u21921.6.0; held: kailash-mcp 0.2.10, kailash-nexus 2.3.0, kailash-kaizen 2.13.1, kailash-pact 0.11.0, kailash-align 0.7.0, kaizen-agents 0.9.4."
       ]
     },
     {
       "version": "1.0.12",
       "date": "2026-04-28",
-      "summary": "PATCH: Sync loom 2.9.7 — new `git reset --hard` discipline rule (CRIT baseline → AGENTS.md / GEMINI.md regenerated) + kailash-dataflow 2.3.3 pin bump. (1) `.claude/rules/git.md` grew 245 → 295 lines: NEW MUST sub-clause `## git reset --hard MUST Verify Clean Working Tree` inserted before the existing § Rules section. Mandates `git status --porcelain` empty-check before any `--hard` reset; mandates `git reset --keep <ref>` as the structurally-safer preferred form for back-out / branch-reorganization workflows; `--keep` aborts loudly when local changes would be lost, converting silent data-loss into refused-with-actionable-error. DO/DO NOT covers four patterns. 7 BLOCKED rationalizations enumerated. Origin: kailash-py session 2026-04-28 (PR #691 sync-PR rebase). Sibling structural-confirmation pattern of dataflow-identifier-safety.md Rule 4 + schema-migration.md Rule 7. (2) git.md is `priority: 0, scope: baseline` and lives inside `<!-- slot:neutral-body -->`, so the new clause flows into the CRIT baseline emission for Codex (AGENTS.md) and Gemini (GEMINI.md). Both regenerated via `emit.mjs --all --lang py`: AGENTS.md 51245 → 52526B (+1281B from new rule), GEMINI.md 51254 → 52535B (+1281B). Both still WARN tier (under 61440B block_cap); headroom ~14.5% (down from ~16.6% pre-rule). (3) SDK pin: kailash-dataflow 2.3.2 → 2.3.3 (PyPI release 2026-04-28 via PR #692). (4) Cross-CLI parity preserved per cross-cli-parity.md Rule 1 — neutral-body byte-identical across all three CLI emissions; only delegation syntax differs in examples slots.",
+      "summary": "PATCH: Sync loom 2.9.7 \u2014 new `git reset --hard` discipline rule (CRIT baseline \u2192 AGENTS.md / GEMINI.md regenerated) + kailash-dataflow 2.3.3 pin bump. (1) `.claude/rules/git.md` grew 245 \u2192 295 lines: NEW MUST sub-clause `## git reset --hard MUST Verify Clean Working Tree` inserted before the existing \u00a7 Rules section. Mandates `git status --porcelain` empty-check before any `--hard` reset; mandates `git reset --keep <ref>` as the structurally-safer preferred form for back-out / branch-reorganization workflows; `--keep` aborts loudly when local changes would be lost, converting silent data-loss into refused-with-actionable-error. DO/DO NOT covers four patterns. 7 BLOCKED rationalizations enumerated. Origin: kailash-py session 2026-04-28 (PR #691 sync-PR rebase). Sibling structural-confirmation pattern of dataflow-identifier-safety.md Rule 4 + schema-migration.md Rule 7. (2) git.md is `priority: 0, scope: baseline` and lives inside `<!-- slot:neutral-body -->`, so the new clause flows into the CRIT baseline emission for Codex (AGENTS.md) and Gemini (GEMINI.md). Both regenerated via `emit.mjs --all --lang py`: AGENTS.md 51245 \u2192 52526B (+1281B from new rule), GEMINI.md 51254 \u2192 52535B (+1281B). Both still WARN tier (under 61440B block_cap); headroom ~14.5% (down from ~16.6% pre-rule). (3) SDK pin: kailash-dataflow 2.3.2 \u2192 2.3.3 (PyPI release 2026-04-28 via PR #692). (4) Cross-CLI parity preserved per cross-cli-parity.md Rule 1 \u2014 neutral-body byte-identical across all three CLI emissions; only delegation syntax differs in examples slots.",
       "changes": [
-        "GLOBAL: .claude/rules/git.md — NEW MUST sub-clause `## git reset --hard MUST Verify Clean Working Tree` (245 → 295 lines, inside slot:neutral-body wrapper).",
-        "BASELINE EMIT: AGENTS.md regenerated via emit.mjs --all --lang py — 51245 → 52526B (WARN, 14.51% headroom under block_cap 61440).",
-        "BASELINE EMIT: GEMINI.md regenerated via emit.mjs --all --lang py — 51254 → 52535B (WARN, 14.49% headroom under block_cap 61440).",
-        "DEPENDENCY DOC: upstream.sdk_packages.kailash-dataflow — 2.3.2 → 2.3.3 (no pyproject.toml in this repo to update; pin lives in template's CLAUDE.md / docs surface only)."
+        "GLOBAL: .claude/rules/git.md \u2014 NEW MUST sub-clause `## git reset --hard MUST Verify Clean Working Tree` (245 \u2192 295 lines, inside slot:neutral-body wrapper).",
+        "BASELINE EMIT: AGENTS.md regenerated via emit.mjs --all --lang py \u2014 51245 \u2192 52526B (WARN, 14.51% headroom under block_cap 61440).",
+        "BASELINE EMIT: GEMINI.md regenerated via emit.mjs --all --lang py \u2014 51254 \u2192 52535B (WARN, 14.49% headroom under block_cap 61440).",
+        "DEPENDENCY DOC: upstream.sdk_packages.kailash-dataflow \u2014 2.3.2 \u2192 2.3.3 (no pyproject.toml in this repo to update; pin lives in template's CLAUDE.md / docs surface only)."
       ]
     },
     {
       "version": "1.0.11",
       "date": "2026-04-28",
-      "summary": "PATCH: Sync loom 2.9.6 — fixes downstream /sync skipping `.claude/hooks/` and `.claude/bin/`. Symptom: many downstream consumer repos (kaizen-cli-py, kz-engage, etc.) ran /sync, the obsoleted-purge for `.claude/scripts/` and `scripts/hooks/` fired correctly, but the canonical `.claude/hooks/` directory was NEVER copied — settings.json hook entries pointed at non-existent paths and every CC SessionStart failed with MODULE_NOT_FOUND. Fix lands in `.claude/commands/sync.md` Step 4 (Downstream) and Step 3 (Gate 2): expected-state listing now explicitly includes hooks/**, hooks/lib/**, bin/**, .coc-obsoleted, plus a BLOCKED-rationalization clause naming the failure mode. Affected downstream consumers MUST re-run `/sync` from this 1.0.11 template release to receive `.claude/hooks/` on disk. No SDK pin changes; no AGENTS.md/GEMINI.md regeneration required (the patch is in a command file, not in any rule body that emits to baseline).",
+      "summary": "PATCH: Sync loom 2.9.6 \u2014 fixes downstream /sync skipping `.claude/hooks/` and `.claude/bin/`. Symptom: many downstream consumer repos (kaizen-cli-py, kz-engage, etc.) ran /sync, the obsoleted-purge for `.claude/scripts/` and `scripts/hooks/` fired correctly, but the canonical `.claude/hooks/` directory was NEVER copied \u2014 settings.json hook entries pointed at non-existent paths and every CC SessionStart failed with MODULE_NOT_FOUND. Fix lands in `.claude/commands/sync.md` Step 4 (Downstream) and Step 3 (Gate 2): expected-state listing now explicitly includes hooks/**, hooks/lib/**, bin/**, .coc-obsoleted, plus a BLOCKED-rationalization clause naming the failure mode. Affected downstream consumers MUST re-run `/sync` from this 1.0.11 template release to receive `.claude/hooks/` on disk. No SDK pin changes; no AGENTS.md/GEMINI.md regeneration required (the patch is in a command file, not in any rule body that emits to baseline).",
       "changes": [
-        "GLOBAL: .claude/commands/sync.md — Step 4 (Downstream) and Step 3 (Gate 2) expected-state listings now enumerate hooks/**, hooks/lib/**, bin/**, .coc-obsoleted; BLOCKED-rationalization clause added naming the SessionStart MODULE_NOT_FOUND failure mode."
+        "GLOBAL: .claude/commands/sync.md \u2014 Step 4 (Downstream) and Step 3 (Gate 2) expected-state listings now enumerate hooks/**, hooks/lib/**, bin/**, .coc-obsoleted; BLOCKED-rationalization clause added naming the SessionStart MODULE_NOT_FOUND failure mode."
       ]
     },
     {
       "version": "1.0.10",
       "date": "2026-04-28",
-      "summary": "PATCH: Sync loom 2.9.5 — additive command + obsoleted-purge. (1) NEW .claude/commands/sweep.md (117 lines, tiers.co) — generic project-scoped 7-sweep audit; auto-detects current repo via `gh repo view --json nameWithOwner`. Codex + Gemini emissions of /sweep also distributed (.codex/prompts/sweep.md + .gemini/commands/sweep.toml). (2) PURGED .claude/scripts/ (legacy pre-v2.9.1 sibling layout, declared obsoleted in manifest). (3) sdk-refs allowlist auto-extended with new global skill paths via Step 7.5 hook (12 entries appended). No rule/skill/agent diff vs 2.9.4. AGENTS.md / GEMINI.md regeneration not required (no rule body changes; only command surface added).",
+      "summary": "PATCH: Sync loom 2.9.5 \u2014 additive command + obsoleted-purge. (1) NEW .claude/commands/sweep.md (117 lines, tiers.co) \u2014 generic project-scoped 7-sweep audit; auto-detects current repo via `gh repo view --json nameWithOwner`. Codex + Gemini emissions of /sweep also distributed (.codex/prompts/sweep.md + .gemini/commands/sweep.toml). (2) PURGED .claude/scripts/ (legacy pre-v2.9.1 sibling layout, declared obsoleted in manifest). (3) sdk-refs allowlist auto-extended with new global skill paths via Step 7.5 hook (12 entries appended). No rule/skill/agent diff vs 2.9.4. AGENTS.md / GEMINI.md regeneration not required (no rule body changes; only command surface added).",
       "changes": [
-        "GLOBAL: NEW .claude/commands/sweep.md (+ .codex/prompts/sweep.md + .gemini/commands/sweep.toml) — 7-sweep generic project-scoped audit.",
+        "GLOBAL: NEW .claude/commands/sweep.md (+ .codex/prompts/sweep.md + .gemini/commands/sweep.toml) \u2014 7-sweep generic project-scoped audit.",
         "OBSOLETED-PURGED: .claude/scripts/ (canonical migrate.py at top-level scripts/migrate.py).",
         ".github/coc-sdk-refs-allowlist.txt extended (+12 entries) for new global skill files surfaced in 2.9.5 distribution.",
         "No SDK pin changes; no AGENTS.md/GEMINI.md regeneration required."
@@ -72,31 +88,31 @@
     {
       "version": "1.0.9",
       "date": "2026-04-28",
-      "summary": "PATCH: Sync loom 2.9.4 — 3 follow-ups + /decisive→/autonomize rename + cross-CLI examples-slot gap CLOSED. (1) rules/agents.md slimmed 315→196 (≤200 cap). (2) rules/testing.md slimmed 293→200; new __all__/re-export sub-clause widened cross-language. (3) NEW variants/codex/rules/agents.md (full neutral-body overlay, codex_agent syntax) + variants/gemini/rules/agents.md (full neutral-body overlay, @specialist syntax) — closes the cross-CLI examples-slot gap flagged as SOFT-WARN tech debt in v1.0.8. AGENTS.md (Codex) + GEMINI.md (Gemini) regenerated; verification grep confirms zero CC `subagent_type=` leakage in non-CC baselines + new codex_agent / @specialist syntax active. (4) commands/decisive.md → commands/autonomize.md across all 3 CLI surfaces (.claude/commands/, .codex/prompts/, .gemini/commands/). decisive.* purged via .coc-obsoleted v2.9.4. AGENTS.md 51245B / 16.59% headroom; GEMINI.md 51254B / 16.58% headroom (both WARN tier, comfortably under 61440B block-cap).",
+      "summary": "PATCH: Sync loom 2.9.4 \u2014 3 follow-ups + /decisive\u2192/autonomize rename + cross-CLI examples-slot gap CLOSED. (1) rules/agents.md slimmed 315\u2192196 (\u2264200 cap). (2) rules/testing.md slimmed 293\u2192200; new __all__/re-export sub-clause widened cross-language. (3) NEW variants/codex/rules/agents.md (full neutral-body overlay, codex_agent syntax) + variants/gemini/rules/agents.md (full neutral-body overlay, @specialist syntax) \u2014 closes the cross-CLI examples-slot gap flagged as SOFT-WARN tech debt in v1.0.8. AGENTS.md (Codex) + GEMINI.md (Gemini) regenerated; verification grep confirms zero CC `subagent_type=` leakage in non-CC baselines + new codex_agent / @specialist syntax active. (4) commands/decisive.md \u2192 commands/autonomize.md across all 3 CLI surfaces (.claude/commands/, .codex/prompts/, .gemini/commands/). decisive.* purged via .coc-obsoleted v2.9.4. AGENTS.md 51245B / 16.59% headroom; GEMINI.md 51254B / 16.58% headroom (both WARN tier, comfortably under 61440B block-cap).",
       "changes": [
-        "GLOBAL rules/agents.md: 315→196 lines (≤200 cap). Slot:neutral-body wrapper applied so codex/gemini variants overlay full body.",
-        "GLOBAL rules/testing.md: 293→200 lines. Slot:neutral-body wrapper for cross-language variant overlay.",
-        "NEW variants/codex/rules/agents.md: full neutral-body overlay with codex_agent(...) syntax — eliminates CC syntax leakage into AGENTS.md (Codex baseline).",
-        "NEW variants/gemini/rules/agents.md: full neutral-body overlay with @specialist invocation syntax — eliminates CC syntax leakage into GEMINI.md (Gemini baseline).",
-        "RENAMED: .claude/commands/decisive.md → .claude/commands/autonomize.md + paired .codex/prompts/autonomize.md + .gemini/commands/autonomize.toml. PURGED: 3 decisive.* paths via .coc-obsoleted.",
-        "AGENTS.md regenerated: 51245B (was 54181B; smaller because slim rules now propagate through). WARN tier; headroom 7259→10195B (16.59%). codex_agent(...) overlay active; subagent_type leakage eliminated.",
-        "GEMINI.md regenerated: 51254B (was 54152B). WARN tier; headroom 7288→10186B (16.58%). @specialist invocation overlay active.",
+        "GLOBAL rules/agents.md: 315\u2192196 lines (\u2264200 cap). Slot:neutral-body wrapper applied so codex/gemini variants overlay full body.",
+        "GLOBAL rules/testing.md: 293\u2192200 lines. Slot:neutral-body wrapper for cross-language variant overlay.",
+        "NEW variants/codex/rules/agents.md: full neutral-body overlay with codex_agent(...) syntax \u2014 eliminates CC syntax leakage into AGENTS.md (Codex baseline).",
+        "NEW variants/gemini/rules/agents.md: full neutral-body overlay with @specialist invocation syntax \u2014 eliminates CC syntax leakage into GEMINI.md (Gemini baseline).",
+        "RENAMED: .claude/commands/decisive.md \u2192 .claude/commands/autonomize.md + paired .codex/prompts/autonomize.md + .gemini/commands/autonomize.toml. PURGED: 3 decisive.* paths via .coc-obsoleted.",
+        "AGENTS.md regenerated: 51245B (was 54181B; smaller because slim rules now propagate through). WARN tier; headroom 7259\u219210195B (16.59%). codex_agent(...) overlay active; subagent_type leakage eliminated.",
+        "GEMINI.md regenerated: 51254B (was 54152B). WARN tier; headroom 7288\u219210186B (16.58%). @specialist invocation overlay active.",
         "Validators 12/13/14 PASS. sdk-refs allowlist (Step 7.5): 19/19 idempotent. Hook integrity: 14/14 resolve."
       ]
     },
     {
       "version": "1.0.8",
       "date": "2026-04-28",
-      "summary": "Sync loom 2.9.3 — W6+W7 codify cycle distribution + SDK pin refresh. 2 global rule files extended: rules/agents.md (+42 lines: new MUST 'Audit/Closure-Parity Verification Specialist Has Bash + Read' in neutral-body slot + matching Examples sub-section) — origin: kailash-py 2026-04-27 W6 /redteam Round 3 where Round-2 analyst FORWARDED 16/22 closure-parity rows for lack of Bash. rules/testing.md (+31 lines: new MUST '__all__ / Re-export Symbol Counts Use Structural Enumeration, Not Grep') — origin: same session, AST vs grep count mismatch in kailash_ml/__init__.py docstring. Multi-CLI baselines AGENTS.md + GEMINI.md regenerated via emit.mjs --all --lang py: ~52.7→54.2KB both WARN tier (~7.3KB headroom under 61440B block_cap). Validators 12/13/14 PASS. SDK pin sweep: kailash-dataflow 2.3.1→2.3.2 (W7-002 emit_train_end structural sanitization) + kailash-ml 1.4.2→1.5.1 (W7-001 LineageGraph implementation + 1.5.0/1.5.1 patches). FLAGGED FINDING (pre-existing, not regression): the new agents.md MUST sub-clause's Examples block uses CC `Agent(subagent_type=...)` syntax. No variants/codex/rules/agents.md or variants/gemini/rules/agents.md exists — same gap covers ALL of agents.md examples slot. Codex AGENTS.md + Gemini GEMINI.md inherit CC syntax verbatim. Per cross-cli-parity.md Rule 2 this is examples-slot drift = SOFT WARN, not BLOCK; neutral-body MUST clauses ARE byte-identical across all three CLIs (parity contract intact).",
+      "summary": "Sync loom 2.9.3 \u2014 W6+W7 codify cycle distribution + SDK pin refresh. 2 global rule files extended: rules/agents.md (+42 lines: new MUST 'Audit/Closure-Parity Verification Specialist Has Bash + Read' in neutral-body slot + matching Examples sub-section) \u2014 origin: kailash-py 2026-04-27 W6 /redteam Round 3 where Round-2 analyst FORWARDED 16/22 closure-parity rows for lack of Bash. rules/testing.md (+31 lines: new MUST '__all__ / Re-export Symbol Counts Use Structural Enumeration, Not Grep') \u2014 origin: same session, AST vs grep count mismatch in kailash_ml/__init__.py docstring. Multi-CLI baselines AGENTS.md + GEMINI.md regenerated via emit.mjs --all --lang py: ~52.7\u219254.2KB both WARN tier (~7.3KB headroom under 61440B block_cap). Validators 12/13/14 PASS. SDK pin sweep: kailash-dataflow 2.3.1\u21922.3.2 (W7-002 emit_train_end structural sanitization) + kailash-ml 1.4.2\u21921.5.1 (W7-001 LineageGraph implementation + 1.5.0/1.5.1 patches). FLAGGED FINDING (pre-existing, not regression): the new agents.md MUST sub-clause's Examples block uses CC `Agent(subagent_type=...)` syntax. No variants/codex/rules/agents.md or variants/gemini/rules/agents.md exists \u2014 same gap covers ALL of agents.md examples slot. Codex AGENTS.md + Gemini GEMINI.md inherit CC syntax verbatim. Per cross-cli-parity.md Rule 2 this is examples-slot drift = SOFT WARN, not BLOCK; neutral-body MUST clauses ARE byte-identical across all three CLIs (parity contract intact).",
       "changes": [
         "GLOBAL rules/agents.md mirror-applied (+42 lines, new MUST Audit/Closure-Parity sub-clause + Examples sub-section).",
         "GLOBAL rules/testing.md mirror-applied (+31 lines, new MUST __all__ structural enumeration).",
-        "AGENTS.md regenerated: 52783→54181B (9 rules, WARN tier, 7259B headroom).",
-        "GEMINI.md regenerated: 52754→54152B (9 rules, WARN tier, 7288B headroom).",
-        "SDK PIN: kailash-dataflow 2.3.1→2.3.2 (W7-002).",
-        "SDK PIN: kailash-ml 1.4.2→1.5.1 (W7-001 + 1.5.x patches).",
+        "AGENTS.md regenerated: 52783\u219254181B (9 rules, WARN tier, 7259B headroom).",
+        "GEMINI.md regenerated: 52754\u219254152B (9 rules, WARN tier, 7288B headroom).",
+        "SDK PIN: kailash-dataflow 2.3.1\u21922.3.2 (W7-002).",
+        "SDK PIN: kailash-ml 1.4.2\u21921.5.1 (W7-001 + 1.5.x patches).",
         "Validator 14 (rule-frontmatter pair consistency) PASS; validators 12+13 PASS.",
-        "sdk-refs allowlist (Step 7.5): idempotent — 19/19 found-and-allowlisted, 0 new entries appended.",
+        "sdk-refs allowlist (Step 7.5): idempotent \u2014 19/19 found-and-allowlisted, 0 new entries appended.",
         "Hook integrity: 14/14 hooks resolve under .claude/hooks/.",
         "FLAGGED: cross-CLI examples-slot inheritance (pre-existing tech debt; SOFT WARN per cross-cli-parity Rule 2). Future: author variants/{codex,gemini}/rules/agents.md."
       ]
@@ -104,17 +120,17 @@
     {
       "version": "1.0.7",
       "date": "2026-04-27",
-      "summary": "PATCH: SDK pin refresh to PyPI-live tips post-2026-04-27 release wave. kailash 2.11.1→2.11.3 (ML error classes shipped in v2.11.2/2.11.3 wheel hotfix). kailash-ml 1.1.1→1.4.2 (3 minor bumps + atomic version-anchor refresh from v1.4.2). kailash-align 0.6.0→0.7.0 (minor catch-up). All other pins unchanged. Pure SDK-pin sweep — no .claude/ artifact changes (loom 2.9.3 already distributed in v1.0.6).",
+      "summary": "PATCH: SDK pin refresh to PyPI-live tips post-2026-04-27 release wave. kailash 2.11.1\u21922.11.3 (ML error classes shipped in v2.11.2/2.11.3 wheel hotfix). kailash-ml 1.1.1\u21921.4.2 (3 minor bumps + atomic version-anchor refresh from v1.4.2). kailash-align 0.6.0\u21920.7.0 (minor catch-up). All other pins unchanged. Pure SDK-pin sweep \u2014 no .claude/ artifact changes (loom 2.9.3 already distributed in v1.0.6).",
       "changes": [
-        "SDK PIN: kailash 2.11.1→2.11.3.",
-        "SDK PIN: kailash-ml 1.1.1→1.4.2.",
-        "SDK PIN: kailash-align 0.6.0→0.7.0."
+        "SDK PIN: kailash 2.11.1\u21922.11.3.",
+        "SDK PIN: kailash-ml 1.1.1\u21921.4.2.",
+        "SDK PIN: kailash-align 0.6.0\u21920.7.0."
       ]
     },
     {
       "version": "1.0.6",
       "date": "2026-04-27",
-      "summary": "PATCH: rename /send-it → /decisive (slang removal + directive realignment to autonomous-execution + permission-envelope). The slang command name 'send-it' was unfamiliar to non-technical COC users (motorsports/skate slang); renamed to 'decisive' which names the posture without slang. Directive body rewritten to align with the user's standing principle 'autonomous execution to full with my permission, with the most optimal, complete, root-cause approach for the long-term … rigorous, prudent as well.' Added: § Prudence (permission envelope — destructive/hard-to-reverse/visible-to-others ops still require confirmation; BUILD-repo + downstream-of-USE commit/push carve-out per standing user feedback) + § Rigor (verify-before-commit — mechanical sweeps, cite paths/lines, distinguish observed-vs-assumed). Old send-it.md/.toml purged via .coc-obsoleted; new decisive command emitted to .claude/commands/ + (multi-CLI templates only) .codex/prompts/ + .gemini/commands/.",
+      "summary": "PATCH: rename /send-it \u2192 /decisive (slang removal + directive realignment to autonomous-execution + permission-envelope). The slang command name 'send-it' was unfamiliar to non-technical COC users (motorsports/skate slang); renamed to 'decisive' which names the posture without slang. Directive body rewritten to align with the user's standing principle 'autonomous execution to full with my permission, with the most optimal, complete, root-cause approach for the long-term \u2026 rigorous, prudent as well.' Added: \u00a7 Prudence (permission envelope \u2014 destructive/hard-to-reverse/visible-to-others ops still require confirmation; BUILD-repo + downstream-of-USE commit/push carve-out per standing user feedback) + \u00a7 Rigor (verify-before-commit \u2014 mechanical sweeps, cite paths/lines, distinguish observed-vs-assumed). Old send-it.md/.toml purged via .coc-obsoleted; new decisive command emitted to .claude/commands/ + (multi-CLI templates only) .codex/prompts/ + .gemini/commands/.",
       "changes": [
         "ADDED: .claude/commands/decisive.md + .codex/prompts/decisive.md + .gemini/commands/decisive.toml. PURGED: 3 send-it variants. OBSOLETED: appended 3 send-it paths to .claude/.coc-obsoleted."
       ]
@@ -131,66 +147,66 @@
     {
       "version": "1.0.4",
       "date": "2026-04-26",
-      "summary": "Sync loom 2.9.0 — PY CYCLE 8 + RS CYCLE 5 dual-SDK convergence. 4 global rule files updated: rules/agents.md (added MUST 'Verify Specialist Tool Inventory' + Examples table), rules/build-repo-release-discipline.md (added MUST Rule 5 PR Review Sub-Package Version Bump Sweep), rules/git.md (added Release-Prep release/v* convention + Pre-FIRST-Push CI Parity Discipline), rules/ci-runners.md (added Rule 6a Binding-CI paths-ignore + Rule 7 Workflow Crons Cost Footer + Rule 8 Release PRs Skip PR-Gate Suite). Multi-CLI baselines AGENTS.md/GEMINI.md regenerated via emit.mjs --all --lang py: 779→813/817 lines, both WARN tier (~52.7KB) — within v6 §2.2 steady-state band [32768, 61440). Validator 14 PASS. SDK pin sweep captured in VERSION: kailash 2.10.0→2.11.1, kailash-dataflow 2.1.2→2.3.1, kailash-mcp 0.2.9→0.2.10, kailash-pact 0.10.0→0.11.0.",
+      "summary": "Sync loom 2.9.0 \u2014 PY CYCLE 8 + RS CYCLE 5 dual-SDK convergence. 4 global rule files updated: rules/agents.md (added MUST 'Verify Specialist Tool Inventory' + Examples table), rules/build-repo-release-discipline.md (added MUST Rule 5 PR Review Sub-Package Version Bump Sweep), rules/git.md (added Release-Prep release/v* convention + Pre-FIRST-Push CI Parity Discipline), rules/ci-runners.md (added Rule 6a Binding-CI paths-ignore + Rule 7 Workflow Crons Cost Footer + Rule 8 Release PRs Skip PR-Gate Suite). Multi-CLI baselines AGENTS.md/GEMINI.md regenerated via emit.mjs --all --lang py: 779\u2192813/817 lines, both WARN tier (~52.7KB) \u2014 within v6 \u00a72.2 steady-state band [32768, 61440). Validator 14 PASS. SDK pin sweep captured in VERSION: kailash 2.10.0\u21922.11.1, kailash-dataflow 2.1.2\u21922.3.1, kailash-mcp 0.2.9\u21920.2.10, kailash-pact 0.10.0\u21920.11.0.",
       "changes": [
         "GLOBAL rules/agents.md mirror-applied from loom global (Tool Inventory MUST + Examples table for 17+ specialists).",
         "GLOBAL rules/build-repo-release-discipline.md mirror-applied (Rule 5 PR Review Sub-Package Version Bump Sweep).",
         "GLOBAL rules/git.md mirror-applied (Release-Prep release/v* + Pre-FIRST-Push CI Parity).",
         "GLOBAL rules/ci-runners.md mirror-applied (Rule 6a + Rule 7 + Rule 8).",
-        "AGENTS.md regenerated: 779→813 lines, 52783B WARN tier.",
-        "GEMINI.md regenerated: 779→817 lines, 52754B WARN tier.",
+        "AGENTS.md regenerated: 779\u2192813 lines, 52783B WARN tier.",
+        "GEMINI.md regenerated: 779\u2192817 lines, 52754B WARN tier.",
         "Validator 14 (rule-frontmatter pair consistency) PASS.",
-        "SDK PIN SWEEP (captured in VERSION.json.upstream.sdk_packages): kailash 2.10.0→2.11.1, kailash-dataflow 2.1.2→2.3.1, kailash-mcp 0.2.9→0.2.10, kailash-pact 0.10.0→0.11.0. Held: kailash-kaizen 2.13.1, kailash-nexus 2.3.0, kailash-ml 1.1.1, kailash-align 0.6.0, kaizen-agents 0.9.4. No root pyproject.toml in this template — downstream USE projects apply pins per their own pyproject."
+        "SDK PIN SWEEP (captured in VERSION.json.upstream.sdk_packages): kailash 2.10.0\u21922.11.1, kailash-dataflow 2.1.2\u21922.3.1, kailash-mcp 0.2.9\u21920.2.10, kailash-pact 0.10.0\u21920.11.0. Held: kailash-kaizen 2.13.1, kailash-nexus 2.3.0, kailash-ml 1.1.1, kailash-align 0.6.0, kaizen-agents 0.9.4. No root pyproject.toml in this template \u2014 downstream USE projects apply pins per their own pyproject."
       ]
     },
     {
       "version": "1.0.3",
       "date": "2026-04-25",
-      "summary": "Sync loom 2.8.30 — kailash-py /codify proposal 2026-04-25 (kailash-kaizen 2.13.0→2.13.1 hotfix postmortem). 2 entries, both classified GLOBAL: NEW MUST 'MUST: __init__.py Module-Scope Imports Honor The Manifest' in rules/dependencies.md + 'Latent failures count' clause extending rules/build-repo-release-discipline.md Rule 2. SDK pin sweep captured in VERSION: kailash 2.9.1→2.10.0, kailash-nexus 2.2.0→2.3.0, kailash-kaizen 2.12.2→2.13.1 (PyPI-live post-2026-04-25 hotfix). Multi-CLI baselines AGENTS.md/GEMINI.md regeneration deferred to next emit cycle (rule body changes are inside slot:neutral-body so cross-CLI parity preserved by design; baseline line count delta is +35 lines on the 9-rule baseline, well under the 61440B WARN cap).",
+      "summary": "Sync loom 2.8.30 \u2014 kailash-py /codify proposal 2026-04-25 (kailash-kaizen 2.13.0\u21922.13.1 hotfix postmortem). 2 entries, both classified GLOBAL: NEW MUST 'MUST: __init__.py Module-Scope Imports Honor The Manifest' in rules/dependencies.md + 'Latent failures count' clause extending rules/build-repo-release-discipline.md Rule 2. SDK pin sweep captured in VERSION: kailash 2.9.1\u21922.10.0, kailash-nexus 2.2.0\u21922.3.0, kailash-kaizen 2.12.2\u21922.13.1 (PyPI-live post-2026-04-25 hotfix). Multi-CLI baselines AGENTS.md/GEMINI.md regeneration deferred to next emit cycle (rule body changes are inside slot:neutral-body so cross-CLI parity preserved by design; baseline line count delta is +35 lines on the 9-rule baseline, well under the 61440B WARN cap).",
       "changes": [
-        "GLOBAL rules/dependencies.md +33 lines (156→189). New MUST sub-rule. Mirror-applied from loom global.",
-        "GLOBAL rules/build-repo-release-discipline.md +2 lines (165→167). 'Latent failures count' paragraph + amended Why. Mirror-applied.",
-        "SDK PIN SWEEP (captured in VERSION.json.upstream.sdk_packages): kailash 2.9.1→2.10.0, kailash-nexus 2.2.0→2.3.0, kailash-kaizen 2.12.2→2.13.1. Other packages held at prior pins per variants/py/rules/deployment.md (kailash-dataflow 2.2.0 BUILD-only). No root pyproject.toml in this template — downstream USE projects apply pins per their own pyproject.",
-        "VERSION: template 1.0.2→1.0.3; upstream.version 2.8.29→2.8.30; upstream.build_version 2.9.1→2.10.0; synced_at 2026-04-25T05:15:00Z→2026-04-25T11:00:00Z."
+        "GLOBAL rules/dependencies.md +33 lines (156\u2192189). New MUST sub-rule. Mirror-applied from loom global.",
+        "GLOBAL rules/build-repo-release-discipline.md +2 lines (165\u2192167). 'Latent failures count' paragraph + amended Why. Mirror-applied.",
+        "SDK PIN SWEEP (captured in VERSION.json.upstream.sdk_packages): kailash 2.9.1\u21922.10.0, kailash-nexus 2.2.0\u21922.3.0, kailash-kaizen 2.12.2\u21922.13.1. Other packages held at prior pins per variants/py/rules/deployment.md (kailash-dataflow 2.2.0 BUILD-only). No root pyproject.toml in this template \u2014 downstream USE projects apply pins per their own pyproject.",
+        "VERSION: template 1.0.2\u21921.0.3; upstream.version 2.8.29\u21922.8.30; upstream.build_version 2.9.1\u21922.10.0; synced_at 2026-04-25T05:15:00Z\u21922026-04-25T11:00:00Z."
       ]
     },
     {
       "version": "1.0.2",
       "date": "2026-04-25",
-      "summary": "Sync loom 2.8.29 — frontmatter regression sweep + Validator 14 (emission-time rule-frontmatter enforcement) + SDK pin sweep to PyPI-resolvable tips. 9 rule files had frontmatter restored or added per rule-authoring.md Rule 7: 4 baseline rules (agents, orphan-detection, security, zero-tolerance) had frontmatter stripped by 2.8.27 rule-extraction cycle; 8 path-scoped rules (agent-reasoning, cross-sdk-inspection, dependencies, observability, patterns, python-environment, specs-authority, testing) had `paths:` only with no `priority:`/`scope:`; worktree-isolation.md was demoted from baseline to path-scoped by 2.8.27 regression. Multi-CLI baselines AGENTS.md + GEMINI.md regenerated from 5 rules (344 lines, 4 rules silently dropped) to 9 rules (779 lines, 48322B each). All 48 rule files now pass Rule 7 audit. SDK pin sweep captured in VERSION for downstream USE-project reference; this template has no root pyproject.toml (multi-CLI scaffold).",
+      "summary": "Sync loom 2.8.29 \u2014 frontmatter regression sweep + Validator 14 (emission-time rule-frontmatter enforcement) + SDK pin sweep to PyPI-resolvable tips. 9 rule files had frontmatter restored or added per rule-authoring.md Rule 7: 4 baseline rules (agents, orphan-detection, security, zero-tolerance) had frontmatter stripped by 2.8.27 rule-extraction cycle; 8 path-scoped rules (agent-reasoning, cross-sdk-inspection, dependencies, observability, patterns, python-environment, specs-authority, testing) had `paths:` only with no `priority:`/`scope:`; worktree-isolation.md was demoted from baseline to path-scoped by 2.8.27 regression. Multi-CLI baselines AGENTS.md + GEMINI.md regenerated from 5 rules (344 lines, 4 rules silently dropped) to 9 rules (779 lines, 48322B each). All 48 rule files now pass Rule 7 audit. SDK pin sweep captured in VERSION for downstream USE-project reference; this template has no root pyproject.toml (multi-CLI scaffold).",
       "changes": [
-        "FRONTMATTER RESTORATION (4 baseline rules): agents.md, orphan-detection.md, security.md, zero-tolerance.md — frontmatter stripped by 2.8.27 extraction cycle, reinstated at canonical values.",
-        "FRONTMATTER BACKFILL (8 path-scoped rules): agent-reasoning.md, cross-sdk-inspection.md, dependencies.md, observability.md, patterns.md, python-environment.md, specs-authority.md, testing.md — added priority:10/scope:path-scoped.",
+        "FRONTMATTER RESTORATION (4 baseline rules): agents.md, orphan-detection.md, security.md, zero-tolerance.md \u2014 frontmatter stripped by 2.8.27 extraction cycle, reinstated at canonical values.",
+        "FRONTMATTER BACKFILL (8 path-scoped rules): agent-reasoning.md, cross-sdk-inspection.md, dependencies.md, observability.md, patterns.md, python-environment.md, specs-authority.md, testing.md \u2014 added priority:10/scope:path-scoped.",
         "REGRESSION FIX (worktree-isolation.md): restored from path-scoped demotion to priority:0/scope:baseline.",
-        "MULTI-CLI BASELINE REGENERATION: AGENTS.md + GEMINI.md regenerated via emit.mjs --all. Line count 344→779 (5→9 rules). Newly-surfaced baselines: agents.md, security.md, worktree-isolation.md, zero-tolerance.md — all 4 were silently dropped from 2.8.28's baselines because their frontmatter was missing. Codex + Gemini users of the multi-CLI template now get full baseline rule surface at session start (48322B per file, 78% of 61440B tier-WARN cap).",
-        "NEW validator in loom emit.mjs — Validator 14 enforces rule-authoring.md Rule 7 at emission-time. Future missing-frontmatter regressions BLOCK emission instead of silent-drop.",
-        "SDK PIN SWEEP (captured in VERSION.json.upstream.sdk_packages): kailash 2.8.12→2.9.1, dataflow 2.0.12→2.1.2, nexus 2.1.1→2.2.0, kaizen 2.11.0→2.12.2, pact 0.9.0→0.10.0, mcp 0.2.8→0.2.9, ml 0.17.0→1.1.1 (major: M1 foundations), align 0.4.0→0.6.0, kaizen-agents 0.9.3→0.9.4. No root pyproject.toml in this template — downstream USE projects apply pins per their own pyproject.",
-        "VERSION: template 1.0.1→1.0.2; upstream.version 2.8.28→2.8.29; upstream.build_version 2.8.12→2.9.1."
+        "MULTI-CLI BASELINE REGENERATION: AGENTS.md + GEMINI.md regenerated via emit.mjs --all. Line count 344\u2192779 (5\u21929 rules). Newly-surfaced baselines: agents.md, security.md, worktree-isolation.md, zero-tolerance.md \u2014 all 4 were silently dropped from 2.8.28's baselines because their frontmatter was missing. Codex + Gemini users of the multi-CLI template now get full baseline rule surface at session start (48322B per file, 78% of 61440B tier-WARN cap).",
+        "NEW validator in loom emit.mjs \u2014 Validator 14 enforces rule-authoring.md Rule 7 at emission-time. Future missing-frontmatter regressions BLOCK emission instead of silent-drop.",
+        "SDK PIN SWEEP (captured in VERSION.json.upstream.sdk_packages): kailash 2.8.12\u21922.9.1, dataflow 2.0.12\u21922.1.2, nexus 2.1.1\u21922.2.0, kaizen 2.11.0\u21922.12.2, pact 0.9.0\u21920.10.0, mcp 0.2.8\u21920.2.9, ml 0.17.0\u21921.1.1 (major: M1 foundations), align 0.4.0\u21920.6.0, kaizen-agents 0.9.3\u21920.9.4. No root pyproject.toml in this template \u2014 downstream USE projects apply pins per their own pyproject.",
+        "VERSION: template 1.0.1\u21921.0.2; upstream.version 2.8.28\u21922.8.29; upstream.build_version 2.8.12\u21922.9.1."
       ]
     },
     {
       "version": "1.0.1",
       "date": "2026-04-24",
-      "summary": "Sync loom 2.8.28 — 5 rule extensions from kailash-py proposal entries 21-25 (release-cycle + CodeQL round-2 codify). No SDK pin deltas; no new files. Rules updated in .claude/rules/: patterns.md (PEP 562 callable-module coexistence), python-environment.md (Py3.11+ threading.Lock factory gotcha), orphan-detection.md (Rule 6b TYPE_CHECKING for lazy __getattr__ exports), zero-tolerance.md (Rule 1b scanner-deferral with tracking-issue + runtime-safety proof), deployment.md (bi-directional sibling-package CI at bridge boundaries). All 5 are path-scoped or have path-scoped frontmatter, so root AGENTS.md + GEMINI.md baseline composition unchanged.",
+      "summary": "Sync loom 2.8.28 \u2014 5 rule extensions from kailash-py proposal entries 21-25 (release-cycle + CodeQL round-2 codify). No SDK pin deltas; no new files. Rules updated in .claude/rules/: patterns.md (PEP 562 callable-module coexistence), python-environment.md (Py3.11+ threading.Lock factory gotcha), orphan-detection.md (Rule 6b TYPE_CHECKING for lazy __getattr__ exports), zero-tolerance.md (Rule 1b scanner-deferral with tracking-issue + runtime-safety proof), deployment.md (bi-directional sibling-package CI at bridge boundaries). All 5 are path-scoped or have path-scoped frontmatter, so root AGENTS.md + GEMINI.md baseline composition unchanged.",
       "changes": [
-        "NEW § rules/patterns.md 'Callable Module + Subpackage Coexistence (MUST — PEP 562)' (+36 lines).",
+        "NEW \u00a7 rules/patterns.md 'Callable Module + Subpackage Coexistence (MUST \u2014 PEP 562)' (+36 lines).",
         "NEW MUST Rule 5 rules/python-environment.md 'Python 3.11+ Lock Factory Gotcha' (+25 lines).",
         "NEW Rule 6b rules/orphan-detection.md 'TYPE_CHECKING Block For Lazy __getattr__ Exports' (+33 lines).",
         "NEW Rule 1b rules/zero-tolerance.md 'Scanner Deferral Requires Tracking Issue + Runtime-Safety Proof' (+39 lines, extends Rule 1a).",
-        "NEW § variants/py/rules/deployment.md 'Bi-Directional At Bridge Boundaries (MUST)' (+37 lines, extends existing Sibling-Package CI rule).",
-        "No SDK pin deltas. Root baseline files (AGENTS.md, GEMINI.md) preserved — the 5 rules are all path-scoped, not in baseline composition."
+        "NEW \u00a7 variants/py/rules/deployment.md 'Bi-Directional At Bridge Boundaries (MUST)' (+37 lines, extends existing Sibling-Package CI rule).",
+        "No SDK pin deltas. Root baseline files (AGENTS.md, GEMINI.md) preserved \u2014 the 5 rules are all path-scoped, not in baseline composition."
       ]
     },
     {
       "version": "1.0.0",
       "date": "2026-04-23",
-      "summary": "Initial VERSION file for multi-CLI USE template. Synced loom 2.8.27 (PY CYCLE 6 — kailash-ml 1.0.0 M1 foundations + deferred-codify backlog). 17 net-new artifact files (10 guides/rule-extracts + 3 kaizen sub-files + 2 skills sub-files + 2 security skills); 59 updates across agents/rules/skills/commands. 8 new M1 pattern MUST clauses integrated (worktree burst≤3, pre-flight merge-base, branch-name match, specs amend-in-place, E2E regression tier, fake-integration handoff, paired async-ness, __all__ reconciliation). Multi-CLI baselines (AGENTS.md + GEMINI.md) regenerated from 5 baseline rules (19187B each, byte-identical neutral-body — cross-cli-parity Rule 1 PASS). .codex-mcp-guard/policies.json installed.",
+      "summary": "Initial VERSION file for multi-CLI USE template. Synced loom 2.8.27 (PY CYCLE 6 \u2014 kailash-ml 1.0.0 M1 foundations + deferred-codify backlog). 17 net-new artifact files (10 guides/rule-extracts + 3 kaizen sub-files + 2 skills sub-files + 2 security skills); 59 updates across agents/rules/skills/commands. 8 new M1 pattern MUST clauses integrated (worktree burst\u22643, pre-flight merge-base, branch-name match, specs amend-in-place, E2E regression tier, fake-integration handoff, paired async-ness, __all__ reconciliation). Multi-CLI baselines (AGENTS.md + GEMINI.md) regenerated from 5 baseline rules (19187B each, byte-identical neutral-body \u2014 cross-cli-parity Rule 1 PASS). .codex-mcp-guard/policies.json installed.",
       "changes": [
         "17 net-new files added: 10 guides/rule-extracts/{agent-reasoning,agents,dependencies,observability,python-environment,security,specs-authority,testing,worktree-isolation,zero-tolerance}.md; 3 skills/04-kaizen/{kaizen-key-concepts,kaizen-provider-config-v25,kaizen-wrapper-composition}.md; skills/10-deployment-git/multi-package-release-wave.md; skills/34-kailash-ml/m1-release-wave.md; skills/18-security-patterns/{dataflow-rls-posture,rls-security-definer-preauth-carveout}.md.",
-        "59 updates across agents (15 files — frameworks, analysis, implementation, quality, release, frontend, management, open-source-strategist), rules (16 files including git.md, testing.md, zero-tolerance.md, worktree-isolation.md, specs-authority.md, agents.md, orphan-detection.md, patterns.md, security.md), skills (26 SKILL.md + dataflow + kaizen + worktree-orchestration), commands (codify.md, cli-audit.md).",
+        "59 updates across agents (15 files \u2014 frameworks, analysis, implementation, quality, release, frontend, management, open-source-strategist), rules (16 files including git.md, testing.md, zero-tolerance.md, worktree-isolation.md, specs-authority.md, agents.md, orphan-detection.md, patterns.md, security.md), skills (26 SKILL.md + dataflow + kaizen + worktree-orchestration), commands (codify.md, cli-audit.md).",
         "Variant-py overlay applied: rules/ci-runners.md pulled from variants/py/ (matches template context).",
         "Multi-CLI baselines regenerated via .claude/bin/emit.mjs --all --lang py: AGENTS.md + GEMINI.md (19187B each, 5 baseline rules, validator-12 slot-round-trip PASS, cross-cli parity byte-identical).",
-        "CLI artifact emissions via .claude/bin/emit-cli-artifacts.mjs: .codex/{prompts,skills} (29 prompts + 34 skills), .gemini/{commands,skills,agents} (29 commands + 34 skills + 22 agents). Exclusions honored (codex: 1 command + 4 skills; gemini: 11 agents — cc-architect + management/* + loom-only specialists).",
+        "CLI artifact emissions via .claude/bin/emit-cli-artifacts.mjs: .codex/{prompts,skills} (29 prompts + 34 skills), .gemini/{commands,skills,agents} (29 commands + 34 skills + 22 agents). Exclusions honored (codex: 1 command + 4 skills; gemini: 11 agents \u2014 cc-architect + management/* + loom-only specialists).",
         ".codex-mcp-guard/policies.json installed (validator-13 PASS).",
         "SDK version pins captured: kailash 2.8.12, dataflow 2.0.12, nexus 2.1.1, kaizen 2.11.0, pact 0.9.0, mcp 0.2.8, ml 0.17.0, align 0.4.0, kaizen-agents 0.9.3 (all PyPI-resolvable tips per 2026-04-21 Wave 1+2 release cycle).",
         "Exclusions verified present: agents/management/{sync-reviewer,coc-sync,repo-ops,settings-manager}.md absent; commands/{repos,inspect,settings,sync-to-build}.md absent; rules/cross-sdk-inspection.md absent.",
