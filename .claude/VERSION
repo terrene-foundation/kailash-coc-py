@@ -1,27 +1,74 @@
 {
-  "version": "1.0.9",
+  "version": "1.0.13",
   "type": "coc-use-template",
   "description": "COC USE template for Python SDK projects — multi-CLI (claude + codex + gemini)",
-  "released": "2026-04-28",
+  "released": "2026-04-29",
   "upstream": {
     "name": "kailash",
     "type": "coc-source",
-    "version": "2.9.4",
-    "build_version": "2.11.3",
-    "synced_at": "2026-04-28T03:35:00+00:00",
+    "version": "2.10.0",
+    "build_version": "2.12.0",
+    "synced_at": "2026-04-29T14:20:00+00:00",
     "sdk_packages": {
-      "kailash": "2.11.3",
-      "kailash-dataflow": "2.3.2",
+      "kailash": "2.12.0",
+      "kailash-dataflow": "2.4.0",
       "kailash-nexus": "2.3.0",
       "kailash-kaizen": "2.13.1",
       "kailash-pact": "0.11.0",
       "kailash-mcp": "0.2.10",
-      "kailash-ml": "1.5.1",
+      "kailash-ml": "1.6.0",
       "kailash-align": "0.7.0",
       "kaizen-agents": "0.9.4"
     }
   },
   "changelog": [
+    {
+      "version": "1.0.13",
+      "date": "2026-04-29",
+      "summary": "MINOR: Sync loom 2.10.0 — 5 new global rule sub-clauses (zero-tolerance Rule 2 fake-dispatch + NEW Rule 3c + NEW Rule 6a; schema-migration NEW Rule 1a; agents NEW Parallel Brief-Claim Verification) bundled with the in-flight 2.9.7 git.md `git reset --hard` discipline rule + SDK pin sweep (kailash 2.11.3→2.12.0, kailash-dataflow 2.3.3→2.4.0, kailash-ml 1.5.1→1.6.0). All 5 sub-clauses live in slot:neutral-body wrappers, so cross-cli-parity Rule 1 is preserved — neutral-body byte-identical across CLAUDE.md (CC, via .claude/rules/), AGENTS.md (Codex), and GEMINI.md (Gemini). Variant overlays at variants/codex/rules/agents.md + variants/gemini/rules/agents.md carry the brief-verification example block with the correct delegation syntax per CLI (codex_agent / @specialist), so AGENTS.md and GEMINI.md ship NO CC `Agent(subagent_type=...)` syntax. Multi-CLI baselines regenerated via emit.mjs --all --lang py: AGENTS.md 52526 → 57459B (WARN, 6.48% headroom under 61440B block_cap), GEMINI.md 52535 → 57468B (WARN, 6.46% headroom). Both WARN tier; headroom tightened from ~14.5% to ~6.5% (cycle added ~5kB to baseline — projection in 2.10.0 changelog estimated ~9-10% but actual is tighter because the 5 new sub-clauses include MUST clauses + Why paragraphs the abridger preserves). Next cycle MUST extract before adding more baseline content. SDK pin sweep is doc-only — this template has no pyproject.toml; pins are referenced in upstream.sdk_packages of VERSION + downstream USE-project pyproject.toml files apply them per their own consumption.",
+      "changes": [
+        "GLOBAL: .claude/rules/zero-tolerance.md — Rule 2 § Extended BLOCKED Patterns gains `Fake dispatch` bullet; NEW Rule 3c `Documented Kwargs Accepted But Unused`; NEW Rule 6a `Remove Fully — Public-API Removal Requires Deprecation Cycle`. 189 → 277 lines (in target).",
+        "GLOBAL: .claude/rules/schema-migration.md — NEW Rule 1a `/redteam MUST Grep For Inline DDL Outside Migrations`. 202 → 231 lines.",
+        "GLOBAL: .claude/rules/agents.md — NEW MUST sub-clause `Parallel Brief-Claim Verification When Issue Count ≥ 3` in § Parallel Execution. 196 → 236 lines.",
+        "VARIANT (codex): .claude/variants/codex/rules/agents.md — brief-verification clause mirrored with codex_agent(...) delegation syntax for AGENTS.md emission.",
+        "VARIANT (gemini): .claude/variants/gemini/rules/agents.md — brief-verification clause mirrored with @specialist invocation syntax for GEMINI.md emission.",
+        "GLOBAL: .claude/rules/git.md — (carried over from in-flight 2.9.7) NEW MUST sub-clause `## git reset --hard MUST Verify Clean Working Tree`; preserved through 2.10.0 sync.",
+        "BASELINE EMIT: AGENTS.md regenerated via emit.mjs --all --lang py — 52526 → 57459B (WARN, 6.48% headroom under block_cap 61440).",
+        "BASELINE EMIT: GEMINI.md regenerated via emit.mjs --all --lang py — 52535 → 57468B (WARN, 6.46% headroom under block_cap 61440).",
+        "Cross-CLI parity verification: AGENTS.md zero `subagent_type` leakage; GEMINI.md zero `subagent_type` and zero `codex_agent` leakage; brief-verification clause present in all three CLI surfaces with correct delegation syntax.",
+        "SDK PIN SWEEP (doc-only, captured in upstream.sdk_packages): kailash 2.11.3→2.12.0, kailash-dataflow 2.3.3→2.4.0, kailash-ml 1.5.1→1.6.0; held: kailash-mcp 0.2.10, kailash-nexus 2.3.0, kailash-kaizen 2.13.1, kailash-pact 0.11.0, kailash-align 0.7.0, kaizen-agents 0.9.4."
+      ]
+    },
+    {
+      "version": "1.0.12",
+      "date": "2026-04-28",
+      "summary": "PATCH: Sync loom 2.9.7 — new `git reset --hard` discipline rule (CRIT baseline → AGENTS.md / GEMINI.md regenerated) + kailash-dataflow 2.3.3 pin bump. (1) `.claude/rules/git.md` grew 245 → 295 lines: NEW MUST sub-clause `## git reset --hard MUST Verify Clean Working Tree` inserted before the existing § Rules section. Mandates `git status --porcelain` empty-check before any `--hard` reset; mandates `git reset --keep <ref>` as the structurally-safer preferred form for back-out / branch-reorganization workflows; `--keep` aborts loudly when local changes would be lost, converting silent data-loss into refused-with-actionable-error. DO/DO NOT covers four patterns. 7 BLOCKED rationalizations enumerated. Origin: kailash-py session 2026-04-28 (PR #691 sync-PR rebase). Sibling structural-confirmation pattern of dataflow-identifier-safety.md Rule 4 + schema-migration.md Rule 7. (2) git.md is `priority: 0, scope: baseline` and lives inside `<!-- slot:neutral-body -->`, so the new clause flows into the CRIT baseline emission for Codex (AGENTS.md) and Gemini (GEMINI.md). Both regenerated via `emit.mjs --all --lang py`: AGENTS.md 51245 → 52526B (+1281B from new rule), GEMINI.md 51254 → 52535B (+1281B). Both still WARN tier (under 61440B block_cap); headroom ~14.5% (down from ~16.6% pre-rule). (3) SDK pin: kailash-dataflow 2.3.2 → 2.3.3 (PyPI release 2026-04-28 via PR #692). (4) Cross-CLI parity preserved per cross-cli-parity.md Rule 1 — neutral-body byte-identical across all three CLI emissions; only delegation syntax differs in examples slots.",
+      "changes": [
+        "GLOBAL: .claude/rules/git.md — NEW MUST sub-clause `## git reset --hard MUST Verify Clean Working Tree` (245 → 295 lines, inside slot:neutral-body wrapper).",
+        "BASELINE EMIT: AGENTS.md regenerated via emit.mjs --all --lang py — 51245 → 52526B (WARN, 14.51% headroom under block_cap 61440).",
+        "BASELINE EMIT: GEMINI.md regenerated via emit.mjs --all --lang py — 51254 → 52535B (WARN, 14.49% headroom under block_cap 61440).",
+        "DEPENDENCY DOC: upstream.sdk_packages.kailash-dataflow — 2.3.2 → 2.3.3 (no pyproject.toml in this repo to update; pin lives in template's CLAUDE.md / docs surface only)."
+      ]
+    },
+    {
+      "version": "1.0.11",
+      "date": "2026-04-28",
+      "summary": "PATCH: Sync loom 2.9.6 — fixes downstream /sync skipping `.claude/hooks/` and `.claude/bin/`. Symptom: many downstream consumer repos (kaizen-cli-py, kz-engage, etc.) ran /sync, the obsoleted-purge for `.claude/scripts/` and `scripts/hooks/` fired correctly, but the canonical `.claude/hooks/` directory was NEVER copied — settings.json hook entries pointed at non-existent paths and every CC SessionStart failed with MODULE_NOT_FOUND. Fix lands in `.claude/commands/sync.md` Step 4 (Downstream) and Step 3 (Gate 2): expected-state listing now explicitly includes hooks/**, hooks/lib/**, bin/**, .coc-obsoleted, plus a BLOCKED-rationalization clause naming the failure mode. Affected downstream consumers MUST re-run `/sync` from this 1.0.11 template release to receive `.claude/hooks/` on disk. No SDK pin changes; no AGENTS.md/GEMINI.md regeneration required (the patch is in a command file, not in any rule body that emits to baseline).",
+      "changes": [
+        "GLOBAL: .claude/commands/sync.md — Step 4 (Downstream) and Step 3 (Gate 2) expected-state listings now enumerate hooks/**, hooks/lib/**, bin/**, .coc-obsoleted; BLOCKED-rationalization clause added naming the SessionStart MODULE_NOT_FOUND failure mode."
+      ]
+    },
+    {
+      "version": "1.0.10",
+      "date": "2026-04-28",
+      "summary": "PATCH: Sync loom 2.9.5 — additive command + obsoleted-purge. (1) NEW .claude/commands/sweep.md (117 lines, tiers.co) — generic project-scoped 7-sweep audit; auto-detects current repo via `gh repo view --json nameWithOwner`. Codex + Gemini emissions of /sweep also distributed (.codex/prompts/sweep.md + .gemini/commands/sweep.toml). (2) PURGED .claude/scripts/ (legacy pre-v2.9.1 sibling layout, declared obsoleted in manifest). (3) sdk-refs allowlist auto-extended with new global skill paths via Step 7.5 hook (12 entries appended). No rule/skill/agent diff vs 2.9.4. AGENTS.md / GEMINI.md regeneration not required (no rule body changes; only command surface added).",
+      "changes": [
+        "GLOBAL: NEW .claude/commands/sweep.md (+ .codex/prompts/sweep.md + .gemini/commands/sweep.toml) — 7-sweep generic project-scoped audit.",
+        "OBSOLETED-PURGED: .claude/scripts/ (canonical migrate.py at top-level scripts/migrate.py).",
+        ".github/coc-sdk-refs-allowlist.txt extended (+12 entries) for new global skill files surfaced in 2.9.5 distribution.",
+        "No SDK pin changes; no AGENTS.md/GEMINI.md regeneration required."
+      ]
+    },
     {
       "version": "1.0.9",
       "date": "2026-04-28",

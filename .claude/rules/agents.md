@@ -34,6 +34,46 @@ When multiple independent operations are needed, launch agents in parallel via t
 
 **Why:** Sequential execution of independent operations wastes the autonomous execution multiplier, turning a 1-session task into a multi-session bottleneck.
 
+### MUST: Parallel Brief-Claim Verification When Issue Count ≥ 3
+
+When `/analyze` runs against a brief covering ≥ 3 distinct issues / failure modes / workstreams, the orchestrator MUST launch parallel deep-dive verification agents — one per claim cluster — to independently re-grep / re-read every factual claim in the brief tagged with file:line citations. Inaccuracies surfaced by the deep-dive sweep MUST be recorded in the workspace journal AND in the architecture plan's "Brief corrections" section AS THE GATE before `/todos`. Single-agent analysis on a ≥3-issue brief is BLOCKED — the framing inherited from the brief is the failure mode this rule prevents.
+
+```python
+# DO — parallel deep-dive verification for ≥3-issue brief
+# (one agent per claim cluster, run concurrently)
+Agent(subagent_type="general-purpose", run_in_background=True, prompt="""
+  Verify brief claim #1: 'ExperimentTracker creates _kml_model_versions'.
+  Re-grep the source tree; cite file:line. Report TRUE / FALSE / UNCLEAR.""")
+Agent(subagent_type="general-purpose", run_in_background=True, prompt="""
+  Verify brief claim #2: 'InferenceServer at engines/inference_server.py'.
+  Re-grep + re-read the cited path. Report TRUE / FALSE / UNCLEAR.""")
+Agent(subagent_type="general-purpose", run_in_background=True, prompt="""
+  Verify brief claim #3: '1.1.x kwargs silently dropped in 1.5.x'.
+  Re-read the 1.5.x signature; check raise vs silent-drop. Report.""")
+# Wait for all three; reconcile findings; record corrections in journal +
+# architecture plan BEFORE /todos.
+
+# DO NOT — single-agent analysis on a ≥3-issue brief
+Agent(subagent_type="analyst", prompt="Analyze the brief and produce architecture plan.")
+# (the analyst inherits whatever framing the brief asserts; brief inaccuracies
+# propagate into the plan, the plan into /todos, and three sessions later
+# the workstream is solving the wrong problem.)
+```
+
+**BLOCKED rationalizations:**
+
+- "The brief was authored by the user, it must be accurate"
+- "Sequential single-agent analysis catches inaccuracies anyway"
+- "Three parallel agents triple the cost for the same conclusion"
+- "I'll spot-check a couple of claims, that's good enough"
+- "Brief verification is /redteam's job, not /analyze's"
+- "The brief's claims are 'mostly correct', the rounding errors don't change the plan"
+- "If a claim turns out wrong, /todos can correct it"
+
+**Why:** Briefs are written from the human's mental model of the system, which is up-to-date as of the last time they read the code. The model decays silently as the code evolves. A ≥3-issue brief carries ≥3× the surface area for stale citations and misframed root causes; single-agent analysis cannot resist the brief's framing because the agent has no independent reading. Parallel deep-dive verification is the structural defense — three agents reading three claim-clusters independently produce three independent reports that the orchestrator reconciles. The cost is bounded (parallel = 1 wall-clock unit) and the value is the prevention of every downstream session inheriting the wrong framing. Evidence: `kailash-ml-1.5.x-followup` brief had THREE distinct factual inaccuracies (issue #699 root-cause framing, issue #700 file path, issue #701 silent-drop scope) — all three were caught only because three parallel deep-dive agents independently verified. A single-agent analysis would have inherited the misframings into `/todos` and the workstream would have shipped fixes targeted at the wrong root causes.
+
+Origin: kailash-ml 1.5.x followup `/analyze` (2026-04-29) — `workspaces/kailash-ml-1.5.x-followup/journal/0001-DISCOVERY-brief-root-cause-incorrect-on-three-issues.md`. Meta-rule: applies to every COC `/analyze` invocation across every SDK, not just kailash-ml.
+
 ## Quality Gates (MUST — Gate-Level Review)
 
 Reviews happen at COC phase boundaries, not per-edit. Skip only when explicitly told to. **MUST gates** are `/implement` and `/release`; reviewer + security-reviewer (and gold-standards-validator at `/release`) run as parallel background agents. RECOMMENDED gates run at `/analyze`, `/todos`, `/redteam`, `/codify`, and post-merge. See guide for the full gate table.

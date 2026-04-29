@@ -37,3 +37,19 @@
 .claude/skills/29-pact/pact-governance-engine.md
 .claude/skills/30-claude-code-patterns/parallel-merge-workflow.md
 .claude/skills/30-claude-code-patterns/sdk-upstream-donation.md
+
+# ─── auto-extended 2026-04-28 from loom v2.9.5 ──────
+# Files newly distributed in this sync that contain legitimate
+# src/kailash/ references. Auto-appended by coc-sync Step 7.5.
+.claude/commands/release.md
+.claude/skills/01-core-sdk/async-resource-safety.md
+.claude/skills/01-core-sdk/production-readiness-patterns.md
+.claude/skills/01-core-sdk/runtime-lifecycle.md
+.claude/skills/08-nodes-reference/nodes-quick-index.md
+.claude/skills/26-eatp-reference/eatp-posture-stores.md
+.claude/skills/29-pact/pact-access-enforcement.md
+.claude/skills/29-pact/pact-dtr-addressing.md
+.claude/skills/29-pact/pact-envelopes.md
+.claude/skills/29-pact/pact-governed-agents.md
+.claude/skills/29-pact/pact-kaizen-integration.md
+.claude/skills/29-pact/pact-quickstart.md
