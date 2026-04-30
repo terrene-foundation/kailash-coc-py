@@ -1,31 +1,47 @@
-# COC Sync Marker — kailash-coc-py
-timestamp: 2026-04-29T11:17:46Z
+# COC Sync Marker — kailash-coc-py (multi-CLI: claude + codex + gemini)
+timestamp: 2026-04-30T13:50:00Z
 source: loom/.claude
-loom_version: 2.10.2
+loom_version: 2.11.0
+loom_sha: 068415b
 variant: py
 clis: ["claude", "codex", "gemini"]
-template_version: 1.0.14
 stats:
-  files_updated_this_sync:
-    - .claude/commands/codify.md (cc-architect rename completion; loom 2.10.2 source fix)
-  files_added_this_sync: []
-  files_purged:
-    - .claude/agents/claude-code-architect.md (obsoleted)
-    - .claude/projects/ (obsoleted)
-    - .claude/scheduled_tasks.lock (obsoleted)
-    - .claude/test-harness/ (obsoleted)
-    - .claude/learning/ (one-shot; loom-leaked, manifest-excluded but no auto-purge mechanism)
-  manifest_changes:
-    obsoleted_added:
-      - .claude/agents/claude-code-architect.md
-      - .claude/projects/
-      - .claude/scheduled_tasks.lock
-      - .claude/test-harness/
-    exclude_added:
-      - "projects/**"
-      - "scheduled_tasks.lock"
-      - "test-harness/**"
-  coc_obsoleted_emitted: 13 paths (16-line file with header)
+  updated: 206
+  created: 10
+  unchanged: 433
+  composed: 2          # rules/deployment.md + rules/ci-runners.md slot-keyed py overlays
+  preserved: 1         # CLAUDE.md
+  use_excluded: 26
+  pre_existing_use_excluded:
+    - .claude/rules/documentation.md
+    - .claude/skills/30-claude-code-patterns/sdk-upstream-donation.md
+    - .claude/guides/co-setup/
+    - .claude/guides/deterministic-quality/
+  baselines_emitted:
+    cc: 0              # CLAUDE.md preserved, not emitted
+    codex: 1           # AGENTS.md
+    gemini: 1          # GEMINI.md
+  baseline_emission_bytes:
+    block_cap_bytes: 61440
+    warn_cap_bytes: 32768
+    codex:
+      rules: 10
+      bytes: 58862
+      tier: WARN
+      headroom_bytes: 2578
+      headroom_pct: 4.20
+    gemini:
+      rules: 10
+      bytes: 58871
+      tier: WARN
+      headroom_bytes: 2569
+      headroom_pct: 4.18
+    note: |
+      Headroom regressed from 12.73% → 4.20% on this sync. Cause:
+      adding rules/upstream-issue-hygiene.md (priority:0 baseline) to
+      the CRIT set (9 → 10 rules). Within WARN tier (steady-state per
+      v6 §2.2). Approaching block_cap; next CRIT addition WILL block
+      unless an existing rule is demoted to path-scoped.
   cli_artifacts:
     codex:
       prompts: 30
@@ -34,8 +50,9 @@ stats:
       commands: 30
       skills: 34
       agents: 22
-notes: |
-  Surgical sync-hygiene patch (loom 2.10.2). Only modified artifact is
-  commands/codify.md (cc-architect rename completion). Stale state purged
-  across all 8 BUILD/USE consumers via new .coc-obsoleted entries.
-  No SDK pin updates this cycle (pure metadata + sync-hygiene patch).
+  mcp_guard:
+    policies_populated: false   # still gated per Step 6.6 § G3
+notes:
+  - "Pre-existing use_excluded files preserved per additive-merge semantics."
+  - "User decision pending: convert use_excluded paths to obsoleted in future cycle."
+  - "Multi-CLI baseline cap headroom = 4.20% — flag for next sync; demotion candidate watch."

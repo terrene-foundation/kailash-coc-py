@@ -121,7 +121,7 @@ When delegating IMPLEMENTATION work (file edits, commits, build/test invocation,
 
 **BLOCKED rationalizations:** "security-reviewer is the security domain, so security-relevant edits go there" / "The agent will figure out its tool limitations" / "I'll re-launch with a different specialist if it halts" / "Read-only review IS implementation when the diff is trivial" / "The agent has Write — that's enough for code edits".
 
-**Why:** Read-only specialists halt mid-instruction at file-edit boundaries — the agent emits "Now let me wire X" then exits with zero tool calls because Edit is unavailable. Verifying tool inventory pre-launch is O(1); re-launch is O(N) on shard size. See guide for cross-SDK rediscovery evidence.
+**Why:** Read-only specialists halt mid-instruction at file-edit boundaries — the agent emits "Now let me wire X" then exits with zero tool calls because Edit is unavailable. Verifying tool inventory pre-launch is O(1); re-launch is O(N) on shard size. See guide for rediscovery evidence.
 
 ## MUST: Audit/Closure-Parity Verification Specialist Has Bash + Read
 
@@ -139,7 +139,7 @@ Agent(subagent_type="analyst", prompt="Verify W5→W6 closure parity...")
 
 **BLOCKED rationalizations:** "Analyst is the audit specialist; closure parity IS audit" / "The reviewer round can pick up the FORWARDED rows" / "I'll instruct the analyst to skip rows it can't verify" / "Read+Grep+Glob covers most verification" / "Analyst can write a recommendation; verification can be done by the next reviewer".
 
-**Why:** Tool-inventory mismatch costs one full audit round. Verifying pre-launch is O(1); re-launch is O(N) on row count. Origin: 2026-04-27 W6 /redteam Round 3 — analyst FORWARDED 16 of 22; pact-specialist (Bash) Round 3 converted all 16 to VERIFIED in one shard. The Rust audit toolkit substitutes `cargo expand` / `cargo doc --document-private-items` (JSON) / `syn::parse_file` for the Python introspection commands.
+**Why:** Tool-inventory mismatch costs one full audit round. Verifying pre-launch is O(1); re-launch is O(N) on row count. Origin: 2026-04-27 /redteam Round 3 — analyst FORWARDED 16 of 22 verification rows; a Bash-equipped specialist re-ran Round 3 and converted all 16 to VERIFIED in one shard. Compiled-language audit toolkits substitute their own introspection commands for the Python introspection set.
 
 ## MUST: Worktree Isolation for Compiling Agents
 
@@ -162,7 +162,7 @@ When prompting an agent with worktree isolation, the orchestrator MUST reference
 # DO — relative paths resolve to the worktree's cwd
 Agent(isolation="worktree", prompt="Edit packages/kailash-ml/src/kailash_ml/trainable.py...")
 # DO NOT — absolute paths bypass worktree isolation
-Agent(isolation="worktree", prompt="Edit /Users/esperie/repos/loom/kailash-py/packages/...")
+Agent(isolation="worktree", prompt="Edit /absolute/path/to/main-checkout/packages/...")
 ```
 
 **BLOCKED rationalizations:** "Absolute paths are unambiguous" / "The agent should figure out its own cwd" / "This worked the one time I tested it".

@@ -1,14 +1,14 @@
 {
-  "version": "1.0.14",
+  "version": "1.1.0",
   "type": "coc-use-template",
   "description": "COC USE template for Python SDK projects \u2014 multi-CLI (claude + codex + gemini)",
-  "released": "2026-04-29",
+  "released": "2026-04-30",
   "upstream": {
     "name": "kailash",
     "type": "coc-source",
-    "version": "2.10.2",
-    "build_version": "2.12.0",
-    "synced_at": "2026-04-29T11:17:06Z",
+    "version": "2.11.0",
+    "build_version": "2.13.0",
+    "synced_at": "2026-04-30T13:50:00Z",
     "sdk_packages": {
       "kailash": "2.12.0",
       "kailash-dataflow": "2.4.0",
@@ -22,6 +22,19 @@
     }
   },
   "changelog": [
+    {
+      "version": "1.1.0",
+      "date": "2026-04-30",
+      "summary": "Sync loom 2.11.0 \u2014 USE-template downstream-context leakage remediation. NEW rule rules/upstream-issue-hygiene.md (priority:0/scope:baseline) \u2014 three MUSTs (human gate before gh issue create against any SDK repo, downstream-context redaction, minimal-repro shape). NEW manifest tier use_exclude: \u2014 8 BUILD-only artifacts (rules/cross-sdk-inspection.md, rules/documentation.md, skills/30-claude-code-patterns/sdk-upstream-donation.md, guides/co-setup/**, guides/deterministic-quality/**, guides/automated-maintenance.md, guides/rule-extracts/{git,independence-rs}.md) NO LONGER propagated from THIS sync's diff. Pre-existing copies of those paths are PRESERVED in this template (additive-merge); FLAGGED for follow-up obsoleted-list decision. ~80 anonymized leakage sites across rules/skills/agents/extracts (kailash-py / kailash-rs / terrene-foundation identifiers redacted, cross-SDK Origin footers dropped, absolute-path examples replaced with placeholders). SDK pins refreshed: kailash 2.12.0\u21922.13.0, kailash-nexus 2.3.0\u21922.5.0, kailash-dataflow 2.4.0\u21922.6.0, kailash-kaizen 2.13.1\u21922.14.0 (legacy target only; multi-CLI has no pyproject).",
+      "changes": [
+        "NEW RULE: .claude/rules/upstream-issue-hygiene.md (priority:0 baseline, ~9.7KB) \u2014 human gate + redaction + 5-section minimal-repro shape.",
+        "MANIFEST USE_EXCLUDE: 8 BUILD-only paths skipped at /sync emission (artifact-flow internals, BUILD-side-language guides, hardcoded BUILD-repo URLs).",
+        "ANONYMIZATION: ~80 sites across rules/skills/agents/extracts; cross-SDK Origin footers dropped; absolute-path examples replaced with placeholders.",
+        "BASELINE EMISSION: kailash-coc-py only \u2014 AGENTS.md (58862 B WARN tier) + GEMINI.md (58871 B WARN tier) emitted via emit.mjs --lang py. Headroom dropped 12.73%\u21924.20% from 9 CRIT rules \u2192 10 CRIT rules (added upstream-issue-hygiene.md). Steady-state per v6 \u00a72.2.",
+        "CLI ARTIFACTS: kailash-coc-py only \u2014 .codex/prompts (30) + skills (34); .gemini/commands (30) + skills (34) + agents (22); .codex-mcp-guard 4 files. emit-cli-artifacts.mjs.",
+        "PRE-EXISTING USE_EXCLUDED FILES (FLAGGED, NOT DELETED): rules/documentation.md, skills/30-claude-code-patterns/sdk-upstream-donation.md, guides/co-setup/, guides/deterministic-quality/. Standing instruction: additive-merge preserves; obsoleted-list follow-up if user wants purge."
+      ]
+    },
     {
       "version": "1.0.14",
       "date": "2026-04-29",

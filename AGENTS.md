@@ -206,7 +206,7 @@ Shards with an executable feedback loop (unit tests, `cargo check`, type checker
 
 When a code review or self-verification surfaces a latent gap in the SAME BUG CLASS as the in-flight PR AND the gap fits within one remaining shard budget (≤500 LOC load-bearing logic / ≤5–10 invariants / ≤3–4 call-graph hops), the session MUST spawn the fix immediately rather than filing a follow-up issue. Filing the follow-up issue instead of fixing is BLOCKED.
 
-**Why:** Same-bug-class gaps surfaced during review cost the least to fix while the context is loaded — the invariants, call graph, and domain model are all warm in attention. Filing a follow-up issue requires the next session to reload the entire context from scratch, typically 2–5× the marginal cost of continuing. Evidence: kailash-rs 2026-04-20 — PR #435 reviewer flagged 40+ model-aware `bind_value` sites with the same `None::<String>` hardcode. The agent filed #436 instead of fixing; the user pushed back ("why aren't you resolving it"); the fix shipped as #437 in the same session. Filing #436 wasted one user-turn of friction and one session-handoff context-reload that was unnecessary.
+**Why:** Same-bug-class gaps surfaced during review cost the least to fix while the context is loaded — the invariants, call graph, and domain model are all warm in attention. Filing a follow-up issue requires the next session to reload the entire context from scratch, typically 2–5× the marginal cost of continuing. Evidence: 2026-04-20 — a reviewer flagged 40+ sibling sites with the same hardcode pattern as the just-fixed PR. The agent filed a follow-up issue instead of fixing; the user pushed back ("why aren't you resolving it"); the fix shipped same session. Filing the follow-up wasted one user-turn of friction and one session-handoff context-reload that was unnecessary.
 
 **Bounded by the shard budget.** This rule does NOT override MUST Rule 1 (shard threshold). If the surfaced gap exceeds ≤500 LOC load-bearing / ≤5–10 invariants / ≤3–4 call-graph hops, filing the follow-up issue IS the correct disposition — the gap is a new shard, not a continuation of the current one.
 
@@ -340,65 +340,50 @@ scope: baseline
 
 # Git Workflow Rules
 
+See `.claude/guides/rule-extracts/git.md` for extended bash examples, full BLOCKED rationalization lists, repository protection table, and Origin evidence.
+
 
 ## Conventional Commits
 
-Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
+Format: `type(scope): description`. Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`.
 
 **Why:** Non-conventional commits break automated changelog generation and make `git log --oneline` useless for release notes.
 
 ## Branch Naming
 
-Format: `type/description` (e.g., `feat/add-auth`, `fix/api-timeout`)
+Format: `type/description` (e.g., `feat/add-auth`, `fix/api-timeout`).
 
-**Why:** Inconsistent branch names prevent CI pattern-matching rules and make `git branch --list` unreadable across contributors.
+**Why:** Inconsistent branch names prevent CI pattern-matching rules and make `git branch --list` unreadable.
 
 ### Release-Prep PRs MUST Use `release/v*` Branch Convention (MUST)
 
-Any PR whose diff is metadata-only — version anchors (`pyproject.toml` / `Cargo.toml`, `__init__.py::__version__` / lib.rs `pub const VERSION`), `CHANGELOG.md`, spec/doc version-line updates, and CHANGELOG-paired spec updates — MUST be opened from a branch named `release/v<X.Y.Z>`. Using `feat/`, `fix/`, `chore/`, or any other prefix on a release-prep PR is BLOCKED.
+Any PR whose diff is metadata-only — version anchors (`pyproject.toml` / `Cargo.toml`, `__init__.py::__version__` / lib.rs `pub const VERSION`), `CHANGELOG.md`, spec/doc version-line updates — MUST be opened from a branch named `release/v<X.Y.Z>`. Using `feat/`, `fix/`, `chore/` on a release-prep PR is BLOCKED.
 
-**Why:** Every PR-gate workflow that adopts the `ci-runners.md` § "MUST: Release-prep skip" pattern checks `if: !startsWith(github.head_ref, 'release/')`. Branching from `release/v*` triggers the auto-skip and saves ~45 min × matrix-size of CI minutes per release-prep PR. Branching from anything else burns the full PR-gate matrix on a diff that has no code surface to verify. Evidence: kailash-rs PR #602 (2026-04-25) used `feat/v3.23.0-release-prep` and consumed ~73 min of GitHub-billable runner time on a metadata-only diff that should have skipped to ~0 min. The cross-reference exists in `ci-runners.md` but is path-scoped to `.github/workflows/**`, so it does not load when an agent is choosing a branch name. This clause cross-references the rule from `git.md` (always-loaded baseline) so branch-naming decisions surface the cost lever.
-
-**If the release-prep work IS NOT metadata-only** (e.g., folds in a code fix as part of the same PR), split: keep the code fix on a `feat/` or `fix/` branch with its own PR; cut the release-prep on a separate `release/v*` branch that only updates anchors + CHANGELOG. Two PRs, one with full CI, one near-zero.
+**Why:** PR-gate workflows check `if: !startsWith(github.head_ref, 'release/')`. Branching from `release/v*` triggers the auto-skip and saves ~45 min × matrix-size of CI minutes per release-prep PR. If the work IS NOT metadata-only, split: keep code fix on `feat/`/`fix/` branch, cut release-prep on a separate `release/v*` branch. Evidence: a recent BUILD release-prep PR opened from `feat/...-release-prep` instead of `release/v*` consumed ~120 min of avoidable PR-gate CI on a metadata-only diff.
 
 ### Pre-FIRST-Push CI Parity Discipline (MUST)
 
-Before the FIRST `git push` that creates a remote branch (which opens the door to PR-gate CI), the agent MUST run the project's local CI parity command set. The discipline already exists in language-specific rules (`build-speed.md` § "Run Full CI Job-Set Locally Before Admin-Merge" for Rust; equivalents for Python: `pre-commit run --all-files` + `mypy --strict` + `pytest`) — this clause extends the same gate to the FIRST push, not just admin-merge.
+Before the FIRST `git push` that creates a remote branch, the agent MUST run the project's local CI parity command set (Rust: `cargo +nightly fmt --all --check` + `cargo clippy -- -D warnings` + `cargo nextest run` + `RUSTDOCFLAGS="-Dwarnings" cargo doc`. Python: `pre-commit run --all-files` + `pytest` + `mypy --strict`). All MUST exit 0 → push.
 
-**Why:** Each push to an open PR retriggers the full PR-gate matrix. With `concurrency: cancel-in-progress: true` on the workflow, prior in-flight runs are cancelled — but **the cancelled runs are still billed for the wall-clock minutes already consumed before cancellation**. kailash-rs PR #598 (2026-04-25) had a 71-minute Workspace Tests run cancelled mid-flight by a fix-up push; those 71 min were charged. Pre-flighting the local commands takes ~5-10 minutes once + amortized seconds on incremental re-runs; the alternative is N × 45 min of billed CI per fix-up cycle. Local discipline is strictly cheaper. The rule extends to the FIRST push because by the time admin-merge is invoked, every previous fix-up cycle has already burned billable minutes.
+**Why:** With `concurrency: cancel-in-progress: true` on the workflow, prior in-flight runs are cancelled — but **the cancelled runs are still billed for the wall-clock minutes already consumed before cancellation**. A recent BUILD release had a 71-minute Workspace Tests run cancelled mid-flight; those 71 min were charged. Pre-flighting takes ~5-10 min; the alternative is N × 45 min of billed CI per fix-up cycle.
 
 ## Branch Protection
 
-All protected repos require PRs to main. Direct push is rejected by GitHub.
+All protected repos require PRs to main. Direct push is rejected by GitHub. Owner workflow: branch → commit → push → PR → `gh pr merge <N> --admin --merge --delete-branch`. See extract for the full repository × protection table.
 
 **Why:** Direct pushes bypass CI checks and code review, allowing broken or unreviewed code to reach the release branch.
 
-| Repository                                    | Branch | Protection                                         |
-| --------------------------------------------- | ------ | -------------------------------------------------- |
-| `terrene-foundation/kailash-py`               | `main` | Full (admin bypass)                                |
-| `terrene-foundation/kailash-coc-claude-py`    | `main` | Full (admin bypass) — legacy (archival 2026-10-22) |
-| `terrene-foundation/kailash-coc-claude-rs`    | `main` | Full (admin bypass) — legacy (archival 2026-10-22) |
-| ... | ... |
-
-**New multi-CLI USE repos (`kailash-coc-py`, `kailash-coc-rs`)**: created 2026-04-23 as net-new repos (not rename) per migration r3 directive. Flipped to public + branch protection applied 2026-04-23 (1 approving review required, force-push + deletion blocked, admin bypass retained). Posture matches legacy `kailash-coc-claude-{py,rs}` rows.
-
-**Owner workflow**: Branch → commit → push → PR → `gh pr merge <N> --admin --merge --delete-branch`
-
-**Contributor workflow**: Fork → branch → PR → 1 approving review → CI passes → merge
-
 ## PR Description
 
-CC system prompt provides the template. Additionally, always include a `## Related issues` section (e.g., `Fixes #123`).
+CC system prompt provides the template. Always include a `## Related issues` section (e.g., `Fixes #123`).
 
 **Why:** Without issue links, PRs become disconnected from their motivation, breaking traceability and preventing automatic issue closure on merge.
 
 ## `git reset --hard` MUST Verify Clean Working Tree (MUST)
 
-`git reset --hard <ref>` SILENTLY discards every unstaged modification AND every untracked file in the affected paths. Recovery is impossible — unstaged content has no reflog entry. Running `git reset --hard` without first verifying `git status --porcelain` is empty is BLOCKED.
+`git reset --hard <ref>` SILENTLY discards every unstaged modification AND every untracked file in the affected paths. Recovery is impossible — unstaged content has no reflog entry. Running `git reset --hard` without first verifying `git status --porcelain` is empty is BLOCKED. Prefer `git reset --keep <ref>`, which performs the same commit-graph operation BUT aborts if it would lose local changes.
 
-The structurally safer command `git reset --keep <ref>` performs the same commit-graph operation BUT aborts if it would lose local changes. It MUST be preferred for any back-out or branch-reorganization workflow.
-
-**Why:** `git reset --hard` is the most destructive git operation that doesn't rewrite history — and unlike force-push, the destruction is unrecoverable: unstaged modifications and untracked files have no reflog. `git reset --keep` exists in git specifically to provide the same commit-graph effect with structural safety; defaulting to `--keep` converts a class of silent data-loss failures into loud "refused — stash first" errors. This rule is the local-git sibling of `dataflow-identifier-safety.md` Rule 4 (DROP requires `force_drop=True`) and `schema-migration.md` Rule 7 (downgrade requires `force_downgrade=True`) — the same structural-confirmation pattern applied to the local-workspace destruction surface.
+**Why:** `git reset --hard` is the most destructive git operation that doesn't rewrite history — and unlike force-push, the destruction is unrecoverable. `git reset --keep` exists in git specifically to provide the same effect with structural safety. Sibling of `dataflow-identifier-safety.md` Rule 4 (DROP) and `schema-migration.md` Rule 7 (downgrade) — same structural-confirmation pattern. Origin: 2026-04-28 — a `git reset --hard` wiped uncommitted `.session-notes`; cross-language principle.
 
 ## Rules
 
@@ -408,11 +393,18 @@ The structurally safer command `git reset --keep <ref>` performs the same commit
 - No large binaries (>10MB single file)
 - Commit bodies MUST answer **why**, not **what** (the diff shows what)
 
-**Why:** Mixed commits are impossible to revert cleanly, leaked secrets require immediate key rotation across all environments, and large binaries permanently bloat the repo since git never forgets them. Commit bodies that explain "why" are the cheapest form of institutional documentation — co-located with the code, versioned, searchable via `git log --grep`, and never stale (they describe a point in time). See 0052-DISCOVERY §2.10.
+**Why:** Mixed commits are impossible to revert cleanly. Leaked secrets require key rotation across all environments. Large binaries permanently bloat the repo. Commit bodies that explain "why" are the cheapest form of institutional documentation — co-located, versioned, `git log --grep`-searchable, never stale.
 
 ## Issue Closure Discipline
 
 Closing a GitHub issue as "completed" MUST include a commit SHA, PR number, or merged-PR link in the close comment. Closing with no code reference is BLOCKED.
+
+```bash
+# DO — close with delivered-code reference
+gh issue close 351 --comment "Fixed in #412 (commit a1b2c3d)"
+# DO NOT — close with no code proof
+gh issue close 351 --comment "Resolved"
+```
 
 **Why:** Issues closed with zero delivered code references break traceability; the next session cannot verify whether the fix actually shipped.
 
@@ -426,7 +418,7 @@ When pre-commit auto-stash causes commits to fail despite hooks passing in direc
 
 Commit bodies MUST describe ONLY changes actually present in the diff. Claiming a refactor, deletion, or side-effect that the diff does NOT contain is BLOCKED. If the claim was made in error, push a FOLLOW-UP commit that actually does what the prior message said — do NOT amend, do NOT ignore.
 
-**Why:** `git log --grep` is the cheapest institutional-knowledge search across a repo — a body that claims something the diff doesn't contain poisons every future search that lands on it. The next session reads "dropped the warning-suppression" in the log, assumes it happened, and bases later decisions on a diff that never existed. Amending is BLOCKED because it loses the audit trail of the over-claim; a follow-up commit preserves both the original claim AND the correction so anyone tracing the history sees the full sequence.
+**Why:** `git log --grep` is the cheapest institutional-knowledge search across a repo — a body that claims something the diff doesn't contain poisons every future search that lands on it. Amending is BLOCKED because it loses the audit trail; a follow-up commit preserves both the original claim AND the correction. Origin: 2026-04-20 commit-body self-correction; cross-language principle.
 
 
 ---
@@ -589,6 +581,85 @@ When a security-relevant kwarg (classification policy, tenant scope, clearance c
 ## Exceptions
 
 Security exceptions require: written justification, security-reviewer approval, documentation, and time-limited remediation plan.
+
+---
+
+# upstream-issue-hygiene.md
+
+---
+priority: 0
+scope: baseline
+---
+
+# Upstream Issue Hygiene
+
+When a downstream session — a Python / Ruby / Rust binding consumer working with `kailash` / `kailash_*` packages — discovers a defect or feature gap in the underlying SDK, the natural action is to file an issue against the SDK repo. That action MUST be human-gated, and the issue body MUST contain ONLY information from the SDK's public-API surface — never the consumer project's name, internal paths, workspace identifiers, finding tags, or session context.
+
+The defect goes upstream. The story of HOW you found it stays at home.
+
+## Scope
+
+ALL sessions running in a USE-template-derived consumer repo. Applies to ANY `gh issue create`, `gh pr create`, `gh issue edit`, or equivalent issue-filing command targeting an SDK repository (`kailash-py`, `kailash-rs`, `kailash-prism`, or any sibling distributed via PyPI / crates.io / gems).
+
+## MUST Rules
+
+### 1. Human Gate Before Filing
+
+The agent MUST NOT execute `gh issue create`, `gh pr create` referencing an upstream SDK issue, or any equivalent issue-filing command against an SDK repo without explicit user approval IN THE SAME SESSION. Drafting the body is permitted; submission is not.
+
+**Why:** Issues filed against public SDK repos are world-readable forever. Auto-filing without a per-issue gate ships downstream-context leaks (project names, internal file paths, workspace IDs) to a surface the user cannot scrub after the fact. The human gate is the only mechanism that catches a draft body's leakage BEFORE it becomes part of the public record. "We can edit later" is wrong: GitHub preserves issue body history; redaction is partial.
+
+### 2. Downstream Context Redaction
+
+The issue body MUST NOT contain any of:
+
+- The downstream project's name (e.g., consumer app names, customer / engagement names)
+- Internal file paths outside the SDK's import surface (e.g. `src/<consumer-app>/...`, `app/...`, `bindings/<consumer>/...`)
+- Workspace identifiers (`workspaces/<name>/...`, `.session-notes`, `.proposals/...`, journal paths)
+- Finding tags (e.g., `F-G1-HIGH`, `S-H3`, `BP-049`, internal redteam round IDs)
+- Session timestamps tied to consumer work (e.g. `<date> <consumer-app> session`, `S07-reviewer-...`)
+- "Origin: <consumer-app>" footers, "<consumer-app> workaround" sections, "Discovered during <consumer-name> red team" lines
+- References to private SDK repos when filing on the public SDK repo
+
+# DO NOT — body carries consumer-project name + internal paths + finding IDs
+
+## Summary
+
+[same technical content]
+
+## Origin
+
+F-G1-HIGH S-H3 finding (<consumer-app> repo, 2026-04-27): non-atomic store_tokens in
+live_oauth.py:192-237 and pseudo-atomic in oauth.py:470-536.
+
+## Workspace
+
+workspaces/<consumer-app>/journal/0020-DISCOVERY-dataflow-execute-raw-utf8-corruption.md
+
+## Expected vs actual
+Expected: ASCII-only string parameter binds correctly.
+Actual: UTF-8 decoding error on a parameter that contains zero non-ASCII bytes.
+
+## Severity
+HIGH — corrupts data path; non-deterministic; reproduces in CI.
+
+## Acceptance criteria
+- [ ] `execute_raw(sql, [None])` followed by `execute_raw(sql, [ascii_str])` succeeds.
+- [ ] Tier 2 regression test added at `tests/integration/dataflow/test_execute_raw_null_bind.py`.
+
+# DO NOT — the historical kitchen-sink shape
+
+## Summary
+[5 paragraphs of context including consumer name]
+## Workspace
+workspaces/<consumer-app>/journal/...
+## Workaround
+The consumer worked around it by ... [3 paragraphs of consumer-internal architecture]
+## Cross-SDK alignment
+This is the Python equivalent of <sibling-SDK>#NNN ...
+## References
+- <consumer-app> shard: S36d
+- Tier 2 test suite: tests/integration/test_websocket_*.py [in the consumer repo]
 
 ---
 
