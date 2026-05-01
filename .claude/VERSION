@@ -1,5 +1,5 @@
 {
-  "version": "1.1.1",
+  "version": "1.1.2",
   "type": "coc-use-template",
   "description": "COC USE template for Python SDK projects \u2014 multi-CLI (claude + codex + gemini)",
   "released": "2026-05-01",
@@ -8,7 +8,7 @@
     "type": "coc-source",
     "version": "2.11.2",
     "build_version": "2.13.1",
-    "synced_at": "2026-05-01T00:00:00Z",
+    "synced_at": "2026-05-01T01:19:49Z",
     "sdk_packages": {
       "kailash": "2.13.1",
       "kailash-dataflow": "2.7.0",
@@ -16,12 +16,24 @@
       "kailash-kaizen": "2.14.0",
       "kailash-pact": "0.11.0",
       "kailash-mcp": "0.2.10",
-      "kailash-ml": "1.6.0",
+      "kailash-ml": "1.7.0",
       "kailash-align": "0.7.0",
       "kaizen-agents": "0.9.4"
     }
   },
   "changelog": [
+    {
+      "version": "1.1.2",
+      "date": "2026-05-01",
+      "summary": "PATCH: sync-marker freshness + emission re-verification for loom 2.11.2. (1) `.claude/.coc-sync-marker` rolled forward: loom_version 2.11.0 \u2192 2.11.2, loom_sha 068415b \u2192 25a0501, timestamp refreshed. (2) emit.mjs --all --lang py re-run produced byte-identical AGENTS.md / GEMINI.md vs on-disk; emission report confirmed budget_warnings=[] across both CLIs (upstream-issue-hygiene.md = 3,728 B / budget 4,000 B; git.md = 5,627 B / budget 4,400 B; all 10 CRIT rules budget_status=ok). Headroom: codex 5.50%, gemini 5.49%. WARN tier (steady-state per v6 \u00a72.2). (3) SDK pin observation reflected in upstream.sdk_packages: kailash-ml 1.7.0 (PyPI tip; BUILD at 1.7.1 not yet published). Multi-CLI template ships no pyproject.toml \u2014 pinning lives at downstream consumer projects.",
+      "changes": [
+        "MARKER: .claude/.coc-sync-marker rolled forward to loom 2.11.2 / SHA 25a0501.",
+        "EMISSION RE-VERIFY: emit.mjs --all --lang py \u2014 budget_warnings=[] (codex + gemini); headroom 5.50% / 5.49%; AGENTS.md + GEMINI.md byte-identical to on-disk (no rewrite needed).",
+        "VERIFIED: 7 use_obsoleted: paths absent at this sync.",
+        "VERIFIED: .coc-obsoleted contains the full union (20 entries).",
+        "VERSION: template 1.1.1 \u2192 1.1.2; upstream loom 2.11.2 unchanged; sdk_packages.kailash-ml 1.6.0 \u2192 1.7.0 (PyPI tip)."
+      ]
+    },
     {
       "version": "1.1.1",
       "date": "2026-05-01",

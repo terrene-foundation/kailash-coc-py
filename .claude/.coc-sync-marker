@@ -1,22 +1,26 @@
 # COC Sync Marker — kailash-coc-py (multi-CLI: claude + codex + gemini)
-timestamp: 2026-04-30T13:50:00Z
+timestamp: 2026-05-01T01:19:49Z
 source: loom/.claude
-loom_version: 2.11.0
-loom_sha: 068415b
+loom_version: 2.11.2
+loom_sha: 25a0501
 variant: py
 clis: ["claude", "codex", "gemini"]
 stats:
-  updated: 206
-  created: 10
-  unchanged: 433
+  updated: 0
+  created: 0
+  unchanged: 686
   composed: 2          # rules/deployment.md + rules/ci-runners.md slot-keyed py overlays
-  preserved: 1         # CLAUDE.md
+  preserved: 1         # CLAUDE.md (template-owned; never overwritten)
   use_excluded: 26
-  pre_existing_use_excluded:
+  pre_existing_use_obsoleted_purged:
+    # All 7 use_obsoleted: paths verified absent at this sync.
     - .claude/rules/documentation.md
     - .claude/skills/30-claude-code-patterns/sdk-upstream-donation.md
     - .claude/guides/co-setup/
     - .claude/guides/deterministic-quality/
+    - .claude/guides/automated-maintenance.md
+    - .claude/guides/rule-extracts/git.md
+    - .claude/guides/rule-extracts/independence-rs.md
   baselines_emitted:
     cc: 0              # CLAUDE.md preserved, not emitted
     codex: 1           # AGENTS.md
@@ -26,22 +30,26 @@ stats:
     warn_cap_bytes: 32768
     codex:
       rules: 10
-      bytes: 58862
+      bytes: 58058
       tier: WARN
-      headroom_bytes: 2578
-      headroom_pct: 4.20
+      headroom_bytes: 3382
+      headroom_pct: 5.50
+      budget_warnings: []
     gemini:
       rules: 10
-      bytes: 58871
+      bytes: 58067
       tier: WARN
-      headroom_bytes: 2569
-      headroom_pct: 4.18
+      headroom_bytes: 3373
+      headroom_pct: 5.49
+      budget_warnings: []
     note: |
-      Headroom regressed from 12.73% → 4.20% on this sync. Cause:
-      adding rules/upstream-issue-hygiene.md (priority:0 baseline) to
-      the CRIT set (9 → 10 rules). Within WARN tier (steady-state per
-      v6 §2.2). Approaching block_cap; next CRIT addition WILL block
-      unless an existing rule is demoted to path-scoped.
+      budget_warnings empty across both CLIs (vs 2 in pre-2.11.2 syncs):
+      `per_rule_size_budget_bytes` entry for upstream-issue-hygiene.md
+      (4000 B) added in 2.11.2 manifest; the rule emits at 3,728 B
+      (within +30% tolerance). All 10 CRIT rules now budget_status=ok.
+      Headroom restored ~4.20% → ~5.50% via git.md trim (PR-already-shipped
+      at c350667). Approaching block_cap; next CRIT addition WILL block
+      unless an existing rule is demoted or per-rule budget tightened.
   cli_artifacts:
     codex:
       prompts: 30
@@ -52,7 +60,9 @@ stats:
       agents: 22
   mcp_guard:
     policies_populated: false   # still gated per Step 6.6 § G3
+sdk_pins: null  # multi-CLI template repo ships no pyproject.toml; SDK pinning lives at downstream consumer projects
 notes:
-  - "Pre-existing use_excluded files preserved per additive-merge semantics."
-  - "User decision pending: convert use_excluded paths to obsoleted in future cycle."
-  - "Multi-CLI baseline cap headroom = 4.20% — flag for next sync; demotion candidate watch."
+  - "2.11.2 sync content delivery committed previously at c350667 (git.md trim, use_obsoleted purge, baseline regen)."
+  - "This sync iteration: marker freshness + emission re-verification (budget_warnings=[] confirmed)."
+  - "loom_sha rolled forward: 068415b (2.11.0) → 25a0501 (2.11.2)."
+  - "Emission re-run produced byte-identical AGENTS.md / GEMINI.md vs on-disk; no baseline rewrite needed."
