@@ -1,19 +1,21 @@
 # COC Sync Marker — kailash-coc-py (multi-CLI: claude + codex + gemini)
-timestamp: 2026-05-01T02:30:00Z
+timestamp: 2026-05-01T12:30:00Z
 source: loom/.claude
-loom_version: 2.12.0
-loom_sha: cd53b65
+loom_version: 2.13.0
+loom_sha: 36db224
 variant: py
 clis: ["claude", "codex", "gemini"]
+template: kailash-coc-py
+template_version: 1.1.4
 stats:
-  updated: 0
-  created: 2          # rules/spec-accuracy.md + guides/rule-extracts/spec-accuracy.md
-  unchanged: 686
-  composed: 2          # rules/deployment.md + rules/ci-runners.md slot-keyed py overlays
-  preserved: 1         # CLAUDE.md (template-owned; never overwritten)
-  use_excluded: 26
+  updated: 7
+  created: 2              # gitignored-claude-warn.js + pre-commit-branch-scope.js
+  unchanged: ~684
+  composed: 2             # rules/deployment.md + rules/ci-runners.md slot-keyed py overlays
+  preserved: 1            # CLAUDE.md (template-owned; never overwritten)
+  scaffold_created: 9     # workspaces/_template/ (8 phase dirs + README.md)
+  use_excluded: 7
   pre_existing_use_obsoleted_purged:
-    # All 7 use_obsoleted: paths verified absent at this sync.
     - .claude/rules/documentation.md
     - .claude/skills/30-claude-code-patterns/sdk-upstream-donation.md
     - .claude/guides/co-setup/
@@ -22,33 +24,33 @@ stats:
     - .claude/guides/rule-extracts/git.md
     - .claude/guides/rule-extracts/independence-rs.md
   baselines_emitted:
-    cc: 0              # CLAUDE.md preserved, not emitted
-    codex: 1           # AGENTS.md
-    gemini: 1          # GEMINI.md
+    cc: 0                 # CLAUDE.md preserved, not emitted
+    codex: 1              # AGENTS.md
+    gemini: 1             # GEMINI.md
   baseline_emission_bytes:
     block_cap_bytes: 61440
     warn_cap_bytes: 32768
     codex:
-      rules: 10
-      bytes: 58058
+      rules: 9
+      bytes: 54967
       tier: WARN
-      headroom_bytes: 3382
-      headroom_pct: 5.50
+      headroom_bytes: 6473
+      headroom_pct: 10.54
       budget_warnings: []
     gemini:
-      rules: 10
-      bytes: 58067
+      rules: 9
+      bytes: 54976
       tier: WARN
-      headroom_bytes: 3373
-      headroom_pct: 5.49
+      headroom_bytes: 6464
+      headroom_pct: 10.52
       budget_warnings: []
     note: |
-      Path-scoped rules/spec-accuracy.md added in 2.12.0 contributes ZERO
-      baseline emission (priority:10, paths: specs/**, workspaces/**/specs/**,
-      02-plans/**, briefs/**). AGENTS.md / GEMINI.md byte-identical vs prior
-      2.11.2 sync. Verified by `grep -c spec-accuracy AGENTS.md GEMINI.md` = 0.
-      Cap-headroom trap fully side-stepped per loom #18 structural-classification
-      decision (path-scoped vs reporter's baseline framing).
+      cross-cli-parity.md demoted from baseline (priority:0) to path-scoped
+      (priority:10) in loom 2.13.0. Demotion freed ~3,091 bytes per CLI baseline:
+      AGENTS.md 58,058 → 54,967 B; GEMINI.md 58,067 → 54,976 B. Cap-headroom
+      restored from 5.50% / 5.49% to ~10.54% / ~10.52% — 3,091 B of additional
+      headroom on the py axis under block_cap=61,440 B. Baseline rule count
+      drops 10 → 9 (cross-cli-parity.md no longer baseline).
   cli_artifacts:
     codex:
       prompts: 30
@@ -60,8 +62,10 @@ stats:
   mcp_guard:
     policies_populated: false   # still gated per Step 6.6 § G3
 sdk_pins: null  # multi-CLI template repo ships no pyproject.toml; SDK pinning lives at downstream consumer projects
+hooks_verified: 13/13
 notes:
-  - "2.12.0 codifies spec-accuracy as path-scoped (priority:10) per loom #18."
-  - "Path-scoped means baseline emission unchanged (10 CRIT rules, NOT 11)."
-  - "loom_sha rolled forward: 25a0501 (2.11.2) → cd53b65 (2.12.0)."
-  - "emit-cli-artifacts.mjs --out re-run regenerated .codex/ + .gemini/ trees."
+  - "2.13.0 demotes cross-cli-parity.md (baseline → path-scoped). Cap-headroom restored 5.50% → 10.54% on py axis."
+  - "TWO NEW HOOKS in .claude/hooks/: gitignored-claude-warn.js + pre-commit-branch-scope.js."
+  - "workspaces/_template/ scaffold (9 paths) at repo root."
+  - "Dotted-dir consolidation verified: emit-cli-artifacts.mjs --out staged at /tmp; rsync to .codex/, .gemini/, .codex-mcp-guard/ canonical paths; no non-dotted leakage."
+  - "loom_sha rolled forward: cd53b65 (2.12.0) → 36db224 (2.13.0)."
