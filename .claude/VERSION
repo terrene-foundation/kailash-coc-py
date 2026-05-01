@@ -1,14 +1,14 @@
 {
-  "version": "1.1.2",
+  "version": "1.1.3",
   "type": "coc-use-template",
   "description": "COC USE template for Python SDK projects \u2014 multi-CLI (claude + codex + gemini)",
   "released": "2026-05-01",
   "upstream": {
     "name": "kailash",
     "type": "coc-source",
-    "version": "2.11.2",
+    "version": "2.12.0",
     "build_version": "2.13.1",
-    "synced_at": "2026-05-01T01:19:49Z",
+    "synced_at": "2026-05-01T02:30:00Z",
     "sdk_packages": {
       "kailash": "2.13.1",
       "kailash-dataflow": "2.7.0",
@@ -16,12 +16,25 @@
       "kailash-kaizen": "2.14.0",
       "kailash-pact": "0.11.0",
       "kailash-mcp": "0.2.10",
-      "kailash-ml": "1.7.0",
+      "kailash-ml": "1.7.1",
       "kailash-align": "0.7.0",
       "kaizen-agents": "0.9.4"
     }
   },
   "changelog": [
+    {
+      "version": "1.1.3",
+      "date": "2026-05-01",
+      "summary": "PATCH: sync loom 2.11.2 \u2192 2.12.0. (1) NEW path-scoped rule rules/spec-accuracy.md (priority:10) per loom #18 \u2014 blocks phantom citations + Phase-1/Phase-2 framings in spec content. Sister to specs-authority.md. (2) NEW companion guides/rule-extracts/spec-accuracy.md \u2014 full post-mortem + migration playbook + audit protocol. (3) emit.mjs --cli codex --lang py + --cli gemini --lang py re-run: AGENTS.md = 58,058 B, GEMINI.md = 58,067 B (unchanged from 2.11.2; path-scoped rule contributes zero baseline emission). emit-cli-artifacts.mjs --out re-run: .codex/prompts (30) + .codex/skills (34); .gemini/commands (30) + .gemini/skills (34) + .gemini/agents (22). validator-12 slot-round-trip PASS, validator-14 rule-frontmatter PASS, validator-13 codex-mcp-guard PASS. (4) sdk_packages.kailash-ml 1.7.0 \u2192 1.7.1 (PyPI tip).",
+      "changes": [
+        "NEW RULE: .claude/rules/spec-accuracy.md (path-scoped, priority:10).",
+        "NEW EXTRACT: .claude/guides/rule-extracts/spec-accuracy.md.",
+        "EMISSION RE-RUN: AGENTS.md 58,058 B / GEMINI.md 58,067 B (unchanged from 2.11.2; path-scoped rule absent from baseline as expected). All validators PASS.",
+        "MULTI-CLI EMIT: .codex/ + .gemini/ trees regenerated via emit-cli-artifacts.mjs.",
+        "MARKER: .claude/.coc-sync-marker rolled forward to loom 2.12.0 / SHA cd53b65.",
+        "VERSION: template 1.1.2 \u2192 1.1.3; upstream.version 2.11.2 \u2192 2.12.0; sdk_packages.kailash-ml 1.7.0 \u2192 1.7.1."
+      ]
+    },
     {
       "version": "1.1.2",
       "date": "2026-05-01",

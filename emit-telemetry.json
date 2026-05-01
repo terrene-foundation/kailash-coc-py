@@ -1,0 +1,16 @@
+{
+  "emitted_at": "2026-05-01T02:29:55.629Z",
+  "per_cli": {
+    "gemini": {
+      "rules": 10,
+      "bytes": 58067,
+      "tier": "WARN",
+      "headroom_bytes": 3373,
+      "headroom_pct": 5.49,
+      "warn_cap_bytes": 32768,
+      "block_cap_bytes": 61440
+    }
+  },
+  "block_cap_bytes": 61440,
+  "warn_cap_bytes": 32768
+}

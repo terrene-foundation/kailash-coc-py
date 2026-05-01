@@ -1,13 +1,13 @@
 # COC Sync Marker — kailash-coc-py (multi-CLI: claude + codex + gemini)
-timestamp: 2026-05-01T01:19:49Z
+timestamp: 2026-05-01T02:30:00Z
 source: loom/.claude
-loom_version: 2.11.2
-loom_sha: 25a0501
+loom_version: 2.12.0
+loom_sha: cd53b65
 variant: py
 clis: ["claude", "codex", "gemini"]
 stats:
   updated: 0
-  created: 0
+  created: 2          # rules/spec-accuracy.md + guides/rule-extracts/spec-accuracy.md
   unchanged: 686
   composed: 2          # rules/deployment.md + rules/ci-runners.md slot-keyed py overlays
   preserved: 1         # CLAUDE.md (template-owned; never overwritten)
@@ -43,13 +43,12 @@ stats:
       headroom_pct: 5.49
       budget_warnings: []
     note: |
-      budget_warnings empty across both CLIs (vs 2 in pre-2.11.2 syncs):
-      `per_rule_size_budget_bytes` entry for upstream-issue-hygiene.md
-      (4000 B) added in 2.11.2 manifest; the rule emits at 3,728 B
-      (within +30% tolerance). All 10 CRIT rules now budget_status=ok.
-      Headroom restored ~4.20% → ~5.50% via git.md trim (PR-already-shipped
-      at c350667). Approaching block_cap; next CRIT addition WILL block
-      unless an existing rule is demoted or per-rule budget tightened.
+      Path-scoped rules/spec-accuracy.md added in 2.12.0 contributes ZERO
+      baseline emission (priority:10, paths: specs/**, workspaces/**/specs/**,
+      02-plans/**, briefs/**). AGENTS.md / GEMINI.md byte-identical vs prior
+      2.11.2 sync. Verified by `grep -c spec-accuracy AGENTS.md GEMINI.md` = 0.
+      Cap-headroom trap fully side-stepped per loom #18 structural-classification
+      decision (path-scoped vs reporter's baseline framing).
   cli_artifacts:
     codex:
       prompts: 30
@@ -62,7 +61,7 @@ stats:
     policies_populated: false   # still gated per Step 6.6 § G3
 sdk_pins: null  # multi-CLI template repo ships no pyproject.toml; SDK pinning lives at downstream consumer projects
 notes:
-  - "2.11.2 sync content delivery committed previously at c350667 (git.md trim, use_obsoleted purge, baseline regen)."
-  - "This sync iteration: marker freshness + emission re-verification (budget_warnings=[] confirmed)."
-  - "loom_sha rolled forward: 068415b (2.11.0) → 25a0501 (2.11.2)."
-  - "Emission re-run produced byte-identical AGENTS.md / GEMINI.md vs on-disk; no baseline rewrite needed."
+  - "2.12.0 codifies spec-accuracy as path-scoped (priority:10) per loom #18."
+  - "Path-scoped means baseline emission unchanged (10 CRIT rules, NOT 11)."
+  - "loom_sha rolled forward: 25a0501 (2.11.2) → cd53b65 (2.12.0)."
+  - "emit-cli-artifacts.mjs --out re-run regenerated .codex/ + .gemini/ trees."
