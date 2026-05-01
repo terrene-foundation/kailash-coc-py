@@ -1,17 +1,17 @@
 {
-  "version": "1.1.5",
+  "version": "1.1.6",
   "type": "coc-use-template",
   "description": "COC USE template for Python SDK projects \u2014 multi-CLI (claude + codex + gemini)",
-  "released": "2026-05-01",
+  "released": "2026-05-02",
   "upstream": {
     "name": "kailash",
     "type": "coc-source",
     "version": "2.14.0",
-    "build_version": "2.13.1",
-    "synced_at": "2026-05-01T13:10:00Z",
+    "build_version": "2.13.2",
+    "synced_at": "2026-05-02T00:00:00Z",
     "sdk_packages": {
-      "kailash": "2.13.1",
-      "kailash-dataflow": "2.7.0",
+      "kailash": "2.13.2",
+      "kailash-dataflow": "2.7.3",
       "kailash-nexus": "2.6.0",
       "kailash-kaizen": "2.14.0",
       "kailash-pact": "0.11.0",
@@ -20,9 +20,27 @@
       "kailash-align": "0.7.0",
       "kaizen-agents": "0.9.4"
     },
-    "loom_sha": "d4b4672"
+    "loom_sha": "897b6f9"
   },
   "changelog": [
+    {
+      "version": "1.1.6",
+      "date": "2026-05-02",
+      "summary": "PATCH: catch-up + new sync from loom 2.14.0 (commits 370d560 + 897b6f9). Yesterday's 2.14.0+1 (Rule 1c) was distributed only to kailash-coc-claude-py \u2014 this template was missed; today's sync lands Rule 1c PLUS today's two new rule additions, in one cycle. (1) RULES catch-up: rules/zero-tolerance.md gains Rule 1c '\"Pre-Existing\" Is Unprovable After Context Boundary' (~40 LOC, baseline) \u2014 closes the rationalization loophole created by CC's wrapper-default scope-discipline (prompts.ts:201-203). After /clear, auto-compaction, conversation resume, sub-agent handoff or any context boundary, the agent has no audit trail of its prior-turn edits \u2014 'pre-existing' claims without SHA grounding are structurally unfalsifiable and BLOCKED. Eight verbatim BLOCKED rationalizations. (2) NEW RULE EDITS from kailash-py /codify (PRs #769\u2013771 cycle), both classified GLOBAL via /sync Gate 1: rules/git.md \u00a7 Discipline += `Pre-commit comment-syntax matchers` bullet (python-use-type-annotations regex matches `# type` not `# type:`; reword to avoid false positives); rules/build-repo-release-discipline.md \u00a7 MUST Rule 2 += `uv index-cache override` paragraph (`uv pip install --refresh` overrides uv's local index cache when pypi.org/.../json returns new metadata but uv reports `No solution found`). (3) MULTI-CLI BASELINES re-emitted (--lang py via emit.mjs --all): codex AGENTS.md = 56,881 B [WARN, headroom 7.42%, 4,559 B free]; gemini GEMINI.md = 56,890 B [WARN, headroom 7.41%, 4,550 B free]. Both grew by ~1,914 B due to Rule 1c (~1,500 B abridged) + git.md bullet (~250 B); build-repo-release-discipline.md not on budget table \u2014 zero baseline impact. Both still in WARN tier (block at 61,440 B). (4) emit-cli-artifacts.mjs --out re-run: 30 codex prompts, 34 codex skills, 30 gemini commands, 34 gemini skills, 22 gemini agents (parity unchanged from 2.13.0). policies.json regenerated_at timestamp updated. validator-12 / -13 / -14 PASS. (5) SDK pins recorded for downstream propagation: kailash 2.13.1 \u2192 2.13.2; kailash-dataflow 2.7.0 \u2192 2.7.3 (matches BUILD repo current state). (6) No new hooks, no new scaffolds, no settings.json change. (7) CLAUDE.md preserved (template-owned).",
+      "changes": [
+        "RULE CATCH-UP: .claude/rules/zero-tolerance.md += Rule 1c '\"Pre-Existing\" Is Unprovable After Context Boundary' (~40 LOC, baseline). Was missed in yesterday's 2.14.0+1 distribution (only kailash-coc-claude-py received it).",
+        "RULE UPDATE: .claude/rules/git.md \u00a7 Discipline += `Pre-commit comment-syntax matchers` bullet (~407 B). Lifted from kailash-py /codify proposal id pre-commit-comment-matcher-quirk. Classification: GLOBAL.",
+        "RULE UPDATE: .claude/rules/build-repo-release-discipline.md \u00a7 MUST Rule 2 += `uv index-cache override` paragraph (~636 B). Lifted from kailash-py /codify proposal id uv-index-cache-refresh. Classification: GLOBAL.",
+        "BASELINE: codex AGENTS.md 54,967 B \u2192 56,881 B [WARN, headroom 7.42%, 4,559 B free under 61,440 B block_cap]; gemini GEMINI.md 54,976 B \u2192 56,890 B [WARN, headroom 7.41%, 4,550 B free]. Growth +1,914 B both axes (Rule 1c abridged ~1,500 B + git.md bullet ~250 B + structural overhead).",
+        "CLI ARTIFACTS: codex prompts=30, skills=34; gemini commands=30, skills=34, agents=22 (parity unchanged from 2.14.0).",
+        "VERIFIED: validator-12 slot-round-trip PASS, validator-13 codex-mcp-guard PASS, validator-14 rule-frontmatter PASS.",
+        "VERIFIED EXCLUSION: rules/loom-csq-boundary.md NOT shipped (use_exclude honored).",
+        "VERIFIED EXCLUSION: test-harness/README.md NOT shipped (universal test-harness/** exclude).",
+        "SDK PIN MAP: sdk_packages.kailash 2.13.1 \u2192 2.13.2; sdk_packages.kailash-dataflow 2.7.0 \u2192 2.7.3 (BUILD repo current state).",
+        "VERSION: template 1.1.5 \u2192 1.1.6; upstream loom version stays 2.14.0; loom_sha d4b4672 \u2192 897b6f9; build_version 2.13.1 \u2192 2.13.2.",
+        "MARKER: .claude/.coc-sync-marker rolled forward to loom 2.14.0 / SHA 897b6f9."
+      ]
+    },
     {
       "version": "1.1.5",
       "date": "2026-05-01",

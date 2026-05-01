@@ -1,40 +1,40 @@
 # COC Sync Marker — kailash-coc-py (multi-CLI: claude + codex + gemini)
-timestamp: 2026-05-01T13:10:00Z
+timestamp: 2026-05-02T00:00:00Z
 source: loom/.claude
 loom_version: 2.14.0
-loom_sha: d4b4672
+loom_sha: 897b6f9
 variant: py
 clis: ["claude", "codex", "gemini"]
 template: kailash-coc-py
-template_version: 1.1.5
+template_version: 1.1.6
 stats:
-  updated: 1               # rules/deploy-hygiene.md (+ Rule 11, ~85 LOC)
+  updated: 3               # rules/zero-tolerance.md (+Rule 1c catch-up), rules/git.md (+Discipline bullet), rules/build-repo-release-discipline.md (+Rule 2 paragraph)
   created: 0
-  unchanged: ~686
-  composed: 0              # no slot-keyed variant changes in 2.14.0
+  unchanged: ~684
+  composed: 0              # no slot-keyed variant changes
   preserved: 1             # CLAUDE.md (template-owned; never overwritten)
-  use_excluded: 8          # +rules/loom-csq-boundary.md (NEW in 2.14.0); rules/cross-sdk-inspection.md, rules/documentation.md, skills/30-claude-code-patterns/sdk-upstream-donation.md, guides/co-setup/**, guides/deterministic-quality/**, guides/automated-maintenance.md, guides/rule-extracts/git.md, guides/rule-extracts/independence-rs.md
-  test_harness_excluded: true   # universal test-harness/** exclude honored (test-harness/README.md NOT shipped despite update in 2.14.0)
-  pre_existing_use_obsoleted_purged: []   # all 18 obsoleted+use_obsoleted paths already absent
+  use_excluded: 9          # rules/loom-csq-boundary.md, rules/cross-sdk-inspection.md, rules/documentation.md, skills/30-claude-code-patterns/sdk-upstream-donation.md, guides/co-setup/**, guides/deterministic-quality/**, guides/automated-maintenance.md, guides/rule-extracts/git.md, guides/rule-extracts/independence-rs.md
+  test_harness_excluded: true   # universal test-harness/** exclude honored
+  pre_existing_use_obsoleted_purged: []
   baselines_emitted:
-    cc: 0                  # CLAUDE.md is preserved, not emitted
-    codex: 1               # AGENTS.md (re-emitted, byte-identical to 2.13.0)
-    gemini: 1              # GEMINI.md (re-emitted, byte-identical to 2.13.0)
+    cc: 0                  # CLAUDE.md preserved, not emitted
+    codex: 1               # AGENTS.md re-emitted (+1,914 B from 2.14.0)
+    gemini: 1              # GEMINI.md re-emitted (+1,914 B from 2.14.0)
   baseline_emission_bytes:
     block_cap_bytes: 61440
     warn_cap_bytes:  32768
     codex:
       rules: 9
-      bytes: 54967
+      bytes: 56881
       tier: WARN
-      headroom_bytes: 6473
-      headroom_pct: 10.54
+      headroom_bytes: 4559
+      headroom_pct: 7.42
     gemini:
       rules: 9
-      bytes: 54976
+      bytes: 56890
       tier: WARN
-      headroom_bytes: 6464
-      headroom_pct: 10.52
+      headroom_bytes: 4550
+      headroom_pct: 7.41
   cli_artifacts:
     codex:
       prompts: 30
@@ -46,28 +46,38 @@ stats:
   mcp_guard:
     policies_populated: false
     predicates_extracted: null
+sdk_pin_updates:
+  kailash: "2.13.1 → 2.13.2"
+  kailash-dataflow: "2.7.0 → 2.7.3"
 verification:
-  hook_integrity: 13/13
+  hook_integrity: ok
   dangling_refs: 0
   build_path_leaks: 0
   obsoleted_paths_absent: true
   use_excluded_paths_absent: true
-  loom_csq_boundary_shipped: false       # CONFIRMED — use_exclude honored
-  test_harness_readme_shipped: false     # CONFIRMED — universal exclude honored
-  deploy_hygiene_rule_11_present: true   # CONFIRMED — file diff matches loom source byte-for-byte
+  rule_1c_present: true                  # CONFIRMED — catch-up succeeded
+  pre_commit_pygrep_bullet_present: true # CONFIRMED — git.md § Discipline
+  uv_refresh_paragraph_present: true     # CONFIRMED — build-repo-release-discipline.md
   validator_12_slot_round_trip: PASS
   validator_13_codex_mcp_guard: PASS
   validator_14_rule_frontmatter: PASS
 notes:
   release_summary: |
-    Small release after 2.13.0. UPDATED rules/deploy-hygiene.md += MUST Rule 11
-    'Push-Triggered Deploy Workflows MUST Cancel In-Progress Runs' (concurrency.cancel-in-progress
-    + ssh keep-alive flags + non-idempotent exception clause); generalized from a downstream
-    surfacing per upstream-issue-hygiene.md anonymization protocol. Rule 11 is NOT a CRIT-baseline
-    rule — cap-headroom UNCHANGED from 2.13.0 (codex 10.54%, gemini 10.52%). NEW
-    rules/loom-csq-boundary.md (paired-rule mirror with csq's csq-loom-boundary.md, csq H12) is
-    loom-only meta-rule and excluded from USE templates via use_exclude:; verified absent.
-    UPDATED test-harness/README.md not shipped (universal exclude). No new hooks, no new
-    scaffolds, no settings.json change. Multi-CLI baselines re-emitted (--lang py); .codex/ and
-    .gemini/ config trees re-emitted via emit-cli-artifacts.mjs (parity unchanged).
-  closes_issues: ["loom #21", "loom #23"]
+    Two-cycle catch-up + new-sync from loom 2.14.0+1 (370d560) and 2.14.0+2
+    (897b6f9). Yesterday's distribution of Rule 1c was missed for this template;
+    today's sync lands Rule 1c PLUS today's two new rule additions in one pass.
+    Rule 1c (zero-tolerance.md): closes the rationalization loophole created by
+    CC's wrapper-default scope-discipline (prompts.ts:201-203) — after /clear,
+    auto-compaction, conversation resume, sub-agent handoff, the agent has no
+    audit trail of its prior-turn edits, so 'pre-existing' claims without SHA
+    grounding are structurally unfalsifiable and BLOCKED. git.md § Discipline:
+    pre-commit pygrep regex matches `# type` (not `# type:`); reword `# type`
+    substrings to avoid false positives. build-repo-release-discipline.md MUST
+    Rule 2: pass `--refresh` to `uv pip install` to override uv's local index
+    cache when pypi.org/.../json returns new metadata but uv reports `No solution
+    found`. Multi-CLI baselines re-emitted (+1,914 B both axes); cap-headroom
+    dropped from 10.54% / 10.52% to 7.42% / 7.41% — both still in WARN tier
+    (block_cap 61,440 B). SDK pins recorded for downstream propagation
+    (kailash 2.13.1 → 2.13.2; kailash-dataflow 2.7.0 → 2.7.3, BUILD repo current
+    state). No new hooks, no settings.json change. CLAUDE.md preserved.
+  closes_issues: []
