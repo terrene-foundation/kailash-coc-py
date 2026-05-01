@@ -1,19 +1,19 @@
 {
-  "version": "1.1.0",
+  "version": "1.1.1",
   "type": "coc-use-template",
   "description": "COC USE template for Python SDK projects \u2014 multi-CLI (claude + codex + gemini)",
-  "released": "2026-04-30",
+  "released": "2026-05-01",
   "upstream": {
     "name": "kailash",
     "type": "coc-source",
-    "version": "2.11.0",
-    "build_version": "2.13.0",
-    "synced_at": "2026-04-30T13:50:00Z",
+    "version": "2.11.2",
+    "build_version": "2.13.1",
+    "synced_at": "2026-05-01T00:00:00Z",
     "sdk_packages": {
-      "kailash": "2.12.0",
-      "kailash-dataflow": "2.4.0",
-      "kailash-nexus": "2.3.0",
-      "kailash-kaizen": "2.13.1",
+      "kailash": "2.13.1",
+      "kailash-dataflow": "2.7.0",
+      "kailash-nexus": "2.6.0",
+      "kailash-kaizen": "2.14.0",
       "kailash-pact": "0.11.0",
       "kailash-mcp": "0.2.10",
       "kailash-ml": "1.6.0",
@@ -22,6 +22,21 @@
     }
   },
   "changelog": [
+    {
+      "version": "1.1.1",
+      "date": "2026-05-01",
+      "summary": "PATCH: Sync loom 2.11.2 \u2014 trimmed rules/git.md (\u00a7 Discipline collapsed to bullet list; 8,673 \u2192 7,098 B raw) + use_obsoleted: tier active-purge of 7 pre-existing BUILD-only artifacts + per-rule budget entry upstream-issue-hygiene.md=4000 (clears validator-14 'CRIT rule requires a budget' warning). (1) rules/git.md trim (Issue Closure / Pre-Commit Hook / Commit-Message Claim collapsed to bullet list). (2) NEW manifest tier use_obsoleted: \u2014 7 paths union'd with obsoleted: into the .coc-obsoleted contract; coc-sync agent Step 4.5 now purges UNION + emits UNION. Purged from this template: rules/documentation.md, skills/30-claude-code-patterns/sdk-upstream-donation.md, guides/co-setup/, guides/deterministic-quality/ (3 already absent). .coc-obsoleted refreshed (13 \u2192 20 entries). (3) AGENTS.md / GEMINI.md regenerated via emit.mjs --all --lang py: post-trim emission expected 5,627 B (down from 6,431 B) for git.md; budget_warnings expected empty (upstream-issue-hygiene.md gained explicit 4000 B budget). Headroom restored from ~4.2% to ~5.5%. WARN tier (steady-state per v6 \u00a72.2). (4) SDK pins refreshed: kailash 2.12.0 \u2192 2.13.1, kailash-dataflow 2.4.0 \u2192 2.7.0, kailash-nexus 2.3.0 \u2192 2.6.0, kailash-kaizen 2.13.1 \u2192 2.14.0.",
+      "changes": [
+        "RULE TRIM: .claude/rules/git.md \u2014 Issue Closure Discipline + Pre-Commit Hook Workarounds + Commit-Message Claim Accuracy collapsed to bullet-list `## Discipline` section. 8,673 \u2192 7,098 B raw.",
+        "PURGED via use_obsoleted: .claude/rules/documentation.md (BUILD-only).",
+        "PURGED via use_obsoleted: .claude/skills/30-claude-code-patterns/sdk-upstream-donation.md (BUILD-only maintainer playbook).",
+        "PURGED via use_obsoleted: .claude/guides/co-setup/ (10 files; BUILD-side artifact-flow internals).",
+        "PURGED via use_obsoleted: .claude/guides/deterministic-quality/ (10 files; BUILD-side rule-authoring guides).",
+        ".coc-obsoleted regenerated: 13 \u2192 20 entries (UNION of obsoleted: + use_obsoleted:).",
+        "MULTI-CLI EMIT: AGENTS.md + GEMINI.md regenerated via emit.mjs --all --lang py. git.md emission 6,431 \u2192 5,627 B; upstream-issue-hygiene.md gained explicit 4000 B budget entry; budget_warnings empty. Headroom restored ~4.2% \u2192 ~5.5%. WARN tier.",
+        "VERSION: template 1.1.0 \u2192 1.1.1; upstream loom 2.11.0 \u2192 2.11.2; build_version 2.13.0 \u2192 2.13.1."
+      ]
+    },
     {
       "version": "1.1.0",
       "date": "2026-04-30",
