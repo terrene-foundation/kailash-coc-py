@@ -1,14 +1,14 @@
 {
-  "version": "1.1.4",
+  "version": "1.1.5",
   "type": "coc-use-template",
   "description": "COC USE template for Python SDK projects \u2014 multi-CLI (claude + codex + gemini)",
   "released": "2026-05-01",
   "upstream": {
     "name": "kailash",
     "type": "coc-source",
-    "version": "2.13.0",
+    "version": "2.14.0",
     "build_version": "2.13.1",
-    "synced_at": "2026-05-01T12:30:00Z",
+    "synced_at": "2026-05-01T13:10:00Z",
     "sdk_packages": {
       "kailash": "2.13.1",
       "kailash-dataflow": "2.7.0",
@@ -20,9 +20,27 @@
       "kailash-align": "0.7.0",
       "kaizen-agents": "0.9.4"
     },
-    "loom_sha": "36db224"
+    "loom_sha": "d4b4672"
   },
   "changelog": [
+    {
+      "version": "1.1.5",
+      "date": "2026-05-01",
+      "summary": "PATCH: sync loom 2.13.0 → 2.14.0. Small release — paired-rule mirror (loom #21) + deploy-hygiene Rule 11 generalization (loom #23). (1) UPDATED rules/deploy-hygiene.md: added MUST Rule 11 'Push-Triggered Deploy Workflows MUST Cancel In-Progress Runs' (~85 LOC). Pattern: GH Actions push-triggered deploy workflows that ssh into a build host MUST set concurrency.cancel-in-progress: true AND pass -o ServerAliveInterval=15 -o ServerAliveCountMax=3 to ssh. DO/DO NOT YAML examples + 6 BLOCKED rationalizations + narrow exception clause for non-idempotent destructive operations MAY set cancel-in-progress: false ONLY with same-file comment naming the specific non-idempotent step. Generalized from a downstream surfacing per upstream-issue-hygiene.md anonymization protocol. Closes loom #23. (2) NEW RULE rules/loom-csq-boundary.md (loom #21) is loom-only meta-rule — EXCLUDED via use_exclude:. Verified: file does NOT ship here. (3) UPDATED extract test-harness/README.md is excluded (universal test-harness/** exclusion). (4) MULTI-CLI BASELINES re-emitted (--lang py): codex AGENTS.md = 54,967 B [WARN, headroom 10.54%, 6,473 B free]; gemini GEMINI.md = 54,976 B [WARN, headroom 10.52%, 6,464 B free]. UNCHANGED from 2.13.0 — deploy-hygiene.md is NOT a CRIT-baseline rule (not in per_rule_size_budget_bytes table); Rule 11 addition is path-scoped/skill-embedded surface that doesn't pay baseline emission cost. (5) emit-cli-artifacts.mjs --out re-run: 30 codex prompts, 34 codex skills, 30 gemini commands, 34 gemini skills, 22 gemini agents (parity unchanged from 2.13.0). validator-12 slot-round-trip PASS, validator-13 codex-mcp-guard PASS, validator-14 rule-frontmatter PASS. (6) No new hooks, no new scaffolds, no settings.json change.",
+      "changes": [
+        "RULE UPDATE: .claude/rules/deploy-hygiene.md += MUST Rule 11 (concurrency.cancel-in-progress + ssh keep-alive flags + non-idempotent exception clause). ~85 LOC added.",
+        "VERIFIED EXCLUSION: rules/loom-csq-boundary.md NOT shipped (use_exclude honored).",
+        "VERIFIED EXCLUSION: test-harness/README.md NOT shipped (universal test-harness/** exclude honored).",
+        "BASELINE: codex AGENTS.md 54,967 B [WARN, headroom 10.54%]; gemini GEMINI.md 54,976 B [WARN, headroom 10.52%] — UNCHANGED from 2.13.0 (deploy-hygiene.md is not CRIT-baseline; addition does not affect cap).",
+        "CLI ARTIFACTS: codex prompts=30, skills=34; gemini commands=30, skills=34, agents=22 (parity unchanged).",
+        "VERIFIED: hooks resolve on disk (13 hooks in .claude/hooks/); .codex-mcp-guard refreshed.",
+        "VERIFIED: settings.json identical to loom; no rewrite needed.",
+        "VERIFIED: 18 obsoleted+use_obsoleted paths absent at this sync (no purge required).",
+        "VERIFIED: .coc-obsoleted manifest unchanged (matches loom 2.14.0 obsoleted+use_obsoleted union).",
+        "VERSION: template 1.1.4 → 1.1.5; upstream.version 2.13.0 → 2.14.0; loom_sha 36db224 → d4b4672.",
+        "MARKER: .claude/.coc-sync-marker rolled forward to loom 2.14.0 / SHA d4b4672."
+      ]
+    },
     {
       "version": "1.1.4",
       "date": "2026-05-01",

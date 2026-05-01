@@ -1,56 +1,40 @@
 # COC Sync Marker — kailash-coc-py (multi-CLI: claude + codex + gemini)
-timestamp: 2026-05-01T12:30:00Z
+timestamp: 2026-05-01T13:10:00Z
 source: loom/.claude
-loom_version: 2.13.0
-loom_sha: 36db224
+loom_version: 2.14.0
+loom_sha: d4b4672
 variant: py
 clis: ["claude", "codex", "gemini"]
 template: kailash-coc-py
-template_version: 1.1.4
+template_version: 1.1.5
 stats:
-  updated: 7
-  created: 2              # gitignored-claude-warn.js + pre-commit-branch-scope.js
-  unchanged: ~684
-  composed: 2             # rules/deployment.md + rules/ci-runners.md slot-keyed py overlays
-  preserved: 1            # CLAUDE.md (template-owned; never overwritten)
-  scaffold_created: 9     # workspaces/_template/ (8 phase dirs + README.md)
-  use_excluded: 7
-  pre_existing_use_obsoleted_purged:
-    - .claude/rules/documentation.md
-    - .claude/skills/30-claude-code-patterns/sdk-upstream-donation.md
-    - .claude/guides/co-setup/
-    - .claude/guides/deterministic-quality/
-    - .claude/guides/automated-maintenance.md
-    - .claude/guides/rule-extracts/git.md
-    - .claude/guides/rule-extracts/independence-rs.md
+  updated: 1               # rules/deploy-hygiene.md (+ Rule 11, ~85 LOC)
+  created: 0
+  unchanged: ~686
+  composed: 0              # no slot-keyed variant changes in 2.14.0
+  preserved: 1             # CLAUDE.md (template-owned; never overwritten)
+  use_excluded: 8          # +rules/loom-csq-boundary.md (NEW in 2.14.0); rules/cross-sdk-inspection.md, rules/documentation.md, skills/30-claude-code-patterns/sdk-upstream-donation.md, guides/co-setup/**, guides/deterministic-quality/**, guides/automated-maintenance.md, guides/rule-extracts/git.md, guides/rule-extracts/independence-rs.md
+  test_harness_excluded: true   # universal test-harness/** exclude honored (test-harness/README.md NOT shipped despite update in 2.14.0)
+  pre_existing_use_obsoleted_purged: []   # all 18 obsoleted+use_obsoleted paths already absent
   baselines_emitted:
-    cc: 0                 # CLAUDE.md preserved, not emitted
-    codex: 1              # AGENTS.md
-    gemini: 1             # GEMINI.md
+    cc: 0                  # CLAUDE.md is preserved, not emitted
+    codex: 1               # AGENTS.md (re-emitted, byte-identical to 2.13.0)
+    gemini: 1              # GEMINI.md (re-emitted, byte-identical to 2.13.0)
   baseline_emission_bytes:
     block_cap_bytes: 61440
-    warn_cap_bytes: 32768
+    warn_cap_bytes:  32768
     codex:
       rules: 9
       bytes: 54967
       tier: WARN
       headroom_bytes: 6473
       headroom_pct: 10.54
-      budget_warnings: []
     gemini:
       rules: 9
       bytes: 54976
       tier: WARN
       headroom_bytes: 6464
       headroom_pct: 10.52
-      budget_warnings: []
-    note: |
-      cross-cli-parity.md demoted from baseline (priority:0) to path-scoped
-      (priority:10) in loom 2.13.0. Demotion freed ~3,091 bytes per CLI baseline:
-      AGENTS.md 58,058 → 54,967 B; GEMINI.md 58,067 → 54,976 B. Cap-headroom
-      restored from 5.50% / 5.49% to ~10.54% / ~10.52% — 3,091 B of additional
-      headroom on the py axis under block_cap=61,440 B. Baseline rule count
-      drops 10 → 9 (cross-cli-parity.md no longer baseline).
   cli_artifacts:
     codex:
       prompts: 30
@@ -60,12 +44,30 @@ stats:
       skills: 34
       agents: 22
   mcp_guard:
-    policies_populated: false   # still gated per Step 6.6 § G3
-sdk_pins: null  # multi-CLI template repo ships no pyproject.toml; SDK pinning lives at downstream consumer projects
-hooks_verified: 13/13
+    policies_populated: false
+    predicates_extracted: null
+verification:
+  hook_integrity: 13/13
+  dangling_refs: 0
+  build_path_leaks: 0
+  obsoleted_paths_absent: true
+  use_excluded_paths_absent: true
+  loom_csq_boundary_shipped: false       # CONFIRMED — use_exclude honored
+  test_harness_readme_shipped: false     # CONFIRMED — universal exclude honored
+  deploy_hygiene_rule_11_present: true   # CONFIRMED — file diff matches loom source byte-for-byte
+  validator_12_slot_round_trip: PASS
+  validator_13_codex_mcp_guard: PASS
+  validator_14_rule_frontmatter: PASS
 notes:
-  - "2.13.0 demotes cross-cli-parity.md (baseline → path-scoped). Cap-headroom restored 5.50% → 10.54% on py axis."
-  - "TWO NEW HOOKS in .claude/hooks/: gitignored-claude-warn.js + pre-commit-branch-scope.js."
-  - "workspaces/_template/ scaffold (9 paths) at repo root."
-  - "Dotted-dir consolidation verified: emit-cli-artifacts.mjs --out staged at /tmp; rsync to .codex/, .gemini/, .codex-mcp-guard/ canonical paths; no non-dotted leakage."
-  - "loom_sha rolled forward: cd53b65 (2.12.0) → 36db224 (2.13.0)."
+  release_summary: |
+    Small release after 2.13.0. UPDATED rules/deploy-hygiene.md += MUST Rule 11
+    'Push-Triggered Deploy Workflows MUST Cancel In-Progress Runs' (concurrency.cancel-in-progress
+    + ssh keep-alive flags + non-idempotent exception clause); generalized from a downstream
+    surfacing per upstream-issue-hygiene.md anonymization protocol. Rule 11 is NOT a CRIT-baseline
+    rule — cap-headroom UNCHANGED from 2.13.0 (codex 10.54%, gemini 10.52%). NEW
+    rules/loom-csq-boundary.md (paired-rule mirror with csq's csq-loom-boundary.md, csq H12) is
+    loom-only meta-rule and excluded from USE templates via use_exclude:; verified absent.
+    UPDATED test-harness/README.md not shipped (universal exclude). No new hooks, no new
+    scaffolds, no settings.json change. Multi-CLI baselines re-emitted (--lang py); .codex/ and
+    .gemini/ config trees re-emitted via emit-cli-artifacts.mjs (parity unchanged).
+  closes_issues: ["loom #21", "loom #23"]
