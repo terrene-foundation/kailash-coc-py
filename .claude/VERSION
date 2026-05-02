@@ -1,28 +1,43 @@
 {
-  "version": "1.1.7",
+  "version": "1.1.8",
   "type": "coc-use-template",
   "description": "COC USE template for Python SDK projects \u2014 multi-CLI (claude + codex + gemini)",
   "released": "2026-05-02",
   "upstream": {
     "name": "kailash",
     "type": "coc-source",
-    "version": "2.14.3",
+    "version": "2.14.4",
     "build_version": "2.13.3",
-    "synced_at": "2026-05-02T12:00:00Z",
+    "synced_at": "2026-05-02T22:00:00Z",
     "sdk_packages": {
       "kailash": "2.13.3",
       "kailash-dataflow": "2.7.5",
       "kailash-nexus": "2.6.0",
-      "kailash-kaizen": "2.16.1",
+      "kailash-kaizen": "2.18.0",
       "kailash-pact": "0.11.0",
       "kailash-mcp": "0.2.10",
       "kailash-ml": "1.7.1",
       "kailash-align": "0.7.0",
       "kaizen-agents": "0.9.4"
     },
-    "loom_sha": "02e69bf"
+    "loom_sha": "e8083e8"
   },
   "changelog": [
+    {
+      "version": "1.1.8",
+      "date": "2026-05-02",
+      "summary": "PATCH: sync to loom 2.14.4 (commit e8083e8). Two structural changes ship to this multi-CLI py template (cross-sdk-inspection.md Rule 4a is use_excluded \u2014 verified absent). (1) rules/cc-artifacts.md Hooks section += Rule 8 'Workspace-Walking Hooks Filter Leading-Underscore Meta-Dirs' (~1,300 B raw). Hooks that walk workspaces/<name>/ MUST filter directories whose name starts with underscore (`_archive`, `_template`, `_draft`, etc.) alongside the existing `instructions` skip. Origin: kailash-rs PR #759 (dc63a8ac, 2026-05-02). Classified GLOBAL via /sync rs Gate 1 second cycle. (2) hooks/lib/workspace-utils.js \u2014 applied `!e.name.startsWith('_')` filter at `detectActiveWorkspace` (line ~23) AND `findAllSessionNotes` (line ~158). Hook source matches loom byte-for-byte. (3) MULTI-CLI BASELINES re-emitted (--lang py via emit.mjs --all): codex AGENTS.md = 56,881 B [WARN, headroom 7.42%, 4,559 B free under 61,440 B block_cap]; gemini GEMINI.md = 56,890 B [WARN, headroom 7.41%, 4,550 B free]. UNCHANGED size from 1.1.7 \u2014 cc-artifacts.md is CC-only (excluded from codex/gemini emission via cli_emit_exclusions); the 2.14.4 Rule 8 addition has zero effect on baseline emission. (4) emit-cli-artifacts.mjs --out re-run: 30 codex prompts, 34 codex skills, 30 gemini commands, 34 gemini skills, 22 gemini agents (parity unchanged, byte-identical to 1.1.7 emission \u2014 no commands/skills/agents source files touched between 2.14.3 and 2.14.4). validator-12 / -13 / -14 PASS. (5) SDK PIN: kailash-kaizen 2.16.1 \u2192 2.18.0 (matches BUILD repo current state). (6) cross-sdk-inspection.md Rule 4a (sibling-canonical fixture vendoring discipline) is NOT shipped \u2014 file is in sync-manifest.yaml::use_exclude. (7) No new hooks, no new scaffolds, no settings.json change. (8) CLAUDE.md preserved (template-owned).",
+      "changes": [
+        "RULE UPDATE: .claude/rules/cc-artifacts.md Hooks section += Rule 8 (~1,300 B). Lifted from loom 2.14.4 (commit e8083e8). Classification: GLOBAL.",
+        "HOOK FIX: .claude/hooks/lib/workspace-utils.js \u2014 `!e.name.startsWith('_')` filter at `detectActiveWorkspace` + `findAllSessionNotes`. Hook source byte-for-byte identical to loom.",
+        "VERIFIED EXCLUSION: rules/cross-sdk-inspection.md NOT shipped (use_exclude honored \u2014 BUILD-internal cross-SDK process).",
+        "BASELINE: codex AGENTS.md = 56,881 B [WARN, headroom 7.42%, 4,559 B free]; gemini GEMINI.md = 56,890 B [WARN, headroom 7.41%, 4,550 B free]. UNCHANGED from 1.1.7 \u2014 cc-artifacts.md is CC-only (excluded from codex/gemini emission).",
+        "CLI ARTIFACTS: codex prompts=30, skills=34; gemini commands=30, skills=34, agents=22. Byte-identical to 1.1.7 emission \u2014 no commands/skills/agents source files touched between 2.14.3 and 2.14.4.",
+        "VERIFIED: validator-12 slot-round-trip PASS, validator-13 codex-mcp-guard PASS, validator-14 rule-frontmatter PASS.",
+        "SDK PIN MAP: sdk_packages.kailash-kaizen 2.16.1 \u2192 2.18.0 (matches BUILD repo current state).",
+        "VERSION: template 1.1.7 \u2192 1.1.8; upstream.version 2.14.3 \u2192 2.14.4; loom_sha 02e69bf \u2192 e8083e8."
+      ]
+    },
     {
       "version": "1.1.7",
       "date": "2026-05-02",
