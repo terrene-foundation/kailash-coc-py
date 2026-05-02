@@ -1,28 +1,43 @@
 {
-  "version": "1.1.6",
+  "version": "1.1.7",
   "type": "coc-use-template",
   "description": "COC USE template for Python SDK projects \u2014 multi-CLI (claude + codex + gemini)",
   "released": "2026-05-02",
   "upstream": {
     "name": "kailash",
     "type": "coc-source",
-    "version": "2.14.0",
-    "build_version": "2.13.2",
-    "synced_at": "2026-05-02T00:00:00Z",
+    "version": "2.14.3",
+    "build_version": "2.13.3",
+    "synced_at": "2026-05-02T12:00:00Z",
     "sdk_packages": {
-      "kailash": "2.13.2",
-      "kailash-dataflow": "2.7.3",
+      "kailash": "2.13.3",
+      "kailash-dataflow": "2.7.5",
       "kailash-nexus": "2.6.0",
-      "kailash-kaizen": "2.14.0",
+      "kailash-kaizen": "2.16.1",
       "kailash-pact": "0.11.0",
       "kailash-mcp": "0.2.10",
       "kailash-ml": "1.7.1",
       "kailash-align": "0.7.0",
       "kaizen-agents": "0.9.4"
     },
-    "loom_sha": "897b6f9"
+    "loom_sha": "02e69bf"
   },
   "changelog": [
+    {
+      "version": "1.1.7",
+      "date": "2026-05-02",
+      "summary": "PATCH: forward-port to loom 2.14.3 (commit 02e69bf), sweeping 2.14.1 \u2192 2.14.2 \u2192 2.14.3 deltas in one sync. Two rule files updated, both global (no py-variant overlay applies for these files). (1) rules/build-repo-release-discipline.md \u00a7 MUST Rule 2 \u00a7 `uv index-cache override` += pip-fallback sentence (~416 B raw / ~250 B abridged). When `uv pip install --refresh` STILL reports unresolvable while `pypi.org/.../json` returns the new metadata, fall back to `python -m ensurepip --upgrade && python -m pip install --no-cache-dir \"<pkg>==<ver>\"`. pip's index TTL is shorter than uv's deeper index-state cache; one-shot install succeeds where `uv pip install --refresh` does not. Evidence: kailash-dataflow 2.7.5 release verify (2026-05-01). Classified GLOBAL via /sync py Gate 1. (2) rules/autonomous-execution.md Rule 4 Origin += rustdoc cross-class evidence (~660 B raw / ~400 B abridged). Three same-shard fix-immediately evidence points spanning two rule-violation classes (kailash-rs PR #735, PR #736, PyNexus EventBus #679 Wave-2). Confirms Rule 4 generalizes beyond null-bind sibling sweeps. Classified GLOBAL via /sync rs Gate 1. (3) MULTI-CLI BASELINES re-emitted (--lang py via emit.mjs --all): codex AGENTS.md = 56,881 B [WARN, headroom 7.42%, 4,559 B free under 61,440 B block_cap]; gemini GEMINI.md = 56,890 B [WARN, headroom 7.41%, 4,550 B free]. UNCHANGED size from 1.1.6 \u2014 Origin paragraphs are stripped by the abridger (per cli_variants.context/root.md.codex.abridgement_protocol.strip_sections), so the 2.14.2 Rule 4 Origin growth is invisible at the abridged-baseline layer. The 2.14.3 build-repo-release-discipline.md sentence is also a no-op for cap-headroom (rule not on per_rule_size_budget_bytes table). Both still WARN tier. (4) emit-cli-artifacts.mjs --out re-run: 30 codex prompts, 34 codex skills, 30 gemini commands, 34 gemini skills, 22 gemini agents (parity unchanged). policies.json regenerated_at timestamp updated. validator-12 / -13 / -14 PASS. (5) SDK pins recorded for downstream propagation: kailash 2.13.2 \u2192 2.13.3; kailash-dataflow 2.7.3 \u2192 2.7.5; kailash-kaizen 2.14.0 \u2192 2.16.1 (matches BUILD repo current state). (6) No new hooks, no new scaffolds, no settings.json change. (7) CLAUDE.md preserved (template-owned).",
+      "changes": [
+        "RULE UPDATE: .claude/rules/build-repo-release-discipline.md \u00a7 MUST Rule 2 \u00a7 `uv index-cache override` += pip-fallback sentence (~416 B). Lifted from loom 2.14.3 (commit 02e69bf). Classification: GLOBAL.",
+        "RULE UPDATE: .claude/rules/autonomous-execution.md Rule 4 Origin += rustdoc cross-class evidence (~660 B). Lifted from loom 2.14.2 (commit 33e4ffc). Classification: GLOBAL.",
+        "BASELINE: codex AGENTS.md = 56,881 B [WARN, headroom 7.42%, 4,559 B free]; gemini GEMINI.md = 56,890 B [WARN, headroom 7.41%, 4,550 B free]. UNCHANGED from 1.1.6 \u2014 abridger strips Origin paragraphs (2.14.2 Rule 4 Origin growth invisible at abridged-baseline) AND build-repo-release-discipline.md is not on per-rule budget table.",
+        "CLI ARTIFACTS: codex prompts=30, skills=34; gemini commands=30, skills=34, agents=22. Byte-identical to 1.1.6 emission \u2014 no commands/skills/agents source files touched between 2.14.0 and 2.14.3.",
+        "VERIFIED: validator-12 slot-round-trip PASS, validator-13 codex-mcp-guard PASS, validator-14 rule-frontmatter PASS.",
+        "SDK PIN MAP: sdk_packages.kailash 2.13.2 \u2192 2.13.3; sdk_packages.kailash-dataflow 2.7.3 \u2192 2.7.5; sdk_packages.kailash-kaizen 2.14.0 \u2192 2.16.1.",
+        "VERSION: template 1.1.6 \u2192 1.1.7; upstream loom version 2.14.0 \u2192 2.14.3; loom_sha 897b6f9 \u2192 02e69bf; build_version 2.13.2 \u2192 2.13.3.",
+        "MARKER: AGENTS.md / GEMINI.md regenerated (mtime updated, content byte-identical \u2014 expected per abridger Origin-strip behavior)."
+      ]
+    },
     {
       "version": "1.1.6",
       "date": "2026-05-02",
