@@ -1,14 +1,14 @@
 {
-  "version": "1.1.8",
+  "version": "1.1.9",
   "type": "coc-use-template",
   "description": "COC USE template for Python SDK projects \u2014 multi-CLI (claude + codex + gemini)",
-  "released": "2026-05-02",
+  "released": "2026-05-03",
   "upstream": {
     "name": "kailash",
     "type": "coc-source",
-    "version": "2.14.4",
+    "version": "2.14.6",
     "build_version": "2.13.3",
-    "synced_at": "2026-05-02T22:00:00Z",
+    "synced_at": "2026-05-03T16:00:00Z",
     "sdk_packages": {
       "kailash": "2.13.3",
       "kailash-dataflow": "2.7.5",
@@ -20,9 +20,29 @@
       "kailash-align": "0.7.0",
       "kaizen-agents": "0.9.4"
     },
-    "loom_sha": "e8083e8"
+    "loom_sha": "f1c9803"
   },
   "changelog": [
+    {
+      "version": "1.1.9",
+      "date": "2026-05-03",
+      "summary": "PATCH: sync to loom 2.14.6 (commit f1c9803). Skips 2.14.5 (hard-blocked at Gate 2; never distributed) \u2014 net-new content originated from kailash-rs /codify 2026-05-03. Three intentional changes ship to this multi-CLI py template; no py-variant overlays apply. (1) NEW BASELINE RULE rules/verify-resource-existence.md (3,909 B raw / priority:0 scope:baseline) \u2014 'Existence Check Precedes Permission Debugging' \u2014 3 MUST + 2 MUST NOT + Three-Layer Defense. When a tool fails with a permission error against a named external resource, the FIRST diagnostic action MUST verify existence via live API read (gh api / psql \\dt / kubectl get / aws describe-*). Default disposition when existence check returns empty: delete-or-stub the dependent code, NOT provision. Origin: 2026-05-03 ci-queue-monitor session burned 6 PRs + 2 user PAT-creation cycles debugging access to a 16-core hosted runner that did not exist. (2) NEW EXTRACT guides/rule-extracts/verify-resource-existence.md (~6,500 B). (3) FRONTMATTER DEMOTE rules/upstream-issue-hygiene.md priority:0/scope:baseline \u2192 priority:10/scope:path-scoped + paths array (.github/, CONTRIBUTING.md, SECURITY.md, .session-notes, journal/, workspaces/). Body content byte-identical to loom 2.14.6. The demote-and-add structure is the cap-headroom recovery mechanism for 2.14.5+6 (loom 2.14.5 added the rule WITHOUT demoting upstream-issue-hygiene.md \u2014 the resulting baseline emission would have BLOCKED at >block_cap; loom 2.14.6 recovers headroom by demoting upstream-issue-hygiene.md so its abridged body no longer pays baseline emission cost). (4) MULTI-CLI BASELINES re-emitted (--lang py via emit.mjs --all): codex AGENTS.md = 56,762 B [WARN, headroom 7.62%, 4,678 B free under 61,440 B block_cap]; gemini GEMINI.md = 56,771 B [WARN, headroom 7.61%, 4,669 B free]. NET CHANGE from 1.1.8: -119 B both axes. RULES_EMITTED dropped 10 \u2192 9 \u2014 confirms upstream-issue-hygiene.md is no longer in baseline emission, replaced 1:1 by verify-resource-existence.md (3,700 B abridged budget vs ~3,800 B abridged for upstream-issue-hygiene.md). Both still in WARN tier; py-axis headroom restored slightly (7.42% \u2192 7.62%). (5) emit-cli-artifacts.mjs --out re-run: 30 codex prompts, 34 codex skills, 30 gemini commands, 34 gemini skills, 22 gemini agents (parity unchanged, byte-identical to 1.1.8 emission \u2014 no commands/skills/agents source files touched between 2.14.4 and 2.14.6). validator-12 / -13 / -14 PASS. (6) SDK PINS unchanged from 1.1.8 (kailash 2.13.3, dataflow 2.7.5, kaizen 2.18.0, etc. \u2014 all match BUILD repo /Users/esperie/repos/loom/kailash-py current state). (7) cross-sdk-inspection.md NOT shipped (use_exclude). (8) No new hooks, no new scaffolds, no settings.json change. (9) CLAUDE.md preserved (template-owned).",
+      "changes": [
+        "NEW RULE: .claude/rules/verify-resource-existence.md (3,909 B raw, priority:0 scope:baseline). Lifted from loom 2.14.5+6 (commits ea0f150 + f1c9803). Classification: GLOBAL.",
+        "NEW EXTRACT: .claude/guides/rule-extracts/verify-resource-existence.md (~6,500 B raw).",
+        "FRONTMATTER DEMOTE: .claude/rules/upstream-issue-hygiene.md priority:0/scope:baseline \u2192 priority:10/scope:path-scoped + paths array. Body content byte-identical to loom 2.14.6. This demote IS the cap-headroom recovery mechanism for the new baseline rule.",
+        "BASELINE: codex AGENTS.md = 56,762 B [WARN, headroom 7.62%, 4,678 B free]; gemini GEMINI.md = 56,771 B [WARN, headroom 7.61%, 4,669 B free]. Net -119 B both axes from 1.1.8 (56,881 / 56,890 B). Headroom restored 7.42% \u2192 7.62% (codex) and 7.41% \u2192 7.61% (gemini).",
+        "BASELINE EMISSION: rules_emitted dropped 10 \u2192 9 (upstream-issue-hygiene.md no longer baseline; verify-resource-existence.md replaces it). 1:1 swap with net byte savings.",
+        "CLI ARTIFACTS: codex prompts=30, skills=34; gemini commands=30, skills=34, agents=22. Byte-identical to 1.1.8 emission \u2014 no commands/skills/agents source files touched between 2.14.4 and 2.14.6.",
+        "VERIFIED: validator-12 slot-round-trip PASS, validator-13 codex-mcp-guard PASS, validator-14 rule-frontmatter PASS.",
+        "VERIFIED EXCLUSION: rules/cross-sdk-inspection.md NOT shipped (use_exclude honored).",
+        "VERIFIED: 18 obsoleted+use_obsoleted paths absent at this sync (no purge required).",
+        "VERIFIED: hooks resolve on disk (26 hook commands in settings.json); no scripts/hooks references.",
+        "VERIFIED: SDK pin allowlist scan \u2014 15 src/kailash/ refs found, 15 already in coc-sdk-refs-allowlist.txt (no new entries needed).",
+        "SDK PIN MAP: unchanged from 1.1.8 (all match BUILD repo current state).",
+        "VERSION: template 1.1.8 \u2192 1.1.9; upstream.version 2.14.4 \u2192 2.14.6 (skips 2.14.5 \u2014 hard-blocked at Gate 2, never distributed); loom_sha e8083e8 \u2192 f1c9803."
+      ]
+    },
     {
       "version": "1.1.8",
       "date": "2026-05-02",
