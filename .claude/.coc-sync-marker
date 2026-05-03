@@ -1,79 +1,82 @@
 # COC Sync Marker — kailash-coc-py (multi-CLI: claude + codex + gemini)
-timestamp: 2026-05-03T22:00:00Z
+timestamp: 2026-05-03T23:30:00Z
 source: loom/.claude
-loom_version: 2.15.0
-loom_sha: f1c9803
+loom_version: 2.15.1
+loom_sha: 6bef70b
 variant: py
 clis: ["claude", "codex", "gemini"]
 template: kailash-coc-py
-template_version: 1.1.10
+template_version: 1.1.11
 stats:
-  updated: 2               # AGENTS.md, GEMINI.md (re-emitted with new baseline rule)
-  created: 2               # rules/repo-scope-discipline.md, guides/rule-extracts/repo-scope-discipline.md
-  unchanged: ~684
-  composed: 0              # no slot-keyed variant changes
+  updated: 1               # skills/16-validation-patterns/SKILL.md (description + index entry)
+  created: 1               # skills/16-validation-patterns/validate-codebase-hygiene-markers.md
+  unchanged: ~686
+  composed: 0              # no slot-keyed variant changes; no rule baseline drift
   preserved: 1             # CLAUDE.md (template-owned; never overwritten)
-  use_excluded: 9          # rules/loom-csq-boundary.md, rules/cross-sdk-inspection.md, rules/documentation.md, skills/30-claude-code-patterns/sdk-upstream-donation.md, guides/co-setup/**, guides/deterministic-quality/**, guides/automated-maintenance.md, guides/rule-extracts/git.md, guides/rule-extracts/independence-rs.md
+  use_excluded: 9          # unchanged from 1.1.10
   test_harness_excluded: true
   pre_existing_use_obsoleted_purged: []
   baselines_emitted:
     cc: 0                  # CLAUDE.md preserved, not emitted
-    codex: 1               # AGENTS.md re-emitted (+2,788 B from 1.1.9)
-    gemini: 1              # GEMINI.md re-emitted (+2,788 B from 1.1.9)
+    codex: 0               # AGENTS.md NOT re-emitted (no rule baseline drift)
+    gemini: 0              # GEMINI.md NOT re-emitted (no rule baseline drift)
   baseline_emission_bytes:
     block_cap_bytes: 61440
     warn_cap_bytes:  32768
     codex:
       rules: 10
-      bytes: 59550
+      bytes: 59550          # unchanged from 1.1.10
       tier: WARN
       headroom_bytes: 1890
       headroom_pct: 3.07
     gemini:
       rules: 10
-      bytes: 59559
+      bytes: 59559          # unchanged from 1.1.10
       tier: WARN
       headroom_bytes: 1881
       headroom_pct: 3.06
   cli_artifacts:
     codex:
-      prompts: 30          # not re-run this cycle (no commands/skills/agents source-tree changes between 2.14.6 and 2.15.0)
-      skills: 34
+      prompts: 30
+      skills: 34            # unchanged dir count; new sub-file inside skills/16-validation-patterns/
     gemini:
       commands: 30
       skills: 34
       agents: 22
   mcp_guard:
-    policies_populated: false   # still gated — no runtime predicate loader yet (Phase H3+)
+    policies_populated: false
 sdk_pin_updates:
-  kailash: "2.13.3 → 2.13.4"
-  kailash-dataflow: "2.7.5 → 2.7.6"
-  kailash-kaizen: "2.18.0 → 2.18.1"
-  kailash-mcp: "0.2.10 → 0.2.11"
-  kailash-nexus: "2.6.0 → 2.6.1"
-  kaizen-agents: "0.9.4 → 0.9.5"
+  kailash: "2.13.4 (unchanged)"
+  kailash-dataflow: "2.7.6 (unchanged)"
+  kailash-kaizen: "2.18.1 (unchanged)"
+  kailash-mcp: "0.2.11 (unchanged)"
+  kailash-nexus: "2.6.1 (unchanged)"
+  kaizen-agents: "0.9.5 (unchanged)"
   kailash-pact: "0.11.0 (unchanged)"
   kailash-ml: "1.7.1 (unchanged)"
   kailash-align: "0.7.0 (unchanged)"
   note: |
-    no pyproject.toml in this repo (template-only — multi-CLI scaffolding,
-    no Python project setup). SDK pin map tracked here for documentation only.
+    no pyproject.toml in this repo (template-only — multi-CLI scaffolding).
+    SDK pin map tracked here for documentation only.
 verification:
   hooks_resolve: 13/13
-  scripts_hooks_paths: 0   # zero stale references
-  use_obsoleted_purged: 0  # no pre-existing copies
-  allowlist_refresh: appended # +1 entry (.claude/VERSION) under 2026-05-03 / loom 2.15.0 block
+  scripts_hooks_paths: 0
+  use_obsoleted_purged: 0
+  allowlist_refresh: idempotent
   validators:
     validator_12_slot_round_trip: PASS
     validator_13_codex_mcp_guard: PASS
     validator_14_rule_frontmatter: PASS
 notes: |
-  loom 2.15.0 introduces ONE new GLOBAL baseline rule:
-  rules/repo-scope-discipline.md (priority:0/scope:baseline) +
-  guides/rule-extracts/repo-scope-discipline.md companion.
-  Baselines re-emitted for codex + gemini. Headroom narrowed
-  from 7.62%/7.61% (1.1.9) to 3.07%/3.06% (1.1.10) — still
-  WARN tier with 1,890/1,881 B free under block_cap. No
-  offsetting demotion this cycle; future minor adds may need
-  rule-demotion paired with the addition (per loom 2.14.6
-  precedent).
+  loom 2.15.1 introduces ONE new GLOBAL skill sub-file:
+  skills/16-validation-patterns/validate-codebase-hygiene-markers.md
+  (~10,800 B / 232 lines) + companion skills/16-validation-patterns/SKILL.md
+  description + index update. Skill content mirrored to .codex/skills/
+  and .gemini/skills/ trees alongside the .claude/skills/ canonical copy.
+  Origin: kailash-py /codify 2026-05-03 — issue #781 TODO-NNN cleanup
+  workstream completion (PR #809 release cycle).
+  Methodology language-agnostic; Python tooling examples illustrative.
+  NO RULE BASELINE CHANGES. emit.mjs + emit-cli-artifacts.mjs NOT re-run
+  this cycle (skills are physically copied, not abridged through codex
+  per_rule_size_budget; baseline byte counts unchanged).
+  SDK PINS UNCHANGED.
