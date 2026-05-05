@@ -1,82 +1,60 @@
-# COC Sync Marker — kailash-coc-py (multi-CLI: claude + codex + gemini)
-timestamp: 2026-05-03T23:30:00Z
+# COC Sync Marker — kailash-coc-py
+# Written by /sync py Gate 2 (loom v2.19.0 → coc-py v1.1.13)
+# Source: loom 18e6f3f
+timestamp: 2026-05-05T16:38:57Z
 source: loom/.claude
-loom_version: 2.15.1
-loom_sha: 6bef70b
+source_commit: 18e6f3f
+loom_version: 2.19.0
+target_version: 1.1.13
 variant: py
 clis: ["claude", "codex", "gemini"]
-template: kailash-coc-py
-template_version: 1.1.11
+template_type: multi-cli
 stats:
-  updated: 1               # skills/16-validation-patterns/SKILL.md (description + index entry)
-  created: 1               # skills/16-validation-patterns/validate-codebase-hygiene-markers.md
-  unchanged: ~686
-  composed: 0              # no slot-keyed variant changes; no rule baseline drift
-  preserved: 1             # CLAUDE.md (template-owned; never overwritten)
-  use_excluded: 9          # unchanged from 1.1.10
-  test_harness_excluded: true
-  pre_existing_use_obsoleted_purged: []
+  updated: 216
+  created: 85
+  unchanged: 0
+  composed: 2          # rules/ci-runners.md, rules/deployment.md (slot-keyed py overlays)
+  preserved: 1         # CLAUDE.md (template-owned, never overwritten)
+  obsoleted_purged: 0  # all obsoleted paths already absent
   baselines_emitted:
-    cc: 0                  # CLAUDE.md preserved, not emitted
-    codex: 0               # AGENTS.md NOT re-emitted (no rule baseline drift)
-    gemini: 0              # GEMINI.md NOT re-emitted (no rule baseline drift)
+    cc: 0              # CLAUDE.md preserved, not emitted
+    codex: 1           # AGENTS.md
+    gemini: 1          # GEMINI.md
   baseline_emission_bytes:
     block_cap_bytes: 61440
-    warn_cap_bytes:  32768
+    warn_cap_bytes: 32768
     codex:
       rules: 10
-      bytes: 59550          # unchanged from 1.1.10
+      bytes: 56735
       tier: WARN
-      headroom_bytes: 1890
-      headroom_pct: 3.07
+      headroom_bytes: 4705
+      headroom_pct: 7.66
     gemini:
       rules: 10
-      bytes: 59559          # unchanged from 1.1.10
+      bytes: 56744
       tier: WARN
-      headroom_bytes: 1881
-      headroom_pct: 3.06
+      headroom_bytes: 4696
+      headroom_pct: 7.64
   cli_artifacts:
     codex:
-      prompts: 30
-      skills: 34            # unchanged dir count; new sub-file inside skills/16-validation-patterns/
+      prompts: 31
+      skills: 35
     gemini:
-      commands: 30
-      skills: 34
+      commands: 31
+      skills: 35
       agents: 22
   mcp_guard:
-    policies_populated: false
-sdk_pin_updates:
-  kailash: "2.13.4 (unchanged)"
-  kailash-dataflow: "2.7.6 (unchanged)"
-  kailash-kaizen: "2.18.1 (unchanged)"
-  kailash-mcp: "0.2.11 (unchanged)"
-  kailash-nexus: "2.6.1 (unchanged)"
-  kaizen-agents: "0.9.5 (unchanged)"
-  kailash-pact: "0.11.0 (unchanged)"
-  kailash-ml: "1.7.1 (unchanged)"
-  kailash-align: "0.7.0 (unchanged)"
-  note: |
-    no pyproject.toml in this repo (template-only — multi-CLI scaffolding).
-    SDK pin map tracked here for documentation only.
-verification:
-  hooks_resolve: 13/13
-  scripts_hooks_paths: 0
-  use_obsoleted_purged: 0
-  allowlist_refresh: idempotent
-  validators:
-    validator_12_slot_round_trip: PASS
-    validator_13_codex_mcp_guard: PASS
-    validator_14_rule_frontmatter: PASS
-notes: |
-  loom 2.15.1 introduces ONE new GLOBAL skill sub-file:
-  skills/16-validation-patterns/validate-codebase-hygiene-markers.md
-  (~10,800 B / 232 lines) + companion skills/16-validation-patterns/SKILL.md
-  description + index update. Skill content mirrored to .codex/skills/
-  and .gemini/skills/ trees alongside the .claude/skills/ canonical copy.
-  Origin: kailash-py /codify 2026-05-03 — issue #781 TODO-NNN cleanup
-  workstream completion (PR #809 release cycle).
-  Methodology language-agnostic; Python tooling examples illustrative.
-  NO RULE BASELINE CHANGES. emit.mjs + emit-cli-artifacts.mjs NOT re-run
-  this cycle (skills are physically copied, not abridged through codex
-  per_rule_size_budget; baseline byte counts unchanged).
-  SDK PINS UNCHANGED.
+    policies_populated: false   # still gated — guard refuses to start until predicates wired
+worktree_isolation_in_baseline: false  # confirmed absent post-2.19.0 demotion
+sdk_pins:
+  kailash: 2.13.4
+  kailash-dataflow: 2.7.7
+  kailash-nexus: 2.6.1
+  kailash-kaizen: 2.19.0
+  kailash-pact: 0.11.0
+  kailash-mcp: 0.2.11
+  kailash-ml: 1.7.1
+  kailash-align: 0.7.0
+  kaizen-agents: 0.9.5
+hook_integrity: "22/22"
+allowlist_refresh: idempotent

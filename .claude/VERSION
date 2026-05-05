@@ -1,29 +1,52 @@
 {
-  "version": "1.1.12",
+  "version": "1.1.13",
   "type": "coc-use-template",
   "description": "COC USE template for Python SDK projects \u2014 multi-CLI (claude + codex + gemini)",
-  "released": "2026-05-03",
+  "released": "2026-05-06",
   "upstream": {
     "name": "kailash",
     "type": "coc-source",
-    "version": "2.15.1",
-    "build_version": "2.16.0",
-    "synced_at": "2026-05-03T23:30:00Z",
+    "version": "2.19.0",
+    "build_version": "2.19.0",
+    "synced_at": "2026-05-05T16:37:58Z",
     "sdk_packages": {
       "kailash": "2.13.4",
-      "kailash-dataflow": "2.7.6",
+      "kailash-dataflow": "2.7.7",
       "kailash-nexus": "2.6.1",
-      "kailash-kaizen": "2.18.1",
+      "kailash-kaizen": "2.19.0",
       "kailash-pact": "0.11.0",
       "kailash-mcp": "0.2.11",
       "kailash-ml": "1.7.1",
       "kailash-align": "0.7.0",
       "kaizen-agents": "0.9.5"
     },
-    "loom_sha": "6bef70b",
-    "source_commit": "e2ba484"
+    "loom_sha": "18e6f3f",
+    "source_commit": "18e6f3f",
+    "template_version": "2.19.0"
   },
   "changelog": [
+    {
+      "date": "2026-05-06",
+      "summary": "loom 2.19.0 sync: cap-headroom remediation completed (PR #30 merged 18e6f3f). DEMOTED rules/worktree-isolation.md from priority:0/scope:baseline to priority:10/scope:path-scoped (paths: .claude/{agents,commands,skills}/**, **/*worktree*, **/workspaces/**) \u2014 frees ~6,166 B baseline emission per CLI; rule still loads in COC orchestration sessions via the commands\u2192skills\u2192agents trigger chain. NEW BASELINE rule .claude/rules/coc-sync-landing.md (1,506 B raw, priority:0/scope:baseline) from PR #29 \u2014 BUILD-side discipline mandating that loom /sync-to-build deliveries land on main BEFORE any other session work; pairs with new SessionStart hook .claude/hooks/coc-drift-warn.js (6,190 B). NEW guide .claude/guides/rule-extracts/coc-sync-landing.md (8,942 B). MANIFEST: per_rule_size_budget_bytes \u2014 REMOVED worktree-isolation.md entry (no longer baseline); ADDED coc-sync-landing.md: 1400. SETTINGS.JSON: SessionStart hook wiring updated to include coc-drift-warn.js. PLUS all 2.17.0 + 2.18.0 artifacts (graduated trust-posture system L1-L5 + violations.jsonl + posture.json per-repo + zero-tolerance Rule 3d Dual-Shape Return + Structural Guard = Silent Fallback + build-repo-release-discipline Rule 1a Test-Only/Docs-Only/Workspace-Only Carve-Out). Cap-headroom post-2.19.0 emit: codex py 56,735 B / 61,440 cap (4,705 B free, 7.66% headroom); gemini py 56,744 B / 61,440 cap (4,696 B free, 7.65% headroom). All validators PASS. WARN tier (refactoring-signal in [32768, 61440)) is steady-state per v6 \u00a72.2. SDK pins refresh: kailash-dataflow 2.7.6 -> 2.7.7, kailash-kaizen 2.18.1 -> 2.19.0 (kaizen #822 dual-shape-config fix). worktree-isolation.md confirmed ABSENT from baseline AGENTS.md/GEMINI.md emission.",
+      "changes": [
+        "RULE DEMOTION: rules/worktree-isolation.md priority:0/scope:baseline -> priority:10/scope:path-scoped \u2014 confirmed absent from baseline AGENTS.md/GEMINI.md emission, present in .claude/rules/ for path-scoped loading.",
+        "NEW BASELINE RULE: rules/coc-sync-landing.md (1,506 B raw, ~1,336 B emit) \u2014 BUILD-side COC drift discipline. Confirmed present in baseline emit.",
+        "NEW HOOK: .claude/hooks/coc-drift-warn.js (6,190 B SessionStart, executable). settings.json wired.",
+        "NEW GUIDE: .claude/guides/rule-extracts/coc-sync-landing.md (8,942 B).",
+        "MANIFEST: cli_variants.context.codex.abridgement_protocol.per_rule_size_budget_bytes \u2014 REMOVED worktree-isolation.md; ADDED coc-sync-landing.md: 1400.",
+        "TRUST-POSTURE SYSTEM (loom 2.17.0): rules/trust-posture.md path-scoped + skills/32-trust-posture/ (7 files) + commands/posture.md + agents/management/posture-auditor.md + hooks/{detect-violations,posture-gate}.js + hooks/lib/{instruct-and-wait,state-io,state-resolver,violation-patterns}.js + settings.json permissions.deny block + 8 new hook wirings.",
+        "ZERO-TOLERANCE RULE 3D (loom 2.18.0): zero-tolerance.md APPENDED Rule 3d 'Dual-Shape Return + Structural Guard = Silent Fallback' (~3,186 B raw / ~1,500 B emit). Origin: kaizen #822.",
+        "BUILD-REPO-RELEASE-DISCIPLINE RULE 1A (loom 2.18.0): build-repo-release-discipline.md APPENDED Rule 1a 'Carve-Out \u2014 Test-Only / Docs-Only / Workspace-Only Diffs'. Origin: kaizen #821 PR #824.",
+        "CAP-HEADROOM (post-2.19.0): codex py 56,735 B / 61,440 cap = 7.66% headroom (4,705 B free); gemini py 56,744 B / 61,440 cap = 7.65% headroom (4,696 B free). WARN tier per v6 \u00a72.2 steady state.",
+        "SDK PINS: kailash-dataflow 2.7.6 -> 2.7.7, kailash-kaizen 2.18.1 -> 2.19.0. Other pins unchanged.",
+        "VERIFIED: worktree-isolation.md absent from baseline AGENTS.md and GEMINI.md emission. Path-scoped activation only when editing .claude/{agents,commands,skills}/** or **/*worktree* paths.",
+        "VERIFIED: hooks integrity \u2014 22/22 hook commands resolve in target settings.json; no scripts/hooks references; lib/ files present.",
+        "VERIFIED: obsoleted paths absent (scripts/hooks/, .claude/scripts/, .claude/projects/, .claude/test-harness/, etc.).",
+        "VERIFIED: SDK-refs allowlist already covers all current contamination (no new entries needed).",
+        "PRESERVED: CLAUDE.md (template-owned, never overwritten per Step 7)."
+      ],
+      "version": "1.1.13"
+    },
     {
       "version": "1.1.12",
       "date": "2026-05-04",
