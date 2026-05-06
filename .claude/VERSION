@@ -6,9 +6,9 @@
   "upstream": {
     "name": "kailash",
     "type": "coc-source",
-    "version": "2.21.0",
-    "build_version": "2.21.0",
-    "synced_at": "2026-05-06T05:45:18Z",
+    "version": "2.21.1",
+    "build_version": "2.21.1",
+    "synced_at": "2026-05-06T08:27:15Z",
     "sdk_packages": {
       "kailash": "2.13.4",
       "kailash-dataflow": "2.7.8",
@@ -20,9 +20,9 @@
       "kailash-align": "0.7.0",
       "kaizen-agents": "0.9.5"
     },
-    "loom_sha": "fd463e9",
+    "loom_sha": "47a6279",
     "source_commit": "6d8d742",
-    "template_version": "2.21.0"
+    "template_version": "2.21.1"
   },
   "changelog": [
     {
