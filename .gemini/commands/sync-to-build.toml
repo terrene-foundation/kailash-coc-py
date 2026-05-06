@@ -23,7 +23,21 @@ Before writing ANY file, you MUST read the target's existing content to understa
 
 ### 1. Resolve BUILD repo
 
-Read `sync-manifest.yaml` → `repos.{target}.build` to get the BUILD repo name. Resolve to absolute path.
+Read `sync-manifest.yaml` → `repos.{target}.build` to get the BUILD repo name.
+
+**Early-exit on `build: null` (MUST).** When `repos.<target>.build` is `null`, `/sync-to-build` MUST exit immediately, before any inventory or merge planning, with the following message:
+
+```
+ERROR: /sync-to-build {target} is not applicable.
+sync-manifest.yaml declares repos.{target}.build: null — this variant has no BUILD source.
+Use `/sync {target}` for USE-template distribution instead.
+```
+
+The `base` variant (v2.21.0+, language-agnostic non-Kailash) is the canonical case: there is no `kailash-base` BUILD repo because the variant ships USE-template artifacts only (cc + co tier methodology + onboarding tier stack-detection skills) — there is no Kailash framework code to push to a BUILD source. `/codify` proposals from base-variant USE consumers route directly to loom (loom owns COC variant distribution including the base axis); they do NOT route through a BUILD repo because none exists.
+
+**BLOCKED rationalizations:** "I'll synthesize a fake BUILD path so the rest of the command works" / "Treat `null` as the empty string and continue" / "Resolve to a sibling repo and push there as a no-op" / "/sync-to-build base is harmless if there's nothing to push — let it run". A `null` build is a structural signal that `/sync-to-build` is the wrong command for this variant; running it anyway either silently no-ops (hiding the operator's mistake) or writes to a wrong target (data corruption).
+
+Otherwise resolve to absolute path and proceed to step 2.
 
 ### 2. Inventory the BUILD repo (READ FIRST)
 
