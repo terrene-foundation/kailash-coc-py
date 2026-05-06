@@ -1,6 +1,6 @@
 ---
 name: architecture-decisions
-description: "Kailash SDK architecture decisions: framework (Core/DataFlow/Nexus/Kaizen), runtime (Async/Sync), DB (PostgreSQL/SQLite), node, test tier. Use for 'which X' choice."
+description: "Kailash architecture (Python) — framework/runtime/DB/node/test-tier picks. For 'which X' choices."
 ---
 
 # Kailash Architecture Decisions

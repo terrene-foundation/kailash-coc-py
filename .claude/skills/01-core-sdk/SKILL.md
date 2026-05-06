@@ -1,6 +1,6 @@
 ---
 name: core-sdk
-description: "Kailash Core SDK — workflows, 110+ nodes, runtime, async, cycles, MCP, OpenTelemetry. Use for WorkflowBuilder + connections + runtime patterns."
+description: "Kailash Core SDK — workflows, nodes, runtime, async, cycles. Custom workflow loops BLOCKED."
 ---
 
 # Kailash Core SDK - Foundational Skills

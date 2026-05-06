@@ -1,6 +1,6 @@
 ---
 name: frontend-integration
-description: "Kailash frontend integration: React + Flutter — setup, API integration, state management, best practices."
+description: "Kailash frontend — React + Flutter setup, API integration, state management."
 ---
 
 # Kailash Frontend Integration

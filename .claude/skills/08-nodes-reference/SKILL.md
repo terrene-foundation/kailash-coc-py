@@ -1,6 +1,6 @@
 ---
 name: nodes-reference
-description: "Kailash 110+ nodes by category: AI, API, Code, Data, Database, File, Logic, Monitoring, Admin, Transaction, Transform. Use for node reference, lookup, capability questions."
+description: "Kailash node catalog by category — reference for node lookup and capability questions."
 ---
 
 # Kailash Nodes - Complete Reference

@@ -1,6 +1,6 @@
 ---
 name: kaizen
-description: "Kailash Kaizen — MANDATORY for AI agents/multi-agent/RAG/signatures/prompt-optimization/Tree-of-Thoughts/PEV/ReAct/governance. Custom LLM agents BLOCKED."
+description: "Kailash Kaizen (Python) — MANDATORY for AI agents/RAG/signatures. Custom LLM agents BLOCKED."
 ---
 
 # Kailash Kaizen - AI Agent Framework

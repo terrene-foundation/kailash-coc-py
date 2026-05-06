@@ -1,6 +1,6 @@
 ---
 name: nexus
-description: "Kailash Nexus — MANDATORY for HTTP/API/CLI/MCP unified deployment, sessions, K8s probes, OpenAPI, security headers. Direct FastAPI/Flask BLOCKED."
+description: "Kailash Nexus — MANDATORY for HTTP/API/CLI/MCP unified deployment. Direct FastAPI/Flask BLOCKED."
 ---
 
 # Kailash Nexus - Multi-Channel Platform Framework
