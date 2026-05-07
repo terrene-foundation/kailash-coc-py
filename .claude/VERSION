@@ -1,14 +1,14 @@
 {
-  "version": "1.5.0",
+  "version": "1.5.1",
   "type": "coc-use-template",
   "description": "COC USE template for Python SDK projects — multi-CLI (claude + codex + gemini)",
-  "released": "2026-05-06",
+  "released": "2026-05-07",
   "upstream": {
     "name": "kailash",
     "type": "coc-source",
     "version": "2.28.2",
     "build_version": "2.28.0",
-    "synced_at": "2026-05-06T16:24:20Z",
+    "synced_at": "2026-05-07T00:00:00Z",
     "sdk_packages": {
       "kailash": "2.13.5",
       "kailash-dataflow": "2.8.0",
@@ -20,11 +20,28 @@
       "kailash-align": "0.7.0",
       "kaizen-agents": "0.9.6"
     },
-    "loom_sha": "94ed1be",
-    "source_commit": "c5565fe",
+    "loom_sha": "c9dfa54",
+    "source_commit": "c9dfa54",
     "template_version": "2.28.2"
   },
   "changelog": [
+    {
+      "date": "2026-05-07",
+      "version": "1.5.1",
+      "summary": "loom 2.28.2 incremental sync (multi-CLI py): skill 15-enterprise-infrastructure additions (scheduler-patterns.md NEW, durability-patterns.md NEW, SKILL.md primitive inventory) + skill 01-core-sdk SKILL.md cross-link to scheduler/durability sub-files + BUILD-side hygiene drift placed at global tier (description: failure-mode framing, FastAPI->Nexus rename, emoji removal, when-to-use removal). Multi-CLI emission refresh: .codex/skills/15-enterprise-infrastructure/{scheduler,durability}-patterns.md + .codex/skills/01-core-sdk/SKILL.md + .gemini/skills/15-enterprise-infrastructure/{scheduler,durability}-patterns.md + .gemini/skills/01-core-sdk/SKILL.md (8 emissions total). Foundation-branding rules purged via use_obsoleted: rules/terrene-naming.md + rules/independence.md (now coc-tier with use_excluded — non-Foundation downstream consumers MUST NOT inherit). Resolves kailash-coc-claude-py#64. AGENTS.md + GEMINI.md NOT refreshed: emitter HARD-BLOCKED (codex 87370B / gemini 87379B vs block_cap 61440B) due to ~3 new CRIT-baseline rules landed since loom 2.27.0 (time-pressure-discipline, value-prioritization, agent-reasoning broadening); existing baselines preserved at 56797B/56806B (WARN tier). Halt-and-report: needs CRIT demotion or budget tightening per spec v6 §A.2 before next baseline refresh. SDK pins unchanged. Pre-flight verify-overlays.sh py 340/340 passing post-overlay-update.",
+      "changes": [
+        "SKILL UPDATE: skills/15-enterprise-infrastructure/SKILL.md — primitive-inventory table + new sub-file links; description: failure-mode framed.",
+        "SKILL NEW: skills/15-enterprise-infrastructure/scheduler-patterns.md (177 lines).",
+        "SKILL NEW: skills/15-enterprise-infrastructure/durability-patterns.md (167 lines).",
+        "SKILL UPDATE: skills/01-core-sdk/SKILL.md — Recurring + Durable Execution cross-link section; description: rewritten failure-mode framing; FastAPI->Nexus (4 occurrences); emojis removed per communication.md; keyword-dump When-to-Use removed per cc-artifacts.md Rule 1b.",
+        "MULTI-CLI EMIT: .codex/skills/15-enterprise-infrastructure/{SKILL,scheduler-patterns,durability-patterns}.md (3 files) + .codex/skills/01-core-sdk/SKILL.md.",
+        "MULTI-CLI EMIT: .gemini/skills/15-enterprise-infrastructure/{SKILL,scheduler-patterns,durability-patterns}.md (3 files) + .gemini/skills/01-core-sdk/SKILL.md.",
+        "PURGE (use_obsoleted): rules/terrene-naming.md + rules/independence.md removed per sync-manifest.yaml::use_obsoleted (2026-05-07).",
+        "BASELINE EMISSION HALT-AND-REPORT: AGENTS.md + GEMINI.md NOT regenerated — current emit BLOCKS at 87370B/87379B vs 61440B cap; existing baselines preserved (56797B/56806B WARN tier). Requires CRIT demotion / budget tightening per spec v6 §A.2 before next refresh.",
+        "VERSION SCHEMA: canonical upstream.version + upstream.template_version + upstream.synced_at + upstream.loom_sha populated per sync-completeness.md MUST-3 (matches loom 2.28.2 c9dfa54).",
+        "SDK PINS: unchanged."
+      ]
+    },
     {
       "date": "2026-05-06",
       "version": "1.4.0",
