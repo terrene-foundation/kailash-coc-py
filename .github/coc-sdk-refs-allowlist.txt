@@ -63,3 +63,9 @@
 # Files newly distributed in this sync that contain legitimate
 # src/kailash/ references. Auto-appended by coc-sync Step 7.5.
 .claude/VERSION
+
+# ─── auto-extended 2026-05-09 from loom v2.28.2 (1fcffe7) ──────
+# Files newly distributed in this sync that contain legitimate
+# src/kailash/ references. Auto-appended by coc-sync Step 7.5.
+.claude/skills/15-enterprise-infrastructure/durability-patterns.md
+.claude/skills/15-enterprise-infrastructure/scheduler-patterns.md
