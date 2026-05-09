@@ -1,7 +1,26 @@
 ---
-priority: 0
-scope: baseline
+priority: 10
+scope: path-scoped
+paths:
+  - "**/workspaces/**"
+  - "**/journal/**"
+  - "**/.session-notes"
+  - "**/.claude/commands/**"
+  - "**/SWEEP*.md"
+  - "**/WORKSPACE-DISPOSITION*.md"
+  - "**/CHANGELOG*.md"
 ---
+
+<!-- Demoted from baseline to path-scoped 2026-05-09 (loom v2.28.x flagged-item
+resolution): CLI baseline emit (AGENTS.md / GEMINI.md) was BLOCKED at
+60-KB cap with this rule contributing 24 KB abridged. Hook-layer enforcement
+(`detectStreetlightSelection`, `detectDeferralWithoutValueAnchor`,
+`detectDeferredItemPickupWithoutRevalidation`, `detectGhIssueCloseAsNotPlanned`)
+remains unchanged — those are the load-bearing structural defenses. The
+path-scoped emission still loads the rule when the agent reads any selection-
+surface artifact (workspace todos, journals, .session-notes, sweep / disposition
+documents, COC commands) per `feedback_paths_frontmatter_loading.md`'s sticky
+session injection. -->
 
 # Value-Prioritization — Rank By User Value Before Shard-Fit
 
