@@ -1,6 +1,6 @@
 ---
 name: 29-pact
-description: "PACT governance — D/T/R addressing, envelopes, clearance, governed agents, MCP governance, verification gradient. Custom authz BLOCKED."
+description: "PACT governance — D/T/R addressing, envelopes, clearance, governed agents. Custom authz BLOCKED."
 ---
 
 # PACT Governance Skills

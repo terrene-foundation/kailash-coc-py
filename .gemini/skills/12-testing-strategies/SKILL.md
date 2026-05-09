@@ -1,6 +1,6 @@
 ---
 name: testing-strategies
-description: "Kailash testing: 3-tier, Tier 2/3 real infra (NO mocking per rules/testing.md), regression, coverage."
+description: "Kailash testing — 3-tier, Tier 2/3 real infra (NO mocking), regression, coverage."
 ---
 
 # Kailash Testing Strategies

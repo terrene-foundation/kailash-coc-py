@@ -1,5 +1,5 @@
 ---
-description: "Spec compliance verification protocol — verify code matches plan via AST/grep, not file existence. Use for /redteam Step 1, /codify validation, plan auditing."
+description: "Spec compliance (Python) — verify via AST/grep, not file existence. Existence-only checks BLOCKED."
 ---
 
 # Spec Compliance Audit
