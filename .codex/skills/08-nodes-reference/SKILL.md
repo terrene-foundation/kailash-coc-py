@@ -1,6 +1,6 @@
 ---
 name: nodes-reference
-description: "Kailash 110+ nodes by category: AI, API, Code, Data, Database, File, Logic, Monitoring, Admin, Transaction, Transform. Use for node reference, lookup, capability questions."
+description: "Kailash node catalog by category — reference for node lookup and capability questions."
 ---
 
 # Kailash Nodes - Complete Reference
@@ -65,7 +65,6 @@ workflow.add_connection("node1", "result", "node2", "input_data")
 
 - **[01-core-sdk](../../01-core-sdk/SKILL.md)** - Core workflow patterns
 - **[06-cheatsheets](../cheatsheets/SKILL.md)** - Node usage patterns
-- **[07-development-guides](../development-guides/SKILL.md)** - Custom node development
 - **[02-dataflow](../../02-dataflow/SKILL.md)** - Auto-generated database nodes
 
 ## Support

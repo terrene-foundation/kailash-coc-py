@@ -1,6 +1,6 @@
 ---
 name: dataflow
-description: "Kailash DataFlow — MANDATORY for DB/CRUD/bulk/migrations/multi-tenancy/PostgreSQL/MySQL/MongoDB/pgvector. Raw SQL & ORMs BLOCKED."
+description: "Kailash DataFlow — MANDATORY for DB/CRUD/bulk/migrations/multi-tenancy. Raw SQL/ORMs BLOCKED."
 ---
 
 # Kailash DataFlow - Zero-Config Database Framework
