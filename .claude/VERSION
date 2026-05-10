@@ -1,14 +1,14 @@
 {
-  "version": "1.6.0",
+  "version": "1.6.1",
   "type": "coc-use-template",
   "description": "COC USE template for Python SDK projects \u2014 multi-CLI (claude + codex + gemini)",
-  "released": "2026-05-09",
+  "released": "2026-05-10",
   "upstream": {
     "name": "kailash",
     "type": "coc-source",
     "version": "2.29.0",
     "build_version": "2.29.0",
-    "synced_at": "2026-05-10T06:15:00Z",
+    "synced_at": "2026-05-10T06:41:02Z",
     "sdk_packages": {
       "kailash": "2.18.0",
       "kailash-dataflow": "2.9.0",
@@ -20,9 +20,14 @@
       "kailash-align": "0.7.1",
       "kaizen-agents": "0.9.7"
     },
-    "loom_sha": "9b7da3c5",
-    "source_commit": "9b7da3c5",
+    "loom_sha": "63897ec8",
+    "source_commit": "63897ec8",
     "template_version": "2.29.0"
+  },
+  "changelog_2.29.0_post_pr117": {
+    "date": "2026-05-10",
+    "version": "1.6.1",
+    "summary": "loom 2.29.0 (post-PR #117) sync (py multi-CLI): emit.mjs CDX-1/2/3 fix distribution. PR #117 fixed per-rule frontmatter leak in emitted body, mid-rule truncation at end of emission, and redundant `# <filename>.md` H1 above natural H1 (closes /cli-audit 2026-05-10 findings). AGENTS.md: 59558B \u2192 58978B (-580B). GEMINI.md: 59567B \u2192 58987B (-580B). Both byte-identical to /tmp/shard-a-fixed pre-merge dry-run reference. Distribution also catches up 148 files of latent drift accumulated since prior full distribution at loom 2.29.0/dfd9ffca: 137 py-variant legacy full-file overlays + 10 globals + 1 slot-keyed compose. Multi-CLI emission refresh (.codex/.gemini) regenerated. SDK PINS unchanged (loom-only emit.mjs change). Origin: loom PR #117."
   },
   "changelog_2.29.0": {
     "date": "2026-05-09",
