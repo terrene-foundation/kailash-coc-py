@@ -1,7 +1,7 @@
 # COC Sync Marker — kailash-coc-py
-timestamp: 2026-05-11T01:00:00Z
+timestamp: 2026-05-11T00:12:37Z
 source: loom/.claude
-loom_sha: b840d8f
+loom_sha: 06a0c4a
 loom_version: 2.29.4
 variant: py
 clis: ["claude", "codex", "gemini"]
