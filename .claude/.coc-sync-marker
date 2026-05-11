@@ -1,21 +1,21 @@
 # COC Sync Marker — kailash-coc-py
-timestamp: 2026-05-11T00:00:00Z
+timestamp: 2026-05-11T01:00:00Z
 source: loom/.claude
-loom_sha: b50f869
+loom_sha: b840d8f
 loom_version: 2.29.4
 variant: py
 clis: ["claude", "codex", "gemini"]
 stats:
-  updated: 5         # value-prioritization + 4 modified hooks/agents
-  created: 22        # state-file-write-guard rule+lib, journal-classifier lib, session-end-hook fixtures (16), guides/rule-extracts/state-file-write-guard.md + sync-flow.md + worktree-orchestration.md (asymmetric)
+  updated: 2         # skills/project/SKILL.md frontmatter + .codex-mcp-guard/README.md Installation section
+  created: 2         # .codex-mcp-guard/package.json + .codex-mcp-guard/package-lock.json
   unchanged: 0
-  removed: 3         # obsoleted: anti-patterns.md, artifact-design.md, token-budget.md
+  removed: 0
   composed: 0
   preserved: 0       # template-owned (CLAUDE.md, README.md) not overwritten
   baselines_emitted:
     cc: 0            # CLAUDE.md preserved
-    codex: 1         # AGENTS.md
-    gemini: 1        # GEMINI.md
+    codex: 0         # AGENTS.md not regenerated this sync (no rule-set changes — content-fix-only commit)
+    gemini: 0        # GEMINI.md not regenerated this sync (no rule-set changes — content-fix-only commit)
   baseline_emission_bytes:
     block_cap_bytes: 61440
     warn_cap_bytes:  32768
@@ -39,3 +39,19 @@ stats:
       commands: 28
       skills: 22
       agents: 22
+# Notes on this sync (loom b840d8f, content-fix-only on top of 2.29.4):
+#   1. .claude/skills/project/SKILL.md gained YAML frontmatter (name+description)
+#      to satisfy Codex CLI's frontmatter-required parser. The fix propagates
+#      via standard .claude/ tree sync (the file is included in the use-template
+#      emission set despite skills/project/ being outside tier_subscriptions —
+#      tier_subscriptions filters .codex/skills/ and .gemini/skills/ emission
+#      via emit-cli-artifacts.mjs, NOT .claude/skills/ direct sync).
+#   2. skills/project is intentionally NOT in any tier's pattern set, so
+#      emit-cli-artifacts.mjs skips it for .codex/skills/ and .gemini/skills/.
+#      The Codex/Gemini sessions inherit the rule that "project" is a CC-only
+#      placeholder skill. This is steady-state by design, NOT a sync gap.
+#   3. .codex-mcp-guard/ gained package.json (declares @modelcontextprotocol/sdk
+#      ^1.29.0 dep), package-lock.json (40 KB, 92 packages, 0 vulnerabilities),
+#      and README.md Installation section documenting `cd .codex-mcp-guard &&
+#      npm ci`. POLICIES_POPULATED still false (guard fail-closed) — predicate
+#      wiring deferred per zero-tolerance.md Rule 2.
