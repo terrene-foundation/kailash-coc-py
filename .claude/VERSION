@@ -8,9 +8,9 @@
     "type": "coc-source",
     "version": "2.29.4",
     "build_version": "2.29.4",
-    "synced_at": "2026-05-11T00:12:37Z",
+    "synced_at": "2026-05-12T02:40:46Z",
     "sdk_packages": {
-      "kailash": "2.19.0",
+      "kailash": "2.20.3",
       "kailash-dataflow": "2.9.0",
       "kailash-nexus": "2.6.3",
       "kailash-kaizen": "2.21.0",
@@ -20,8 +20,8 @@
       "kailash-align": "0.7.1",
       "kaizen-agents": "0.9.7"
     },
-    "loom_sha": "06a0c4a",
-    "source_commit": "b50f869",
+    "loom_sha": "1c3b964",
+    "source_commit": "1c3b964",
     "template_version": "2.29.4"
   },
   "changelog": [
