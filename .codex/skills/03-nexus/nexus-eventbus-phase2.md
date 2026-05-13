@@ -187,8 +187,8 @@ session_events = app.get_events(session_id="session_123")
 
 ## Source Code
 
-- `packages/kailash-nexus/src/nexus/events.py` -- EventBus (janus.Queue, subscribe_filtered)
-- `packages/kailash-nexus/src/nexus/core.py` -- Phase 2 APIs (on_event, scheduled, emit)
-- `packages/kailash-nexus/src/nexus/bridges/dataflow.py` -- DataFlow event bridge
-- `packages/kailash-nexus/src/nexus/files.py` -- NexusFile
-- `packages/kailash-nexus/src/nexus/background.py` -- BackgroundService ABC
+- the nexus package (`src/nexus/events.py`) -- EventBus (janus.Queue, subscribe_filtered)
+- the nexus package (`src/nexus/core.py`) -- Phase 2 APIs (on_event, scheduled, emit)
+- the nexus package (`src/nexus/bridges/dataflow.py`) -- DataFlow event bridge
+- the nexus package (`src/nexus/files.py`) -- NexusFile
+- the nexus package (`src/nexus/background.py`) -- BackgroundService ABC

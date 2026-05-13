@@ -97,30 +97,30 @@ blackboard = Pipeline.blackboard(
 
 ### Comprehensive Guides
 
-For in-depth documentation, see `packages/kailash-kaizen/docs/`:
+For in-depth documentation, see the kaizen package (`docs/`):
 
 **Core Guides:**
 
-- **[BaseAgent Architecture](../../../packages/kailash-kaizen/docs/guides/baseagent-architecture.md)** - Complete unified agent system guide
-- **[Multi-Agent Coordination](../../../packages/kailash-kaizen/docs/guides/multi-agent-coordination.md)** - Google A2A protocol, 5 coordination patterns
-- **[Signature Programming](../../../packages/kailash-kaizen/docs/guides/signature-programming.md)** - Complete signature system guide
-- **[Hooks System Guide](../../../packages/kailash-kaizen/docs/guides/hooks-system-guide.md)** - Event-driven observability framework
-- **[Integration Patterns](../../../packages/kailash-kaizen/docs/guides/integration-patterns.md)** - DataFlow, Nexus, MCP integration
-- **[Meta-Controller Guide](../../../packages/kailash-kaizen/docs/guides/meta-controller-guide.md)** - Intelligent task delegation
-- **[Planning System Guide](../../../packages/kailash-kaizen/docs/guides/planning-system-guide.md)** - Structured workflow orchestration
+- **[BaseAgent Architecture](../../../the kaizen package directory docs/guides/baseagent-architecture.md)** - Complete unified agent system guide
+- **[Multi-Agent Coordination](../../../the kaizen package directory docs/guides/multi-agent-coordination.md)** - Google A2A protocol, 5 coordination patterns
+- **[Signature Programming](../../../the kaizen package directory docs/guides/signature-programming.md)** - Complete signature system guide
+- **[Hooks System Guide](../../../the kaizen package directory docs/guides/hooks-system-guide.md)** - Event-driven observability framework
+- **[Integration Patterns](../../../the kaizen package directory docs/guides/integration-patterns.md)** - DataFlow, Nexus, MCP integration
+- **[Meta-Controller Guide](../../../the kaizen package directory docs/guides/meta-controller-guide.md)** - Intelligent task delegation
+- **[Planning System Guide](../../../the kaizen package directory docs/guides/planning-system-guide.md)** - Structured workflow orchestration
 
 **Reference Documentation:**
 
-- **[API Reference](../../../packages/kailash-kaizen/docs/reference/api-reference.md)** - Complete API documentation
-- **[Checkpoint API](../../../packages/kailash-kaizen/docs/reference/checkpoint-api.md)** - State persistence API
-- **[Coordination API](../../../packages/kailash-kaizen/docs/reference/coordination-api.md)** - Multi-agent coordination API
-- **[Interrupts API](../../../packages/kailash-kaizen/docs/reference/interrupts-api.md)** - Graceful shutdown API
-- **[Memory API](../../../packages/kailash-kaizen/docs/reference/memory-api.md)** - 3-tier memory system API
-- **[Observability API](../../../packages/kailash-kaizen/docs/reference/observability-api.md)** - Hooks and monitoring API
-- **[Planning Agents API](../../../packages/kailash-kaizen/docs/reference/planning-agents-api.md)** - Planning/PEV/ToT agents API
-- **[Tools API](../../../packages/kailash-kaizen/docs/reference/tools-api.md)** - Tool calling and approval API
-- **[Configuration Guide](../../../packages/kailash-kaizen/docs/reference/configuration.md)** - All configuration options
-- **[Troubleshooting](../../../packages/kailash-kaizen/docs/reference/troubleshooting.md)** - Common issues and solutions
+- **[API Reference](../../../the kaizen package directory docs/reference/api-reference.md)** - Complete API documentation
+- **[Checkpoint API](../../../the kaizen package directory docs/reference/checkpoint-api.md)** - State persistence API
+- **[Coordination API](../../../the kaizen package directory docs/reference/coordination-api.md)** - Multi-agent coordination API
+- **[Interrupts API](../../../the kaizen package directory docs/reference/interrupts-api.md)** - Graceful shutdown API
+- **[Memory API](../../../the kaizen package directory docs/reference/memory-api.md)** - 3-tier memory system API
+- **[Observability API](../../../the kaizen package directory docs/reference/observability-api.md)** - Hooks and monitoring API
+- **[Planning Agents API](../../../the kaizen package directory docs/reference/planning-agents-api.md)** - Planning/PEV/ToT agents API
+- **[Tools API](../../../the kaizen package directory docs/reference/tools-api.md)** - Tool calling and approval API
+- **[Configuration Guide](../../../the kaizen package directory docs/reference/configuration.md)** - All configuration options
+- **[Troubleshooting](../../../the kaizen package directory docs/reference/troubleshooting.md)** - Common issues and solutions
 
 ### Quick Start (Skills)
 
@@ -278,7 +278,7 @@ Located in the package source:
 ### Testing & Quality
 
 - **[kaizen-testing-patterns](kaizen-testing-patterns.md)** - Testing AI agents
-- **[Performance Benchmarks](../../../packages/kailash-kaizen/docs/benchmarks/BENCHMARK_GUIDE.md)** - Measure Kaizen performance
+- **[Performance Benchmarks](../../../the kaizen package directory docs/benchmarks/BENCHMARK_GUIDE.md)** - Measure Kaizen performance
 
 ## Key Concepts
 
