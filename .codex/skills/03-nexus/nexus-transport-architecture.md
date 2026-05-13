@@ -152,7 +152,7 @@ class WebSocketTransport(Transport):
 
 ## Source Code
 
-- `packages/kailash-nexus/src/nexus/transports/base.py` -- Transport ABC
-- `packages/kailash-nexus/src/nexus/transports/http.py` -- HTTPTransport
-- `packages/kailash-nexus/src/nexus/transports/mcp.py` -- MCPTransport
-- `packages/kailash-nexus/src/nexus/registry.py` -- HandlerRegistry, HandlerDef, HandlerParam
+- the nexus package (`src/nexus/transports/base.py`) -- Transport ABC
+- the nexus package (`src/nexus/transports/http.py`) -- HTTPTransport
+- the nexus package (`src/nexus/transports/mcp.py`) -- MCPTransport
+- the nexus package (`src/nexus/registry.py`) -- HandlerRegistry, HandlerDef, HandlerParam

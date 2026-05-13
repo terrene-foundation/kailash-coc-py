@@ -60,7 +60,43 @@ cp    "$SISTER/GEMINI.md"        ./GEMINI.md
 
 ## Step 4 — `.claude/` refresh
 
-Run downstream-sync semantics against the sister (`skills/30-claude-code-patterns/sync-flow.md` § Downstream Sync). Diffs sister `.claude/` against project `.claude/`; overwrites template-owned files; preserves `.claude/settings.local.json`, `.claude/.proposals/`, `.claude/learning/`. Purges paths in sister's `.claude/.coc-obsoleted`. Picks up new binaries (`emit.mjs`, `emit-cli-artifacts.mjs`).
+Run downstream-sync semantics against the sister (`skills/30-claude-code-patterns/sync-flow.md` § Downstream Sync). The semantics are **additive-merge with explicit obsoletion**, NOT wholesale replacement (per `rules/cross-repo.md` Rule 4):
+
+- **Overwrites** template-owned files when sister has a newer/different version
+- **Preserves** project-only files: `.claude/settings.local.json`, `.claude/.proposals/`, `.claude/learning/`, `.claude/workspaces/`, AND any path that exists in project but NOT in sister AND is NOT on the sister's `.coc-obsoleted` list
+- **Purges** paths explicitly listed in sister's `.claude/.coc-obsoleted` (declarative obsoletion overrides preservation)
+- **Picks up** new binaries (`emit.mjs`, `emit-cli-artifacts.mjs`)
+
+**Implementation pattern (do NOT wholesale `cp -r sister/.claude/ ./.claude/`):**
+
+```bash
+# DO — per-file diff + merge respecting cross-repo Rule 4
+SISTER_OBSOLETED=$(cat "$SISTER/.claude/.coc-obsoleted" 2>/dev/null || echo "")
+# Compute the file set: sister's files + project's surviving files (not on obsoleted)
+# Apply per-file: write sister content for shared paths; preserve project-only files
+# (a real implementation walks `find $SISTER/.claude` and per-file decides write-vs-preserve;
+#  pseudo-code intentional — the agent following this step must NOT bulk `cp -r`).
+
+# DO NOT — wholesale replacement drops project-only files
+rm -rf .claude && cp -r "$SISTER/.claude" .claude
+# (this violates cross-repo Rule 4; if your implementation does this, surface the gap)
+```
+
+**Post-Step-4 self-check:** `git status` MUST NOT show any DELETED file under `.claude/` that is NOT in sister's `.coc-obsoleted` list. If it does, the Step 4 implementation regressed to wholesale replacement; recover via `git checkout main -- <path>` for each unintentional deletion AND open an issue against the migrate.md protocol.
+
+### Step 4a — Scaffold the symlink + manifest the emitters need (MUST)
+
+`.claude/bin/emit.mjs` and `.claude/bin/emit-cli-artifacts.mjs` (invoked at Step 6) require two artifacts that sister templates do NOT ship today:
+
+```bash
+# 1. codex-mcp-guard symlink — emit.mjs imports policies via relative path from .claude/bin/
+[ -e .claude/codex-mcp-guard ] || ln -s ../.codex-mcp-guard .claude/codex-mcp-guard
+
+# 2. sync-manifest.yaml — emit-cli-artifacts.mjs reads tiers + cli_emit_exclusions
+[ -f .claude/sync-manifest.yaml ] || cp "$LOOM_PATH/.claude/sync-manifest.yaml" .claude/sync-manifest.yaml
+```
+
+`$LOOM_PATH` resolves to wherever loom is checked out locally (typically `~/repos/loom`); if absent, the agent MUST surface a clear error before invoking Step 6. These two artifacts are tracked for inclusion in sister templates via `multi_cli_overlays:` (separate workstream); until that lands, /migrate MUST scaffold them inline.
 
 ## Step 5 — CLAUDE.md 3-way reconciliation
 

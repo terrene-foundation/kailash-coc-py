@@ -46,6 +46,7 @@ function safeWriteFileSync(filePath, data) {
 }
 
 import { parseSlotsV5, applyOverlay } from "./lib/slot-parser.mjs";
+import { resolveOverlay } from "./lib/variant-overlay.mjs";
 import { extractPolicies } from "../codex-mcp-guard/extract-policies.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -253,50 +254,46 @@ export function composeRule(ruleName, cli, lang = null) {
   let composed = fs.readFileSync(globalPath, "utf8");
   const warnings = [];
 
-  // Language-axis only overlay (applied first; Phase I2 2026-04-22)
-  if (lang) {
-    const langOnly = path.join(
-      REPO,
-      ".claude",
-      "variants",
-      lang,
-      "rules",
-      ruleName,
-    );
-    if (fs.existsSync(langOnly)) {
-      const overlay = fs.readFileSync(langOnly, "utf8");
+  // Axis resolution defers to resolveOverlay() so sync-manifest.yaml::variants
+  // is the source of truth. `null` declarations skip the axis even if a
+  // legacy file exists on disk (closes the phantom-overlay class — e.g.
+  // `variants/py/rules/ci-runners.md` exists despite the manifest declaring
+  // `[py] ci-runners.md: null`).
+  //
+  // Composition order matches the documented precedent: language-axis first,
+  // CLI-axis second, ternary (lang-cli) third. All present overlays compose
+  // additively (slot bodies replace global slots; full-file overlays replace
+  // composed body entirely — last writer wins).
+  const applyAxis = (axis, axisLabel) => {
+    const res = resolveOverlay("rules", ruleName, axis);
+    if (res.kind === "manifest-null") return;
+    if (!fs.existsSync(res.path)) {
+      if (res.kind === "manifest-explicit") {
+        throw new Error(
+          `sync-manifest.yaml::variants declares overlay '${path.relative(REPO, res.path)}' ` +
+            `for rules/${ruleName} axis '${axis}', but the file is missing (manifest defect)`,
+        );
+      }
+      return;
+    }
+    const overlay = fs.readFileSync(res.path, "utf8");
+    if (overlay.includes("<!-- slot:")) {
+      // Slot-keyed overlay — compose via slot-parser (Phase F2 convention).
       const { composed: c, warnings: w } = applyOverlay(composed, overlay);
       composed = c;
-      warnings.push(...w.map((m) => `[${lang}] ${m}`));
+      warnings.push(...w.map((m) => `[${axisLabel}] ${m}`));
+    } else {
+      // Full-file overlay — variant wins per artifact-flow.md § Variant
+      // Overlay Semantics. Pre-2026-05-12 composeRule had no branch for
+      // this and silently no-op'd against legacy full-file overlays (e.g.
+      // variants/prism/rules/*.md). Mirror composeArtifactBody behavior.
+      composed = overlay;
     }
-  }
+  };
 
-  // CLI-only overlay
-  const cliOnly = path.join(REPO, ".claude", "variants", cli, "rules", ruleName);
-  if (fs.existsSync(cliOnly)) {
-    const overlay = fs.readFileSync(cliOnly, "utf8");
-    const { composed: c, warnings: w } = applyOverlay(composed, overlay);
-    composed = c;
-    warnings.push(...w.map((m) => `[${cli}] ${m}`));
-  }
-
-  // Ternary (lang × CLI) overlay — stacked on top of CLI-only
-  if (lang) {
-    const ternary = path.join(
-      REPO,
-      ".claude",
-      "variants",
-      `${lang}-${cli}`,
-      "rules",
-      ruleName,
-    );
-    if (fs.existsSync(ternary)) {
-      const overlay = fs.readFileSync(ternary, "utf8");
-      const { composed: c, warnings: w } = applyOverlay(composed, overlay);
-      composed = c;
-      warnings.push(...w.map((m) => `[${lang}-${cli}] ${m}`));
-    }
-  }
+  if (lang) applyAxis(lang, lang);
+  applyAxis(cli, cli);
+  if (lang) applyAxis(`${lang}-${cli}`, `${lang}-${cli}`);
 
   return { composed, warnings };
 }

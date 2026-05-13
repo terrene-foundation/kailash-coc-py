@@ -71,8 +71,8 @@ app = Nexus([workflow], preset="standard")
 
 ## Source Files
 
-- `packages/kailash-nexus/src/nexus/probes.py`
-- `packages/kailash-nexus/src/nexus/openapi.py`
-- `packages/kailash-nexus/src/nexus/middleware/security_headers.py`
-- `packages/kailash-nexus/src/nexus/middleware/csrf.py`
-- `packages/kailash-nexus/src/nexus/presets.py`
+- the nexus package (`src/nexus/probes.py`)
+- the nexus package (`src/nexus/openapi.py`)
+- the nexus package (`src/nexus/middleware/security_headers.py`)
+- the nexus package (`src/nexus/middleware/csrf.py`)
+- the nexus package (`src/nexus/presets.py`)

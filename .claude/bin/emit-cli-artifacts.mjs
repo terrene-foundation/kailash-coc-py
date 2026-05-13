@@ -58,6 +58,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { applyOverlay } from "./lib/slot-parser.mjs";
+import { resolveOverlay } from "./lib/variant-overlay.mjs";
+import { stripBuildInternalReferences } from "./lib/strip-build-internal.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO = path.resolve(__dirname, "..", "..");
@@ -319,10 +321,23 @@ function loadTargetVariant(target) {
 //
 // Without `lang` (legacy emit-everything mode), only the CLI-axis
 // overlay is applied.
+//
+// Return shape: { body, destRelPath } | null
+//   body:        composed file content
+//   destRelPath: relPath on the destination tree. Equals input relPath UNLESS
+//                the manifest declares an explicit overlay whose basename
+//                differs from the global (true rename — e.g.
+//                skills/.../python-version-bump.md → rust-version-bump.md on rs).
+//
+// Overlay resolution per axis uses resolveOverlay() from lib/variant-overlay.mjs:
+//   - manifest-explicit + file missing → halt (manifest defect)
+//   - manifest-null                    → skip overlay for this axis
+//   - manifest-explicit / path-mirror  → apply if file exists
 function composeArtifactBody(category, relPath, cli, lang) {
   const globalPath = path.join(REPO, ".claude", category, relPath);
   if (!fs.existsSync(globalPath)) return null;
   let composed = fs.readFileSync(globalPath, "utf8");
+  let destRelPath = relPath;
 
   const axes = [];
   if (lang) axes.push(lang);
@@ -330,16 +345,20 @@ function composeArtifactBody(category, relPath, cli, lang) {
   if (lang && cli) axes.push(`${lang}-${cli}`);
 
   for (const axis of axes) {
-    const overlayPath = path.join(
-      REPO,
-      ".claude",
-      "variants",
-      axis,
-      category,
-      relPath,
-    );
-    if (!fs.existsSync(overlayPath)) continue;
-    const overlay = fs.readFileSync(overlayPath, "utf8");
+    const res = resolveOverlay(category, relPath, axis);
+    if (res.kind === "manifest-null") continue;
+    if (!fs.existsSync(res.path)) {
+      if (res.kind === "manifest-explicit") {
+        process.stderr.write(
+          `emit-cli-artifacts: sync-manifest.yaml::variants declares overlay ` +
+            `'${path.relative(REPO, res.path)}' for ${category}/${relPath} ` +
+            `axis '${axis}', but the file is missing — halt (manifest defect).\n`,
+        );
+        process.exit(2);
+      }
+      continue;
+    }
+    const overlay = fs.readFileSync(res.path, "utf8");
     if (overlay.includes("<!-- slot:")) {
       // Slot-keyed: compose via slot-parser
       const { composed: c } = applyOverlay(composed, overlay);
@@ -348,8 +367,21 @@ function composeArtifactBody(category, relPath, cli, lang) {
       // Full-file replacement
       composed = overlay;
     }
+    // Renames carry through the destination basename — last explicit wins.
+    if (res.kind === "manifest-explicit" && res.destRelPath !== relPath) {
+      destRelPath = res.destRelPath;
+    }
   }
-  return composed;
+  // Strip BUILD-internal references before returning. Per
+  // .claude/agents/management/coc-sync.md Step 3a — every artifact
+  // landing in a USE template MUST be stripped of paths the USE
+  // consumer cannot resolve (workspaces/multi-cli-coc/, packages/
+  // kailash-*/, gh api repos/<concrete-org>/kailash-*, etc.). The
+  // transform is idempotent; running on already-clean content is a
+  // no-op. See .claude/bin/lib/strip-build-internal.mjs for the
+  // codified pattern set + audit fixtures.
+  const { stripped } = stripBuildInternalReferences(composed);
+  return { body: stripped, destRelPath };
 }
 
 // ────────────────────────────────────────────────────────────────
@@ -496,15 +528,17 @@ function emitCommands({ outDir, exclusions, tierFilter, lang, verbose }) {
     // Apply variant overlays per (lang, codex) 3-axis stack so codex/prompts
     // matches the same composed content CC sees in .claude/commands/.
     if (!matchesAnyGlob(manifestRel, exclusions.codex)) {
-      const codexBody = composeArtifactBody("commands", relPath, "codex", lang);
+      const codexResult = composeArtifactBody("commands", relPath, "codex", lang);
+      const { body: codexBody, destRelPath: codexDest } = codexResult;
       const { frontmatter: cFm, body: cBody } = parseFrontmatter(codexBody);
-      const cDesc = cFm.description || `Loom command: ${name}`;
+      const codexName = path.basename(codexDest, ".md");
+      const cDesc = cFm.description || `Loom command: ${codexName}`;
       const cTrimmed = cBody.replace(/^\n+/, "").replace(/\n+$/, "\n");
-      const codexPath = path.join(outDir, "codex", "prompts", `${name}.md`);
-      const codexContent = `---\nname: ${name}\ndescription: "${cDesc}"\n---\n\n${cTrimmed}`;
+      const codexPath = path.join(outDir, "codex", "prompts", `${codexName}.md`);
+      const codexContent = `---\nname: ${codexName}\ndescription: "${cDesc}"\n---\n\n${cTrimmed}`;
       safeWriteFileSync(codexPath, codexContent);
       stats.codex++;
-      if (verbose) console.log(`  codex   prompts/${name}.md`);
+      if (verbose) console.log(`  codex   prompts/${codexName}.md`);
     } else {
       stats.skipped++;
     }
@@ -512,16 +546,18 @@ function emitCommands({ outDir, exclusions, tierFilter, lang, verbose }) {
     // Gemini — TOML. Body becomes the prompt string. Apply (lang, gemini)
     // overlays.
     if (!matchesAnyGlob(manifestRel, exclusions.gemini)) {
-      const geminiBody = composeArtifactBody("commands", relPath, "gemini", lang);
+      const geminiResult = composeArtifactBody("commands", relPath, "gemini", lang);
+      const { body: geminiBody, destRelPath: geminiDest } = geminiResult;
       const { frontmatter: gFm, body: gBody } = parseFrontmatter(geminiBody);
-      const gDesc = gFm.description || `Loom command: ${name}`;
+      const geminiName = path.basename(geminiDest, ".md");
+      const gDesc = gFm.description || `Loom command: ${geminiName}`;
       const gTrimmed = gBody.replace(/^\n+/, "").replace(/\n+$/, "\n");
-      const geminiPath = path.join(outDir, "gemini", "commands", `${name}.toml`);
+      const geminiPath = path.join(outDir, "gemini", "commands", `${geminiName}.toml`);
       const toolsLine = GEMINI_DEFAULT_COMMAND_TOOLS
         .map((t) => `"${t}"`)
         .join(", ");
       const tomlContent = [
-        `name = "${name}"`,
+        `name = "${geminiName}"`,
         `description = "${gDesc.replace(/"/g, '\\"')}"`,
         `prompt = '''`,
         tomlLiteralEscape(gTrimmed).replace(/\n+$/, ""),
@@ -531,7 +567,7 @@ function emitCommands({ outDir, exclusions, tierFilter, lang, verbose }) {
       ].join("\n");
       safeWriteFileSync(geminiPath, tomlContent);
       stats.gemini++;
-      if (verbose) console.log(`  gemini  commands/${name}.toml`);
+      if (verbose) console.log(`  gemini  commands/${geminiName}.toml`);
     }
   }
 
@@ -603,20 +639,27 @@ function emitSkills({ outDir, exclusions, tierFilter, lang, verbose }) {
 function emitSkillTreeWithOverlays({ skillName, skillSrc, skillOut, cli, lang }) {
   fs.mkdirSync(skillOut, { recursive: true });
   for (const { absPath, relPath } of walkFiles(skillSrc)) {
-    const outFile = path.join(skillOut, relPath);
     // For markdown files, apply variant-overlay composition. Non-md
     // files (e.g., images, fixtures) are copied byte-for-byte — they
     // never have variant overlays.
     if (relPath.endsWith(".md")) {
       const category = "skills";
       const skillRelPath = path.posix.join(skillName, relPath);
-      const composed = composeArtifactBody(category, skillRelPath, cli, lang);
-      if (composed !== null) {
-        safeWriteFileSync(outFile, composed);
+      const result = composeArtifactBody(category, skillRelPath, cli, lang);
+      if (result !== null) {
+        // Destination path follows manifest rename when present:
+        // skills/<skill>/<rename>.md instead of skills/<skill>/<orig>.md.
+        // Strip the leading "<skill>/" so the path is relative to skillOut.
+        const destBelowSkill = result.destRelPath.startsWith(`${skillName}/`)
+          ? result.destRelPath.slice(skillName.length + 1)
+          : result.destRelPath;
+        const outFile = path.join(skillOut, destBelowSkill);
+        safeWriteFileSync(outFile, result.body);
         continue;
       }
     }
-    // Fallback: byte copy.
+    // Fallback: byte copy (destination keeps original relPath).
+    const outFile = path.join(skillOut, relPath);
     const data = fs.readFileSync(absPath);
     safeWriteFileSync(outFile, data);
   }
@@ -708,8 +751,8 @@ function emitGeminiAgents({ outDir, exclusions, tierFilter, lang, verbose }) {
     // emitted gemini agent matches the composed content CC sees in
     // .claude/agents/ for the same target. Without this, .gemini/agents/
     // ships globals while .claude/agents/ ships variant-composed bodies.
-    const source = composeArtifactBody("agents", relPath, "gemini", lang) ||
-      fs.readFileSync(absPath, "utf8");
+    const composedResult = composeArtifactBody("agents", relPath, "gemini", lang);
+    const source = composedResult ? composedResult.body : fs.readFileSync(absPath, "utf8");
     const { frontmatter, body } = parseFrontmatter(source);
     const name = frontmatter.name || path.basename(relPath, ".md");
     const description = frontmatter.description || `${name} specialist`;

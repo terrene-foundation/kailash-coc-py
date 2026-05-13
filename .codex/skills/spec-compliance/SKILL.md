@@ -102,7 +102,7 @@ For every "MOVE A → B" task, the source path A MUST satisfy ONE of:
 - (c) imports from B AND emits `DeprecationWarning`
 
 ```bash
-wc -l src/kailash/mcp_server/client.py packages/kailash-mcp/src/kailash_mcp/client.py
+wc -l src/kailash/mcp_server/client.py the mcp package directory src/kailash_mcp/client.py
 # Both 1088 lines → CRITICAL: copied not moved (drift risk)
 
 # If source is a thin shim, verify it imports from new path AND warns:
