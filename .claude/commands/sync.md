@@ -61,6 +61,8 @@ Merges loom/ source + variant overlays into USE template repos. This is a **merg
 11. Verify hooks — every entry in `settings.json` has a script on disk.
 12. Mark BUILD proposal as `distributed` with `distributed_date`.
 
+**Multi-CLI scaffold (Step 4.6 in coc-sync)**: for multi-CLI USE templates (`template_type: multi-cli`), Gate 2 emits the symlinks and conditional manifest declared under `sync-manifest.yaml::multi_cli_overlays.<template_type>.symlinks` + `manifest_distribute`. Closes the `/migrate` Step-4a inline-workaround gap (#184). Cc-only-legacy templates are unaffected.
+
 **Pre-commit gate**: run `tools/verify-overlays.sh <target>` from loom — MUST report `Failing: 0` (slot-keyed-aware since v2.21.1). Any CRIT-2 / drift / deployed-missing row blocks the cycle.
 
 **Report shape**:
@@ -75,7 +77,7 @@ Dependencies: uv sync ✓ | Hooks: 11/11 | VERSION: 1.0.0→1.1.0
 
 ## Exclusions
 
-Never synced: `learning/`, `.proposals/`, `sync-manifest.yaml`, `variants/`, `settings.local.json`, `CLAUDE.md`, `.env`, `.git/`. Full list: `skills/30-claude-code-patterns/sync-flow.md` § Exclusions.
+Never synced: `learning/`, `.proposals/`, `variants/`, `settings.local.json`, `CLAUDE.md`, `.env`, `.git/`. `sync-manifest.yaml` is excluded from cc-only-legacy templates AND from BUILD repos, but **emitted to multi-CLI USE templates** when `multi_cli_overlays.<template_type>.manifest_distribute: true` (the emitter at the project repo reads it at `/migrate` time). Full list: `skills/30-claude-code-patterns/sync-flow.md` § Exclusions.
 
 ## Delegate
 

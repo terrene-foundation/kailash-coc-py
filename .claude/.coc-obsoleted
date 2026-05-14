@@ -28,6 +28,7 @@ scripts/resolve-template.js
 .claude/skills/30-claude-code-patterns/anti-patterns.md
 .claude/skills/30-claude-code-patterns/artifact-design.md
 .claude/skills/30-claude-code-patterns/token-budget.md
+.claude/skills/management/
 .claude/rules/documentation.md
 .claude/skills/30-claude-code-patterns/sdk-upstream-donation.md
 .claude/guides/co-setup/
