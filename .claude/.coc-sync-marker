@@ -1,24 +1,20 @@
 # COC Sync Marker — kailash-coc-py
-timestamp: 2026-05-13T03:39:04Z
+timestamp: 2026-05-15T01:15:00Z
 source: loom/.claude
-loom_sha: 2a497fc
-loom_version: 2.30.0
+loom_sha: b39410c
+loom_version: 2.31.0
+template_version: 1.7.0
 variant: py
 clis: [claude, codex, gemini]
-correction: issue-179-overlay-regression-repair
 stats:
-  total_considered: 1604
-  global_written: 8
-  global_unchanged: 401
-  overlay_full_written: 137
-  overlay_full_unchanged: 4
-  overlay_slot_written: 1
-  overlay_slot_unchanged: 0
-  overlay_compose_failed: 0
-  variant_only_written: 4
-  variant_only_unchanged: 15
-  excluded_skipped: 773
-  tier_filtered: 280
+  updated: 7        # 7 tier-classified files
+  manifest_distributed: 1   # sync-manifest.yaml refreshed (multi_cli_overlays.manifest_distribute=true)
+  symlinks_created: 1       # .claude/codex-mcp-guard → ../.codex-mcp-guard (Step 4.6)
+  created: 0
+  unchanged: 0
+  composed: 0      # py:null overlay for agents.md — global propagates as-is
+  preserved: 1     # CLAUDE.md (template-owned, Step 7)
+  obsoleted_purged: 0   # all manifest-declared obsoleted paths already absent
   baselines_emitted:
     cc: 0           # CLAUDE.md preserved
     codex: 1        # AGENTS.md
@@ -28,33 +24,60 @@ stats:
     warn_cap_bytes: 32768
     codex:
       rules: 10
-      bytes: 52956
+      bytes: 56288       # bumped from 52956 due to agents.md slot-partition refactor
       tier: WARN
-      headroom_bytes: 8484
-      headroom_pct: 13.81
+      headroom_bytes: 5152
+      headroom_pct: 8.39
     gemini:
       rules: 10
-      bytes: 52965
+      bytes: 56259
       tier: WARN
-      headroom_bytes: 8475
-      headroom_pct: 13.79
+      headroom_bytes: 5181
+      headroom_pct: 8.43
   cli_artifacts:
     codex:
       prompts: 28
       skills: 26
+      refreshed: [cli-audit.md, migrate.md, sync.md]
     gemini:
       commands: 28
       skills: 26
       agents: 22
+      refreshed: [cli-audit.toml, migrate.toml, sync.toml]
   mcp_guard:
-    policies_populated: false
-  preserved:
+    policies_populated: false   # Loom-B not yet wired
+  preserved_paths:
     - CLAUDE.md
+cli_drift_audit:
+  rules: 10
+  critical: 0
+  warn: 1         # expected examples-only drift on agents.md (per parity_enforcement.warn_on_drift_in_slots)
+  note: 0
 verify_overlays:
   langs_checked: py
   total_checks: 286
   passing: 286
   failing: 0
   post_sync_status: PASS
-sdk_pin_change: null   # No pyproject.toml in this template
+sdk_pin_change:
+  consumer_facing: true
+  kailash: 2.20.3 → 2.21.0
+  kailash-dataflow: 2.9.0 → 2.9.7
 uv_sync: skip          # No pyproject.toml in this template
+files_distributed:
+  - .claude/agents/cli-orchestrator.md
+  - .claude/commands/cli-audit.md
+  - .claude/commands/migrate.md
+  - .claude/commands/sync.md
+  - .claude/rules/agents.md
+  - .claude/rules/worktree-isolation.md
+  - .claude/skills/30-claude-code-patterns/multi-cli-migration.md
+  - .claude/sync-manifest.yaml
+  - AGENTS.md
+  - GEMINI.md
+  - .codex/prompts/cli-audit.md
+  - .codex/prompts/migrate.md
+  - .codex/prompts/sync.md
+  - .gemini/commands/cli-audit.toml
+  - .gemini/commands/migrate.toml
+  - .gemini/commands/sync.toml
