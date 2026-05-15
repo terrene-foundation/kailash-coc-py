@@ -197,10 +197,10 @@ Also available via `kaizen_agents.patterns`. The deprecated `kaizen_agents.agent
 
 ## LLM Wire Layer (`kaizen.llm.LlmClient`)
 
-Below the `Delegate` API sits `kaizen.llm.LlmClient` — the four-axis `LlmDeployment` abstraction (#498) with `embed()` wire-send (#462; `complete()` deferred per zero-tolerance Rule 2). For LlmDeployment presets, from_env precedence, dispatch pattern, or adding a new wire-send method, load `.claude/skills/04-kaizen/kaizen-llm-deployment.md` first. Authoritative spec: `specs/kaizen-llm-deployments.md`. Cross-SDK parity: `esperie-enterprise/kailash-rs#406` + `#393` + `#394`.
+Below the `Delegate` API sits `kaizen.llm.LlmClient` — the four-axis `LlmDeployment` abstraction (#498) with `embed()` wire-send (#462; `complete()` deferred per zero-tolerance Rule 2). For LlmDeployment presets, from_env precedence, dispatch pattern, or adding a new wire-send method, load `.gemini/skills/04-kaizen/kaizen-llm-deployment.md` first. Authoritative spec: `specs/kaizen-llm-deployments.md`. Cross-SDK parity: `esperie-enterprise/kailash-rs#406` + `#393` + `#394`.
 
 ## Full Documentation
 
-- `.claude/skills/04-kaizen/SKILL.md` -- Complete Kaizen skill index
-- `.claude/skills/04-kaizen/kaizen-advanced-patterns.md` -- Advanced patterns
-- `.claude/skills/04-kaizen/kaizen-llm-deployment.md` -- LLM wire layer (#498 + #462)
+- `.gemini/skills/04-kaizen/SKILL.md` -- Complete Kaizen skill index
+- `.gemini/skills/04-kaizen/kaizen-advanced-patterns.md` -- Advanced patterns
+- `.gemini/skills/04-kaizen/kaizen-llm-deployment.md` -- LLM wire layer (#498 + #462)

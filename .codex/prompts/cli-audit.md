@@ -124,8 +124,8 @@ Run iteratively until zero CRITICAL and zero HIGH remain. Each iteration MUST re
 
 ## References
 
-- `.claude/agents/cli-orchestrator.md` — the 5 verbs; `/cli-audit` dispatches `audits` + `sees`
-- `.claude/agents/{cc,codex,gemini}-architect.md` — parallel audit targets
+- `.codex/agents/cli-orchestrator.md` — the 5 verbs; `/cli-audit` dispatches `audits` + `sees`
+- `.codex/agents/{cc,codex,gemini}-architect.md` — parallel audit targets
 - `.claude/bin/emit.mjs` — Phase E4 emitter (V12 + V13 built-in)
 - `.claude/sync-manifest.yaml` → `cli_variants` + `parity_enforcement` — emission + audit config
 - `.claude/rules/cross-cli-parity.md` — parity contract source of truth

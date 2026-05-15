@@ -206,7 +206,7 @@ Use `pattern-expert` subagent when:
 ## Documentation References
 
 ### Primary Sources
-- **Pattern Expert**: [`.claude/agents/pattern-expert.md` (lines 294-338)](../../../../.claude/agents/pattern-expert.md#L294-L338)
+- **Pattern Expert**: [`.codex/agents/pattern-expert.md` (lines 294-338)](../../../../.claude/agents/pattern-expert.md#L294-L338)
 
 ### Related Documentation
 - **Critical Rules**: [`CLAUDE.md` (line 140)](../../../../CLAUDE.md#L140)

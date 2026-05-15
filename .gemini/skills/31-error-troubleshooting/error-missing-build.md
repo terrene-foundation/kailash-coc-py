@@ -160,7 +160,7 @@ Use `pattern-expert` subagent when:
 ## Documentation References
 
 ### Primary Sources
-- **Pattern Expert**: [`.claude/agents/pattern-expert.md` (lines 257-264)](../../../agents/pattern-expert.md#L257-L264)
+- **Pattern Expert**: [`.gemini/agents/pattern-expert.md` (lines 257-264)](../../../agents/pattern-expert.md#L257-L264)
 - **Essential Pattern**: [`CLAUDE.md` (lines 139-141)](../../../../CLAUDE.md#L139-L141)
 
 ### Related Documentation

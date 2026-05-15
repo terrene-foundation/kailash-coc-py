@@ -122,6 +122,6 @@ Also update the main SDK's optional extras in `pyproject.toml` to reference the 
 
 After bumping, verify ALL versions are consistent:
 
-**Full reference**: `.claude/skills/management/release-checklist.md`
+**Full reference**: `.gemini/skills/management/release-checklist.md`
 '''
 tools = ["read_file", "glob", "grep_search", "list_directory", "run_shell_command", "write_file"]

@@ -124,4 +124,4 @@ Also update the main SDK's optional extras in `pyproject.toml` to reference the 
 
 After bumping, verify ALL versions are consistent:
 
-**Full reference**: `.claude/skills/management/release-checklist.md`
+**Full reference**: `.codex/skills/management/release-checklist.md`
