@@ -228,6 +228,7 @@ cli_variants:
       size_cap_bytes: 65536
       warn_cap_bytes: 32768            # refactoring-signal threshold
       block_cap_bytes: 61440           # v6: raised from 40960 to match override ceiling less 4 KiB safety margin
+      headroom_floor_pct: 10           # v6.2 Risk-0004 floor — emission MUST keep ≥10% margin under block_cap; per-lang enforcement at emission time per workspaces/multi-cli-coc/02-plans/08-loom-v6.2-headroom-validator.md Shard 1
       block_cap_rationale: |
         Codex native cap is 32,768 bytes; mandatory invocation flag
         -c project_doc_max_bytes=65536 raises operational cap to 65,536
@@ -333,15 +334,34 @@ cli_variants:
           "communication.md": 1800
           "verify-resource-existence.md": 4200
           "repo-scope-discipline.md": 2800
-          "sweep-completeness.md": 3200
+          # sweep-completeness.md DEMOTED to path-scoped at v6.2-Shard-3
+          # (2026-05-15) — frees ~3,550 B baseline emission across both
+          # codex+gemini, restoring rs-lang headroom from 9.81%/9.85%
+          # (BELOW 10% Risk-0004 floor) to ~15%+. Demoted per
+          # workspaces/multi-cli-coc/02-plans/08-loom-v6.2-headroom-validator.md
+          # Shard 3 + journal/0072. Rule still loads in /sweep, /redteam,
+          # /codify, /vet command sessions via paths predicate covering
+          # those command files + corresponding skill/workspace paths.
+          # Selection over loom-csq-boundary.md / coc-sync-landing.md:
+          # narrowest fire condition (only multi-step protocol substitution
+          # decisions) AND largest reclamation (3,550 B vs 1,299 B for
+          # coc-sync-landing). loom-csq-boundary.md rejected because its
+          # Rule 5 (commit-tagging for COC shape changes) actually fires
+          # across all .claude/rules/ + sync-manifest.yaml edits — wider
+          # than path predicate suggests.
           "coc-sync-landing.md": 1400
         per_rule_budget_tolerance: "±30%"
         per_rule_budget_block_threshold: "+30%"
     gemini:
       emit_to: "GEMINI.md"
-      # Gemini cap/abridgement TBD: refined at Phase E2 when the
-      # gemini-architect agent lands. Inherits codex's abridgement
-      # protocol as a v6 placeholder per spec §2.2.
+      # Gemini caps mirror codex's contract per cross-cli-parity.md MUST
+      # Rule 1 (neutral-body slot invariant across CLIs). Caps were
+      # implicit pre-v6.2 (loadCliCaps fallback path); v6.2 makes them
+      # explicit so headroom_floor_pct lives at the single source of
+      # truth instead of a regex fallback default.
+      warn_cap_bytes: 32768            # mirror codex per parity contract
+      block_cap_bytes: 61440           # mirror codex per parity contract
+      headroom_floor_pct: 10           # v6.2 Risk-0004 floor — parity-locked to codex per cross-cli-parity.md MUST-1
       inherit_abridgement_from: "codex"
 
   # agents/**.md — TOML-header safety for codex-ingested agent files.
@@ -420,14 +440,20 @@ parity_enforcement:
   # Cross-CLI drift check — byte-identity on neutral-body + frontmatter
   # classification across every CLI emission of the same underlying
   # artifact. Syntactic-delegation tokens are scrubbed to avoid false
-  # positives (CC `Agent(` vs Codex `codex_agent(` vs Gemini `@specialist`
-  # are EXPECTED divergence, not drift).
+  # positives (CC `Agent(` vs Codex `/prompts:specialist-<name>` vs
+  # Gemini `@specialist` are EXPECTED divergence, not drift). The
+  # legacy `codex_agent(` token stays in the scrub list for backward
+  # compatibility while ternary py-codex / rs-codex overlays drain;
+  # new codex variants emit `/prompts:specialist-` exclusively per the
+  # 2026-05-15 deterministic shim landing (see
+  # .claude/bin/emit-cli-artifacts.mjs::emitCodexAgentPrompts).
   cross_cli_drift_audit:
     enabled: true
     compare_slots: ["neutral-body", "frontmatter.priority", "frontmatter.scope"]
     scrub_tokens:
       - "Agent("
       - "codex_agent("
+      - "/prompts:specialist-"
       - "@specialist"
       - "subagent_type"
       - "run_in_background"

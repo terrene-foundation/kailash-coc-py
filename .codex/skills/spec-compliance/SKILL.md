@@ -68,7 +68,7 @@ for node in ast.walk(tree):
 grep -A 5 "^class StreamingAgent" src/kaizen/streaming/agent.py | grep "def __init__"
 ```
 
-> **Cross-SDK note**: This skill is Python-only because it syncs to USE templates that serve Python and Ruby developers. The kailash-rs BUILD repo (the only place where non-Python source is edited) maintains its OWN equivalent verification protocol locally at `.claude/skills/spec-compliance/rust-parity.md`, which loom never overwrites. Do NOT add non-Python examples to this global skill.
+> **Cross-SDK note**: This skill is Python-only because it syncs to USE templates that serve Python and Ruby developers. The kailash-rs BUILD repo (the only place where non-Python source is edited) maintains its OWN equivalent verification protocol locally at `.codex/skills/spec-compliance/rust-parity.md`, which loom never overwrites. Do NOT add non-Python examples to this global skill.
 
 #### 2. Field Presence Verification
 

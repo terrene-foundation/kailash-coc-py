@@ -270,9 +270,9 @@ PEP 563 turns type annotations into strings, preventing Nexus from recognizing `
 
 When this guidance is insufficient, consult:
 
-- `.claude/skills/03-nexus/` - Complete Nexus skills directory
-- `.claude/skills/03-nexus/nexus-dataflow-integration.md` - Integration patterns
-- `.claude/skills/03-nexus/nexus-troubleshooting.md` - Troubleshooting and input mapping
+- `.gemini/skills/03-nexus/` - Complete Nexus skills directory
+- `.gemini/skills/03-nexus/nexus-dataflow-integration.md` - Integration patterns
+- `.gemini/skills/03-nexus/nexus-troubleshooting.md` - Troubleshooting and input mapping
 
 ---
 

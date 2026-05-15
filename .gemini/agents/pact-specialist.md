@@ -168,5 +168,5 @@ Discovered during kailash-rs red team. Violations are BLOCK-level findings.
 
 ## Full Documentation
 
-- `.claude/skills/29-pact/` -- Complete PACT skill index
+- `.gemini/skills/29-pact/` -- Complete PACT skill index
 - `.claude/rules/pact-governance.md` -- PACT governance rules

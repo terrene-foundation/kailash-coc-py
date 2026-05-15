@@ -170,7 +170,7 @@ Use `dataflow-specialist` subagent when:
 ## Documentation References
 
 ### Primary Sources
-- **DataFlow Specialist**: [`.claude/agents/frameworks/dataflow-specialist.md` (lines 30-33)](../../../../.claude/agents/frameworks/dataflow-specialist.md#L30-L33)
+- **DataFlow Specialist**: [`.codex/agents/frameworks/dataflow-specialist.md` (lines 30-33)](../../../../.claude/agents/frameworks/dataflow-specialist.md#L30-L33)
 
 ### Related Documentation
 
