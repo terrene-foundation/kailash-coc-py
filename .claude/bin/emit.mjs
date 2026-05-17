@@ -23,6 +23,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { spawnSync } from "node:child_process";
 
 // Symlink-safe write. Node's fs.writeFileSync follows symlinks by
 // default, so a TOCTOU attacker can plant a symlink between mkdirSync
@@ -569,8 +570,10 @@ export function emitBaseline(cli, outDir, { lang = null, verbose = false, dryRun
   // per-rule budget BLOCK (line 440) and tier classification (above).
   // Surfaces a structured violation for any cli×lang combo whose
   // emission would breach the Risk-0004 floor. Both dryRun and regular
-  // returns include the array; --strict-headroom in main() turns a
-  // non-empty array into a non-zero exit code so /sync halts at emission.
+  // returns include the array; strict-headroom mode in main() (default
+  // on as of v6.2 cycle-2; --no-strict-headroom escape for test-harness)
+  // turns a non-empty array into a non-zero exit code so /sync halts at
+  // emission.
   const headroomFloorViolations = validateAggregateHeadroom({
     cli,
     lang,
@@ -806,6 +809,121 @@ export function validateRuleFrontmatter() {
 }
 
 // ────────────────────────────────────────────────────────────────
+// Validator 15 — manifest tier-completeness (loom 2026-05-16, journal
+// 0078). Every .claude/rules/*.md MUST have its distribution fate
+// consciously declared in sync-manifest.yaml — exactly one of:
+//   (a) tier-listed (cc/co/coc/onboarding) — shipped to subscribers,
+//   (b) use_obsoleted: — actively purged from USE templates,
+//   (c) use_exclude:   — deliberately loom-only (never fanned out).
+// The failure mode this blocks is SILENT omission: a rule that is in
+// none of the three falls out of the subscription-based /sync model
+// unnoticed. Before this validator, 16 rules authored at loom were
+// never added to a tier and were frozen in templates (matching only by
+// the luck of a pre-subscription full-sync). use_exclude IS a conscious
+// state (loom-only by design, e.g. loom-csq-boundary.md) — counting it
+// as managed prevents false positives on deliberately-excluded rules
+// while still hard-failing the unmanaged class. Regex-scoped section
+// parse (no YAML dep) consistent with loadManifestConfig.
+export function validateTierCompleteness() {
+  const manifestPath = path.join(REPO, ".claude", "sync-manifest.yaml");
+  const rulesDir = path.join(REPO, ".claude", "rules");
+  const text = fs.readFileSync(manifestPath, "utf8");
+
+  // Slice a top-level YAML block: from the line AFTER `^<key>:` to the
+  // next column-0 key. Slicing must start past the key's own newline —
+  // otherwise the next-key search matches the tail of the key line.
+  const sliceBlock = (key) => {
+    const re = new RegExp(`^${key}:\\s*$`, "m");
+    const start = text.search(re);
+    if (start === -1) return "";
+    const bodyStart = text.indexOf("\n", start);
+    if (bodyStart === -1) return "";
+    const after = text.slice(bodyStart + 1);
+    const nextRel = after.search(/^[A-Za-z_][\w-]*:\s*$/m);
+    return after.slice(0, nextRel === -1 ? undefined : nextRel);
+  };
+
+  const tiersBlock = sliceBlock("tiers");
+  const obsBlock = sliceBlock("use_obsoleted");
+  const exclBlock = sliceBlock("use_exclude");
+
+  const tiered = new Set(
+    [...tiersBlock.matchAll(/^\s*-\s*rules\/([a-z0-9-]+)\.md\s*$/gm)].map(
+      (m) => `${m[1]}.md`,
+    ),
+  );
+  // use_obsoleted entries are `.claude/rules/x.md`; use_exclude entries
+  // are `rules/x.md` (no `.claude/` prefix). Match both shapes.
+  const obsoleted = new Set(
+    [...obsBlock.matchAll(/^\s*-\s*\.claude\/rules\/([a-z0-9-]+)\.md\s*$/gm)].map(
+      (m) => `${m[1]}.md`,
+    ),
+  );
+  const excluded = new Set(
+    [...exclBlock.matchAll(/^\s*-\s*rules\/([a-z0-9-]+)\.md\s*$/gm)].map(
+      (m) => `${m[1]}.md`,
+    ),
+  );
+
+  const failures = [];
+  for (const f of fs.readdirSync(rulesDir).filter((f) => f.endsWith(".md"))) {
+    if (!tiered.has(f) && !obsoleted.has(f) && !excluded.has(f)) {
+      failures.push(
+        `${f}: unmanaged — declare its distribution fate in ` +
+          `sync-manifest.yaml: add to a tier (cc/co/coc/onboarding), OR ` +
+          `use_obsoleted: (purge from templates), OR use_exclude: ` +
+          `(loom-only). (journal 0078)`,
+      );
+    }
+  }
+  return { pass: failures.length === 0, failures };
+}
+
+// ────────────────────────────────────────────────────────────────
+// Validator 16 — strict-YAML manifest gate (loom 2026-05-16, journal
+// 0080). emit.mjs parses sync-manifest.yaml with regex (no YAML dep, by
+// design — loadManifestConfig). That parser is YAML-SYNTAX-BLIND: a
+// structurally-broken manifest still lets `emit --dry-run` exit 0,
+// while every strict-YAML consumer (verify-overlays.sh, yq, downstream
+// /sync) fails repo-wide. PR #246 shipped exactly this — a list scalar
+// with an embedded ": " — and it passed the emit gate. This validator
+// closes the hole: a strict YAML parse (python3 yaml.safe_load shell-
+// out, so emit.mjs stays Node-dependency-free) MUST succeed or emit
+// hard-fails. Runs BEFORE Validator 15 in main() — V15's regex section
+// parse is only trustworthy on a syntactically valid manifest.
+export function validateManifestYaml() {
+  const manifestPath = path.join(REPO, ".claude", "sync-manifest.yaml");
+  const r = spawnSync(
+    "python3",
+    [
+      "-c",
+      "import sys,yaml\ntry:\n yaml.safe_load(open(sys.argv[1]))\nexcept yaml.YAMLError as e:\n sys.stderr.write(str(e))\n sys.exit(1)",
+      manifestPath,
+    ],
+    { encoding: "utf8" },
+  );
+  if (r.error && r.error.code === "ENOENT") {
+    // python3 absent — degrade to a clear advisory, do NOT silently pass.
+    return {
+      pass: false,
+      failures: [
+        "python3 not found — cannot strict-YAML-validate the manifest. " +
+          "Install python3 (PyYAML) OR validate manually before emit.",
+      ],
+    };
+  }
+  if (r.status !== 0) {
+    return {
+      pass: false,
+      failures: [
+        `sync-manifest.yaml is not valid YAML: ${(r.stderr || "").trim().slice(0, 400)}`,
+      ],
+    };
+  }
+  return { pass: true, failures: [] };
+}
+
+// ────────────────────────────────────────────────────────────────
 // POLICIES writeback to .codex-mcp-guard/
 // ────────────────────────────────────────────────────────────────
 // Runs extract-policies on .claude/hooks/. Writes TWO files (CDX-5 fix,
@@ -853,7 +971,7 @@ export function wireMcpPolicies(outDir) {
   const auditJson = {
     version: 1,
     generated_at: new Date().toISOString(),
-    source_dir: hooksDir,
+    source_dir: path.relative(REPO, hooksDir),
     shape_summary: {
       A: filteredPredicates.filter((p) => p.shape === "A").length,
       B: filteredPredicates.filter((p) => p.shape === "B").length,
@@ -876,7 +994,15 @@ export function wireMcpPolicies(outDir) {
 // ────────────────────────────────────────────────────────────────
 // CLI entry
 // ────────────────────────────────────────────────────────────────
-function parseArgs(argv) {
+
+// Single source of truth for the accepted-flag list. Read by BOTH the
+// parseArgs unknown-flag warning (issue #235) and main()'s usage line —
+// a future flag addition touches one place, not two.
+const EMIT_USAGE =
+  "usage: emit.mjs [--cli codex|gemini] [--lang py|rs] [--all] " +
+  "[--out <dir>] [--dry-run] [--no-strict-headroom] [-v]";
+
+export function parseArgs(argv) {
   const args = {
     cli: null,
     out: null,
@@ -884,7 +1010,18 @@ function parseArgs(argv) {
     all: false,
     dryRun: false,
     verbose: false,
-    strictHeadroom: false,
+    // v6.2 cycle-2 — strict mode is opt-out (default true). Mirrors the
+    // v2.13.0 --strict-budget rollout: shipped opt-in in cycle-1, flipped
+    // to opt-out in cycle-2 after one /sync observation cycle confirmed
+    // zero false-positive blocks (PR #218 → v2.31.0 /sync, 2026-05-15).
+    // Any headroom_floor_violations[] entry triggers exit code 1 so
+    // /sync halts at emission rather than shipping the breach to
+    // downstream USE templates.
+    strictHeadroom: true,
+    // issue #235 — tokens parseArgs did not recognize. Populated below so
+    // callers (and the emit-shape harness) can assert the warning fired
+    // without scraping stderr. A typo'd --no-strict-headroom lands here.
+    unknownArgs: [],
   };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
@@ -894,12 +1031,28 @@ function parseArgs(argv) {
     else if (a === "--all") args.all = true;
     else if (a === "--dry-run") args.dryRun = true;
     else if (a === "-v" || a === "--verbose") args.verbose = true;
-    // v6.2 Shard 1 — opt-in for first cycle, opt-out planned for second
-    // cycle (mirrors the v2.13.0 --strict-budget rollout). When set,
-    // any headroom_floor_violations[] entry triggers exit code 1 so
-    // /sync halts at emission rather than shipping the breach to
-    // downstream USE templates.
-    else if (a === "--strict-headroom") args.strictHeadroom = true;
+    // v6.2 cycle-2 — explicit opt-out for test-harness intentional-breach
+    // exercises. Production /sync invocations MUST NOT pass this flag;
+    // dropping strict mode in a /sync command body is regression class (a)
+    // per sync-completeness.md Trust Posture Wiring § Rule 2 headroom-floor.
+    else if (a === "--no-strict-headroom") args.strictHeadroom = false;
+    // issue #235 — anything else is an unrecognized token. Pre-v6.2 this
+    // branch did not exist: a typo'd --no-strict-headroon was silently
+    // swallowed, strict mode stayed ON, and the operator burned a round
+    // trip diagnosing why their explicit opt-out never fired.
+    else args.unknownArgs.push(a);
+  }
+  if (args.unknownArgs.length > 0) {
+    // JSON.stringify each token before echoing: argv is operator-controlled
+    // and may carry control / ANSI-escape characters; quoting neutralizes
+    // them and makes empty / whitespace-only tokens visible.
+    const shown = args.unknownArgs.map((t) => JSON.stringify(t)).join(", ");
+    process.stderr.write(
+      `emit.mjs: WARNING — ignored unrecognized argument(s): ${shown}\n` +
+        `  ${EMIT_USAGE}\n` +
+        `  note: a typo'd --no-strict-headroom leaves strict mode ON — ` +
+        `emission stays fail-safe, but the intended opt-out did NOT apply\n`,
+    );
   }
   return args;
 }
@@ -911,7 +1064,7 @@ function main() {
   const clis = args.all ? ["codex", "gemini"] : args.cli ? [args.cli] : null;
   if (!clis) {
     process.stderr.write(
-      "usage: emit.mjs [--cli codex|gemini] [--lang py|rs] [--all] [--out <dir>] [--dry-run] [--strict-headroom] [-v]\n",
+      `${EMIT_USAGE}\n`,
     );
     process.exit(2);
   }
@@ -934,6 +1087,34 @@ function main() {
     overallPass = false;
     process.stderr.write(
       `VALIDATOR 14 FAIL (rule-authoring.md Rule 7):\n${v14.failures.map((l) => "  " + l).join("\n")}\n`,
+    );
+    process.exit(1);
+  }
+
+  // Validator 16 — strict-YAML manifest gate (journal 0080). MUST run
+  // BEFORE V15: V15's regex section parse is only meaningful on a
+  // syntactically valid manifest. PR #246's broken manifest passed the
+  // YAML-blind regex parser; this gate makes that impossible.
+  const v16 = validateManifestYaml();
+  console.log(`[validator-16] manifest-yaml: ${v16.pass ? "PASS" : "FAIL"}`);
+  if (!v16.pass) {
+    overallPass = false;
+    process.stderr.write(
+      `VALIDATOR 16 FAIL (sync-manifest.yaml strict-YAML, journal 0080):\n${v16.failures.map((l) => "  " + l).join("\n")}\n`,
+    );
+    process.exit(1);
+  }
+
+  // Validator 15 — manifest tier-completeness (journal 0078). Runs
+  // alongside V14 (structural, pre-emission): a rule absent from every
+  // tier is silently excluded from the subscription sync, so block
+  // before any CLI work — same fail-fast posture as V14.
+  const v15 = validateTierCompleteness();
+  console.log(`[validator-15] tier-completeness: ${v15.pass ? "PASS" : "FAIL"}`);
+  if (!v15.pass) {
+    overallPass = false;
+    process.stderr.write(
+      `VALIDATOR 15 FAIL (sync-manifest tier-completeness, journal 0078):\n${v15.failures.map((l) => "  " + l).join("\n")}\n`,
     );
     process.exit(1);
   }
@@ -1011,7 +1192,9 @@ function main() {
     // v6.2 Shard 1 — per-lang headroom floor enforcement. Surfaces with
     // ANY violation (independent of tier — a BLOCK is cap-breach, a
     // floor breach is the canary BEFORE cap-breach). Always logs;
-    // --strict-headroom converts the log into a hard fail.
+    // strict-headroom mode (default on as of cycle-2; opt-out via
+    // --no-strict-headroom for test-harness) converts the log into a
+    // hard fail.
     if (result.headroom_floor_violations && result.headroom_floor_violations.length > 0) {
       const v = result.headroom_floor_violations[0];
       const verdict = args.strictHeadroom ? "BLOCK" : "WARN";
