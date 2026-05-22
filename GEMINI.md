@@ -265,6 +265,10 @@ When a gate-level review (reviewer, security-reviewer, gold-standards-validator)
 
 **Bounded by the shard budget.** This rule does NOT override MUST Rule 1 (shard threshold). If the surfaced gap exceeds ≤500 LOC load-bearing / ≤5–10 invariants / ≤3–4 call-graph hops, filing the follow-up issue IS the correct disposition — the gap is a new shard, not a continuation of the current one.
 
+## Multi-Operator Capacity Considerations
+
+Concurrent-operator capacity guidance — per-operator capacity bounded per-`verified_id` (not per-session), cross-operator parallelization throughput multiplier (NON-SAME adjacency only), `/claim`-record discipline as the coordination signal — lives in `rules/multi-operator-coordination.md` §8. That rule is `scope: path-scoped` so the capacity clauses load only on paths where multi-operator coordination applies, keeping this baseline rule under its per-rule emission budget.
+
 ## MUST NOT (Sharding)
 
 - Size shards by LOC alone, ignoring invariant count and call-graph depth
