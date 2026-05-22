@@ -66,3 +66,8 @@ secrets/
 **/scripts/data/
 **/scripts/outputs/
 **/scripts/*.log
+
+# Added by /sync from loom@e488c0d (2026-05-22T12:16:45Z) — F14 multi-operator-coc gitignore_additions
+.claude/operator-id
+.coc-fetch-cache
+.claude/learning/codify-lease.json
