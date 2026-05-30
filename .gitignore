@@ -71,3 +71,4 @@ secrets/
 .claude/operator-id
 .coc-fetch-cache
 .claude/learning/codify-lease.json
+.claude/logs/
