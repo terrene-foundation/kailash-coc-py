@@ -119,13 +119,20 @@ jobs:
             && { echo "::error::credential-shaped ENV found in image layers"; exit 1; } \
             || echo "I5 layer ENV scan: clean"
 
-      - name: Secret scan — committed source (gitleaks)
+      - name: Secret scan — committed source (trufflehog)
         # Catches committed credentials before they propagate to the release tag.
-        # No license required for OSS repos.
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # Free for OSS / org repos (gitleaks-action@v2 requires a paid license
+        # for orgs as of 2024; switched to trufflehog 2026-05-31 after the
+        # first PR-gate run failed at "License key is required" on the
+        # gitleaks step against the terrene-foundation org).
+        uses: trufflesecurity/trufflehog@main
         with:
-          # Default config + repo-local .gitleaks.toml (optional, added if/when
-          # we need to allowlist e.g. .env.example placeholders).
-          config: ${{ hashFiles('.gitleaks.toml') != '' && '.gitleaks.toml' || '' }}
+          path: ./
+          base: ${{ github.event.pull_request.base.sha }}
+          head: ${{ github.event.pull_request.head.sha }}
+          # Only flag verified secrets (callable / authentic) to keep noise low —
+          # .env.example placeholders + dev-only DB creds in docker-compose.yml
+          # do not authenticate against the live service, so they are unverified
+          # and pass through. A real leaked Anthropic / OpenAI / Google / GitHub
+          # token verifies against the provider's API and fails the gate.
+          extra_args: --only-verified
