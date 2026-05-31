@@ -72,3 +72,6 @@ secrets/
 .coc-fetch-cache
 .claude/learning/codify-lease.json
 .claude/logs/
+
+# Hook artifact — journal-write-guard skip log
+workspaces/*/.journal-skipped.log
