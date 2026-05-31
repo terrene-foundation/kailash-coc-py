@@ -1,0 +1,131 @@
+name: Dev Container PR Gate
+
+# PR-time gate for Dockerfile + recipe changes. Builds the dev image
+# (single-arch, no push), smoke-tests the I1/I2/I4/I7/I8 invariants from
+# specs/dev-container-image.md, and scans the source tree for committed
+# secrets. The tag-triggered publish workflow (publish-dev-image.yml) is
+# the release gate — this is the catch-it-at-PR gate so breakage / leaks
+# can't ride a green tag-push straight to Docker Hub.
+#
+# Matches the kailash-coc-rs equivalent so PR hygiene is identical across
+# the COC USE templates.
+
+on:
+  pull_request:
+    paths:
+      - "Dockerfile"
+      - "requirements-coc.txt"
+      - "requirements-coc-ml.txt"
+      - "docker-compose.yml"
+      - "bin/dev"
+      - ".devcontainer/**"
+      - ".dockerignore"
+      - ".github/workflows/docker-build.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  # Cancel superseded PR runs — the build is a pure function of the diff
+  # and idempotent; queuing wastes 20+ min per re-push (per deploy-hygiene.md Rule 11).
+  group: docker-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-smoke:
+    name: build + smoke-test + secret-scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # Release-prep PRs are metadata-only — skip per ci-runners.md Rule 8.
+    if: ${{ !startsWith(github.head_ref, 'release/') }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          # Full history so gitleaks can scan committed secrets across the PR.
+          fetch-depth: 0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image (linux/amd64, no push, GHA cache)
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          # Single-arch on PR — multi-arch matrix is reserved for the publish workflow.
+          platforms: linux/amd64
+          push: false
+          load: true
+          tags: kailash-coc-py-pr:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Smoke test — invariants I1/I2/I4/I7/I8 from specs/dev-container-image.md
+        run: |
+          set -euxo pipefail
+          # Single container run exercises every invariant a PR-gate can verify
+          # without standing up the full compose stack (I9 / I10 are publish-time).
+          docker run --rm \
+            -v "$PWD:/workspace" \
+            kailash-coc-py-pr:test bash -euxo pipefail -c '
+              # I1 — all three CLIs resolve.
+              claude --version
+              codex  --version
+              gemini --version
+
+              # I2 — baked frameworks import (kailash + dataflow + nexus + kaizen + pact).
+              python -c "import kailash, dataflow, nexus, kaizen, pact; print(\"I2 OK\")"
+
+              # I4 — non-root by default; container user is dev/uid 1000.
+              test "$(whoami)" = "dev"
+              test "$(id -u)"  = "1000"
+
+              # I7 — formatters present + uv on PATH (proxy for shared venv health).
+              ruff  --version
+              black --version
+              uv    --version
+
+              # I8 — WORKDIR is /workspace.
+              test "$(pwd)" = "/workspace"
+            '
+
+      - name: Image leak check — no .env / no host gitconfig baked in
+        # I5 — defense in depth: assert nothing identity-shaped landed in the image
+        # layers. The Dockerfile MUST NOT COPY .env / .host-gitconfig / .ssh / .gnupg.
+        run: |
+          set -euxo pipefail
+          docker run --rm kailash-coc-py-pr:test bash -euxo pipefail -c '
+            # Layer must not carry any .env, signing key, or ssh material.
+            test ! -e /workspace/.env
+            test ! -e /home/dev/.env
+            test ! -e /home/dev/.gitconfig
+            test ! -d /home/dev/.ssh
+            test ! -d /home/dev/.gnupg
+            test ! -e /root/.env
+            test ! -e /root/.gitconfig
+            test ! -d /root/.ssh
+            test ! -d /root/.gnupg
+          '
+          # Inspect ENV instructions in the built layers — flag anything that
+          # looks like a credential variable (API key / token / password / secret).
+          # Built-in vars (DEBIAN_FRONTEND / PATH / VIRTUAL_ENV / PIP_DISABLE_*) are
+          # allowed; everything else carrying credential-shaped tokens fails.
+          docker history --no-trunc --format '{{.CreatedBy}}' kailash-coc-py-pr:test \
+            | grep -iE 'ENV\s+.*(API_KEY|TOKEN|PASSWORD|SECRET|CREDENTIAL)' \
+            | grep -ivE '^\s*$' \
+            && { echo "::error::credential-shaped ENV found in image layers"; exit 1; } \
+            || echo "I5 layer ENV scan: clean"
+
+      - name: Secret scan — committed source (gitleaks)
+        # Catches committed credentials before they propagate to the release tag.
+        # No license required for OSS repos.
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # Default config + repo-local .gitleaks.toml (optional, added if/when
+          # we need to allowlist e.g. .env.example placeholders).
+          config: ${{ hashFiles('.gitleaks.toml') != '' && '.gitleaks.toml' || '' }}
