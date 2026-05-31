@@ -120,6 +120,50 @@ Hooks validate your environment on session start. Rules, skills, and specialist 
 
 ---
 
+## Development Environment (Docker)
+
+A reproducible development container is available as a published image on Docker Hub: **`terrenefoundation/kailash-coc-py:1.10.1`** (multi-arch amd64+arm64). It carries all three CLIs (`claude`, `codex`, `gemini`), Python plus the baked Kailash frameworks (Core SDK, DataFlow, Nexus, Kaizen, PACT), Node, and every tool the hooks shell out to (`git`, `gh`, `jq`, `yq`, `rg`, `gnupg`). Your API keys are read from `.env` at runtime — never baked into an image layer.
+
+Consumer-shipped configs (`docker-compose.yml`, `.devcontainer/devcontainer.json`, `bin/dev`) ship at the repo root and reference the published image. The `Dockerfile` + `requirements-coc*.txt` at the repo root are the publisher's build recipe (provenance + the input to the publish workflow); consumers do not execute them on first run.
+
+### Launch (one command)
+
+```bash
+cp .env.example .env        # fill ANTHROPIC_API_KEY / OPENAI_API_KEY / GOOGLE_API_KEY / GH_TOKEN
+./bin/dev                   # pulls the published image on first run, then shells in as user `dev`
+```
+
+First run pulls `terrenefoundation/kailash-coc-py:1.10.1` from Docker Hub (one-time, cached thereafter). No local build. Inside the shell, every binary resolves and the frameworks import:
+
+```bash
+claude --version && codex --version && gemini --version
+python -c "import kailash, dataflow, nexus, kaizen, pact"
+claude                      # start a session — the COC hooks fire exactly as on a host
+```
+
+Need a database? `docker compose --profile db up -d` brings up loopback-bound `postgres` + `mysql` services on the compose network (`DATABASE_URL` resolves to the service name).
+
+### Editor door (VS Code / Cursor / Codespaces / JetBrains)
+
+Open the folder → **Dev Containers: Reopen in Container**. The editor pulls the registry image referenced in `.devcontainer/devcontainer.json` (`docker.io/terrenefoundation/kailash-coc-py:1.10.1`), aligns the container user to your host UID (files stay yours), and runs `.devcontainer/postCreate.sh`. Copy `.env.example` → `.env` first — the container reads it at create time.
+
+### Rebuild the publisher recipe locally (template developers only)
+
+If you are iterating on the `Dockerfile` itself (not consuming the published image), set `DEV_IMAGE=kailash-coc-dev:local` in `.env`, uncomment the `build:` block in `docker-compose.yml`, and run `docker compose build dev`. `./bin/dev` then uses your local-built image instead of pulling from Docker Hub.
+
+### Add your own dependencies
+
+| You need…             | Add it to…                          | Rebuild? |
+| --------------------- | ----------------------------------- | -------- |
+| extra Python packages | `requirements-user.txt`             | **No**   |
+| extra Node packages   | root `package.json`                 | **No**   |
+| extra OS packages     | `Dockerfile.user` (from `.example`) | Yes      |
+| project setup script  | `.devcontainer/postCreate.user.sh`  | **No**   |
+
+`requirements-user.txt` and `package.json` install into the shared venv / npm prefix on next container start (`postCreate.sh` handles both). `Dockerfile.user` is the documented escape hatch for OS packages — build a thin layer FROM the published image (digest-pinned per `Dockerfile.user.example`).
+
+---
+
 ## Repository Structure
 
 ```

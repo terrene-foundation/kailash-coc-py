@@ -89,25 +89,25 @@ Each framework has 2 version locations PLUS the SDK dependency pin:
 
 | File                                                 | Field                          |
 | ---------------------------------------------------- | ------------------------------ |
-| `packages/kailash-dataflow/pyproject.toml`           | `version = "X.Y.Z"`            |
-| `packages/kailash-dataflow/src/dataflow/__init__.py` | `__version__ = "X.Y.Z"`        |
-| `packages/kailash-dataflow/pyproject.toml`           | `dependencies: kailash>=A.B.C` |
+| the dataflow package (`pyproject.toml`)           | `version = "X.Y.Z"`            |
+| the dataflow package (`src/dataflow/__init__.py`) | `__version__ = "X.Y.Z"`        |
+| the dataflow package (`pyproject.toml`)           | `dependencies: kailash>=A.B.C` |
 
 **kailash-kaizen:**
 
 | File                                             | Field                          |
 | ------------------------------------------------ | ------------------------------ |
-| `packages/kailash-kaizen/pyproject.toml`         | `version = "X.Y.Z"`            |
-| `packages/kailash-kaizen/src/kaizen/__init__.py` | `__version__ = "X.Y.Z"`        |
-| `packages/kailash-kaizen/pyproject.toml`         | `dependencies: kailash>=A.B.C` |
+| the kaizen package (`pyproject.toml`)         | `version = "X.Y.Z"`            |
+| the kaizen package (`src/kaizen/__init__.py`) | `__version__ = "X.Y.Z"`        |
+| the kaizen package (`pyproject.toml`)         | `dependencies: kailash>=A.B.C` |
 
 **kailash-nexus:**
 
 | File                                           | Field                          |
 | ---------------------------------------------- | ------------------------------ |
-| `packages/kailash-nexus/pyproject.toml`        | `version = "X.Y.Z"`            |
-| `packages/kailash-nexus/src/nexus/__init__.py` | `__version__ = "X.Y.Z"`        |
-| `packages/kailash-nexus/pyproject.toml`        | `dependencies: kailash>=A.B.C` |
+| the nexus package (`pyproject.toml`)        | `version = "X.Y.Z"`            |
+| the nexus package (`src/nexus/__init__.py`) | `__version__ = "X.Y.Z"`        |
+| the nexus package (`pyproject.toml`)        | `dependencies: kailash>=A.B.C` |
 
 ##### SDK Dependency Pin Update Rule
 
