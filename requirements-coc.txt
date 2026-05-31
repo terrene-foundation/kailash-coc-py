@@ -1,0 +1,13 @@
+# Kailash COC baked framework set — template-owned, regenerated on /sync.
+# Lighter five frameworks + hook formatters. ML/Align (torch-class, multi-GB) are
+# OPT-IN via requirements-coc-ml.txt (compose `ml` profile) per plan §0 decision 1.
+# Pins resolved 2026-05-27. Implements specs/dev-container-image.md §5.
+# (Top-level exact pins; --generate-hashes supply-chain lock is the hardening follow-up
+#  noted in the M1 verification record.)
+kailash==2.26.2
+kailash-dataflow==2.10.0
+kailash-nexus==2.6.3
+kailash-kaizen==2.24.1
+kailash-pact==0.12.0
+ruff==0.15.14
+black==26.5.1

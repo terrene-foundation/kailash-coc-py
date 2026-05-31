@@ -1,0 +1,6 @@
+# Kailash COC OPT-IN ML/Align framework set — template-owned, regenerated on /sync.
+# Torch-class, multi-GB. NOT in the default image (plan §0 decision 1). Installed only
+# via the compose `ml` profile / `postCreate.sh --ml`. Implements specs/dev-container-image.md §5.
+# Pins resolved 2026-05-27. Install into the SAME shared /opt/venv (no --system).
+kailash-ml==1.7.4
+kailash-align==0.7.1
