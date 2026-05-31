@@ -150,7 +150,14 @@ jobs:
         # lockstep with the stable tag, NOT every pre-release / hotfix re-push.
         # Same condition that fed :latest into the tag list at the "Compute tag
         # list" step above.
-        if: github.event_name == 'push' || inputs.push_latest == 'true'
+        # NB: workflow_dispatch's push_latest input is declared as type: boolean.
+        # In Actions expression context, comparing a boolean to the string 'true'
+        # fails type-coercion and the step silently skips. Use the bare input
+        # (truthy evaluation) instead — matches the bash-side check in "Compute
+        # tag list" that interpolates the boolean as the string "true" inside a
+        # shell test. Fix landed 2026-05-31 after the v1.10.1 publish landed the
+        # image+:latest but skipped this Overview-sync step.
+        if: ${{ github.event_name == 'push' || inputs.push_latest }}
         uses: peter-evans/dockerhub-description@v4
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
