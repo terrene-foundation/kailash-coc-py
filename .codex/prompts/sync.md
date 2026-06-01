@@ -35,6 +35,27 @@ Exit 1 → HALT /sync; surface the report. The validator (issue #350 Stage 2) ga
 
 **New-rule discipline**: every new rule landed at loom MUST also land either a corresponding validator check OR a `no-check: <reason>` annotation in the same PR. Fixtures + structural probes: `.claude/audit-fixtures/validate-emit/`.
 
+## Step 0b: Pre-Sync Remote Freshness Check (coc-source — loom/ only)
+
+For `coc-source`, **before Gate 1, after Step 0a**, verify loom's local `main` matches `origin/main` AND each declared sync target's local `main` matches its `origin/main`. Stale-local distribution is the failure mode this gate blocks (F62, journal/0163 / 0164 — Q3b-approved hybrid remote/local pre-flight).
+
+**Why 0b after 0a (not before):** 0a is local-only AST/structural validation (~seconds, no network); 0b makes ~200ms × N network calls. Running the cheap deterministic gate first means a malformed local artifact halts before network round-trips. Operators with a stale-AND-malformed local pay the local cost once vs the network cost first.
+
+```bash
+# Target slugs MUST match sync-manifest.yaml::repos.<lang>.templates[].repo
+# per sync-completeness.md MUST-1 (enumerate from manifest, not memory).
+# Example below is the cc-only-legacy set for /sync all; multi-CLI targets
+# (use-template.py / .rs / .rb) MUST be added when subscribed.
+node .claude/bin/check-sync-freshness.mjs --loom \
+  --target use-template.claude-py \
+  --target use-template.claude-rs \
+  --target use-template.claude-rb
+```
+
+Exit 1 → HALT /sync; the helper emits the verbatim local-vs-remote SHA pair AND remediation (`git fetch origin main && git reset --keep origin/main` per `git.md` — `--keep` over `--hard` to refuse on dirty tree). Read-only check — no fetch side-effects. When `target` is a single language (`/sync py`), pass only that language's USE-template slug; when `target=all`, probe every subscribed template.
+
+**Rationale**: `/sync` distributing from a stale local main ships outdated artifacts to every USE template; `/sync` writing onto a stale target clone risks force-push-over-teammate's-work. `git ls-remote` is the live runtime evidence per `rules/verify-resource-existence.md` MUST-2; operator memory of "I just fetched" is the hearsay this gate replaces. Symmetric pre-sync counterpart to `sync-completeness.md` MUST-2's post-sync verification table.
+
 ## Two Gates (coc-source — loom/ only)
 
 **loom is the central splitter, not an author.** loom does NOT originate artifact changes — it ingests proposals from TWO upstream streams (BUILD repos for SDK code; USE-template repos for COC-artifact improvements per `guides/co-setup/09-proposal-protocol.md` Step 7b), splits global vs variant at Gate 1, then dual-distributes: `/sync-to-build` pushes canonical back to BUILD repos, `/sync` distributes to USE templates (which downstream repos pull via their own `/sync`).
@@ -69,6 +90,8 @@ Scans inbound artifact changes not yet upstreamed to loom/. Two streams:
 Merges loom/ source + variant overlays into USE template repos. This is a **merge** — templates may have legitimate local content.
 
 **Synced-disclosure gate (MUST, runs first):** before any emit step, Gate 2 runs `node .claude/bin/scan-synced-disclosure.mjs --check`; a non-zero exit is BLOCK-level — /sync HALTs and surfaces the redacted report until a human genericizes + relocates the disclosure to the operator-local companion (per #255/#260). Full protocol: skill § Gate 2 step 0.
+
+**HALT-on-dirty (modified-TRACKED) + serial same-lane (MUST, #401):** before writing to any target, HALT only on a modified-TRACKED file the sync would overwrite with no reflog — run `git -C <target> status --porcelain -- . ':(exclude).claude/VERSION' ':(exclude).claude/.coc-sync-marker' ':(exclude).claude/learning/' ':(exclude).claude/.proposals/' ':(exclude).claude/settings.local.json' | grep -vE '^\?\?'`. A non-empty result (a modified/added/deleted TRACKED entry outside the never-synced set; untracked `??` lines filtered out) HALTs /sync for that target — commit/clean those tracked changes first, then re-run (HALT, never auto-stash). Untracked WIP (`workspaces/`, `docs/`, `.session-notes`, `.claude/learning/` state, `M .claude/VERSION` #407 auto-drift) does NOT block — downstream templates are perpetually WIP, and this is safe because `sync-tier-aware.mjs` snapshots EVERY untracked file surface-wide BEFORE any Gate-2 write (the #401 forever-fix), while a modified-TRACKED file (the only un-snapshotted loss case) always HALTs — with NO write-set allowlist to drift (an earlier scoped pathspec missed `.gitignore`/`.codex-mcp-guard/`, re-opening the hole). Full rationale: skill § Gate 2 step 0a. Sync each template in a multi-template lane SERIALLY via `--template <repo>`, or one `--all-templates` invocation — NEVER parallel same-lane agents (the per-lane tool writes both templates; a bare un-scoped `--target <lane>` write is refused, exit 2). Full protocol: skill § Gate 2 steps 0a + serial-orchestration.
 
 **Process summary** (full protocol in skill):
 
