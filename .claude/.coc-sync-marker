@@ -1,18 +1,62 @@
 # COC Sync Marker — kailash-coc-py
-timestamp: 2026-06-01T07:15:00Z
+timestamp: 2026-06-01T13:00:00Z
 source: loom/.claude
-loom_sha: 1de1c41
-loom_version: 2.38.0
+loom_sha: e934018
+loom_version: 2.39.0
 variant: py
 clis: [claude, codex, gemini]
+visibility: public
 stats:
+  updated: 150
+  created: 0
+  composed: 1            # rules/deployment.md slot-keyed -> compose.mjs
+  legacy_overlays: 140   # py legacy-full-file overlays copied + stripped
+  build_internal_stripped: 7
   content_synced_byte_equal: true
+  copied_global: 1242    # sync-tier-aware.mjs --target py --template kailash-coc-py
   baseline_status: emitted
   preserved:
     - CLAUDE.md
     - README.md
+  baselines_emitted: { cc: 0, codex: 1, gemini: 1 }   # AGENTS.md + GEMINI.md (CLAUDE.md preserved)
+  baseline_emission_bytes:
+    block_cap_bytes: 61440
+    warn_cap_bytes: 32768
+    codex:
+      rules: 9
+      bytes: 52708
+      tier: WARN
+      headroom_bytes: 8732
+      headroom_pct: 14.21
+    gemini:
+      rules: 9
+      bytes: 52505
+      tier: WARN
+      headroom_bytes: 8935
+      headroom_pct: 14.54
   cli_artifacts:
-    codex: { prompts: emitted, skills: emitted }
-    gemini: { commands: emitted, skills: emitted, agents: emitted }
-  baselines_emitted: { cc: 0, codex: 1, gemini: 1 }
-  obsoleted_purge: variants-tree-confirmed-absent
+    codex:
+      prompts: 55          # 34 commands + 21 agent-prompts
+      skills: 29
+    gemini:
+      commands: 34
+      skills: 29
+      agents: 21
+  scaffold:
+    symlinks: 1            # .claude/codex-mcp-guard -> ../.codex-mcp-guard
+    manifest_distribute: true
+    codex_dispatcher: 28   # bin/coc + 28 per-phase symlinks
+  consumer_owned_preserved:
+    - Dockerfile
+    - docker-compose.yml
+    - .devcontainer/devcontainer.json
+    - .dockerignore
+    - bin/dev
+    - requirements-user.txt
+    - compose.override.yml.example
+  obsoleted_purge: clean-zero-present
+  settings_hooks_resolved: 39
+  sdk_pins:
+    kailash: 2.28.3->2.28.4
+    kailash-nexus: 2.8.0->2.9.0
+  verify_overlays: 286/286 Failing:0
