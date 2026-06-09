@@ -1,62 +1,41 @@
 # COC Sync Marker — kailash-coc-py
-timestamp: 2026-06-01T13:00:00Z
-source: loom/.claude
-loom_sha: e934018
-loom_version: 2.39.0
-variant: py
-clis: [claude, codex, gemini]
 visibility: public
+timestamp: 2026-06-09T11:08:52Z
+source: loom/.claude
+loom_sha: 4a12b9c
+loom_version: "2.39.0"
+variant: py
+template_type: multi-cli
+clis: ["claude", "codex", "gemini"]
 stats:
-  updated: 150
-  created: 0
-  composed: 1            # rules/deployment.md slot-keyed -> compose.mjs
-  legacy_overlays: 140   # py legacy-full-file overlays copied + stripped
-  build_internal_stripped: 7
-  content_synced_byte_equal: true
-  copied_global: 1242    # sync-tier-aware.mjs --target py --template kailash-coc-py
-  baseline_status: emitted
-  preserved:
-    - CLAUDE.md
-    - README.md
-  baselines_emitted: { cc: 0, codex: 1, gemini: 1 }   # AGENTS.md + GEMINI.md (CLAUDE.md preserved)
+  tier_copied: 1290
+  verified_byte_equal: 1290
+  composed: 1          # rules/deployment.md slot-keyed via compose.mjs
+  legacy_overlays: 142 # py full-file overlays copied-from-variant
+  preserved: 1         # CLAUDE.md (template-owned, not overwritten)
+  purged: 0
+  baselines_emitted:
+    cc: 0              # CLAUDE.md preserved, not emitted
+    codex: 1           # AGENTS.md
+    gemini: 1          # GEMINI.md
   baseline_emission_bytes:
     block_cap_bytes: 61440
     warn_cap_bytes: 32768
-    codex:
-      rules: 9
-      bytes: 52708
-      tier: WARN
-      headroom_bytes: 8732
-      headroom_pct: 14.21
-    gemini:
-      rules: 9
-      bytes: 52505
-      tier: WARN
-      headroom_bytes: 8935
-      headroom_pct: 14.54
+    codex:  { bytes: 49661, tier: WARN, headroom_bytes: 11779, headroom_pct: 19.17 }
+    gemini: { bytes: 49458, tier: WARN, headroom_bytes: 11982, headroom_pct: 19.50 }
   cli_artifacts:
-    codex:
-      prompts: 55          # 34 commands + 21 agent-prompts
-      skills: 29
-    gemini:
-      commands: 34
-      skills: 29
-      agents: 21
+    codex:  { prompts: 34, agent_prompts: 21, skills: 31 }
+    gemini: { commands: 34, skills: 31, agents: 21 }
+  codex_dispatcher:
+    bin_coc: 1
+    phase_symlinks: 28
   scaffold:
-    symlinks: 1            # .claude/codex-mcp-guard -> ../.codex-mcp-guard
-    manifest_distribute: true
-    codex_dispatcher: 28   # bin/coc + 28 per-phase symlinks
-  consumer_owned_preserved:
-    - Dockerfile
-    - docker-compose.yml
-    - .devcontainer/devcontainer.json
-    - .dockerignore
-    - bin/dev
-    - requirements-user.txt
-    - compose.override.yml.example
-  obsoleted_purge: clean-zero-present
-  settings_hooks_resolved: 39
-  sdk_pins:
-    kailash: 2.28.3->2.28.4
-    kailash-nexus: 2.8.0->2.9.0
-  verify_overlays: 286/286 Failing:0
+    symlinks: 1        # .claude/codex-mcp-guard -> ../.codex-mcp-guard
+    manifest_distributed: true
+verify_overlays_py: "286/286 Passing Failing:0"
+sdk_pin_delta:
+  kailash: "2.28.4 -> 2.29.3"
+  kailash-dataflow: "2.10.3 -> 2.11.3"
+  kailash-ml: "1.7.4 -> 2.0.1"
+  kailash-align: "0.7.1 -> 0.7.2"
+  unchanged: [kailash-nexus, kailash-kaizen, kailash-pact, kailash-mcp, kaizen-agents]
