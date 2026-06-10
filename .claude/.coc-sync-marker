@@ -1,41 +1,46 @@
 # COC Sync Marker — kailash-coc-py
 visibility: public
-timestamp: 2026-06-09T11:08:52Z
+timestamp: 2026-06-10T02:52:00Z
 source: loom/.claude
-loom_sha: 4a12b9c
+loom_sha: 1daa45b
 loom_version: "2.39.0"
 variant: py
 template_type: multi-cli
 clis: ["claude", "codex", "gemini"]
+operation: redistribution-close-427-variant_only-and-overlay-drifts
 stats:
   tier_copied: 1290
   verified_byte_equal: 1290
-  composed: 1          # rules/deployment.md slot-keyed via compose.mjs
-  legacy_overlays: 142 # py full-file overlays copied-from-variant
-  preserved: 1         # CLAUDE.md (template-owned, not overwritten)
+  variant_only_copied: 19
+  variant_only_verified_byte_equal: 19
+  overlays_applied: 143
+  composed: 1           # 1 slot-keyed overlay via compose.mjs
+  legacy_overlays: 142  # py full-file overlays copied-from-variant, strip-build-internal applied
+  preserved: 1          # CLAUDE.md (template-owned, not overwritten)
   purged: 0
   baselines_emitted:
-    cc: 0              # CLAUDE.md preserved, not emitted
-    codex: 1           # AGENTS.md
-    gemini: 1          # GEMINI.md
-  baseline_emission_bytes:
+    cc: 0               # CLAUDE.md preserved, not emitted
+    # NOTE: codex/gemini baselines NOT re-emitted this cycle — redistribution
+    # was scoped to .claude/ content + overlay-apply (close #427 verify-overlays
+    # drifts). CLI trees (.codex/.gemini/AGENTS.md/GEMINI.md) carried forward
+    # from loom@4a12b9c emit (same loom 2.39.0 globals+overlays; overlay-apply
+    # restored the correct overlay content the prior emit was built from).
+  baseline_emission_bytes_carried_forward:
     block_cap_bytes: 61440
     warn_cap_bytes: 32768
     codex:  { bytes: 49661, tier: WARN, headroom_bytes: 11779, headroom_pct: 19.17 }
     gemini: { bytes: 49458, tier: WARN, headroom_bytes: 11982, headroom_pct: 19.50 }
-  cli_artifacts:
+  cli_artifacts_carried_forward:
     codex:  { prompts: 34, agent_prompts: 21, skills: 31 }
     gemini: { commands: 34, skills: 31, agents: 21 }
-  codex_dispatcher:
+  codex_dispatcher_carried_forward:
     bin_coc: 1
     phase_symlinks: 28
-  scaffold:
-    symlinks: 1        # .claude/codex-mcp-guard -> ../.codex-mcp-guard
+  scaffold_carried_forward:
+    symlinks: 1         # .claude/codex-mcp-guard -> ../.codex-mcp-guard
     manifest_distributed: true
-verify_overlays_py: "286/286 Passing Failing:0"
+verify_overlays_py: "324/324 Passing Failing:0 (post overlay-apply)"
 sdk_pin_delta:
-  kailash: "2.28.4 -> 2.29.3"
-  kailash-dataflow: "2.10.3 -> 2.11.3"
-  kailash-ml: "1.7.4 -> 2.0.1"
-  kailash-align: "0.7.1 -> 0.7.2"
-  unchanged: [kailash-nexus, kailash-kaizen, kailash-pact, kailash-mcp, kaizen-agents]
+  kailash: "2.28.4 -> 2.29.3 (requirements-coc.txt)"
+  kailash-dataflow: "2.10.3 -> 2.11.3 (requirements-coc.txt)"
+  unchanged: [kailash-nexus, kailash-kaizen, kailash-pact]
