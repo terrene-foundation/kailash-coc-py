@@ -1,46 +1,42 @@
 # COC Sync Marker — kailash-coc-py
 visibility: public
-timestamp: 2026-06-10T02:52:00Z
+timestamp: 2026-06-10T04:30:00Z
 source: loom/.claude
-loom_sha: 1daa45b
+loom_sha: b8b3d1a
 loom_version: "2.39.0"
 variant: py
 template_type: multi-cli
 clis: ["claude", "codex", "gemini"]
-operation: redistribution-close-427-variant_only-and-overlay-drifts
+operation: re-emit-multi-cli-trees-current-to-b8b3d1a
+note: >
+  Follow-up to the 2026-06-10 /sync py+rs+base redistribution (loom@1daa45b
+  prior marker), which refreshed .claude/-content but did NOT re-run the
+  multi-CLI emit (Step 6.5/6.6/4.6). This cycle re-emits the per-CLI trees
+  from current loom HEAD b8b3d1a. EMPIRICAL RESULT: baselines
+  (AGENTS.md/GEMINI.md) byte-IDENTICAL — no change. CLI trees stale in
+  exactly ONE file per CLI — codex/skills/rules-reference/SKILL.md +
+  gemini/skills/rules-reference/SKILL.md — reflecting the
+  self-referential-codify.md paths: addition of `tools/verify-overlays.sh`
+  (loom commit c01a06d). Distributed .claude/sync-manifest.yaml refreshed
+  (multi_cli_overlays.multi-cli.manifest_distribute:true) to pick up the
+  journal/0250 multi-operator-substrate coc->co tier reclassification.
 stats:
-  tier_copied: 1290
-  verified_byte_equal: 1290
-  variant_only_copied: 19
-  variant_only_verified_byte_equal: 19
-  overlays_applied: 143
-  composed: 1           # 1 slot-keyed overlay via compose.mjs
-  legacy_overlays: 142  # py full-file overlays copied-from-variant, strip-build-internal applied
-  preserved: 1          # CLAUDE.md (template-owned, not overwritten)
-  purged: 0
+  cli_trees_changed: true
+  files_changed: 3        # codex rules-reference SKILL.md + gemini rules-reference SKILL.md + distributed sync-manifest.yaml
   baselines_emitted:
-    cc: 0               # CLAUDE.md preserved, not emitted
-    # NOTE: codex/gemini baselines NOT re-emitted this cycle — redistribution
-    # was scoped to .claude/ content + overlay-apply (close #427 verify-overlays
-    # drifts). CLI trees (.codex/.gemini/AGENTS.md/GEMINI.md) carried forward
-    # from loom@4a12b9c emit (same loom 2.39.0 globals+overlays; overlay-apply
-    # restored the correct overlay content the prior emit was built from).
-  baseline_emission_bytes_carried_forward:
+    cc: 0                 # CLAUDE.md preserved, not emitted
+    codex: 0              # AGENTS.md byte-identical to prior emit — not rewritten
+    gemini: 0             # GEMINI.md byte-identical to prior emit — not rewritten
+  baseline_emission_bytes:    # measured this cycle, strict-headroom PASS (default mode, exit 0)
     block_cap_bytes: 61440
     warn_cap_bytes: 32768
-    codex:  { bytes: 49661, tier: WARN, headroom_bytes: 11779, headroom_pct: 19.17 }
-    gemini: { bytes: 49458, tier: WARN, headroom_bytes: 11982, headroom_pct: 19.50 }
-  cli_artifacts_carried_forward:
-    codex:  { prompts: 34, agent_prompts: 21, skills: 31 }
+    codex:  { rules: 9, bytes: 49661, tier: WARN, headroom_bytes: 11779, headroom_pct: 19.17 }
+    gemini: { rules: 9, bytes: 49458, tier: WARN, headroom_bytes: 11982, headroom_pct: 19.50 }
+  cli_artifacts:              # measured on-disk this cycle (emitter-owned trees)
+    codex:  { prompts: 55, skills: 31 }   # prompts = 34 commands + 21 agent-prompts; skills incl. rules-reference
     gemini: { commands: 34, skills: 31, agents: 21 }
-  codex_dispatcher_carried_forward:
-    bin_coc: 1
-    phase_symlinks: 28
-  scaffold_carried_forward:
-    symlinks: 1         # .claude/codex-mcp-guard -> ../.codex-mcp-guard
+  scaffold:
+    symlinks: 1           # .claude/codex-mcp-guard -> ../.codex-mcp-guard (verified OK)
     manifest_distributed: true
-verify_overlays_py: "324/324 Passing Failing:0 (post overlay-apply)"
-sdk_pin_delta:
-  kailash: "2.28.4 -> 2.29.3 (requirements-coc.txt)"
-  kailash-dataflow: "2.10.3 -> 2.11.3 (requirements-coc.txt)"
-  unchanged: [kailash-nexus, kailash-kaizen, kailash-pact]
+    bin_coc: true         # bin/coc present (unchanged)
+  headroom_floor_violations: []   # strict-headroom gate PASS (lowest 19.17% > 10% Risk-0004 floor)
