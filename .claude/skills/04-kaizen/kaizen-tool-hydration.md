@@ -44,5 +44,5 @@ The search uses stdlib-only BM25 scoring (no external deps) over tool names + de
 
 ## Source Files
 
-- `packages/kaizen-agents/src/kaizen_agents/delegate/tools/hydrator.py`
-- `packages/kaizen-agents/src/kaizen_agents/delegate/tools/search.py`
+- the kaizen-agents package (`src/kaizen_agents/delegate/tools/hydrator.py`)
+- the kaizen-agents package (`src/kaizen_agents/delegate/tools/search.py`)

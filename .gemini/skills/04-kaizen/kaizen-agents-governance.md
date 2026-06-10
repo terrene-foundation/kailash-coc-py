@@ -70,7 +70,7 @@ _BUDGET_QUERY_METHODS = frozenset({"get_snapshot", "is_held", "get_events"})
 
 The `envelope` property returns `copy.deepcopy()` to prevent mutation through dict reference.
 
-**Source**: `packages/kaizen-agents/src/kaizen_agents/supervisor.py`
+**Source**: the kaizen-agents package (`src/kaizen_agents/supervisor.py`)
 
 ## Seven Governance Modules
 
@@ -99,7 +99,7 @@ address = tracker.get_address("worker-1")
 # "D1-R1-T1-R1"
 ```
 
-**Source**: `packages/kaizen-agents/src/kaizen_agents/governance/accountability.py`
+**Source**: the kaizen-agents package (`src/kaizen_agents/governance/accountability.py`)
 
 ### 2. BudgetTracker (Reclamation + Predictive Warnings)
 
@@ -122,7 +122,7 @@ budget.reclaim("agent-1")
 budget.reallocate(from_agent="agent-2", to_agent="agent-1", amount=2.0)
 ```
 
-**Source**: `packages/kaizen-agents/src/kaizen_agents/governance/budget.py`
+**Source**: the kaizen-agents package (`src/kaizen_agents/governance/budget.py`)
 
 ### 3. CascadeManager (Envelope Tightening + Termination)
 
@@ -146,7 +146,7 @@ cascade.terminate("supervisor", reason="budget_exhausted")
 
 `_intersect_dicts()` handles: nested dicts (recurse), numerics (take min), "allowed" lists (intersection), "blocked" lists (union). Recursion bounded to depth 10.
 
-**Source**: `packages/kaizen-agents/src/kaizen_agents/governance/cascade.py`
+**Source**: the kaizen-agents package (`src/kaizen_agents/governance/cascade.py`)
 
 ### 4. ClearanceEnforcer + ClassificationAssigner
 
@@ -170,7 +170,7 @@ enforcer.register_value("api_key", DataClassification.PUBLIC)  # Rejected!
 
 Recursive leaf scanning via `_extract_string_leaves()` (bounded to depth 10) catches secrets in nested structures.
 
-**Source**: `packages/kaizen-agents/src/kaizen_agents/governance/clearance.py`
+**Source**: the kaizen-agents package (`src/kaizen_agents/governance/clearance.py`)
 
 ### 5. DerelictionDetector
 
@@ -187,7 +187,7 @@ stats = detector.get_stats()
 # DerelictionStats(total_warnings=N, dereliction_count=N, ...)
 ```
 
-**Source**: `packages/kaizen-agents/src/kaizen_agents/governance/dereliction.py`
+**Source**: the kaizen-agents package (`src/kaizen_agents/governance/dereliction.py`)
 
 ### 6. BypassManager (Emergency Override)
 
@@ -206,7 +206,7 @@ mgr.revoke_bypass("agent-1")
 
 Uses `time.monotonic()` for timing. Original envelope preserved for restoration after expiry.
 
-**Source**: `packages/kaizen-agents/src/kaizen_agents/governance/bypass.py`
+**Source**: the kaizen-agents package (`src/kaizen_agents/governance/bypass.py`)
 
 ### 7. VacancyManager (Orphan Detection)
 
@@ -224,7 +224,7 @@ orphans = vacancy.get_orphans()
 # [OrphanRecord(agent_id="child", ...)]
 ```
 
-**Source**: `packages/kaizen-agents/src/kaizen_agents/governance/vacancy.py`
+**Source**: the kaizen-agents package (`src/kaizen_agents/governance/vacancy.py`)
 
 ## AuditTrail (EATP Hash Chain)
 
@@ -243,7 +243,7 @@ records = trail.to_list()
 # [AuditRecord(record_type="genesis", ...), AuditRecord(record_type="delegation", ...)]
 ```
 
-**Source**: `packages/kaizen-agents/src/kaizen_agents/audit/trail.py`
+**Source**: the kaizen-agents package (`src/kaizen_agents/audit/trail.py`)
 
 ## Integration with L3 SDK Primitives
 
@@ -262,7 +262,7 @@ subtasks = [
 child_envelopes = allocator.allocate_with_sdk(parent_envelope, subtasks)
 ```
 
-**Source**: `packages/kaizen-agents/src/kaizen_agents/policy/envelope_allocator.py`
+**Source**: the kaizen-agents package (`src/kaizen_agents/policy/envelope_allocator.py`)
 
 ### Context Bridging via SDK ScopedContext
 
@@ -280,7 +280,7 @@ context = bridge.inject_context(keys=["project.name"])
 merged = bridge.merge_child_results(child_scope)
 ```
 
-**Source**: `packages/kaizen-agents/src/kaizen_agents/context/_scope_bridge.py`
+**Source**: the kaizen-agents package (`src/kaizen_agents/context/_scope_bridge.py`)
 
 ## Type Adapter Strategy
 
@@ -292,7 +292,7 @@ merged = bridge.merge_child_results(child_scope)
 
 Pattern: internal code uses local types. `_sdk_compat.py` adapters convert at SDK boundaries only.
 
-**Source**: `packages/kaizen-agents/src/kaizen_agents/_sdk_compat.py`
+**Source**: the kaizen-agents package (`src/kaizen_agents/_sdk_compat.py`)
 
 ## Install
 

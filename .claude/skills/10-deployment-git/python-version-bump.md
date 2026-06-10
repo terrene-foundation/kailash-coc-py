@@ -23,15 +23,15 @@ Files (current as of 2026-04-15):
 
 ```
 pyproject.toml
-packages/kailash-dataflow/pyproject.toml
-packages/kailash-nexus/pyproject.toml
-packages/kailash-kaizen/pyproject.toml
-packages/kailash-mcp/pyproject.toml
-packages/kailash-pact/pyproject.toml
-packages/kailash-trust/pyproject.toml
-packages/kaizen-agents/pyproject.toml
-packages/kailash-ml/pyproject.toml
-packages/kailash-align/pyproject.toml
+the dataflow package directory pyproject.toml
+the nexus package directory pyproject.toml
+the kaizen package directory pyproject.toml
+the mcp package directory pyproject.toml
+the pact package directory pyproject.toml
+the trust package directory pyproject.toml
+the kaizen-agents package directory pyproject.toml
+the ml package directory pyproject.toml
+the align package directory pyproject.toml
 ```
 
 `requires-python = ">=3.11"` floor stays unchanged — we are widening declared support, not narrowing the minimum.
@@ -81,7 +81,7 @@ If every package returns dependency lines (no `error:` or `No matching distribut
 
 ### Stale literal version assertions in test fixtures
 
-Per-package version tests that hardcode the version string (e.g. `assert __version__ == "0.2.1"`) silently rot on every release bump and only surface when the matrix runs them. The 3.14 PR surfaced exactly this in `packages/kailash-align/tests/test_package.py` — the fixture had been red on `main` for two release bumps.
+Per-package version tests that hardcode the version string (e.g. `assert __version__ == "0.2.1"`) silently rot on every release bump and only surface when the matrix runs them. The 3.14 PR surfaced exactly this in the align package (`tests/test_package.py`) — the fixture had been red on `main` for two release bumps.
 
 **Durable pattern** (no literal coupling to a specific version):
 

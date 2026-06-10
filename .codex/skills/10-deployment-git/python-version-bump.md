@@ -29,7 +29,7 @@ the kaizen package directory pyproject.toml
 the mcp package directory pyproject.toml
 the pact package directory pyproject.toml
 the trust package directory pyproject.toml
-packages/kaizen-agents/pyproject.toml
+the kaizen-agents package directory pyproject.toml
 the ml package directory pyproject.toml
 the align package directory pyproject.toml
 ```

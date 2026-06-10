@@ -145,5 +145,5 @@ delegate.model         # str -- the resolved model name
 
 ## Source Files
 
-- `packages/kaizen-agents/src/kaizen_agents/delegate/delegate.py`
-- `packages/kaizen-agents/src/kaizen_agents/delegate/events.py`
+- the kaizen-agents package (`src/kaizen_agents/delegate/delegate.py`)
+- the kaizen-agents package (`src/kaizen_agents/delegate/events.py`)

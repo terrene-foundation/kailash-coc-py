@@ -213,7 +213,7 @@ await cache.prepare("meta-llama/Llama-3-8B")
 
 ## Cross-References
 
-- `packages/kailash-align/` -- Source code
+- the align package directory -- Source code
 - `skills/04-kaizen/kaizen-ml-integration.md` -- kailash-ml engine patterns
 - `skills/02-dataflow/dataflow-ml-integration.md` -- DataFlow + ML integration
 - `agents/frameworks/kaizen-specialist.md` -- Kaizen agent (covers ML + align)

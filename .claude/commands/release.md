@@ -57,9 +57,9 @@ Before any release work, determine WHAT needs releasing by analyzing unreleased 
 
    ```
    git log <last-tag>..HEAD -- src/kailash/           → Core SDK changes?
-   git log <last-tag>..HEAD -- packages/kailash-dataflow/  → DataFlow changes?
-   git log <last-tag>..HEAD -- packages/kailash-kaizen/    → Kaizen changes?
-   git log <last-tag>..HEAD -- packages/kailash-nexus/     → Nexus changes?
+   git log <last-tag>..HEAD -- the dataflow package directory  → DataFlow changes?
+   git log <last-tag>..HEAD -- the kaizen package directory    → Kaizen changes?
+   git log <last-tag>..HEAD -- the nexus package directory     → Nexus changes?
    ```
 
 2. **Present release plan to human** — Show which packages have unreleased changes and propose:
