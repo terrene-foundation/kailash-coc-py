@@ -1,19 +1,20 @@
 # COC Sync Marker — kailash-coc-py
 visibility: public
-timestamp: 2026-06-11T10:23:53Z
+timestamp: 2026-06-11T14:39:06Z
 source: loom/.claude
-loom_sha: bbfa970
-loom_version: 2.41.0
+loom_sha: 036c8ff
+loom_version: 2.42.0
 variant: py
+template_type: multi-cli
 clis: ["claude", "codex", "gemini"]
 stats:
-  copied: 1145
+  copied: 1159
+  stripped_build_internal: 38
+  byte_equal: 1121
   variant_only: 12
-  overlays: 149
-  composed: 0
-  preserved: 1   # CLAUDE.md (template-owned)
+  overlays_applied: 157
   purged: 0
-  skipped: { loom_local: 2, exclude: 869, use_exclude: 29, no_tier_match: 43 }
+  preserved: ["CLAUDE.md", "README.md", "settings.json"]
   baselines_emitted:
     cc: 0       # CLAUDE.md preserved
     codex: 1    # AGENTS.md
@@ -21,13 +22,29 @@ stats:
   baseline_emission_bytes:
     block_cap_bytes: 61440
     warn_cap_bytes: 32768
-    codex: { rules: 9, bytes: 49661, tier: WARN, headroom_bytes: 11779, headroom_pct: 19.17 }
-    gemini: { rules: 9, bytes: 49458, tier: WARN, headroom_bytes: 11982, headroom_pct: 19.50 }
+    codex:
+      rules: 10
+      bytes: 54616
+      tier: WARN
+      headroom_pct: 11.11
+    gemini:
+      rules: 10
+      bytes: 54413
+      tier: WARN
+      headroom_pct: 11.44
   cli_artifacts:
-    codex: { prompts: 55, skills: 32 }
-    gemini: { commands: 34, skills: 32, agents: 21 }
-  codex_dispatcher: { bin_coc: 1, phase_symlinks: 28 }
-  sdk_pins_changed:
-    kailash-kaizen: "2.24.6 -> 2.25.1"
-    kaizen-agents: "0.9.8 -> 0.9.10"
-headline: "NEW skill 36-claude-managed-agents (CMA hosted-harness integration reference)"
+    codex:
+      prompts: 34
+      agent_prompts: 21
+      skills: 31
+    gemini:
+      commands: 34
+      skills: 31
+      agents: 21
+  codex_dispatcher:
+    bin_coc: true
+    phase_shims: 28
+  scaffold:
+    symlink_codex_mcp_guard: "../.codex-mcp-guard"
+    manifest_distributed: true
+  template_version: 1.12.5
