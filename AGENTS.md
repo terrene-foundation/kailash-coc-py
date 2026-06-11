@@ -7,13 +7,13 @@ See `.claude/guides/rule-extracts/agents.md` for full evidence, extended example
 
 When working with Kailash frameworks, MUST consult the relevant specialist: **dataflow-specialist** (DB/DataFlow), **nexus-specialist** (API/deployment), **kaizen-specialist** (AI agents), **mcp-specialist** (MCP integration), **mcp-platform-specialist** (FastMCP platform), **pact-specialist** (governance), **ml-specialist** (ML lifecycle), **align-specialist** (LLM fine-tuning). See `rules/framework-first.md` for the domain-to-framework binding.
 
-**Why:** Framework specialists encode hard-won patterns and constraints generalist agents miss, leading to subtle misuse of DataFlow, Nexus, or Kaizen APIs.
+**Why:** Specialists encode hard-won patterns generalist agents miss, preventing subtle API misuse.
 
 ## Specs Context in Delegation (MUST)
 
 Every specialist delegation prompt MUST include relevant spec file content from `specs/`. Read `specs/_index.md`, select relevant files, include them inline. See `rules/specs-authority.md` MUST Rule 7 for the full protocol.
 
-**Why:** Specialists without domain context produce technically correct but intent-misaligned output (e.g., schemas without tenant_id because multi-tenancy wasn't communicated).
+**Why:** Specialists without domain context produce technically correct but intent-misaligned output (e.g., schemas missing tenant_id).
 
 ## Analysis Chain (Complex Features)
 
@@ -32,7 +32,7 @@ When multiple independent operations are needed, launch agents in parallel via t
 
 ### MUST: Decompose Onto The Parallel Primitive By Default When The Work Earns It
 
-When the work surface is **≥3 independent items** OR has a **multi-stage shape** (analyze → implement → verify), the orchestrator MUST decompose onto the runtime's parallel orchestration primitive by DEFAULT — not only under `/autonomize`. The trigger is a real gate: a genuinely serial single-item task MUST stay serial. Governance per `rules/governed-throughput.md`; concurrency throttle-aware per `rules/worktree-isolation.md` Rule 4.
+When the work surface is **≥3 independent items** OR has a **multi-stage shape**, the orchestrator MUST decompose onto the runtime's parallel orchestration primitive by DEFAULT — not only under `/autonomize`. A genuinely serial single-item task MUST stay serial. Governance per `rules/governed-throughput.md`; throttle-aware per `rules/worktree-isolation.md` Rule 4.
 
 ```text
 # DO — 3 independent shards → one parallel wave
@@ -43,7 +43,7 @@ When the work surface is **≥3 independent items** OR has a **multi-stage shape
 
 ### MUST: Parallel Brief-Claim Verification When Issue Count ≥ 3
 
-When `/analyze` runs against a brief covering ≥ 3 distinct issues / failure modes / workstreams, the orchestrator MUST launch parallel deep-dive verification agents — one per claim cluster — to independently re-grep / re-read every factual claim in the brief tagged with file:line citations. Inaccuracies surfaced by the deep-dive sweep MUST be recorded in the workspace journal AND in the architecture plan's "Brief corrections" section AS THE GATE before `/todos`. Single-agent analysis on a ≥3-issue brief is BLOCKED — the framing inherited from the brief is the failure mode this rule prevents.
+When `/analyze` runs against a brief covering ≥ 3 distinct issues, the orchestrator MUST launch parallel deep-dive verification agents — one per claim cluster — to independently re-grep / re-read every factual claim. Inaccuracies MUST be recorded in the workspace journal AND the plan's "Brief corrections" section AS THE GATE before `/todos`. Single-agent analysis on a ≥3-issue brief is BLOCKED.
 
 (See **Example 1** in the examples slot below for CLI-specific dispatch syntax.)
 
@@ -53,7 +53,7 @@ When `/analyze` runs against a brief covering ≥ 3 distinct issues / failure mo
 
 Reviews happen at COC phase boundaries, not per-edit. Skip only when explicitly told to. **MUST gates** are `/implement` and `/release`; reviewer + security-reviewer (and gold-standards-validator at `/release`) run as parallel background agents. RECOMMENDED gates run at `/analyze`, `/todos`, `/redteam`, `/codify`, and post-merge. See guide for the full gate table.
 
-**Why:** Skipping gate reviews lets analysis gaps, security holes, and naming violations propagate to downstream repos where they are far more expensive to fix.
+**Why:** Skipped gate reviews let gaps propagate downstream where they are far more expensive to fix.
 
 (See **Example 2** in the examples slot below for the background-dispatch pattern.)
 
@@ -65,7 +65,7 @@ Every gate-level reviewer prompt MUST include explicit mechanical sweeps that ve
 
 (See **Example 3** in the examples slot below for a mechanical-sweep reviewer prompt.)
 
-**Why:** Reviewers are constrained by the diff. The orphan failure mode in `orphan-detection.md` §1 is invisible at diff-level. A 4-second `grep -c` catches what 5 minutes of LLM judgment misses. See guide for full evidence.
+**Why:** Reviewers are constrained by the diff; the `orphan-detection.md` §1 failure mode is invisible at diff-level. A 4-second `grep -c` catches what LLM judgment misses. See guide.
 
 ### MUST: Holistic Post-Multi-Wave Redteam Before Plan Close
 
@@ -115,7 +115,7 @@ When prompting a worktree-isolated agent, the orchestrator MUST use paths RELATI
 
 ## MUST: Recover Orphan Writes From Zero-Commit Worktree Agents
 
-When a worktree agent reports done but its branch has zero commits and the worktree was auto-cleaned, the parent MUST check the MAIN checkout for orphaned untracked files (`git status`) and recover them on a `recovery/<branch>` branch before concluding work was lost — absolute-path writes resolve to main. Protocol + PR #574 evidence: `skills/30-claude-code-patterns/worktree-orchestration.md` Rule 4a.
+When a worktree agent reports done but its branch has zero commits and the worktree was auto-cleaned, the parent MUST check the MAIN checkout for orphaned untracked files and recover them on a `recovery/<branch>` branch — absolute-path writes resolve to main. Protocol: `worktree-orchestration.md` Rule 4a.
 
 ## MUST: Worktree Agents Commit Incremental Progress
 
@@ -394,18 +394,18 @@ A command that exited non-zero, hit an invalid flag, timed out, or returned empt
 
 ## Trust Posture Wiring
 
-- **Severity:** `halt-and-report` at gate-review (reviewer / cc-architect at `/codify`); `advisory` at hook layer per `hook-output-discipline.md` MUST-2. MUST-2 is the canonical halt-and-report trigger.
+- **Severity:** `halt-and-report` at gate-review; `advisory` at hook layer per `hook-output-discipline.md` MUST-2.
 - **Grace period:** 7 days from rule landing (2026-05-31 → 2026-06-07).
 - **Cumulative posture impact:** MUST-1/3/4 route cumulative per `trust-posture.md` MUST-4; MUST-2 routes emergency — never double-counted.
 - **Regression-within-grace:** emergency downgrade per `trust-posture.md` MUST-4. Independently, MUST-2 is a 1×-instant emergency trigger — key `evidence_free_claim` (1× = drop 1 posture).
 - **Receipt requirement:** SessionStart `[ack: evidence-first-claims]` IFF `posture.json::pending_verification` includes this rule_id.
-- **Detection mechanism:** Phase 1 review-layer (load-bearing) — reviewer at `/implement` + cc-architect at `/codify`. Phase 2 hook (advisory, planned `detectEvidenceFreeClaim` on Stop). Fixtures: `.claude/audit-fixtures/evidence-first-claims/` (one flag + one clean per MUST predicate).
+- **Detection mechanism:** Phase 1 review-layer — reviewer at `/implement` + cc-architect at `/codify`. Phase 2 hook (advisory, planned `detectEvidenceFreeClaim`). Fixtures: `.claude/audit-fixtures/evidence-first-claims/`.
 - **Violation scope:** rule-corpus-wide. MUST-1/3/4 cumulative; MUST-2 emergency.
 - **Origin:** See § Origin.
 
 ## Distinct From / Cross-References
 
-Extends `verify-resource-existence.md` MUST-2 to ALL diagnostic/anomaly/security claims. Pairs with `recommendation-quality.md` MUST-3, `probe-driven-verification.md`, `user-flow-validation.md` MUST-2. Distinct from `communication.md` (HOW to phrase vs WHETHER a claim may be made) and from `verify-claims-before-write.md` (code-surface claims at durable-write time vs diagnostic/security claims inline in any message).
+Extends `verify-resource-existence.md` MUST-2 to ALL diagnostic/anomaly/security claims. Pairs with `recommendation-quality.md` MUST-3, `probe-driven-verification.md`, `user-flow-validation.md` MUST-2. Distinct from `communication.md` (HOW vs WHETHER) and `verify-claims-before-write.md` (code-surface claims at durable-write time vs diagnostic/security claims inline).
 
 ## Origin
 
@@ -625,7 +625,7 @@ All user-generated content MUST be encoded before display in HTML templates, JSO
 
 ## Sanitizer Contract — DataFlow Display Hygiene
 
-DataFlow's input sanitizer (`packages/kailash-dataflow/src/dataflow/core/nodes.py::sanitize_sql_input`) is a defense-in-depth display-path safety net, NOT the primary SQLi defense. Parameter binding (`$N` / `%s` / `?`) is the primary defense — see § Parameterized Queries above.
+DataFlow's input sanitizer (`dataflow/core/nodes.py::sanitize_sql_input`) is a defense-in-depth display-path safety net, NOT the primary SQLi defense — parameter binding is (§ Parameterized Queries above).
 
 ### 1. String Inputs MUST Be Token-Replaced, Not Quote-Escaped
 
@@ -784,8 +784,8 @@ ALL version locations updated atomically:
 
 ### Rule 6a: Remove Fully — Public-API Removal Requires Deprecation Cycle
 
-Public-API removal MUST land with a `DeprecationWarning` shim covering at least one minor cycle, plus a CHANGELOG migration section explicitly documenting the callsite change. Removal-without-shim is BLOCKED. Removal is "complete" only when the shim has lived through one minor release AND the migration entry is in place.
+Public-API removal MUST land with a `DeprecationWarning` shim covering at least one minor cycle, plus a CHANGELOG migration section documenting the callsite change. Removal-without-shim is BLOCKED; removal is "complete" only after the shim lives through one minor release AND the migration entry lands.
 
-**Why:** Removal without a deprecation cycle hard-breaks every downstream callsite on first `pip upgrade` / `cargo update`. The shim converts a hard break into an actionable warning; the CHANGELOG migration tells users what to do next. See guide for kailash-ml 1.5.0 evidence.
+**Why:** Removal without a deprecation cycle hard-breaks every downstream callsite on first upgrade; the shim converts a hard break into an actionable warning. See guide for kailash-ml 1.5.0 evidence.
 
 ---
