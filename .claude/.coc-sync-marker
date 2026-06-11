@@ -1,51 +1,45 @@
 # COC Sync Marker — kailash-coc-py
 visibility: public
-timestamp: 2026-06-10T15:22:06Z
+timestamp: 2026-06-11T01:58:28Z
 source: loom/.claude
-loom_sha: 3880c5f
-loom_version: "2.39.0"
+loom_sha: 57c88cc
+loom_version: 2.40.0
 variant: py
 template_type: multi-cli
 clis: ["claude", "codex", "gemini"]
-pre_sync_version: "1.12.1"
-post_sync_version: "1.12.2"
-operation: redistribution-477-strip-extension-variant-lane-reclassification-plus-multi-cli-reemit
 stats:
-  tier_copied: 1143
-  verified_byte_equal: 1143
-  verify_failures: 0
-  stripped: 38                    # strip-build-internal at write time (#477)
-  variant_only_copied: 12
-  variant_only_verified_byte_equal: 12
-  variant_only_verify_failures: 0
-  overlays_applied: 149           # variants: REPLACEMENT overlays
-  overlay_verified: 149
-  overlay_verify_failures: 0
-  overlay_orphans_purged: 0
-  preserved: 1                    # CLAUDE.md (template-owned, not overwritten)
+  copied: 1144
+  variant_only: 12
+  overlays_applied: 149
+  stripped: 38
   purged: 0
-  presync_snapshot: null          # clean tracked-untracked axis (no untracked-not-ignored files to snapshot)
+  preserved: ["CLAUDE.md", "requirements-user.txt", "Docker/dev-container scaffold (F78)", ".codex/local-config.toml", ".gemini/local-settings.json", "settings.local.json", "learning/", ".proposals/", ".env"]
   baselines_emitted:
-    cc: 0                         # CLAUDE.md preserved, not emitted
-    codex: 1                      # AGENTS.md
-    gemini: 1                     # GEMINI.md
-  baseline_emission_bytes:        # from emit-telemetry.json, strict-headroom PASS (default mode, exit 0)
+    cc: 0            # CLAUDE.md preserved, not emitted
+    codex: 1         # AGENTS.md
+    gemini: 1        # GEMINI.md
+  baseline_emission_bytes:
     block_cap_bytes: 61440
     warn_cap_bytes: 32768
     codex:  { rules: 9, bytes: 49661, tier: WARN, headroom_bytes: 11779, headroom_pct: 19.17 }
     gemini: { rules: 9, bytes: 49458, tier: WARN, headroom_bytes: 11982, headroom_pct: 19.50 }
-  cli_artifacts:                  # from emit-cli-artifacts.mjs --target py
-    codex:  { prompts: 55, skills: 31 }   # prompts = 34 commands + 21 agent-prompts; skills incl. rules-reference
+  cli_artifacts:
+    codex:  { prompts: 55, skills: 31 }
     gemini: { commands: 34, skills: 31, agents: 21 }
-  scaffold:
-    symlinks: 1                   # .claude/codex-mcp-guard -> ../.codex-mcp-guard (verified OK)
-    manifest_distributed: true    # .claude/sync-manifest.yaml (164874 bytes)
-    bin_coc: true                 # bin/coc + 28 per-phase symlinks
+  codex_dispatcher: "bin/coc + 28 phase symlinks"
   mcp_guard:
-    policies_populated: false     # still gated (Step 6.6 — runtime predicate loader not wired)
-  headroom_floor_violations: []   # strict-headroom PASS (lowest 19.17% > 10% Risk-0004 floor)
-verify_overlays_py: "Failing:0 (py templates, post overlay-apply)"
-gitignore: { action: noop, added_entries_present: 10 }
-sdk_pin_delta:
-  kailash-kaizen: "2.24.5 -> 2.24.6 (BUILD kailash-py at 2.24.6)"
-  unchanged: [kailash, kailash-dataflow, kailash-nexus, kailash-pact, kailash-mcp, kailash-ml, kailash-align, kaizen-agents]
+    policies_populated: false   # fail-closed; predicate loader is a later phase
+fsub_delta:
+  - .claude/hooks/lib/coc-emit.js (new)
+  - .claude/hooks/lib/codify-lease.js
+  - .claude/hooks/lib/coordination-log.js
+  - .claude/hooks/lib/journal-body-anchor.js
+  - .claude/hooks/lib/journal-reserve.js
+  - .claude/hooks/lib/operator-id.js (full-diff carry)
+  - .claude/commands/codify.md
+  - .claude/commands/journal.md
+  - .claude/rules/knowledge-convergence.md
+  - .claude/rules/self-referential-codify.md
+verify_overlays: "322/322 Failing:0"
+hooks_resolve: "38/38"
+sdk_pins: "current — no drift vs kailash-py BUILD"
