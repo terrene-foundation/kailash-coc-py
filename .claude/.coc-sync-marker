@@ -1,9 +1,9 @@
 # COC Sync Marker — kailash-coc-py
 visibility: public
-timestamp: 2026-06-12T02:15:45Z
+timestamp: 2026-06-12T05:44:13Z
 source: loom/.claude
-loom_sha: d7ec0d2
-loom_version: 2.43.0
+loom_sha: 6d18fe9
+loom_version: 2.45.0
 variant: py
 template_type: multi-cli
 clis: ["claude", "codex", "gemini"]
@@ -14,9 +14,10 @@ stats:
   variant_only: 12
   overlays_applied: 157
   purged: 0
-  changed_this_cycle: 3   # agents.md worktree-cluster extraction + security.md slot-partition + worktree-orchestration skill (#491)
-  preserved: ["CLAUDE.md", "README.md", "settings.json"]
+  changed_this_cycle: settings.json (MultiEdit canonicalization) + tool-classes.js + github-login.js SSOT + codex-mcp-guard regen (PR #500)
+  preserved: ["CLAUDE.md", "README.md"]
   verify_overlays: "338/338"
+  hook_integrity: "28/28"
   baselines_emitted:
     cc: 0       # CLAUDE.md preserved
     codex: 1    # AGENTS.md
@@ -26,14 +27,14 @@ stats:
     warn_cap_bytes: 32768
     codex:
       rules: 10
-      bytes: 52022
+      bytes: 52518
       tier: WARN
-      headroom_pct: 15.33
+      headroom_pct: 14.52
     gemini:
       rules: 10
-      bytes: 51819
+      bytes: 52315
       tier: WARN
-      headroom_pct: 15.66
+      headroom_pct: 14.85
   cli_artifacts:
     codex:
       prompts: 34
@@ -49,4 +50,5 @@ stats:
   scaffold:
     symlink_codex_mcp_guard: "../.codex-mcp-guard"
     manifest_distributed: true
-  template_version: 1.12.7
+  consumer_owned_preserved: ["Dockerfile", "docker-compose.yml", ".devcontainer/devcontainer.json", ".dockerignore", "bin/dev", "requirements-user.txt", "compose.override.yml.example"]
+  template_version: 1.12.9
