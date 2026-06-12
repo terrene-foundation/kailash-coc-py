@@ -1,20 +1,22 @@
 # COC Sync Marker — kailash-coc-py
 visibility: public
-timestamp: 2026-06-11T14:39:06Z
+timestamp: 2026-06-12T02:15:45Z
 source: loom/.claude
-loom_sha: 036c8ff
-loom_version: 2.42.0
+loom_sha: d7ec0d2
+loom_version: 2.43.0
 variant: py
 template_type: multi-cli
 clis: ["claude", "codex", "gemini"]
 stats:
   copied: 1159
-  stripped_build_internal: 38
-  byte_equal: 1121
+  stripped_build_internal: 36
+  byte_equal: 1123
   variant_only: 12
   overlays_applied: 157
   purged: 0
+  changed_this_cycle: 3   # agents.md worktree-cluster extraction + security.md slot-partition + worktree-orchestration skill (#491)
   preserved: ["CLAUDE.md", "README.md", "settings.json"]
+  verify_overlays: "338/338"
   baselines_emitted:
     cc: 0       # CLAUDE.md preserved
     codex: 1    # AGENTS.md
@@ -24,14 +26,14 @@ stats:
     warn_cap_bytes: 32768
     codex:
       rules: 10
-      bytes: 54616
+      bytes: 52022
       tier: WARN
-      headroom_pct: 11.11
+      headroom_pct: 15.33
     gemini:
       rules: 10
-      bytes: 54413
+      bytes: 51819
       tier: WARN
-      headroom_pct: 11.44
+      headroom_pct: 15.66
   cli_artifacts:
     codex:
       prompts: 34
@@ -47,4 +49,4 @@ stats:
   scaffold:
     symlink_codex_mcp_guard: "../.codex-mcp-guard"
     manifest_distributed: true
-  template_version: 1.12.5
+  template_version: 1.12.7
