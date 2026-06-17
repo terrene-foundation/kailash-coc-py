@@ -115,7 +115,7 @@ changes:
       pattern, different lane (coc = phase commands, dev = container lifecycle).
     diff_lines: "+92 -0"
 
-status: pending_review
+status: superseded
 
 # ----------------------------------------------------------------------------
 # Loom-side manifest directives proposed (Gate-1 reviewer enacts in
@@ -165,3 +165,29 @@ manifest_directives_proposed:
 #     with rust-toolchain.toml replacing requirements-coc.txt. Treat as a
 #     downstream variant-overlay decision at Gate-1.
 #   - kailash-coc-rb (Ruby template) ditto with Gemfile replacing requirements-*.
+
+# ----------------------------------------------------------------------------
+# DISPOSITION (sync-upflow Wave-3 todo-14, 2026-06-17): SUPERSEDED
+#
+# This M5 dev-container proposal asked loom to INGEST the 8 dev-container files
+# as template-owned artifacts + DECLARE preserve-globs in sync-manifest.yaml.
+# That request is SUPERSEDED by ECO-CANON W5 C5 (3-way dev-container ownership)
+# + ECO-IMPL W6b-i C2 (loom commit e050603): loom now OWNS + EMITS the py
+# dev-container via .claude/bin/emit-dev-container.mjs + .claude/dev-container-
+# templates/py/ as the loom-owned source, with ecosystem-relative registry
+# substitution ({{REGISTRY_HOST}}/{{REGISTRY_ORG}} -> getRegistry()). The
+# distribution path is the W6b-i emitter (coc-sync.md Step 4.5 step (c)), NOT
+# the consumer-proposal ingest this entry requested.
+#
+# The proposal's SUBSTANCE landed by a different route:
+#   - the 8 template-owned files are now loom-owned source, regenerated on /sync
+#     (the proposal's request #1, satisfied via emit-dev-container.mjs);
+#   - the preserve-glob set is the 3-way ownership model's project_owned_preserve
+#     class (the proposal's request #2, satisfied via dev_container_ownership in
+#     sync-manifest.yaml, NOT a flat preserve_globs list).
+#
+# Per artifact-flow.md § "Append, Never Overwrite": the 8 changes: entries +
+# manifest_directives_proposed block above are PRESERVED unchanged; this block
+# is appended. No prior content destroyed. status flipped pending_review ->
+# superseded so the entry no longer dangles for a future Gate-1 ingest.
+# ----------------------------------------------------------------------------
