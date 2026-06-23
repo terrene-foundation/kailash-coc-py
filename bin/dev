@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# loom dev-container distribution source (py) — generated INTO consumer templates by /sync-to-use; do not hand-edit the consumer copy. Registry host/org are ecosystem-relative, substituted at /sync-to-use distribution.
 # Kailash COC dev environment — one-command launch. Template-owned, regenerated on /sync.
 # `./bin/dev`            → drop into a shell in the dev container (ephemeral, --rm)
 # `./bin/dev <cmd...>`   → run <cmd> in the dev container

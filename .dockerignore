@@ -1,3 +1,4 @@
+# loom dev-container distribution source (py) — generated INTO consumer templates by /sync-to-use; do not hand-edit the consumer copy. Registry host/org are ecosystem-relative, substituted at /sync-to-use distribution.
 # Keep secrets + operator state + VCS out of the build context (N-H1 / secrets-and-auth.md S1).
 # An over-broad `COPY . .` must never bake any of these into a layer.
 .env

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# loom dev-container distribution source (py) — generated INTO consumer templates by /sync-to-use; do not hand-edit the consumer copy. Registry host/org are ecosystem-relative, substituted at /sync-to-use distribution.
 # Kailash COC dev container — postCreate orchestrator (template-owned, regenerated on /sync).
 #
 # Idempotent + re-runnable on demand:  docker compose exec dev .devcontainer/postCreate.sh

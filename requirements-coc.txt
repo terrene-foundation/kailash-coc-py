@@ -1,3 +1,4 @@
+# loom dev-container distribution source (py) — generated INTO consumer templates by /sync-to-use; do not hand-edit the consumer copy. Registry host/org are ecosystem-relative, substituted at /sync-to-use distribution.
 # Kailash COC baked framework set — template-owned, regenerated on /sync.
 # Lighter five frameworks + hook formatters. ML/Align (torch-class, multi-GB) are
 # OPT-IN via requirements-coc-ml.txt (compose `ml` profile) per plan §0 decision 1.

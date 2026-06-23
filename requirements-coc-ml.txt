@@ -1,3 +1,4 @@
+# loom dev-container distribution source (py) — generated INTO consumer templates by /sync-to-use; do not hand-edit the consumer copy. Registry host/org are ecosystem-relative, substituted at /sync-to-use distribution.
 # Kailash COC OPT-IN ML/Align framework set — template-owned, regenerated on /sync.
 # Torch-class, multi-GB. NOT in the default image (plan §0 decision 1). Installed only
 # via the compose `ml` profile / `postCreate.sh --ml`. Implements specs/dev-container-image.md §5.

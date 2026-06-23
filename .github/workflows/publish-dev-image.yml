@@ -1,16 +1,17 @@
 name: Publish Dev Container Image
 
+# loom dev-container distribution source (py) — generated INTO consumer templates by /sync-to-use; do not hand-edit the consumer copy. Registry host/org are ecosystem-relative, substituted at /sync-to-use distribution.
 # Architecture B (2026-05-28 pivot, journal/0003): the dev container distributes as a
-# publisher-built image on Docker Hub (`terrenefoundation/kailash-coc-py`). Consumers
-# `docker pull`; they do not build the Dockerfile locally on first run.
+# publisher-built image on the ecosystem registry (`docker.io/terrenefoundation/kailash-coc-py`).
+# Consumers `docker pull`; they do not build the Dockerfile locally on first run.
 #
 # Triggers:
 #   - git tag v<X.Y.Z> push      → build + push :<X.Y.Z> and :latest, multi-arch.
 #   - manual workflow_dispatch    → publish-with-explicit-tag operator override.
 #
 # Outputs (per `specs/dev-container-image.md` § Image acquisition + I10):
-#   - terrenefoundation/kailash-coc-py:<X.Y.Z>          (immutable, semver tag)
-#   - terrenefoundation/kailash-coc-py:latest           (moving pointer)
+#   - docker.io/terrenefoundation/kailash-coc-py:<X.Y.Z>   (immutable, semver tag)
+#   - docker.io/terrenefoundation/kailash-coc-py:latest    (moving pointer)
 #   - manifest digest sha256:…                          (captured as job output + release artifact)
 
 on:
@@ -71,9 +72,13 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Log in to Docker Hub
+      - name: Log in to the ecosystem registry
         uses: docker/login-action@v3
         with:
+          # docker/login-action defaults to docker.io when `registry:` is omitted;
+          # the pull pointers carry docker.io, so the publish login MUST
+          # target the same host or fork pull/push split across registries.
+          registry: docker.io
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
@@ -82,9 +87,9 @@ jobs:
         run: |
           set -euo pipefail
           TAG="${{ steps.resolve.outputs.tag }}"
-          TAGS="terrenefoundation/kailash-coc-py:${TAG}"
+          TAGS="docker.io/terrenefoundation/kailash-coc-py:${TAG}"
           if [ "${{ github.event_name }}" = "push" ] || [ "${{ inputs.push_latest }}" = "true" ]; then
-            TAGS="${TAGS},terrenefoundation/kailash-coc-py:latest"
+            TAGS="${TAGS},docker.io/terrenefoundation/kailash-coc-py:latest"
           fi
           {
             echo "tags<<EOF"
@@ -116,7 +121,7 @@ jobs:
           set -euo pipefail
           TAG="${{ steps.resolve.outputs.tag }}"
           DIGEST="${{ steps.build.outputs.digest }}"
-          echo "Published terrenefoundation/kailash-coc-py:${TAG}"
+          echo "Published docker.io/terrenefoundation/kailash-coc-py:${TAG}"
           echo "Manifest digest: ${DIGEST}"
           mkdir -p artifacts
           {
@@ -140,7 +145,7 @@ jobs:
           set -euo pipefail
           TAG="${{ steps.resolve.outputs.tag }}"
           # Surface the platforms the registry now serves under this tag.
-          docker buildx imagetools inspect "terrenefoundation/kailash-coc-py:${TAG}" | tee /tmp/manifest.txt
+          docker buildx imagetools inspect "docker.io/terrenefoundation/kailash-coc-py:${TAG}" | tee /tmp/manifest.txt
           # Fail loudly if the published manifest is single-arch (regression guard).
           grep -q "linux/amd64" /tmp/manifest.txt
           grep -q "linux/arm64" /tmp/manifest.txt
@@ -157,7 +162,17 @@ jobs:
         # tag list" that interpolates the boolean as the string "true" inside a
         # shell test. Fix landed 2026-05-31 after the v1.10.1 publish landed the
         # image+:latest but skipped this Overview-sync step.
-        if: ${{ github.event_name == 'push' || inputs.push_latest }}
+        #
+        # ECOSYSTEM-RELATIVE: peter-evans/dockerhub-description talks ONLY to the
+        # Docker Hub overview API, and its `repository:` input is a Docker Hub
+        # `org/repo` slug (NOT a host-prefixed pointer — prefixing docker.io
+        # would make the action reject the slug). So this ancillary step is gated to
+        # the canon Docker Hub registry: on an ecosystem fork whose docker.io
+        # is NOT docker.io (e.g. ghcr.io / a private registry) there is no Docker Hub
+        # overview to sync, and the step is a no-op. The HOST-bearing publish path
+        # (login + push + inspect above) is fully docker.io-parameterized, so
+        # the published and pulled image always share one registry on every ecosystem.
+        if: ${{ (github.event_name == 'push' || inputs.push_latest) && 'docker.io' == 'docker.io' }}
         uses: peter-evans/dockerhub-description@v4
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}

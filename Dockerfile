@@ -1,4 +1,5 @@
 # syntax=docker/dockerfile:1.7
+# loom dev-container distribution source (py) — generated INTO consumer templates by /sync-to-use; do not hand-edit the consumer copy. Registry host/org are ecosystem-relative, substituted at /sync-to-use distribution.
 # Kailash COC multi-CLI development environment.
 # Template-owned, regenerated on /sync — do not hand-edit downstream.
 # Implements workspaces/dev-container/specs/dev-container-image.md (S1, I1–I8).

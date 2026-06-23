@@ -1,3 +1,4 @@
+# loom dev-container distribution source (py) — generated INTO consumer templates by /sync-to-use; do not hand-edit the consumer copy. Registry host/org are ecosystem-relative, substituted at /sync-to-use distribution.
 # Project-owned Python dependencies — YOURS, never overwritten by /sync.
 #
 # Add the extra pip packages your project needs, one per line (pip requirement syntax).

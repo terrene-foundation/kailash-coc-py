@@ -1,3 +1,4 @@
+# loom dev-container distribution source (py) — generated INTO consumer templates by /sync-to-use; do not hand-edit the consumer copy. Registry host/org are ecosystem-relative, substituted at /sync-to-use distribution.
 # Kailash COC dev environment — template-owned, regenerated on /sync.
 # `dev` is the workbench (a template-derived project is developed AND run here, plan §0
 # decision 2). The image is publisher-built and pulled from Docker Hub — consumers do

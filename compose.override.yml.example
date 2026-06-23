@@ -1,3 +1,4 @@
+# loom dev-container distribution source (py) — generated INTO consumer templates by /sync-to-use; do not hand-edit the consumer copy. Registry host/org are ecosystem-relative, substituted at /sync-to-use distribution.
 # Project-owned Compose overlay — copy to `compose.override.yml` to activate.
 #
 #     cp compose.override.yml.example compose.override.yml
