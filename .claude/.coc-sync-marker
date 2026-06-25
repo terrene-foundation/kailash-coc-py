@@ -1,42 +1,44 @@
 # COC Sync Marker — kailash-coc-py (py lane, multi-CLI)
-timestamp: 2026-06-23T02:26:14Z
+timestamp: 2026-06-25T07:21:30Z
 source: loom/.claude
-loom_sha: f7c236d
+loom_sha: 8197257
 variant: py
 clis: [claude, codex, gemini]
 visibility: public
+headline: MO-OPT W1 — multi-operator-coordination substrate made OPT-IN (coordination-mode.js + isCoordinationEnabled hoists; all GLOBAL hooks, no py overlay)
 stats:
-  copied: 1262
+  copied: 1263
+  stripped: 35
   variant_only: 13
   overlay_applied: 157
   verify_failures: 0
-  purged: 0
-  preserved: [CLAUDE.md, .proposals/, learning/, settings.local.json, dev-container-scaffold]
+  overlay_verify_failures: 0
+  variant_only_verify_failures: 0
+  purged: 9          # universal obsoleted: stale loom-only leak copies (sync-from-build/use, cli-audit × {.claude,.codex,.gemini})
+  preserved: [CLAUDE.md, .proposals/, learning/, settings.local.json, dev-container-project-owned]
   baselines_emitted:
-    cc: 0          # CLAUDE.md preserved, not emitted
-    codex: 1       # AGENTS.md
-    gemini: 1      # GEMINI.md
+    cc: 0           # CLAUDE.md preserved, not emitted
+    codex: 1        # AGENTS.md
+    gemini: 1       # GEMINI.md
   baseline_emission:
     block_cap_bytes: 61440
     warn_cap_bytes: 32768
     headroom_floor_pct: 10
-    codex: { tier: WARN, headroom_pct: 14.55, bytes: 52499 }
-    gemini: { tier: WARN, headroom_pct: 14.88, bytes: 52296 }
+    codex: { tier: WARN, headroom_pct: 15.61, bytes: 51850, rules: 10 }
+    gemini: { tier: WARN, headroom_pct: 15.94, bytes: 51647, rules: 10 }
   cli_artifacts:
-    codex: { prompts: 40, skills: 33, agent_prompts: 21 }
-    gemini: { commands: 40, skills: 33, agents: 21 }
+    codex: { prompts: 37, skills: 33, agent_prompts: 21 }
+    gemini: { commands: 37, skills: 33, agents: 21 }
   codex_dispatcher: { bin_coc: 1, phase_shims: 28 }
-  coc_unified: { artifacts: 172, rules: 71, agents: 25, skills: 35, commands: 41 }
-  dev_container: { emit: distributed, registry_substitutions: 27, residual_placeholders: 0 }
-  mcp_guard: { policies_populated: false }
-sdk_pin_changes:
-  note: sdk_packages metadata refreshed to PyPI-resolvable current; requirements-coc image pins HELD at loom-source (image-rebuild concern)
-  kailash: 2.29.4 -> 2.44.1
-  kailash-dataflow: 2.11.3 -> 2.12.0
-  kailash-nexus: 2.9.1 -> 2.11.0
-  kailash-kaizen: 2.27.0 -> 2.28.0
-  kailash-pact: 0.12.0 -> 0.14.1
-  kailash-mcp: 0.2.14 -> 0.2.15
-  kailash-ml: 2.0.1 -> 2.2.1
-  kaizen-agents: 0.9.10 -> 0.9.11
-note: loom@f7c236d (2.45.0) redistribution; full artifact-set delta + multi-CLI re-emit + dev-container refresh. uv-equivalent N/A (no consumer pyproject; requirements image-pinned).
+  dev_container: { emit: distributed, registry_substitutions: 27, residual_placeholders: 0, files_changed: 2 }
+  mcp_guard: { policies_populated: false }   # validator-13 PASS; runtime predicate loader still gated
+w1_landing:
+  coordination_mode_js: present
+  isCoordinationEnabled_in_integrity_guard: verified
+sdk_pin_changes: none      # SDK VERSION pins PRESERVED (released PyPI values unchanged); no mid-feature/unreleased bump
+dev_container_requirements:
+  note: requirements-coc.txt + requirements-coc-ml.txt drift-corrected to MATCH the already-declared released VERSION pins (kailash 2.44.1, ml 2.2.1 etc.) — NOT an unreleased bump
+uv_sync: skipped           # no consumer pyproject.toml change (hooks-focused cycle)
+obsoleted_purge:
+  obsoleted_union_entries: 66
+  removed_this_cycle: 9
