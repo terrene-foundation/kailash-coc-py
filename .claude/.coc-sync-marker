@@ -1,44 +1,47 @@
 # COC Sync Marker — kailash-coc-py (py lane, multi-CLI)
-timestamp: 2026-06-26T13:55:47Z
+timestamp: 2026-06-26T22:52:26Z
 source: loom/.claude
-loom_sha: 9755c2d
+loom_sha: 9101e34
 variant: py
 template_type: multi-cli
 clis: [claude, codex, gemini]
 visibility: public
-headline: F1 distribution — Shard-A/B/C rule narrowing+extraction, F5 base re-tier, claude-rb retirement, dogfood catch-up (loom 2.45.0 unchanged); .codex/.gemini wholesale-replaced (orphan sync.md/sync.toml purged)
+headline: Obsoletion propagation — codex/gemini-templates added to .coc-obsoleted (F1 #685 follow-up; loom 9755c2d→9101e34, content CONSISTENT, no re-emit)
 stats:
-  copied: 1271
-  variant_only: 13
-  overlay_applied: 157
+  copied: 0          # narrow cycle — content already CONSISTENT (sync-tier-aware --verify, 1441 files); no content writes
+  variant_only: 0
+  overlay_applied: 0
   verify_failures: 0
   overlay_verify_failures: 0
   variant_only_verify_failures: 0
-  purged: 0          # sync-tier-aware --verify CONSISTENT (1441 files); no obsoleted present this cycle
-  preserved: [CLAUDE.md, .proposals/, learning/, settings.local.json, dev-container-project-owned]
+  purged: 0          # no obsoleted path present in this template (verify: no obsoleted path present)
+  obsoleted_manifest:
+    regenerated: true        # .claude/.coc-obsoleted rebuilt from sync-manifest.yaml::obsoleted + use_obsoleted
+    lines: 74                # 3 header + 71 paths (69 unique + 2 dups: terrene-naming/independence)
+    prev_lines: 69
+    new_entries:             # additive — every prior entry preserved
+      - .claude/codex-templates/    # F1 #685 — orphan multi-CLI source tree, downstream auto-purge
+      - .claude/gemini-templates/   # F1 #685 — orphan multi-CLI source tree, downstream auto-purge
+      - .claude/commands/sync.md    # prior-cycle gap — de-surfaced /sync triplet, now in manifest union
+      - .codex/prompts/sync.md
+      - .gemini/commands/sync.toml
+  preserved: [CLAUDE.md, .proposals/, learning/, settings.local.json, dev-container-project-owned, AGENTS.md, GEMINI.md, .codex/, .gemini/, .codex-mcp-guard/, bin/coc]
   baselines_emitted:
     cc: 0           # CLAUDE.md preserved, not emitted
-    codex: 1        # AGENTS.md
-    gemini: 1       # GEMINI.md
-  baseline_emission:
-    block_cap_bytes: 61440
-    warn_cap_bytes: 32768
-    headroom_floor_pct: 10
-    codex: { tier: WARN, headroom_pct: 15.61, bytes: 51850, rules: 10 }
-    gemini: { tier: WARN, headroom_pct: 15.94, bytes: 51647, rules: 10 }
+    codex: 0        # AGENTS.md NOT re-emitted this cycle (content CONSISTENT)
+    gemini: 0       # GEMINI.md NOT re-emitted this cycle (content CONSISTENT)
   cli_artifacts:
-    codex: { prompts: 36, skills: 33, agent_prompts: 21 }
-    gemini: { commands: 36, skills: 33, agents: 21 }
-  cli_orphans_purged:
-    - .codex/prompts/sync.md      # loom-only /sync dispatcher, de-surfaced
-    - .gemini/commands/sync.toml  # loom-only /sync dispatcher, de-surfaced
+    note: not-re-emitted-this-cycle   # narrow obsoletion cycle; .codex/.gemini trees untouched
   codex_dispatcher: { bin_coc: 1, phase_shims: 28 }   # preserved (bin/coc + 28 shims present, untouched)
-  scaffold: { codex_mcp_guard_symlink: present, sync_manifest_distributed: refreshed }
-  dev_container: { emit: not-re-emitted-this-cycle }   # .claude/-content axis already applied + verified CONSISTENT upstream; D6 emit unchanged
-  mcp_guard: { policies_populated: false }   # validator-13 PASS; runtime predicate loader still gated (zero-tolerance Rule 3 — NOT flipped)
+  scaffold: { codex_mcp_guard_symlink: present, sync_manifest_distributed: unchanged }
+  dev_container: { emit: not-re-emitted-this-cycle }
+  mcp_guard: { policies_populated: false }   # runtime predicate loader still gated (zero-tolerance Rule 3 — NOT flipped)
 distribution:
-  tool: sync-tier-aware.mjs --target py --all-templates
+  tool: sync-tier-aware.mjs --target py --all-templates --verify
   verify: CONSISTENT
   files_total: 1441
 sdk_pin_changes: none      # SDK VERSION pins PRESERVED (released PyPI values unchanged); BUILD kailash-py pyproject 2.44.1; no bump
 uv_sync: skipped           # no consumer pyproject.toml change
+notes:
+  - "Narrow obsoletion-propagation cycle: only .coc-obsoleted regeneration (Step 4.5) + marker + VERSION patch bump. Content files + .codex/.gemini trees + AGENTS.md/GEMINI.md untouched (sync-tier-aware --verify CONSISTENT both templates)."
+  - ".coc-obsoleted now carries the manifest's full obsoleted+use_obsoleted union (74 lines); downstream /sync-from-template can auto-purge leaked .claude/codex-templates/ + .claude/gemini-templates/ orphan trees (leaked at v2.23.1)."
