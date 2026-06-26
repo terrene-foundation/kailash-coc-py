@@ -1,20 +1,20 @@
 # COC Sync Marker — kailash-coc-py (py lane, multi-CLI)
-timestamp: 2026-06-25T07:21:30Z
+timestamp: 2026-06-26T13:55:47Z
 source: loom/.claude
-loom_sha: 8197257
+loom_sha: 9755c2d
 variant: py
+template_type: multi-cli
 clis: [claude, codex, gemini]
 visibility: public
-headline: MO-OPT W1 — multi-operator-coordination substrate made OPT-IN (coordination-mode.js + isCoordinationEnabled hoists; all GLOBAL hooks, no py overlay)
+headline: F1 distribution — Shard-A/B/C rule narrowing+extraction, F5 base re-tier, claude-rb retirement, dogfood catch-up (loom 2.45.0 unchanged); .codex/.gemini wholesale-replaced (orphan sync.md/sync.toml purged)
 stats:
-  copied: 1263
-  stripped: 35
+  copied: 1271
   variant_only: 13
   overlay_applied: 157
   verify_failures: 0
   overlay_verify_failures: 0
   variant_only_verify_failures: 0
-  purged: 9          # universal obsoleted: stale loom-only leak copies (sync-from-build/use, cli-audit × {.claude,.codex,.gemini})
+  purged: 0          # sync-tier-aware --verify CONSISTENT (1441 files); no obsoleted present this cycle
   preserved: [CLAUDE.md, .proposals/, learning/, settings.local.json, dev-container-project-owned]
   baselines_emitted:
     cc: 0           # CLAUDE.md preserved, not emitted
@@ -27,18 +27,18 @@ stats:
     codex: { tier: WARN, headroom_pct: 15.61, bytes: 51850, rules: 10 }
     gemini: { tier: WARN, headroom_pct: 15.94, bytes: 51647, rules: 10 }
   cli_artifacts:
-    codex: { prompts: 37, skills: 33, agent_prompts: 21 }
-    gemini: { commands: 37, skills: 33, agents: 21 }
-  codex_dispatcher: { bin_coc: 1, phase_shims: 28 }
-  dev_container: { emit: distributed, registry_substitutions: 27, residual_placeholders: 0, files_changed: 2 }
-  mcp_guard: { policies_populated: false }   # validator-13 PASS; runtime predicate loader still gated
-w1_landing:
-  coordination_mode_js: present
-  isCoordinationEnabled_in_integrity_guard: verified
-sdk_pin_changes: none      # SDK VERSION pins PRESERVED (released PyPI values unchanged); no mid-feature/unreleased bump
-dev_container_requirements:
-  note: requirements-coc.txt + requirements-coc-ml.txt drift-corrected to MATCH the already-declared released VERSION pins (kailash 2.44.1, ml 2.2.1 etc.) — NOT an unreleased bump
-uv_sync: skipped           # no consumer pyproject.toml change (hooks-focused cycle)
-obsoleted_purge:
-  obsoleted_union_entries: 66
-  removed_this_cycle: 9
+    codex: { prompts: 36, skills: 33, agent_prompts: 21 }
+    gemini: { commands: 36, skills: 33, agents: 21 }
+  cli_orphans_purged:
+    - .codex/prompts/sync.md      # loom-only /sync dispatcher, de-surfaced
+    - .gemini/commands/sync.toml  # loom-only /sync dispatcher, de-surfaced
+  codex_dispatcher: { bin_coc: 1, phase_shims: 28 }   # preserved (bin/coc + 28 shims present, untouched)
+  scaffold: { codex_mcp_guard_symlink: present, sync_manifest_distributed: refreshed }
+  dev_container: { emit: not-re-emitted-this-cycle }   # .claude/-content axis already applied + verified CONSISTENT upstream; D6 emit unchanged
+  mcp_guard: { policies_populated: false }   # validator-13 PASS; runtime predicate loader still gated (zero-tolerance Rule 3 — NOT flipped)
+distribution:
+  tool: sync-tier-aware.mjs --target py --all-templates
+  verify: CONSISTENT
+  files_total: 1441
+sdk_pin_changes: none      # SDK VERSION pins PRESERVED (released PyPI values unchanged); BUILD kailash-py pyproject 2.44.1; no bump
+uv_sync: skipped           # no consumer pyproject.toml change

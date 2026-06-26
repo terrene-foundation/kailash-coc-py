@@ -805,7 +805,7 @@ parity_enforcement:
       # provenance (2) — per-lane delivery declared in provenance_parity above
       - "provenance-capture-prompt.js|provenance|HumanInput capture; lanes declared in provenance_parity"
       - "provenance-capture-tool.js|provenance|Action/Decision/Delegation capture; lanes in provenance_parity"
-      # cc-only (25) — CC-runtime / loom-substrate; NOT in the fresh extraction
+      # cc-only (26) — CC-runtime / loom-substrate; NOT in the fresh extraction
       - "integrity-guard.js|cc-only|gates Edit/Write to codify/<id>-<date> branches; coordination substrate (codify-branch state) — omits @coc-codex-edit-gate → excluded from apply_patch (FF-AC6-1 AC#2), not mirrored"
       - "journal-write-guard.js|cc-only|journal slot-reservation + overwrite guard; coordination substrate (journal-slot fold) — omits @coc-codex-edit-gate → excluded from apply_patch (FF-AC6-1 AC#2), not mirrored"
       - "adjacency-leasecheck.js|cc-only|multi-operator claim-adjacency lease check; coordination substrate (claims/roster, auto-claim writes) — omits @coc-codex-edit-gate → excluded from apply_patch (FF-AC6-1 AC#2), not mirrored"
@@ -831,6 +831,7 @@ parity_enforcement:
       - "validate-prod-deploy.js|cc-only|prod-deploy validation gate; CC-workflow"
       - "validate-workflow.js|cc-only|workflow validation gate; CC-workflow"
       - "wrapup-after-landing.js|cc-only|PostToolUse(Bash) wrapup-on-landing nudge on `gh pr merge`; advisory CC-workflow convenience (not a trust gate, no classifiable predicate, no @coc-codex-edit-gate) — the cross-CLI wrapup-on-landing DISCIPLINE reaches Codex/Gemini via the wave-loop.md G2 rule + release.md command emission, not this hook"
+      - "analyze-completeness-guard.js|cc-only|PreToolUse(Skill) /analyze output-completeness gate (loom#675); keys on the CC-only Skill tool + PreToolUse(Skill) matcher (no Codex/Gemini equivalent) — the rule PROSE (analyze-output-completeness.md) reaches Codex/Gemini via the co-tier skill-channel; the structural hook enforcement is CC-only"
 
 tiers:
   cc:
@@ -898,6 +899,14 @@ tiers:
     - rules/rule-authoring.md
     - rules/specs-authority.md
     - rules/spec-accuracy.md
+    # analyze-output-completeness (loom#675, 2026-06-26): the /analyze
+    # phase-complete output-tree gate (01-analysis/02-plans/03-user-flows/specs
+    # populated before /todos advances). co tier reaches py + rs + base — every
+    # USE axis that runs /analyze. The companion hook ships via the hooks/**
+    # runtime-infra glob (coc tier); base consumers (cc/co/onboarding) receive
+    # the rule PROSE and wire their own PreToolUse hook — the same documented
+    # pattern as rules/state-file-write-guard.md above.
+    - rules/analyze-output-completeness.md
     - rules/deploy-hygiene.md
     - rules/upstream-issue-hygiene.md
     # proposal-intake-trust (sync-upflow todo 08): the reviewer-side
@@ -924,6 +933,12 @@ tiers:
     - commands/start.md
     - commands/autonomize.md
     - commands/sweep.md
+    # commands/sync-from-downstream.md + commands/sync-from-template.md MOVED here from coc
+    # (2026-06-25, F10 cascade-tiering): methodology-generic consumer-run cascade verbs (sync-from-template.md
+    # has zero Kailash coupling). co reaches py + rs + base, so the non-Kailash `base` USE-template axis
+    # (tier_subscriptions [cc, co, onboarding] — excludes coc) gets the pull/ingest verbs and joins the cascade.
+    - commands/sync-from-downstream.md
+    - commands/sync-from-template.md
     # commands/cli-audit.md MOVED to loom_only (leak fix 2026-06-23): it audits loom's OWN
     # multi-CLI EMISSION PIPELINE (source rules → slot overlays → per-CLI target files) and
     # dispatches the loom-only cc/codex/gemini-architect agents — a consumer has neither the
@@ -1020,6 +1035,93 @@ tiers:
     - operators.roster.schema.json
     - team-memory/README.md
     - templates/specs/_certification.yaml
+    # ── Base-coverage reconciliation 2026-06-26 (F10 follow-up, co-owner-directed) ──
+    # Co-owner directive (verbatim): "only kailash related stuff should be removed"
+    # from the non-Kailash `base` USE axis. The `coc` tier had become a grab-bag
+    # mixing genuinely Kailash-specific artifacts with general CO methodology /
+    # quality / frontend artifacts; the latter were silently excluded from `base`
+    # (tier_subscriptions [cc, co, onboarding]) — the ENTIRE CO lifecycle
+    # (/analyze /todos /implement /redteam /codify) plus general quality agents,
+    # general rules, and general skills never reached non-Kailash consumers
+    # (emit walk 2026-06-26: base SKIPPED 32 commands / 58 skills / 34 agents).
+    # These are general or general-cored (Kailash examples degrade gracefully —
+    # same as existing co-tier rules whose cross-refs point at cc-tier files), so
+    # they belong in `co` (reaches py + rs + base). Only purely-Kailash artifacts
+    # (DataFlow/Nexus/PACT/Core-SDK/Kaizen/MCP/ML/Align specialists, SDK skills,
+    # framework quick-ref commands) + loom-tooling (sync/variant machinery base
+    # consumers never run) stay in `coc`. A few moved skill dirs (12-testing,
+    # 16-validation, 17-gold-standards, 18-security-patterns, 10-deployment-git)
+    # carry Kailash examples / DataFlow-RLS sub-files that ride along inertly on
+    # base — graceful degradation per the aggressive-inclusion call, not harm.
+    # Covered by the same emit.mjs manifest-completeness validator (silent
+    # untiering impossible). Receipt: journal/0344.
+    # CO lifecycle + general commands
+    - commands/analyze.md
+    - commands/todos.md
+    - commands/implement.md
+    - commands/redteam.md
+    - commands/codify.md
+    - commands/validate.md
+    - commands/migrate.md
+    - commands/release.md
+    - commands/test.md
+    - commands/deploy.md
+    # Frontend / design commands
+    - commands/design.md
+    - commands/i-audit.md
+    - commands/i-polish.md
+    - commands/i-harden.md
+    # General analysis / quality / implementation / release agents
+    - agents/analysis/analyst.md
+    - agents/quality/reviewer.md
+    - agents/quality/gold-standards-validator.md
+    - agents/quality/security-reviewer.md
+    - agents/value-auditor.md
+    - agents/implementation/build-fix.md
+    - agents/implementation/tdd-implementer.md
+    - agents/testing/testing-specialist.md
+    - agents/release/release-specialist.md
+    # Multi-CLI artifact architects (any CC/Codex/Gemini project)
+    - agents/cli-orchestrator.md
+    - agents/codex-architect.md
+    - agents/gemini-architect.md
+    # Frontend agents (react / flutter / uiux)
+    - agents/frontend/**
+    # General methodology / quality / frontend skills
+    - skills/spec-compliance/**
+    - skills/test-skip-discipline/**
+    - skills/12-testing-strategies/**
+    - skills/16-validation-patterns/**
+    - skills/17-gold-standards/**
+    - skills/18-security-patterns/**
+    - skills/10-deployment-git/**
+    - skills/23-uiux-design-principles/**
+    - skills/25-ai-interaction-patterns/**
+    - skills/36-claude-managed-agents/**
+    # General CO / quality / infra rules
+    - rules/agent-reasoning.md
+    - rules/documentation.md
+    - rules/ci-runners.md
+    - rules/testing.md
+    - rules/dependencies.md
+    - rules/deployment.md
+    - rules/observability.md
+    - rules/e2e-god-mode.md
+    - rules/env-models.md
+    - rules/schema-migration.md
+    # rules/ui-backend-defense.md + rules/refactor-invariants.md MOVED coc→co 2026-06-26
+    # (base-coverage re-tier R2/R3 self-ref redteam — reviewer + cc-architect CONFIRMED general,
+    # mis-KEPT in coc): ui-backend-defense is framework-agnostic HTTP-backend hostile-input defense
+    # (generic **/routes|handlers|api** paths, zero Kailash tokens); refactor-invariants is general
+    # refactoring discipline (LOC-invariant test, zero Kailash tokens). See journal/0344 + the
+    # convergence AMENDMENT. rules/python-environment.md (general-cored Python venv/uv discipline)
+    # ALSO MOVED coc→co 2026-06-26 — the cc-architect-verdicted THIRD move, co-owner-gated this cycle:
+    # framework-agnostic in its load-bearing MUST clauses (Kailash appears only in DO/DO-NOT example
+    # sub-package names + an Origin footnote, never a rule predicate). Its 2 BUILD-repo upstream-fixes Origin
+    # footers were genericized first (the dd7b5bc/F-D1 disclosure class — completing the workspace-token sweep).
+    - rules/ui-backend-defense.md
+    - rules/refactor-invariants.md
+    - rules/python-environment.md
   coc:
     # rules/terrene-naming.md + rules/independence.md — removed from COC
     # distribution 2026-05-31 (FB) — Foundation messaging governance, not
@@ -1028,17 +1130,11 @@ tiers:
     # obligations, so these were never license enforcement — their purpose
     # was Terrene-internal brand/license-labeling/anti-derivative messaging,
     # which is not a codegen-orchestration concern for non-Terrene consumers.
-    # Multi-CLI orchestration agents (Phase E5, 2026-04-22; tier-classified 2026-05-06)
-    # commands/cli-audit.md MOVED to loom_only (leak fix 2026-06-23) — it audits loom's OWN
-    # multi-CLI emission pipeline + dispatches the loom-only architects; see loom_only + obsoleted.
-    - agents/cli-orchestrator.md
-    - agents/codex-architect.md
-    - agents/gemini-architect.md
+    # Multi-CLI architect agents (cli-orchestrator + codex/gemini-architect) AND
+    # the general analysis/quality agents (analyst, reviewer, gold-standards-
+    # validator, security-reviewer) MOVED to `co` 2026-06-26 (base-coverage
+    # reconciliation, F10 follow-up — see the co tier). cli-audit.md is loom_only.
     - guides/codex/**
-    - agents/analysis/analyst.md
-    - agents/quality/reviewer.md
-    - agents/quality/gold-standards-validator.md
-    - agents/quality/security-reviewer.md
     # agents/open-source-strategist.md — removed from COC distribution 2026-05-31 (FB).
     # The agent IS Terrene Foundation IP/open-core strategy (four-layer model,
     # "Foundation owns all IP", EATP/Kailash open-vs-proprietary boundary,
@@ -1047,12 +1143,10 @@ tiers:
     # (RRPS/community) Terrene's strategic answers. Now loom-only (kept on disk
     # for Terrene's own use, like agents/management/*). Obsoleted below for
     # universal downstream purge. Receipt: journal/0184.
-    - agents/testing/testing-specialist.md
-    - agents/value-auditor.md
-    - agents/implementation/build-fix.md
+    # testing-specialist, value-auditor, build-fix, tdd-implementer,
+    # release-specialist MOVED to `co` 2026-06-26 (base-coverage reconciliation).
+    # pattern-expert STAYS (Core SDK workflows/nodes/cycles — purely Kailash).
     - agents/implementation/pattern-expert.md
-    - agents/implementation/tdd-implementer.md
-    - agents/release/release-specialist.md
     # agents/management/{todo-manager,gh-manager,posture-auditor}.md — REMOVED
     # from the coc tier 2026-06-01 (F104). They are loom-only management
     # agents (CLAUDE.md "Management (loom-only, excluded from sync)") but were
@@ -1062,7 +1156,7 @@ tiers:
     # live in the top-level `loom_only:` stanza (positive never-sync
     # declaration); the mutual-exclusion validator (validate-emit.mjs check 8)
     # blocks /sync if a loom_only path is ever re-added to a synced tier.
-    - agents/frontend/**
+    # agents/frontend/** MOVED to `co` 2026-06-26 (base-coverage reconciliation).
     - agents/frameworks/dataflow-specialist.md
     - agents/frameworks/nexus-specialist.md
     - agents/frameworks/kaizen-specialist.md
@@ -1071,8 +1165,8 @@ tiers:
     - agents/frameworks/mcp-platform-specialist.md
     - agents/frameworks/ml-specialist.md
     - agents/frameworks/align-specialist.md
-    - skills/spec-compliance/**
-    - skills/test-skip-discipline/**
+    # skills/spec-compliance/** + skills/test-skip-discipline/** MOVED to `co`
+    # 2026-06-26 (base-coverage reconciliation — general CO methodology).
     # skills/project/** added 2026-05-11 — placeholder/redirect skill for the
     # CLI parser slot. Pre-fix, `project/` was not in any tier, so
     # emit-cli-artifacts.mjs skipped it for every target. Result: any USE
@@ -1098,31 +1192,18 @@ tiers:
     # consumers alongside the other domain skills.
     - skills/framework-first/**
     - skills/08-nodes-reference/**
-    - skills/12-testing-strategies/**
-    - skills/16-validation-patterns/**
-    - skills/17-gold-standards/**
-    - skills/23-uiux-design-principles/**
-    - skills/25-ai-interaction-patterns/**
-    - commands/analyze.md
-    - commands/todos.md
-    - commands/implement.md
-    - commands/redteam.md
-    - commands/codify.md
-    - commands/validate.md
-    - commands/design.md
-    - commands/i-audit.md
-    - commands/i-polish.md
-    - commands/i-harden.md
-    - commands/deploy.md
-    - skills/10-deployment-git/**
+    # General skills (12-testing-strategies / 16-validation-patterns /
+    # 17-gold-standards / 23-uiux-design-principles / 25-ai-interaction-patterns /
+    # 10-deployment-git) AND the CO lifecycle + frontend commands (analyze, todos,
+    # implement, redteam, codify, validate, design, i-audit, i-polish, i-harden,
+    # deploy) MOVED to `co` 2026-06-26 (base-coverage reconciliation, F10
+    # follow-up): the non-Kailash base axis had NONE of the CO lifecycle.
     - skills/15-enterprise-infrastructure/**
     - skills/31-error-troubleshooting/**
-    - skills/18-security-patterns/**
-    # Explicit entries for cross-SDK RLS skills placed 2026-04-23 via
-    # kailash-rs proposal #9 and #10 (classified global). Glob above
-    # already covers them; explicit lines make the additions greppable.
-    - skills/18-security-patterns/dataflow-rls-posture.md
-    - skills/18-security-patterns/rls-security-definer-preauth-carveout.md
+    # skills/18-security-patterns/** (incl. the explicit dataflow-rls-posture +
+    # rls-security-definer-preauth-carveout sub-files) MOVED to `co` 2026-06-26
+    # (base-coverage reconciliation): general OWASP security patterns reach base;
+    # the 2 DataFlow-RLS sub-files ride along inertly (graceful degradation).
     - skills/34-kailash-ml/**
     - skills/35-kailash-align/**
     # skills/36-claude-managed-agents/** added 2026-06-11 (journal/0268,
@@ -1130,13 +1211,13 @@ tiers:
     # (event model, custom-tool reverse-tunnel with RT-hardened example,
     # session state machine). CLI-agnostic (emits to cc/codex/gemini, not in
     # cli_emit_exclusions). On-demand skill — no baseline-headroom impact.
-    - skills/36-claude-managed-agents/**
-    - rules/documentation.md
-    - rules/env-models.md
+    # skills/36-claude-managed-agents/** + rules/{documentation,env-models} MOVED
+    # to `co` 2026-06-26 (base-coverage reconciliation): general CC/methodology
+    # artifacts applicable to non-Kailash base consumers.
     - rules/cross-sdk-inspection.md
     - rules/patterns.md
-    - rules/agent-reasoning.md
-    - rules/deployment.md
+    # rules/agent-reasoning.md + rules/deployment.md MOVED to `co` 2026-06-26
+    # (base-coverage reconciliation): agent-reasoning is a CO core directive.
     - rules/build-repo-release-discipline.md
     - rules/eatp.md
     - rules/infrastructure-sql.md
@@ -1145,32 +1226,33 @@ tiers:
     - rules/connection-pool.md
     - rules/dataflow-pool.md
     - rules/framework-first.md
-    - rules/dependencies.md
-    - rules/testing.md
-    - rules/e2e-god-mode.md
-    - rules/observability.md
-    - rules/schema-migration.md
+    # rules/{dependencies,testing,e2e-god-mode,observability,schema-migration}
+    # MOVED to `co` 2026-06-26 (base-coverage reconciliation): general CO/quality/
+    # infra discipline (Kailash/DataFlow examples degrade gracefully on base).
     - rules/dataflow-classification.md
     - rules/event-payload-classification.md
-    - rules/ci-runners.md
+    # rules/ci-runners.md MOVED to `co` 2026-06-26 (base-coverage reconciliation).
     - rules/nexus-webhook-hmac.md
     - rules/nexus-http-status-convention.md
-    - rules/ui-backend-defense.md
-    - commands/release.md
-    - commands/sync.md # DEPRECATED stub (D8 2026-06-15) — removed next cycle; redirects to /sync-from-*
+    # rules/ui-backend-defense.md MOVED to `co` 2026-06-26 (R2 redteam: general HTTP-backend hostile-input defense, zero Kailash tokens).
+    # commands/release.md MOVED to `co` 2026-06-26 (base-coverage reconciliation).
     # commands/sync-from-build.md + commands/sync-from-use.md MOVED to loom_only (leak fix 2026-06-23):
     # both are loom's OWN Gate-1 inbound ingest verbs (loom ingests the BUILD + USE-template proposal
     # streams) — a downstream BUILD/USE consumer never runs them. They reached cc/codex/gemini consumers
     # via this coc tier since D8 (2026-06-15); removed here so loom_only is their single source of truth +
-    # obsoleted purges the stale copies. sync-from-downstream/template STAY (consumer-run verbs).
-    - commands/sync-from-downstream.md # D8: USE-template inbound — downstream upflow inbox (USE templates RUN this → ships)
-    - commands/sync-from-template.md # D8: downstream-consumer inbound — pull from template (consumers RUN this → ships)
-    - commands/migrate.md
+    # obsoleted purges the stale copies.
+    # commands/sync-from-downstream.md + commands/sync-from-template.md MOVED to the `co` tier
+    # (2026-06-25, F10 cascade-tiering): they are methodology-generic consumer-run verbs (sync-from-template.md
+    # has zero Kailash coupling), and the non-Kailash `base` USE-template axis (tier_subscriptions
+    # [cc, co, onboarding] — excludes coc) needs the pull/ingest verbs to participate in the cascade. `co`
+    # reaches py + rs + base — strictly additive vs coc (py/rs still get them, base now does too).
+    # commands/sync.md (deprecated D8 redirect stub) REMOVED this cycle + obsoleted-purged (see obsoleted:).
+    # commands/{migrate,test} MOVED to `co` 2026-06-26 (base-coverage reconciliation);
+    # commands/{ai,api,db,sdk} STAY (Kailash framework quick-refs — purely Kailash).
     - commands/ai.md
     - commands/api.md
     - commands/db.md
     - commands/sdk.md
-    - commands/test.md
     # Runtime infrastructure (canonical Anthropic-documented locations since v2.9.1).
     # MUST appear in every USE template and every downstream consumer — without
     # these directories on disk the consumer's settings.json hooks resolve to
@@ -1191,10 +1273,13 @@ tiers:
     # (stack-agnostic) consumers do NOT want them, so they belong in
     # `coc`, not `co`. Covered by the same emit.mjs manifest-completeness
     # validator that makes silent untiering structurally impossible.
-    - rules/python-environment.md
+    # rules/refactor-invariants.md + rules/python-environment.md MOVED to `co` 2026-06-26 (self-ref
+    # redteam + co-owner gate): both general (refactoring discipline / Python venv-uv discipline), zero
+    # Kailash content. python-environment's 2 BUILD-repo upstream-fixes Origin footers were genericized first.
+    # tenant-isolation + dataflow-identifier-safety below STAY (DataFlow-pathed); the sync/cli rules below
+    # STAY (COC-tooling — base consumers never run /sync-to-*).
     - rules/tenant-isolation.md
     - rules/dataflow-identifier-safety.md
-    - rules/refactor-invariants.md
     - rules/coc-sync-landing.md
     - rules/sync-completeness.md
     - rules/variant-authoring.md
@@ -1393,9 +1478,9 @@ variants:
     py: null
     rs: variants/rs/rules/ci-runners.md
     rb: null
-  # commands/sync.md is now a DEPRECATED redirect stub (D8 2026-06-15) — identical
-  # across lanes, so it carries NO variant overlay. The rs pull-command overlay moved
-  # to commands/sync-from-template.md below (the renamed consumer pull verb).
+  # commands/sync.md (the former D8 redirect stub) was REMOVED 2026-06-25 (F10) — it never
+  # carried a variant overlay. The rs consumer-pull overlay lives on commands/sync-from-template.md
+  # below (the renamed pull verb the former sync.md split out of).
   commands/sync-from-template.md:
     py: null
     rs: variants/rs/commands/sync-from-template.md
@@ -2270,6 +2355,13 @@ obsoleted:
   - .claude/commands/sync-from-use.md # why: loom-only Gate-1 USE-template-stream ingest verb leaked to consumers via the coc tier (D8 2026-06-15); purge the stale cc copy. Sibling of sync-from-build.md above.
   - .codex/prompts/sync-from-use.md # why: paired Codex emission of the leaked sync-from-use.md; purge the stale copy.
   - .gemini/commands/sync-from-use.toml # why: paired Gemini emission of the leaked sync-from-use.md; purge the stale copy.
+  # ── sync.md deprecated-stub removal (2026-06-25, F10 cascade-tiering) ──────────────────────────
+  # commands/sync.md was the D8 (2026-06-15) DEPRECATED redirect stub, retained for one cycle. Removed
+  # from the coc tier this cycle; purge the stale cc + codex + gemini copies from every consumer that
+  # synced during the stub's one-cycle window. Consumers use the per-class verbs (sync-from-template etc.).
+  - .claude/commands/sync.md # why: deprecated D8 redirect stub removed (F10); purge the stale cc copy.
+  - .codex/prompts/sync.md # why: paired Codex emission of the removed sync.md stub; purge the stale copy.
+  - .gemini/commands/sync.toml # why: paired Gemini emission of the removed sync.md stub; purge the stale copy.
   # ── additional loom-orchestration leak purge (2026-06-23, "what OTHER loom only commands did you leak?") ──
   # cli-audit shipped to cc (co tier) + codex + gemini → ×3. inspect/repos/settings were exclude-fenced from
   # the cc lane but leaked to codex + gemini (emit-cli-artifacts ignores exclude:) → ×2 (codex+gemini only).
@@ -2483,6 +2575,24 @@ gitignore_additions:
   # lease IS the runtime-only signal of "an operator holds the codify
   # lock"; persisting it across clones would make the lease forgeable.
   - .claude/learning/codify-lease.json
+  # Coordination opt-in local override (MO-OPT W1 — coordination-mode.js tier 2).
+  # Per-clone, never-synced state-class file (same visibility class as
+  # posture.json); carries no identity (just {enabled: bool}) but MUST stay
+  # local-only — committing it would surface as drift + let a consumer's opt-in
+  # state leak between clones. Mirrors loom's own .gitignore entry.
+  - .claude/learning/coordination-mode.json
+  # Operator roster (MO-OPT W2-c / GAP A — the state-locality policy).
+  # The roster carries operator TRUST identity (genesis trust-root, GPG
+  # pubkeys/fingerprints, role: owner) and is loom/build's COMMITTED shared
+  # substrate THERE — but at a USE-template-derived CONSUMER it MUST be
+  # local-only. Un-gitignored, a `/whoami --enroll` at a template makes the
+  # roster committable → it ships to every downstream clone, contaminating
+  # consumers with the template author's identity (the brief's directive-#1
+  # contamination vector). The roster SCHEMA (operators.roster.schema.json)
+  # IS synced so a consumer can validate its OWN local roster; the roster
+  # DATA stays per-clone. loom itself is NOT a consumer, so loom's own roster
+  # stays committed (this list applies to consumer repos only).
+  - .claude/operators.roster.json
   # Telemetry autocommit log (per-clone runtime-generated; never synced
   # via /sync). Surfaces as untracked drift every session if not gitignored
   # at the consumer; trips SessionStart drift hooks as a false positive.
@@ -2723,6 +2833,13 @@ repos:
   py:
     build: kailash-py
     variant: py
+    # build_variant_overlay (F11, 2026-06-26): the /sync-to-build variant policy
+    # for THIS BUILD repo. false → kailash-py BUILD ships the GLOBAL content
+    # (the global rule/skill corpus is already Python-native; the py variant
+    # overlays serve the USE template's downstream Python devs, not the SDK
+    # source repo). USE-lane distribution is UNAFFECTED — /sync-to-use always
+    # applies the py overlay. Absent ⇒ false. (rs declares true — see below.)
+    build_variant_overlay: false
     # Phase H1 (2026-04-22): parallel targets during multi-CLI rollout.
     # CC-only legacy target stays active for downstream projects that
     # consume it today; multi-CLI target ships AGENTS.md + CLAUDE.md +
@@ -2740,6 +2857,14 @@ repos:
   rs:
     build: kailash-rs
     variant: rs
+    # build_variant_overlay (F11, 2026-06-26): true → kailash-rs BUILD applies
+    # the rs variant overlay. The global corpus is Python-centric (pytest, py
+    # idioms); kailash-rs developers work in Rust and need the rs-flavored
+    # rules/skills (cargo nextest, Rust security MUST sections, etc.). This
+    # matches the long-standing empirical state of kailash-rs and the
+    # sync-to-build.md "use the variant version" intent for a non-Python
+    # engine. py declares false because the global IS its native form.
+    build_variant_overlay: true
     tier_subscriptions: [cc, co, coc]
     templates:
       - repo: kailash-coc-claude-rs
