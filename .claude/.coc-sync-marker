@@ -1,47 +1,60 @@
 # COC Sync Marker — kailash-coc-py (py lane, multi-CLI)
-timestamp: 2026-06-26T22:52:26Z
+timestamp: 2026-06-29T08:14:51Z
 source: loom/.claude
-loom_sha: 9101e34
+loom_sha: e2ac475
 variant: py
 template_type: multi-cli
 clis: [claude, codex, gemini]
 visibility: public
-headline: Obsoletion propagation — codex/gemini-templates added to .coc-obsoleted (F1 #685 follow-up; loom 9755c2d→9101e34, content CONSISTENT, no re-emit)
+headline: gitignore_additions per-clone trust-state fix (coordination-log.jsonl* + 7 siblings; journal/0368) + SDK pin refresh + accumulated artifacts; loom 9101e34→e2ac475 (2.45.0 unchanged)
 stats:
-  copied: 0          # narrow cycle — content already CONSISTENT (sync-tier-aware --verify, 1441 files); no content writes
-  variant_only: 0
-  overlay_applied: 0
+  copied: 1274
+  variant_only: 13
+  overlay_applied: 157
+  overlay_verified: 157
+  verified: 1274
   verify_failures: 0
   overlay_verify_failures: 0
   variant_only_verify_failures: 0
-  purged: 0          # no obsoleted path present in this template (verify: no obsoleted path present)
-  obsoleted_manifest:
-    regenerated: true        # .claude/.coc-obsoleted rebuilt from sync-manifest.yaml::obsoleted + use_obsoleted
-    lines: 74                # 3 header + 71 paths (69 unique + 2 dups: terrene-naming/independence)
-    prev_lines: 69
-    new_entries:             # additive — every prior entry preserved
-      - .claude/codex-templates/    # F1 #685 — orphan multi-CLI source tree, downstream auto-purge
-      - .claude/gemini-templates/   # F1 #685 — orphan multi-CLI source tree, downstream auto-purge
-      - .claude/commands/sync.md    # prior-cycle gap — de-surfaced /sync triplet, now in manifest union
-      - .codex/prompts/sync.md
-      - .gemini/commands/sync.toml
+  stripped: 35
+  swallowed: 0
+  purged: 0          # no obsoleted path present in this template
+  overlay_orphans_purged: 0
+  gitignore:
+    action: replaced
+    added: 24
+    pre_bytes: 1492
+    post_bytes: 1880   # +388B managed coc:gitignore_additions block
+    coordination_log_present: true
   preserved: [CLAUDE.md, .proposals/, learning/, settings.local.json, dev-container-project-owned, AGENTS.md, GEMINI.md, .codex/, .gemini/, .codex-mcp-guard/, bin/coc]
   baselines_emitted:
     cc: 0           # CLAUDE.md preserved, not emitted
-    codex: 0        # AGENTS.md NOT re-emitted this cycle (content CONSISTENT)
-    gemini: 0       # GEMINI.md NOT re-emitted this cycle (content CONSISTENT)
+    codex: 0        # AGENTS.md byte-IDENTICAL to fresh emit — NOT re-emitted (no drift)
+    gemini: 0       # GEMINI.md byte-IDENTICAL to fresh emit — NOT re-emitted (no drift)
   cli_artifacts:
-    note: not-re-emitted-this-cycle   # narrow obsoletion cycle; .codex/.gemini trees untouched
-  codex_dispatcher: { bin_coc: 1, phase_shims: 28 }   # preserved (bin/coc + 28 shims present, untouched)
+    note: not-re-emitted-this-cycle   # AGENTS.md/GEMINI.md verified byte-identical to emit.mjs --all --lang py; .codex/.gemini trees untouched
+  codex_dispatcher: { bin_coc: 1, phase_shims: 28 }   # preserved (untouched this cycle)
   scaffold: { codex_mcp_guard_symlink: present, sync_manifest_distributed: unchanged }
   dev_container: { emit: not-re-emitted-this-cycle }
   mcp_guard: { policies_populated: false }   # runtime predicate loader still gated (zero-tolerance Rule 3 — NOT flipped)
 distribution:
-  tool: sync-tier-aware.mjs --target py --all-templates --verify
+  tool: sync-tier-aware.mjs --target py --all-templates
   verify: CONSISTENT
-  files_total: 1441
-sdk_pin_changes: none      # SDK VERSION pins PRESERVED (released PyPI values unchanged); BUILD kailash-py pyproject 2.44.1; no bump
-uv_sync: skipped           # no consumer pyproject.toml change
+cli_baseline_staleness_check:
+  method: emit.mjs --all --lang py + byte-diff vs current
+  AGENTS.md: IDENTICAL (51850B)
+  GEMINI.md: IDENTICAL (51647B)
+  validators: 12-18 PASS
+  result: NOT re-emitted — path-scoped rule deltas (cc-artifacts/self-referential-codify/sync-completeness) are on-demand, not in root baseline
+sdk_pin_changes:            # metadata-only (multi-CLI template ships no pyproject.toml)
+  kailash-dataflow: 2.12.0 -> 2.13.1
+  kailash-pact: 0.14.1 -> 0.14.3
+  kailash-ml: 2.2.1 -> 2.2.2
+  kailash-align: 0.7.2 -> 0.7.4
+uv_sync: n/a               # multi-CLI template ships no consumer pyproject.toml
+hooks_resolve: see-claude-py # shared .claude/settings.json hook set
+template_version: "1.14.0" # was 1.13.3 (minor: gitignore fix + pin-metadata refresh)
 notes:
-  - "Narrow obsoletion-propagation cycle: only .coc-obsoleted regeneration (Step 4.5) + marker + VERSION patch bump. Content files + .codex/.gemini trees + AGENTS.md/GEMINI.md untouched (sync-tier-aware --verify CONSISTENT both templates)."
-  - ".coc-obsoleted now carries the manifest's full obsoleted+use_obsoleted union (74 lines); downstream /sync-from-template can auto-purge leaked .claude/codex-templates/ + .claude/gemini-templates/ orphan trees (leaked at v2.23.1)."
+  - "Cycle initially halted on a loom-source swallowed-artifact gate (gitignored .DS_Store + .env-template swept into the always-include filesystem walk). Orchestrator removed the loom junk + filed the structural fix (sync-tier-aware must honor source .gitignore) as loom#710 before this completion."
+  - "Driving change: sync-manifest gitignore_additions gained 8 per-clone trust-state entries (coordination-log.jsonl*, provenance/, posture.json, .initialized, learning-codified.json, learning-digest.json, .heartbeat-cache*, .session-end-cache*) — closes journal/0368 trust-state-commit leak class."
+  - ".codex/.gemini on-demand skill trees carry the path-scoped rule deltas and were NOT re-emitted this cycle (procedure scoped to .claude/ distribution; emit-cli-artifacts not in the enumerated steps). Minor consistency gap, not a blocker — root baselines verified current."
