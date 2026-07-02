@@ -1,60 +1,63 @@
 # COC Sync Marker — kailash-coc-py (py lane, multi-CLI)
-timestamp: 2026-06-29T08:14:51Z
+timestamp: 2026-07-02T15:41:08Z
 source: loom/.claude
-loom_sha: e2ac475
+loom_sha: 618e23dd9f390e3d8730815c097d0bb2cbe6ab88
 variant: py
 template_type: multi-cli
 clis: [claude, codex, gemini]
 visibility: public
-headline: gitignore_additions per-clone trust-state fix (coordination-log.jsonl* + 7 siblings; journal/0368) + SDK pin refresh + accumulated artifacts; loom 9101e34→e2ac475 (2.45.0 unchanged)
+headline: distribute #743 coherence layer + item-3 detector from loom 618e23d; SDK pin metadata + dev-container requirements refresh to BUILD kailash-py 2.45.1
 stats:
-  copied: 1274
+  copied: 1375
   variant_only: 13
   overlay_applied: 157
   overlay_verified: 157
-  verified: 1274
+  verified: 1375
   verify_failures: 0
   overlay_verify_failures: 0
   variant_only_verify_failures: 0
-  stripped: 35
+  stripped: 53                # content-equal after BUILD-internal ref strip
+  byte_equal: 1322
   swallowed: 0
-  purged: 0          # no obsoleted path present in this template
-  overlay_orphans_purged: 0
+  purged: 9
   gitignore:
     action: replaced
-    added: 24
-    pre_bytes: 1492
-    post_bytes: 1880   # +388B managed coc:gitignore_additions block
-    coordination_log_present: true
+    declared: 25
+    pre_bytes: 1880
+    post_bytes: 1919
   preserved: [CLAUDE.md, .proposals/, learning/, settings.local.json, dev-container-project-owned, AGENTS.md, GEMINI.md, .codex/, .gemini/, .codex-mcp-guard/, bin/coc]
   baselines_emitted:
-    cc: 0           # CLAUDE.md preserved, not emitted
-    codex: 0        # AGENTS.md byte-IDENTICAL to fresh emit — NOT re-emitted (no drift)
-    gemini: 0       # GEMINI.md byte-IDENTICAL to fresh emit — NOT re-emitted (no drift)
+    cc: 0           # CLAUDE.md preserved (template-owned), not emitted
+    codex: 0        # AGENTS.md not re-emitted this cycle (procedure scoped to .claude/ distribution)
+    gemini: 0       # GEMINI.md not re-emitted this cycle
   cli_artifacts:
-    note: not-re-emitted-this-cycle   # AGENTS.md/GEMINI.md verified byte-identical to emit.mjs --all --lang py; .codex/.gemini trees untouched
-  codex_dispatcher: { bin_coc: 1, phase_shims: 28 }   # preserved (untouched this cycle)
-  scaffold: { codex_mcp_guard_symlink: present, sync_manifest_distributed: unchanged }
-  dev_container: { emit: not-re-emitted-this-cycle }
-  mcp_guard: { policies_populated: false }   # runtime predicate loader still gated (zero-tolerance Rule 3 — NOT flipped)
+    note: not-re-emitted-this-cycle   # emit-cli-artifacts / .codex/.gemini trees not in the enumerated py-lane steps
+  codex_dispatcher: { bin_coc: preserved, phase_shims: preserved }
+  mcp_guard: { policies_populated: false }   # runtime predicate loader still gated (NOT flipped)
 distribution:
   tool: sync-tier-aware.mjs --target py --all-templates
   verify: CONSISTENT
-cli_baseline_staleness_check:
-  method: emit.mjs --all --lang py + byte-diff vs current
-  AGENTS.md: IDENTICAL (51850B)
-  GEMINI.md: IDENTICAL (51647B)
-  validators: 12-18 PASS
-  result: NOT re-emitted — path-scoped rule deltas (cc-artifacts/self-referential-codify/sync-completeness) are on-demand, not in root baseline
-sdk_pin_changes:            # metadata-only (multi-CLI template ships no pyproject.toml)
-  kailash-dataflow: 2.12.0 -> 2.13.1
+sdk_pin_changes:             # metadata + dev-container requirements-coc*.txt
+  kailash: 2.44.1 -> 2.45.1
+  kailash-dataflow: 2.12.0 -> 2.13.2     # requirements-coc.txt (was 2.12.0)
   kailash-pact: 0.14.1 -> 0.14.3
   kailash-ml: 2.2.1 -> 2.2.2
   kailash-align: 0.7.2 -> 0.7.4
-uv_sync: n/a               # multi-CLI template ships no consumer pyproject.toml
-hooks_resolve: see-claude-py # shared .claude/settings.json hook set
-template_version: "1.14.0" # was 1.13.3 (minor: gitignore fix + pin-metadata refresh)
+sdk_packages:
+  kailash: "2.45.1"
+  kailash-dataflow: "2.13.2"
+  kailash-nexus: "2.11.0"
+  kailash-kaizen: "2.28.0"
+  kailash-pact: "0.14.3"
+  kailash-mcp: "0.2.15"
+  kailash-ml: "2.2.2"
+  kailash-align: "0.7.4"
+  kaizen-agents: "0.9.11"
+uv_sync: n/a               # multi-CLI template ships no consumer pyproject.toml (pins live in requirements-coc*.txt)
+hooks_resolve: 28/28
+scripts_hooks_refs: 0
+template_version: "1.15.0" # was 1.14.0 (minor: #743 coherence-layer distribution + SDK pin refresh)
 notes:
-  - "Cycle initially halted on a loom-source swallowed-artifact gate (gitignored .DS_Store + .env-template swept into the always-include filesystem walk). Orchestrator removed the loom junk + filed the structural fix (sync-tier-aware must honor source .gitignore) as loom#710 before this completion."
-  - "Driving change: sync-manifest gitignore_additions gained 8 per-clone trust-state entries (coordination-log.jsonl*, provenance/, posture.json, .initialized, learning-codified.json, learning-digest.json, .heartbeat-cache*, .session-end-cache*) — closes journal/0368 trust-state-commit leak class."
-  - ".codex/.gemini on-demand skill trees carry the path-scoped rule deltas and were NOT re-emitted this cycle (procedure scoped to .claude/ distribution; emit-cli-artifacts not in the enumerated steps). Minor consistency gap, not a blocker — root baselines verified current."
+  - "Distributes the #743 coherence layer + item-3 detector artifacts landed at loom 618e23d (e2ac475->618e23d)."
+  - "SDK pins bumped in dev-container requirements: requirements-coc.txt kailash 2.44.1->2.45.1 + dataflow 2.12.0->2.13.2 + pact 0.14.1->0.14.3; requirements-coc-ml.txt ml 2.2.1->2.2.2 + align 0.7.2->0.7.4. sdk_packages metadata map refreshed."
+  - "No consumer pyproject.toml → no uv sync. .codex/.gemini on-demand trees not re-emitted this cycle (steps scoped to .claude/ distribution per the enumerated py-lane flow)."
