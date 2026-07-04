@@ -1,32 +1,20 @@
 # COC Sync Marker — kailash-coc-py (py lane, multi-CLI)
-timestamp: 2026-07-02T15:57:39Z
+timestamp: 2026-07-04T14:02:05Z
 source: loom/.claude
-loom_sha: 618e23dd9f390e3d8730815c097d0bb2cbe6ab88
+loom_sha: f259523abe9dddb5b7cd1dae4ecdfc040fd62b77
 variant: py
 template_type: multi-cli
 clis: [claude, codex, gemini]
 visibility: public
-cli_trees_status: CURRENT@618e23d   # corrective multi-CLI emission (Steps 6.5/6.6/6.7) — STALE flag cleared
-headline: distribute #743 coherence layer + item-3 detector from loom 618e23d; SDK pin metadata + dev-container requirements refresh to BUILD kailash-py 2.45.1; corrective multi-CLI emission (AGENTS.md/GEMINI.md/.codex/.gemini/.coc) refreshed to 618e23d
+cli_trees_status: CURRENT@f259523   # full multi-CLI re-emit (Steps 6.5/6.6/6.7) against loom f259523
+headline: loom 618e23d->f259523 redistribution (py multi-CLI) — deterministic-engine .claude/ compose (verified CONSISTENT) + full multi-CLI enrichment (AGENTS.md/GEMINI.md/.codex/.gemini/.coc re-emitted; .codex-mcp-guard + sync-manifest.yaml byte-current); SDK pins to BUILD kailash-py 2.45.3
+distribution:
+  claude_tree:
+    owner: deterministic-engine   # sync-tier-aware.mjs --build/--target compose — DONE + verified CONSISTENT upstream of this enrichment (journal/0339); counts NOT re-improvised here
+    tool: sync-tier-aware.mjs --target py
+    verify: CONSISTENT
+  enrichment_owner: coc-sync (Gate-2 Step-2 enrichment, staged worktree)
 stats:
-  copied: 1375
-  variant_only: 13
-  overlay_applied: 157
-  overlay_verified: 157
-  verified: 1375
-  verify_failures: 0
-  overlay_verify_failures: 0
-  variant_only_verify_failures: 0
-  stripped: 53                # content-equal after BUILD-internal ref strip
-  byte_equal: 1322
-  swallowed: 0
-  purged: 9
-  gitignore:
-    action: replaced
-    declared: 25
-    pre_bytes: 1880
-    post_bytes: 1919
-  preserved: [CLAUDE.md, .proposals/, learning/, settings.local.json, dev-container-project-owned, AGENTS.md, GEMINI.md, .codex/, .gemini/, .codex-mcp-guard/, bin/coc]
   baselines_emitted:
     cc: 0           # CLAUDE.md preserved (template-owned), not emitted
     codex: 1        # AGENTS.md re-emitted (Step 6.5)
@@ -34,31 +22,34 @@ stats:
   baseline_emission_bytes:
     block_cap_bytes: 61440
     warn_cap_bytes: 32768
-    codex:  { rules: 10, bytes: 51893, tier: WARN, headroom_bytes: 9547, headroom_pct: 15.54 }
-    gemini: { rules: 10, bytes: 51690, tier: WARN, headroom_bytes: 9750, headroom_pct: 15.87 }
+    codex:  { rules: 9, bytes: 51663, tier: WARN, headroom_bytes: 9777, headroom_pct: 15.91 }
+    gemini: { rules: 9, bytes: 51460, tier: WARN, headroom_bytes: 9980, headroom_pct: 16.24 }
   cli_artifacts:                       # emit-cli-artifacts.mjs --target py (Step 6.6)
-    codex:  { prompts: 57, skills: 34 }   # 36 command-prompts + 21 agent-prompts; 33 skills + 1 rules-reference
-    gemini: { commands: 36, skills: 34, agents: 21 }
+    codex:  { prompts: 58, skills: 35 }   # 36 command-prompts + 22 agent-prompts; 34 skills + 1 rules-reference
+    gemini: { commands: 36, skills: 35, agents: 22 }   # 34 skills + 1 rules-reference
   coc_artifacts:                       # emit-coc.mjs --target py (Step 6.7)
-    rules: 73
-    agents: 25
-    skills: 35
+    rules: 74
+    agents: 26
+    skills: 36
     commands: 37
-    total_artifacts: 170
-  codex_dispatcher: { bin_coc: preserved, phase_shims: preserved }   # bin/coc IDENTICAL to loom; 28 phase shims unchanged
-  mcp_guard: { policies_populated: false }   # runtime predicate loader still gated (NOT flipped); server.js refresh deferred (out of #743 scope — see notes)
-distribution:
-  tool: sync-tier-aware.mjs --target py --all-templates
-  verify: CONSISTENT
-sdk_pin_changes:             # metadata + dev-container requirements-coc*.txt
-  kailash: 2.44.1 -> 2.45.1
-  kailash-dataflow: 2.12.0 -> 2.13.2     # requirements-coc.txt (was 2.12.0)
-  kailash-pact: 0.14.1 -> 0.14.3
-  kailash-ml: 2.2.1 -> 2.2.2
-  kailash-align: 0.7.2 -> 0.7.4
+    total_artifacts: 173
+    coc_version: 1.0.0
+  codex_dispatcher: { bin_coc: reinstalled_0755, phase_shims: 28 }   # bin/coc IDENTICAL to loom; 28 phase shims recreated
+  mcp_guard:
+    synced: byte-current            # all 9 files copied fresh from loom .claude/codex-mcp-guard/
+    refreshed: [server.js, test-server.mjs]   # prior-cycle out-of-scope drift resolved to loom #411/#466/#442 shape
+    policies_populated: false       # NOT flipped; POLICIES_POPULATED is WRAPPED_TOOLS.some(...) runtime-computed
+  scaffold:
+    symlink: .claude/codex-mcp-guard -> ../.codex-mcp-guard   # recreated (ln -sfn)
+    manifest_distribute: true       # sync-manifest.yaml distributed byte-current (232430B)
+    codex_config: [config.toml IDENTICAL, hooks.json refreshed-from-loom]
+    gemini_config: [settings.json IDENTICAL, README.md refreshed-from-loom]
+sdk_pin_changes:             # requirements-coc.txt + metadata
+  kailash: 2.45.1 -> 2.45.3
+  kailash-dataflow: 2.13.2 -> 2.13.13
 sdk_packages:
-  kailash: "2.45.1"
-  kailash-dataflow: "2.13.2"
+  kailash: "2.45.3"
+  kailash-dataflow: "2.13.13"
   kailash-nexus: "2.11.0"
   kailash-kaizen: "2.28.0"
   kailash-pact: "0.14.3"
@@ -66,15 +57,20 @@ sdk_packages:
   kailash-ml: "2.2.2"
   kailash-align: "0.7.4"
   kaizen-agents: "0.9.11"
-uv_sync: n/a               # multi-CLI template ships no consumer pyproject.toml (pins live in requirements-coc*.txt)
-hooks_resolve: 28/28
+uv_sync: n/a               # multi-CLI template ships no consumer pyproject.toml; pins live in requirements-coc*.txt
+uv_resolution: PASS        # uv pip compile requirements-coc.txt --python 3.13 -> 74 packages resolved (both bumped pins PyPI-resolvable)
+hooks_resolve: 38/38
 scripts_hooks_refs: 0
-template_version: "1.15.0" # was 1.14.0 (minor: #743 coherence-layer distribution + SDK pin refresh)
+settings_pii_tokens: 0
+description_label: "(Python)"
+build_internal_leaks: 0    # workspaces/ + kailash-*/.claude = 0 in AGENTS.md/GEMINI.md/.codex/.gemini/.coc; packages/kailash-<subpkg>[dev] editable-install examples strip-clean
+inbox_ensure_exists: present (no-op)
+template_version: "1.16.0" # was 1.15.0 (minor: loom sha redistribution + SDK pin refresh + full multi-CLI re-emit)
+emit_exit_codes: { emit_mjs: 0, emit_cli_artifacts: 0, emit_coc: 0 }
 notes:
-  - "Distributes the #743 coherence layer + item-3 detector artifacts landed at loom 618e23d (e2ac475->618e23d)."
-  - "SDK pins bumped in dev-container requirements: requirements-coc.txt kailash 2.44.1->2.45.1 + dataflow 2.12.0->2.13.2 + pact 0.14.1->0.14.3; requirements-coc-ml.txt ml 2.2.1->2.2.2 + align 0.7.2->0.7.4. sdk_packages metadata map refreshed."
-  - "No consumer pyproject.toml → no uv sync."
-  - "CORRECTIVE multi-CLI emission (2026-07-02T15:57Z): the prior py-lane run scoped to .claude/ distribution only and left AGENTS.md/GEMINI.md/.codex/.gemini/.coc STALE relative to the #743 delta. This cycle ran coc-sync Steps 6.5 (baselines) + 6.6 (Codex/Gemini trees) + 6.7 (.coc unified set) against loom 618e23d. Presync untracked-snapshot taken via sync-tier-aware.mjs --target py (reported CONSISTENT) BEFORE any emit-cli write per the Step-6.6 snapshot-ordering MUST. emit.mjs / emit-cli-artifacts.mjs / emit-coc.mjs all exit 0."
-  - "Preserved (untouched, verified): CLAUDE.md, .codex/config.toml (IDENTICAL), .codex/hooks.json (template richer — extra $comment/$env_var_note keys, hook defs functionally identical), .gemini/settings.json (IDENTICAL), .gemini/README.md, bin/coc (IDENTICAL) + 28 phase shims, .codex-mcp-guard/, dev-container project-owned."
-  - "OUT OF SCOPE / surfaced: .codex-mcp-guard/server.js DIFFERS from loom (loom carries the newer #411 fail-closed evaluatePolicies + #466 additionalContext canonicalization + #442 cross-CLI parity; template still on the older fail-open shape). This is a SEPARATE distribution drift predating #743, is a security-enforcement-surface behavioral change deserving its own review cycle, and is NOT in this corrective task's staging enumeration — left untouched, flagged for a dedicated sync."
-  - "emit-coc WARN (non-blocking, not truncated): rules/SELF-REFERENTIAL-CODIFY.md 87907B exceeds the 60KiB producer budget; spec-09 imposes no consumer cap so it is emitted intact. Inherent loom-source content size, not a distribution defect."
+  - "Distributes the loom 618e23d->f259523 delta (py multi-CLI). The .claude/ content compose was performed + verified CONSISTENT by the deterministic engine (sync-tier-aware.mjs) UPSTREAM of this Step-2 enrichment; per journal/0339 the file-set/overlays/purge are NOT re-improvised here."
+  - "FULL multi-CLI enrichment this cycle: emit.mjs --all --lang py (Step 6.5 baselines), emit-cli-artifacts.mjs --target py (Step 6.6 .codex/.gemini trees), emit-coc.mjs --target py (Step 6.7 .coc unified set). All three exit 0. Wholesale-replace of .codex/{prompts,skills}, .gemini/{commands,skills,agents}, .coc/ from filtered emit output (purges any orphans)."
+  - ".codex-mcp-guard synced byte-current from loom .claude/codex-mcp-guard/ (all 9 files) per sync-completeness.md MUST-5 — RESOLVES the prior-cycle out-of-scope server.js/test-server.mjs drift (now loom #411 fail-closed evaluatePolicies + #466 additionalContext canonicalization + #442 cross-CLI parity shape). policies.json IDENTICAL. POLICIES_POPULATED NOT manually flipped (it is WRAPPED_TOOLS.some(...) runtime-computed in loom's canonical server.js; byte-current copy carries loom's value verbatim)."
+  - "SDK pins: requirements-coc.txt kailash 2.45.1->2.45.3 + kailash-dataflow 2.13.2->2.13.13 (BUILD kailash-py packages/ current). requirements-coc-ml.txt HELD (ml 2.2.2 + align 0.7.4 already BUILD-current). sdk_packages metadata refreshed. uv pip compile requirements-coc.txt --python 3.13 resolved 74 packages (env default python 3.14 fails llvmlite compile — env toolchain issue, not a pin defect; 3.13.7 clean). No consumer pyproject.toml -> no uv sync."
+  - "emit-coc WARN (non-blocking, not truncated): rules/SELF-REFERENTIAL-CODIFY.md 91465B exceeds the 60KiB producer budget; spec-09 imposes no consumer cap so it is emitted intact. Inherent loom-source content size, not a distribution defect."
+  - "Preserved (untouched): CLAUDE.md (template-owned), .proposals/, learning/, settings.local.json, dev-container project-owned (Dockerfile.user/compose.override.yml.example/requirements-user.txt), .env."

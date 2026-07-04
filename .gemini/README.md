@@ -41,7 +41,7 @@ kailash-coc-<lang>/
     └── skills/               # per-skill SKILL.md mirrors generated from .claude/skills/
 ```
 
-CC-only USE templates (`kailash-coc-claude-py`, `kailash-coc-claude-rs`, `kailash-coc-claude-rb`, `kailash-coc-claude-prism`) do NOT receive `.gemini/` — their template entries list `clis: [claude]` only.
+CC-only USE templates (`kailash-coc-claude-py`, `kailash-coc-claude-rs`) do NOT receive `.gemini/` — their template entries list `clis: [claude]` only.
 
 ## Source of truth
 
