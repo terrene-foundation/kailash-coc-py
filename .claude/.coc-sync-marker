@@ -1,69 +1,78 @@
 # COC Sync Marker — kailash-coc-py (py lane, multi-CLI)
-timestamp: 2026-07-05T05:49:32Z
+timestamp: 2026-07-11T05:17:44Z
 source: loom/.claude
-loom_sha: a67471822e3d6cde2143a1436bd4ac64fe14dd7c
-loom_sha_short: a674718
+loom_sha: 5eea21d35393d394b211a6f765b26cdc3aa88346
+loom_sha_short: 5eea21d
 variant: py
 template_type: multi-cli
 clis: [claude, codex, gemini]
 visibility: public
-cli_trees_status: CURRENT@a674718
-headline: loom 618e23d->a674718 redistribution (py multi-CLI); deterministic engine apply+verify pre-staged the .claude/ content delta (60 files), Gate-2 enrichment layered SDK pin refresh (kailash 2.45.3, dataflow 2.13.16) + external .codex-mcp-guard/ tree sync-current to loom (#411/#466/#442 fail-closed shape) + VERSION bump 1.15.0->1.16.0
+cli_trees_status: RE-EMITTED@5eea21d   # root-baseline (git.md) + command/skill deltas present this cycle -> full multi-CLI re-emit
+headline: loom a674718->5eea21d redistribution (py multi-CLI); F2 re-cut replacing closed stale PR #41. Engine apply+verify pre-staged the 75-file .claude/ delta; Gate-2 enrichment layered SDK pin refresh (requirements-coc.txt: kailash 2.45.3->2.48.0, dataflow 2.13.16->2.14.7, kaizen 2.28.0->2.29.0) + full multi-CLI re-emit (AGENTS/GEMINI + .codex/.gemini/.coc) + .codex-mcp-guard tree sync-current-to-loom + VERSION 1.16.0->1.17.0
+distribution:
+  mode: engine-applied         # deterministic sync-tier-aware apply + --verify ran BEFORE this enrichment step
+  tool: sync-gate2-worktree.mjs --lane use --target py (wraps sync-tier-aware --target py)
+  verify: engine --verify CONSISTENT (1566 in-plan files matched; no obsoleted path present)
 stats:
-  engine_staged_files: 60          # sync-tier-aware apply+verify (pre-run by orchestrator)
+  engine_staged_files: 75          # sync-tier-aware apply+verify (orchestrator pre-run)
   engine_breakdown:
-    modified: 51
-    deleted: 1                      # .claude/commands/sync.md (de-surfaced /sync)
-    added: 8                        # agents/onboarding/, audit-fixtures/o1-citation-check fixtures, bin/sync-gate2-worktree.mjs, guides/rule-extracts/cross-sdk-inspection.md, hooks/lib/coc-ledger-driver.js, rules/enrollment-operations.md, skills/45-genesis-bootstrap/
+    added: 13                      # commands clean-instantiate/doctor/reconcile-notes/worktree; hooks/lib coord-background/enrollment-seed-transport/genesis-materializer/log-ref-name/read-stdin-bounded/trust-root-backfill; rules knowledge-cascade-routing; skills 46-clean-instantiate/47-loom-doctor
+    modified: 62                    # rules 13, hooks 26, bin 9, commands 6, skills 7, guides 1, .gitignore 1 (root-baseline git.md among them -> AGENTS/GEMINI re-emit)
+    deleted: 0
   enrichment_touched:
-    - requirements-coc.txt           # pins: kailash 2.45.1->2.45.3, dataflow 2.13.2->2.13.16
-    - .claude/VERSION                # 1.15.0->1.16.0; upstream 2.45.1->2.45.3
-    - .codex-mcp-guard/server.js     # 863->957 lines: synced current to loom (#411 fail-closed evaluatePolicies)
-    - .codex-mcp-guard/test-server.mjs  # 495->548 lines: synced current to loom
+    - requirements-coc.txt           # pins: kailash 2.45.3->2.48.0, dataflow 2.13.16->2.14.7, kaizen 2.28.0->2.29.0
+    - .claude/VERSION                # 1.16.0->1.17.0; upstream 2.45.3->2.48.0
+    - AGENTS.md                      # re-emit (emit.mjs --all --lang py) — git.md root-baseline delta
+    - GEMINI.md                      # re-emit (emit.mjs --all --lang py)
+    - .codex/                        # prompts=40 skills=36 (emit-cli-artifacts --target py) + config.toml/hooks.json refresh
+    - .gemini/                       # commands=40 skills=36 agents=22 (emit-cli-artifacts --target py) + settings.json/README refresh
+    - .coc/                          # 182 files (emit-coc --target py)
+    - bin/coc                        # dispatcher refreshed from codex-templates (28 phase shims preserved)
+    - .codex-mcp-guard/              # README/server.js/test-server.mjs + package files synced current to loom; policies.json PRESERVED
+    - .claude/sync-manifest.yaml     # manifest_distribute (multi-cli)
     - .claude/.coc-sync-marker       # this file
-    - .coc-sync-marker               # root marker (newly created this cycle)
-  preserved: [CLAUDE.md, .proposals/, learning/, settings.local.json, dev-container-project-owned, AGENTS.md, GEMINI.md, .codex/, .gemini/, .codex-mcp-guard/policies.json, bin/coc]
+  preserved: [CLAUDE.md, .proposals/ (README/.gitkeep kept), learning/, settings.local.json, dev-container-project-owned (Dockerfile.user.example etc.), .codex-mcp-guard/policies.json]
   baselines_emitted:
     cc: 0            # CLAUDE.md preserved (template-owned)
-    codex: 0         # AGENTS.md not re-emitted this cycle (root baseline unchanged by engine delta)
-    gemini: 0        # GEMINI.md not re-emitted this cycle
+    codex: 1         # AGENTS.md re-emitted (root-baseline git.md delta)
+    gemini: 1        # GEMINI.md re-emitted
   cli_artifacts:
-    note: "not re-emitted this cycle — engine .claude/ delta is rule/skill/hook prose + additions; root AGENTS.md/GEMINI.md + .codex/.gemini trees left as staged. Baseline re-emit is an orchestrator-finalize decision if a root-baseline rule delta is present."
-  codex_dispatcher: { bin_coc: preserved, phase_shims: 28 }
+    codex: { prompts: 40, skills: 36 }
+    gemini: { commands: 40, skills: 36, agents: 22 }
+    coc: { files: 182, version: "1.0.0" }
+    note: "Full re-emit this cycle: root-baseline git.md delta (AGENTS/GEMINI differ) + command/skill deltas (new clean-instantiate/doctor/reconcile-notes prompts + 46/47 skills). Contrast prior 1.16.0 which left trees staged (no root-baseline delta that cycle)."
+  codex_dispatcher: { bin_coc: refreshed, phase_shims: 28 }
   mcp_guard:
-    policies_populated: false        # runtime predicate loader still gated (POLICIES table not flipped)
-    server_js: synced-current@a674718  # was older fail-open shape; now #411/#466/#442
-distribution:
-  engine: sync-tier-aware apply+verify (orchestrator pre-run)
-  enrichment: coc-sync Gate-2 (this run) — pins + codex-mcp-guard tree + VERSION + markers
-  verify: CONSISTENT (engine); codex-mcp-guard tree diff-clean vs loom POST-sync
-sdk_pin_changes:                     # requirements-coc.txt + sdk_packages metadata
-  kailash: 2.45.1 -> 2.45.3
-  kailash-dataflow: 2.13.2 -> 2.13.16   # PyPI-resolvable; BUILD main 2.13.17 is 404
+    policies_populated: false        # runtime predicate loader still gated (POLICIES table not flipped) — coc-sync Step 6.6 G3
+    server_js: synced-current@5eea21d
+sdk_pin_changes:                     # requirements-coc.txt (dev-container source) + sdk_packages metadata
+  kailash: 2.45.3 -> 2.48.0          # PyPI HTTP 200 verified 2026-07-11
+  kailash-dataflow: 2.13.16 -> 2.14.7  # PyPI HTTP 200 verified 2026-07-11
+  kailash-kaizen: 2.28.0 -> 2.29.0     # PyPI HTTP 200 verified 2026-07-11
 sdk_packages:
-  kailash: "2.45.3"
-  kailash-dataflow: "2.13.16"
+  kailash: "2.48.0"
+  kailash-dataflow: "2.14.7"
   kailash-nexus: "2.11.0"
-  kailash-kaizen: "2.28.0"
+  kailash-kaizen: "2.29.0"
   kailash-pact: "0.14.3"
   kailash-mcp: "0.2.15"
   kailash-ml: "2.2.2"
   kailash-align: "0.7.4"
   kaizen-agents: "0.9.11"
 build_source_of_truth:
-  note: "BUILD kailash-py packages/ CURRENT. dataflow BUILD main 2.13.17 NOT PyPI-published (HTTP 404); pinned PyPI-resolvable latest 2.13.16 (200). A USE template MUST pin what consumers can pip-install."
-  kailash-dataflow: "2.13.17"
+  note: "BUILD kailash-py @ 4f0570c (root/__init__ 2.48.0); packages/kailash-*/ sub-package versions. All three moved pins are BUILD-current AND PyPI-resolvable (HTTP 200 verified 2026-07-11) — no held-back pin this cycle (contrast 1.16.0 where dataflow 2.13.17 was PyPI-404 and held at 2.13.16)."
 uv_resolution:
   tool: uv pip compile requirements-coc.txt
-  result: "exit 0, Resolved 74 packages"   # kailash 2.45.3 + dataflow 2.13.16 resolve cleanly
-  note: "multi-CLI template ships no consumer pyproject.toml; pins live in requirements-coc*.txt. No native build attempted (light set, no torch/ml)."
+  result: "resolved cleanly — kailash 2.48.0 + dataflow 2.14.7 + kaizen 2.29.0 in compiled output; no native build attempted (light framework set, ML/Align opt-in via requirements-coc-ml.txt)."
+  note: "multi-CLI template ships no consumer pyproject.toml; pins live in requirements-coc*.txt. requirements-coc-ml.txt unchanged (kailash-ml 2.2.2 / kailash-align 0.7.4 BUILD-current)."
 hooks_resolve: 28/28
 scripts_hooks_refs: 0
+settings_pii: 0                       # 0 /Users|/home tokens
 inbox: ensure-exists-noop            # .claude/.proposals/inbox/{README.md,.gitkeep} already present
-template_version: "1.16.0"           # was 1.15.0 (minor: SDK pin refresh + codex-mcp-guard tree sync)
+template_version: "1.17.0"           # was 1.16.0 (minor: SDK pin refresh + full multi-CLI re-emit)
 notes:
-  - "Deterministic engine (sync-tier-aware) apply+verify was pre-run by the orchestrator; this Gate-2 enrichment did NOT re-run the .claude/ file-set distribution. Engine staged 60 files."
-  - "External .codex-mcp-guard/ tree synced current to loom: server.js + test-server.mjs carried the OLDER fail-open shape (flagged OUT-OF-SCOPE in the 1.15.0 corrective cycle); loom's #411 fail-closed evaluatePolicies + #466 additionalContext canonicalization + #442 cross-CLI parity now distributed. Inventory identical (no add/delete). Symlink .claude/codex-mcp-guard -> ../.codex-mcp-guard resolves. policies.json + config files untouched (byte-equal to loom)."
-  - "SDK pins refreshed to BUILD kailash-py current: kailash 2.45.1->2.45.3, dataflow 2.13.2->2.13.16. dataflow BUILD main 2.13.17 is NOT PyPI-published (verified 404) so the consumer pin is the PyPI-resolvable 2.13.16 (verified 200); 2.13.17 recorded in build_source_of_truth. Held: nexus/kaizen/pact/mcp/ml/align/kaizen-agents (all BUILD-current). uv pip compile requirements-coc.txt exit 0."
-  - "requirements-coc-ml.txt unchanged (kailash-ml 2.2.2 / kailash-align 0.7.4 already BUILD-current)."
-  - "Root .coc-sync-marker was ABSENT (not tracked at HEAD); created this cycle per the enrichment task's dual-marker directive. Orchestrator finalizes staging."
+  - "F2 re-cut: replaces the closed stale sync PR terrene-foundation/kailash-coc-py#41 (cut from loom f259523, conflicting). This cut is from loom@5eea21d (origin/main)."
+  - "Deterministic engine (sync-tier-aware) apply+verify pre-staged the 75-file .claude/ delta; this Gate-2 enrichment layered the multi-CLI residue (pins + full CLI re-emit + codex-mcp-guard tree + markers + manifest)."
+  - "Full multi-CLI re-emit warranted this cycle: git.md (root-baseline rule) changed -> AGENTS/GEMINI differ; commands (autonomize/implement/migrate/redteam + new clean-instantiate/doctor/reconcile-notes) + skills (43/44/45 + new 46/47) changed -> .codex/.gemini/.coc trees stale. Regenerated via canonical emit tools (emit.mjs / emit-cli-artifacts --target py / emit-coc --target py). Per prior-cycle marker directive: 'baseline re-emit is an orchestrator-finalize decision if a root-baseline rule delta is present' — present this cycle."
+  - "External .codex-mcp-guard/ tree synced current to loom (README/server.js/test-server.mjs + package files); policies.json PRESERVED byte-equal; symlink .claude/codex-mcp-guard -> ../.codex-mcp-guard resolves. POLICIES_POPULATED stays false (runtime predicate loader still gated — do NOT flip)."
+  - "emit-dev-container.mjs NOT run: the loom dev-container source (.claude/dev-container-templates/py/requirements-coc.txt) is STALER (kailash 2.44.1 / dataflow 2.12.0) than the distributed copy; running it would REGRESS the pins. Pins hand-refreshed in the worktree copy per the prior-cycle established mechanism."
