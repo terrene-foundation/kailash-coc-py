@@ -226,6 +226,8 @@ When a gate-level review (reviewer, security-reviewer, gold-standards-validator)
 
 **Why:** Same-class gaps cost least to fix while the context is warm; a follow-up issue forces the next session to reload everything, typically 2–5× the marginal cost. See Origin.
 
+**Bounded by the category (`rules/product-completion-first.md` MUST-3).** The fix-now mandate applies to a same-class within-budget gap classified BUG or INVEST-NOW; an INCREMENTAL same-class gap (off-path polish) MAY instead route to the deferred-quality list with a value-anchor. The category verdict — NOT convenience, NOT severity — gates the lane: relabelling a warm same-class BUG/INVEST-NOW gap "incremental" to defer it is BLOCKED.
+
 **Bounded by the shard budget.** This rule does NOT override MUST Rule 1 (shard threshold). If the surfaced gap exceeds ≤500 LOC load-bearing / ≤5–10 invariants / ≤3–4 call-graph hops, filing the follow-up issue IS the correct disposition — the gap is a new shard, not a continuation of the current one.
 
 ## Multi-Operator Capacity Considerations
@@ -657,6 +659,10 @@ Any "pre-existing" / "not introduced this session" disposition MUST cite a commi
 
 **Why:** Context boundaries erase the edit log; `git blame` may attribute a same-session regression to the original author. See guide.
 
+### Rule 1d: Blocking-Scoped Carve-Out — Enumerated Classes Stay ABSOLUTE
+
+The enumerated classes above + Rules 2/3 stay **ABSOLUTE — never defer-eligible**; ONLY an OUTSIDE-those-classes INCREMENTAL review finding may defer, per `rules/product-completion-first.md` MUST-2 (which owns the conditions + BLOCKED corpus; relabelling an enumerated-class failure "incremental" is BLOCKED).
+
 ## Rule 2: No Stubs, Placeholders, Or Deferred Implementation
 
 Production code MUST NOT contain: `TODO`/`FIXME`/`HACK`/`STUB`/`XXX` markers, `raise NotImplementedError`, `pass # placeholder`, empty function bodies, `return None # not implemented`.
@@ -697,9 +703,9 @@ A property/method whose return type is a union of structurally-distinct shapes (
 
 ### Rule 3e: Doc Walk-Back Claims About Code Surface Cite Source Line Range
 
-Any doc edit rewriting a code-surface claim — method lists, registered handlers, exposed bindings, config keys, deprecation lists, magic-value numeric constants (cross-base `pub const` restatements) — MUST cite the ground-truth source as `<path>:<start>-<end>` in the same paragraph; cross-base numeric restatements additionally require a same-shard compile-time pin test. Uncited claims are BLOCKED. **Binding-inheritance:** a contract (error variant, enum member, field, finish reason, lifecycle guarantee, OR a fail-closed safety/invariant) restated by a wrapper across ≥2 bindings MUST be re-derived from the SDK _code_ (NOT the SDK _doc_) for EACH binding; the multi-binding parity audit's source-rederivation matrix MUST INCLUDE the cross-binding fail-closed SAFETY-INVARIANT rows, not only the API-surface contract-shape rows — AND this applies to safety claims in CONVERGENCE / REDTEAM REPORTS (presumed-UNVERIFIED until the matrix re-derives EACH binding's source), not only to binding rustdoc/RDoc.
+Any doc edit rewriting a code-surface claim — method lists, registered handlers, exposed bindings, config keys, deprecation lists, magic-value numeric constants (cross-base `pub const` restatements) — MUST cite the ground-truth source as `<path>:<start>-<end>` in the same paragraph; cross-base numeric restatements additionally require a same-shard compile-time pin test. Uncited claims are BLOCKED. **Binding-inheritance:** a contract (error variant, field, finish reason, lifecycle guarantee, OR a fail-closed safety/invariant) restated by a wrapper across ≥2 bindings MUST be re-derived from the SDK _code_ (NOT _doc_) for EACH binding — including the cross-binding fail-closed SAFETY-INVARIANT rows in CONVERGENCE / REDTEAM REPORTS (presumed-UNVERIFIED until re-derived). Full audit-matrix treatment + evidence: see guide.
 
-**Why:** A wrong SDK doc claim is faithfully mirrored by every binding (N reviewers all trust the same doc); a convergence report's "safe by construction" claim is the same failure at the AUDIT layer when one binding is the SOLE un-gated one. See guide for the Rust SDK evidence chain (#1087/#1088/#1160, F16 W2, the SAFETY-INVARIANT / convergence-report extension).
+**Why:** A wrong SDK doc claim is faithfully mirrored by every binding; a convergence report's "safe by construction" claim is the same failure at the AUDIT layer when one binding is the SOLE un-gated one. See guide (Rust SDK #1087/#1088/#1160, F16 W2).
 
 ## Rule 4: No Workarounds For Core SDK Issues
 
