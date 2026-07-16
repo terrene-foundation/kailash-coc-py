@@ -1,51 +1,54 @@
 # COC Sync Marker — kailash-coc-py (py lane, multi-CLI)
-timestamp: 2026-07-12T06:58:03Z
+timestamp: 2026-07-16T17:00:19Z
 source: loom/.claude
-loom_sha: f403a49c055d8a1efafe5a87e2263094590e01b9
-loom_sha_short: f403a49c
+loom_sha: 8b5b6be15d3b6310784310b59a87a65542013412
+loom_sha_short: 8b5b6be1
 variant: py
 template_type: multi-cli
 clis: [claude, codex, gemini]
 visibility: public
-cli_trees_status: RE-EMITTED@f403a49c   # Rule 8 full multi-CLI re-emit this cycle; idempotency verified (re-emit 0 diffs)
-headline: loom 5eea21d->f403a49c redistribution (py multi-CLI) — F9 Gate-2 re-sync (sync-completeness Rule 8 cascade). Engine apply+verify pre-staged the 18-file .claude/ delta; Gate-2 enrichment did the FULL multi-CLI re-emit (AGENTS/GEMINI + .codex/.gemini/.coc + config bases + bin/coc + .codex-mcp-guard) + manifest_distribute refresh. SDK pins UNCHANGED (all 9 already BUILD-current at 2.48.0). VERSION 1.17.0->1.18.0
+cli_trees_status: RE-EMITTED@8b5b6be1   # sync-completeness Rule 8 full multi-CLI re-emit this cycle; idempotency verified (2nd emit produced 0 further git status change)
+headline: loom f403a49c->8b5b6be1 CONTENT-ONLY redistribution (py multi-CLI) — Gate-2 re-sync of ~2-3 weeks accumulated COC artifact updates. Engine apply+verify pre-staged the 97-file .claude/ delta; Gate-2 enrichment did the FULL multi-CLI re-emit (AGENTS/GEMINI + .codex/.gemini/.coc + config bases + bin/coc + .codex-mcp-guard) + manifest_distribute refresh. CONTENT-ONLY mode (co-owner-ratified Option A) — template_version UNCHANGED at 1.18.0; all 9 SDK pins UNCHANGED at 2.48.0 set; VERSION file + pins byte-identical to target origin/main; dev-container preserved (emit-dev-container NOT run).
 distribution:
-  mode: engine-applied         # deterministic sync-tier-aware apply + --verify ran BEFORE this enrichment step
+  mode: content-only           # co-owner-ratified Option A — no template semver bump, no SDK pin refresh, no dev-container emit
+  engine: engine-applied        # deterministic sync-tier-aware apply + --verify ran BEFORE this enrichment step
   tool: sync-gate2-worktree.mjs --lane use --target py (wraps sync-tier-aware --target py)
-  verify: engine --verify CONSISTENT (1568 in-plan files matched; no obsoleted path present)
+  verify: engine --verify CONSISTENT (1590 in-plan files matched; no obsoleted path present)
 stats:
-  engine_staged_files: 18          # sync-tier-aware apply+verify (orchestrator pre-run)
+  engine_staged_files: 97          # sync-tier-aware apply+verify (orchestrator pre-run): .claude/ + .gitignore delta
   engine_breakdown:
-    added: 2                        # rules/product-completion-first.md, skills/sweep/
-    modified: 16                    # rules 8 (autonomous-execution, self-referential-codify, spec-accuracy, specs-authority, sync-completeness, trust-posture, wave-loop, zero-tolerance); commands 2 (redteam, sweep); bin 2 (sync-tier-aware, validate-emit); hooks 1 (lib/state-resolver); skills 2 (sync-flow, user-flow-validation-walk-discipline); .coc-obsoleted
-    deleted: 0
+    added: 26                       # incl. mesh-* bin tooling, cross-repo-authorize bin+command, conformance-walk rule+skill, audit-fixtures
+    modified: 39                    # rules/hooks/bin/commands/skills/.gitignore content refreshes
+    deleted: 32                     # retired fleet-* / lint-prose-drift / loom-links / sync-* bin + fixtures (loom-local, purged)
   enrichment_touched:
-    - .claude/VERSION                # 1.17.0->1.18.0; loom_sha 5eea21d->f403a49c (no SDK pin move)
-    - AGENTS.md                      # re-emit (emit.mjs --all --lang py) — 52404B WARN steady-state
-    - GEMINI.md                      # re-emit (emit.mjs --all --lang py) — 52201B WARN steady-state
-    - .codex/                        # prompts=62 skills=38 (emit-cli-artifacts --target py) + config.toml/hooks.json refresh
-    - .gemini/                       # commands=40 skills=38 agents=22 (emit-cli-artifacts --target py) + settings.json refresh
-    - .coc/                          # 184 files / 182 artifacts (emit-coc --target py)
+    - AGENTS.md                      # re-emit (emit.mjs --all --lang py) — WARN steady-state (v6 §2.2 refactoring-signal tier)
+    - GEMINI.md                      # re-emit (emit.mjs --all --lang py) — WARN steady-state; headroom 13.82% (advisory, above 10% BLOCK floor)
+    - .codex/                        # prompts=41 skills=38 (emit-cli-artifacts --target py) + config.toml/hooks.json refresh
+    - .gemini/                       # commands=41 skills=38 agents=22 (emit-cli-artifacts --target py) + settings.json refresh
+    - .coc/                          # 188 files (emit-coc --target py) — coc.version 1.0.0
     - bin/coc                        # dispatcher refreshed from codex-templates (28 phase shims regenerated)
-    - .codex-mcp-guard/              # synced current to loom; policies.json unchanged
-    - .claude/sync-manifest.yaml     # manifest_distribute (multi-cli) — loom manifest +18 lines 5eea21d->f403a49c
+    - .codex-mcp-guard/              # synced current to loom; policies.json PRESERVED (POLICIES_POPULATED stays false)
+    - .claude/sync-manifest.yaml     # manifest_distribute (multi-cli) — loom manifest refreshed to 8b5b6be1
     - .claude/.coc-sync-marker       # this file
+  NOT_touched:
+    - .claude/VERSION                # CONTENT-ONLY: template_version 1.18.0 + sdk_packages 2.48.0 held UNCHANGED (byte-identical to origin/main)
+    - dev-container (requirements-coc*.txt, docker-compose.yml, .devcontainer, Dockerfile)  # Option A: emit-dev-container NOT run; preserved at 2.48.0
   preserved: [CLAUDE.md, .proposals/ (README/.gitkeep kept), learning/, settings.local.json, dev-container-project-owned (Dockerfile.user.example etc.), .codex-mcp-guard/policies.json]
   baselines_emitted:
     cc: 0            # CLAUDE.md preserved (template-owned)
     codex: 1         # AGENTS.md re-emitted
     gemini: 1        # GEMINI.md re-emitted
   cli_artifacts:
-    codex: { prompts: 62, skills: 38 }      # 40 phase prompts + 22 agent-prompts; 37 skills + rules-reference
-    gemini: { commands: 40, skills: 38, agents: 22 }
-    coc: { files: 184, artifacts: 182, version: "1.0.0" }
-    idempotency: "Rule 8 verified — re-emit produced 0 diffs (.coc), AGENTS.md/GEMINI.md byte-identical. Wholesale rm+cp: 0 orphan deletions (stable artifact set)."
+    codex: { prompts: 41, skills: 38, agent_prompts: 22 }
+    gemini: { commands: 41, skills: 38, agents: 22 }
+    coc: { files: 188, version: "1.0.0" }
+    idempotency: "sync-completeness Rule 8 verified — 2nd full emit+copy produced 0 further git status change (135 status lines byte-identical pass1==pass2). Wholesale rm+cp: stable artifact set, 0 orphan deletions."
   codex_dispatcher: { bin_coc: refreshed, phase_shims: 28 }
   mcp_guard:
     policies_populated: false        # runtime predicate loader still gated (POLICIES table not flipped) — coc-sync Step 6.6 G3; do NOT flip
-    server_js: synced-current@f403a49c
-sdk_pin_changes: none-this-cycle     # all 9 pins already BUILD-current at 2.48.0 set (unchanged from prior 1.17.0 cycle); no SDK bump 5eea21d->f403a49c
-sdk_packages:
+    server_js: synced-current@8b5b6be1
+sdk_pin_changes: none-this-cycle     # CONTENT-ONLY mode — all 9 pins held at 2.48.0 set (unchanged from prior 1.18.0 cycle); no SDK bump distributed
+sdk_packages:                        # UNCHANGED
   kailash: "2.48.0"
   kailash-dataflow: "2.14.7"
   kailash-nexus: "2.11.0"
@@ -56,20 +59,19 @@ sdk_packages:
   kailash-align: "0.7.4"
   kaizen-agents: "0.9.11"
 build_source_of_truth:
-  note: "BUILD kailash-py current (unchanged since 1.17.0 cycle); all 9 pins BUILD-current AND PyPI-resolvable at the 2.48.0 set."
-uv_resolution:
-  tool: uv pip compile requirements-coc.txt
-  result: "no-op this cycle — pins unchanged from prior 1.17.0 (requirements-coc.txt already at 2.48.0 set); prior cycle's compiled resolution stands."
-  note: "multi-CLI template ships no consumer pyproject.toml; pins live in requirements-coc*.txt (both unchanged this cycle)."
-hooks_resolve: 38/38
+  note: "BUILD kailash-py current (unchanged since 1.18.0 cycle); all 9 pins BUILD-current AND PyPI-resolvable at the 2.48.0 set."
+hooks_resolve: verified              # settings.json hook .js scripts present on disk (see enrichment verification)
 scripts_hooks_refs: 0
 settings_pii: 0                       # 0 /Users|/home tokens
 description_label: "(Python)"         # parenthetical matches variant key py (Step 6b)
-inbox: ensure-exists-noop            # .claude/.proposals/inbox/{README.md,.gitkeep} already present
-template_version: "1.18.0"           # was 1.17.0 (minor: per-cycle bump + full multi-CLI re-emit; no SDK pin move)
+inbox: ensure-exists-noop            # .claude/.proposals/inbox/{README.md,.gitkeep} already present (additive, never-overwrite)
+scaffold:
+  symlink: ".claude/codex-mcp-guard -> ../.codex-mcp-guard (resolves)"
+  manifest_distribute: true          # loom sync-manifest.yaml copied to .claude/sync-manifest.yaml
+template_version: "1.18.0"           # UNCHANGED — content-only redistribution (Option A); no per-cycle bump this cascade
 notes:
-  - "F9 Gate-2 re-sync cut from loom@f403a49c (origin/main, authorized source). CWD moved to a fresh branch at HEAD f403a49c so the un-merged feat/mesh-d6-d7-convergence rule edits (beyond f403a49c) are excluded. spec-accuracy.md + specs-authority.md ship at their f403a49c versions, NOT the mesh edits."
-  - "Deterministic engine (sync-tier-aware) apply+verify pre-staged the 18-file .claude/ delta; this Gate-2 enrichment did the full multi-CLI residue (Rule 8 re-emit + codex-mcp-guard + manifest_distribute + markers). Idempotency (Rule 8): second emit produced 0 diffs across .coc/AGENTS.md/GEMINI.md."
-  - "Full multi-CLI re-emit per sync-completeness Rule 8 (grace ends 2026-07-18): AGENTS/GEMINI (root-baseline rule deltas among the 8 modified rules) + .codex/.gemini/.coc (command/skill deltas: redteam/sweep + product-completion-first + sweep skill). Regenerated via canonical emit tools (emit.mjs / emit-cli-artifacts --target py / emit-coc --target py). Config bases + bin/coc + .codex-mcp-guard refreshed."
+  - "CONTENT-ONLY Gate-2 re-sync cut from loom@8b5b6be1 (origin/main published freshness anchor; local HEAD 9fa936f5 carries un-synced cross-repo authz commits, excluded from this cascade)."
+  - "Deterministic engine (sync-tier-aware) apply+verify pre-staged the 97-file .claude/ delta; this Gate-2 enrichment did the full multi-CLI residue (Rule 8 re-emit + codex-mcp-guard + manifest_distribute + marker). Idempotency (Rule 8): 2nd emit produced 0 further git status change."
+  - "Full multi-CLI re-emit per sync-completeness Rule 8 via canonical emit tools (emit.mjs --all --lang py / emit-cli-artifacts --target py / emit-coc --target py); all rc=0. Config bases + bin/coc + .codex-mcp-guard refreshed. WARN-tier emission sizes are documented steady-state (v6 §2.2), NOT failures; gemini headroom 13.82% is advisory (within 15% proximity band, above the 10% BLOCK floor)."
   - "External .codex-mcp-guard/ tree synced current to loom; policies.json PRESERVED; symlink .claude/codex-mcp-guard -> ../.codex-mcp-guard resolves. POLICIES_POPULATED stays false (runtime predicate loader still gated — do NOT flip)."
-  - "emit-dev-container.mjs NOT run: the loom dev-container source (.claude/dev-container-templates/py/requirements-coc.txt) remains STALER (kailash 2.44.1 / dataflow 2.12.0) than the distributed copy (2.48.0 set); running it would REGRESS the pins. Pins unchanged this cycle (already 2.48.0); dev-container files preserved untouched. Established prior-cycle mechanism carried forward."
+  - "emit-dev-container.mjs NOT run (co-owner-ratified Option A): dev-container files (requirements-coc*.txt, docker-compose.yml, .devcontainer, Dockerfile) PRESERVED untouched at the distributed 2.48.0 set; VERSION.sdk_packages held at 2.48.0. No pin regression, no pin bump — content-only."
