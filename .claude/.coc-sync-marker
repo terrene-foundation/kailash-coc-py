@@ -1,39 +1,38 @@
 # COC Sync Marker — kailash-coc-py (py lane, multi-CLI)
-timestamp: 2026-07-18T18:42:56Z
+timestamp: 2026-07-19T11:49:30Z
 source: loom/.claude
-loom_sha: ebb79709521f8f60170f816494274708ab8a3478
-loom_sha_short: ebb79709
+loom_sha: 4cb1e6d9165fde252880bde93902dde568fa25c3
+loom_sha_short: 4cb1e6d9
 variant: py
 template_type: multi-cli
 clis: [claude, codex, gemini]
 visibility: public
-cli_trees_status: RE-EMITTED@ebb79709   # sync-completeness Rule 8 full multi-CLI re-emit this cycle; idempotency verified (2nd emit produced 0 further git status change: AGENTS.md/GEMINI.md byte-identical)
-headline: loom 8b5b6be1->ebb79709 redistribution (py multi-CLI) — Gate-2 re-sync via sync-gate2-worktree (--lane use --target py) + PyPI-verified SDK pin refresh + FULL Rule-8 multi-CLI re-emit. Deterministic engine (sync-tier-aware) apply+verify pre-staged a 33-status-line .claude/ governance/tooling delta (--verify CONSISTENT, 1609 in-plan; 0 obsoleted present). Gate-2 enrichment — (1) PyPI-verified SDK pin refresh (6 of 9 bumped to PyPI-latest, install-verified uv pip compile exit 0); (2) FULL derived-tree re-emit (AGENTS/GEMINI + .codex/.gemini/.coc + config bases + bin/coc + .codex-mcp-guard) because baseline agents.md (Triad clause) + 4 new skills + 3 changed commands reach the derived trees; (3) VERSION 1.18.0->1.19.0 (minor, pin refresh). Total changed = 65 files (19 added, 46 modified, 0 deleted — no orphans, stable artifact set).
+cli_trees_status: RE-EMITTED@4cb1e6d9   # sync-completeness Rule 8 full multi-CLI re-emit this cycle; idempotency verified (2nd emit produced byte-identical AGENTS.md/GEMINI.md + .codex/.gemini/.coc trees — 0 further git status change)
+headline: loom ebb79709->4cb1e6d9 redistribution (py multi-CLI) — Gate-2 re-sync via sync-gate2-worktree (--lane use --target py) + PyPI-verified SDK pin refresh + FULL Rule-8 multi-CLI re-emit. Deterministic engine (sync-tier-aware) apply+verify pre-staged a 28-status-line .claude/ governance/tooling delta (17 M + 11 added; --verify CONSISTENT; 0 obsoleted present). Gate-2 enrichment — (1) PyPI-verified SDK pin refresh (4 of 9 bumped to PyPI-latest, install-verified uv pip compile exit clean / 74 packages); (2) FULL derived-tree re-emit (AGENTS/GEMINI + .codex/.gemini/.coc + config bases + bin/coc + .codex-mcp-guard) because new baseline security.md clauses + issue-triage-routing/command-skill-parity/handoff-completion/orchestration-launch-ledger rules + new 18-security-patterns skills + changed enroll/certify/onboard/whoami/claim commands reach the derived trees; (3) VERSION 1.19.0->1.20.0 (minor, pin refresh).
 distribution:
   mode: pin-refresh + full-multi-cli-re-emit   # NOT content-only: real SDK pin refresh + Rule-8 derived-tree re-emit
   engine: engine-applied        # deterministic sync-tier-aware apply + --verify ran BEFORE this enrichment step
   tool: sync-gate2-worktree.mjs --lane use --target py (wraps sync-tier-aware --target py)
-  verify: engine --verify CONSISTENT (1609 in-plan files matched; no obsoleted path present)
+  verify: engine --verify CONSISTENT; no obsoleted path present
 stats:
-  changed_total: 65               # 19 A + 46 M + 0 D (staged worktree delta)
-  engine_staged_status_lines: 33  # sync-tier-aware apply+verify (orchestrator pre-run): .claude/ content delta (22 M + 11 untracked-dir/file), expands to individual staged files
+  engine_staged_status_lines: 28  # sync-tier-aware apply (orchestrator pre-run): .claude/ content delta (17 modified + 11 added untracked-dir/file)
   engine_breakdown:
-    added_dirs_files: "bin/lib/local-rules.mjs, hooks emit-artifact-activation{,-session}.js + lib artifact-activation-{event,ledger}.js, guides rule-extracts/artifact-flow.md, skills 30 dual-surface-redteam/parallel-dispatch-default/self-referential-allowlist-provenance/specialist-delegation-syntax, audit-fixtures/adjacency-domain/"
-    modified: "rules agents/artifact-flow/product-completion-first/self-referential-codify/sweep-completeness/testing/wave-loop/zero-tolerance, commands autonomize/redteam/wrapup, bin emit/mesh-observability-console/validate-emit, hooks genesis-anchor-guard + lib adjacency/version-utils, guides rule-extracts agents/cross-sdk-inspection/testing, skills 30 closure-parity/redteam-dispatch"
-    copied_verified: "1439 copied/verified (57 content-equal after BUILD-internal strip, 1382 byte-equal); 157 py overlays byte-equal; 13 variant_only byte-equal; 0 purged"
+    modified: "bin scan-synced-disclosure/validate-emit + audit-fixtures/scan-synced-disclosure/run.mjs, commands certify/claim/enroll/onboard/whoami, rules cc-artifacts/enrollment-operations/security/self-referential-codify, skills 41-onboard/42-certify/43-ecosystem-init/44-enroll SKILL.md, .gitignore"
+    added_dirs_files: "rules command-skill-parity/handoff-completion/issue-triage-routing/orchestration-launch-ledger, skills 18-security-patterns/{frontmatter-directive-trust-surface,path-containment} + issue-triage-routing/, guides rule-extracts/handoff-completion.md, audit-fixtures coc-eval-all/ coc-eval-core/ scan-synced-disclosure/operator-local-md-destination-flip/"
   enrichment_touched:
-    - .claude/VERSION                # 1.18.0->1.19.0 (minor, SDK pin refresh); upstream 2.48.0->2.54.0; loom_sha->ebb79709
-    - requirements-coc.txt           # 5 install-surface pins bumped (see sdk_pin_changes); install-verified
+    - .claude/VERSION                # 1.19.0->1.20.0 (minor, SDK pin refresh); upstream 2.54.0->2.55.0; loom_sha->4cb1e6d9
+    - requirements-coc.txt           # 3 install-surface pins bumped (see sdk_pin_changes); install-verified
     - AGENTS.md                      # re-emit (emit.mjs --all --lang py) — WARN steady-state (v6 §2.2), idempotent
-    - GEMINI.md                      # re-emit (emit.mjs --all --lang py) — WARN steady-state; headroom 14.17% advisory (>10% BLOCK floor)
-    - .codex/                        # prompts=41 skills=38 (emit-cli-artifacts --target py) + config.toml/hooks.json refresh
-    - .gemini/                       # commands=41 skills=38 agents=22 (emit-cli-artifacts --target py) + settings.json refresh
-    - .coc/                          # 188 files / 186 artifacts (emit-coc --target py) — coc.version 1.0.0
+    - GEMINI.md                      # re-emit (emit.mjs --all --lang py) — WARN steady-state; headroom 10.43% advisory (>10% BLOCK floor)
+    - .codex/                        # prompts=41 skills=39 agent-prompts=22 (emit-cli-artifacts --target py) + config.toml/hooks.json refresh
+    - .gemini/                       # commands=41 skills=39 agents=22 (emit-cli-artifacts --target py) + settings.json refresh
+    - .coc/                          # 196 files / 194 artifacts (emit-coc --target py) — coc.version 1.0.0
     - bin/coc                        # dispatcher refreshed from codex-templates (28 phase shims regenerated)
     - .codex-mcp-guard/              # synced current to loom; policies.json PRESERVED (POLICIES_POPULATED stays false)
+    - .claude/sync-manifest.yaml     # manifest_distribute — copied from loom@4cb1e6d9
     - .claude/.coc-sync-marker       # this file
   NOT_touched:
-    - dev-container Dockerfile/docker-compose.yml/.devcontainer  # emit-dev-container NOT run (loom dev-container source is STALE at 2.44.1; running it would REGRESS the template). requirements-coc.txt refreshed template-direct per 1.17.0 precedent.
+    - dev-container Dockerfile/docker-compose.yml/.devcontainer  # emit-dev-container NOT run (loom dev-container source STALE; running it would REGRESS the template). requirements-coc.txt refreshed template-direct per 1.17.0 precedent.
     - requirements-coc-ml.txt        # kailash-ml 2.2.2 + kailash-align 0.7.4 already PyPI-latest — HELD
   preserved: [CLAUDE.md, .proposals/ (README/.gitkeep kept), learning/, settings.local.json, dev-container-project-owned (Dockerfile.user.example etc.), .codex-mcp-guard/policies.json]
   baselines_emitted:
@@ -41,59 +40,59 @@ stats:
     codex: 1         # AGENTS.md re-emitted
     gemini: 1        # GEMINI.md re-emitted
   baseline_emission:
-    codex:  { bytes: 52914, tier: WARN }
-    gemini: { bytes: 52733, tier: WARN, headroom_pct: 14.17 }   # advisory, above 10% BLOCK floor
+    codex:  { bytes: 55214, tier: WARN, headroom_pct: 10.13 }   # advisory, above 10% BLOCK floor (within 15% proximity band)
+    gemini: { bytes: 55033, tier: WARN, headroom_pct: 10.43 }   # advisory, above 10% BLOCK floor (within 15% proximity band)
   cli_artifacts:
-    codex: { prompts: 41, skills: 38, agent_prompts: 22 }
-    gemini: { commands: 41, skills: 38, agents: 22 }
-    coc: { files: 188, artifacts: 186, version: "1.0.0" }
-    idempotency: "sync-completeness Rule 8 verified — 2nd emit.mjs --all --lang py produced byte-identical AGENTS.md + GEMINI.md. Wholesale rm+cp of .codex/.gemini/.coc: 0 orphan deletions (stable artifact set)."
+    codex: { prompts: 41, skills: 39, agent_prompts: 22 }   # + rules-reference skill (codex=1); prompts dir totals 63 files (41 command + 22 specialist)
+    gemini: { commands: 41, skills: 39, agents: 22 }        # + rules-reference skill (gemini=1)
+    coc: { files: 196, artifacts: 194, version: "1.0.0" }   # rules=82 agents=26 skills=42 commands=44
+    idempotency: "sync-completeness Rule 8 verified — 2nd emit (emit-cli-artifacts + emit.mjs --all --lang py + emit-coc, all --target py) produced BYTE-IDENTICAL output vs the landed worktree: AGENTS.md/GEMINI.md identical; diff -r .codex/{prompts,skills} + .gemini/{commands,skills,agents} + .coc all empty. 0 further git status change."
   codex_dispatcher: { bin_coc: refreshed, phase_shims: 28 }
   mcp_guard:
     policies_populated: false        # runtime predicate loader still gated (POLICIES table not flipped) — coc-sync Step 6.6 G3; do NOT flip
-    server_js: synced-current@ebb79709
-sdk_pin_changes:                     # PyPI-verified 2026-07-18 (PyPI JSON API, per-package) + install-verified
-  requirements-coc.txt:              # install surface — 5 pins BUMPED
-    kailash: "2.48.0 -> 2.54.0"
-    kailash-dataflow: "2.14.7 -> 2.18.0"
-    kailash-nexus: "2.11.0 -> 2.12.0"
-    kailash-kaizen: "2.29.0 -> 2.35.0"   # HELD BACK from BUILD-main 2.36.0 (NOT on PyPI); 2.35.0 is PyPI-latest, install-safe
-    kailash-pact: "0.14.3 -> 0.15.0"
+    server_js: synced-current@4cb1e6d9
+sdk_pin_changes:                     # PyPI-verified 2026-07-19 (PyPI JSON API, per-package) + install-verified
+  requirements-coc.txt:              # install surface — 3 pins BUMPED
+    kailash: "2.54.0 -> 2.55.0"
+    kailash-nexus: "2.12.0 -> 2.12.1"
+    kailash-kaizen: "2.35.0 -> 2.37.0"
+  held_install_surface:              # already PyPI-latest — no change
+    kailash-dataflow: "2.18.0"
+    kailash-pact: "0.15.0"
   metadata_only:                     # sdk_packages map — not in coc install set
-    kailash-mcp: "0.2.15 -> 0.4.0"        # transitive-resolved 0.4.0 in the lock
-    kaizen-agents: "0.9.11 -> 0.10.0"     # PyPI-latest
-  held:                              # already PyPI-latest — no change
+    kaizen-agents: "0.10.0 -> 0.11.1"     # PyPI-latest
+    kailash-mcp: "0.4.0"                  # held (PyPI-latest)
+  held:                              # already PyPI-latest — no change (requirements-coc-ml.txt)
     kailash-ml: "2.2.2"
     kailash-align: "0.7.4"
-  install_verify: "uv pip compile requirements-coc.txt -> exit 0, 'Resolved 74 packages', zero warn/error/conflict (zero-tolerance gate PASS)"
-sdk_packages:                        # 2.54.0 set (PyPI-verified)
-  kailash: "2.54.0"
+  install_verify: "uv pip compile requirements-coc.txt -> 'Resolved 74 packages', zero warn/error/conflict (zero-tolerance gate PASS). uv lock N/A — this multi-CLI template ships requirements-*.txt, no pyproject.toml (uv lock errors 'No pyproject.toml found'); uv pip compile is the authoritative resolve proof for the requirements surface (prior-cycle precedent)."
+sdk_packages:                        # 2.55.0 set (PyPI-verified)
+  kailash: "2.55.0"
   kailash-dataflow: "2.18.0"
-  kailash-nexus: "2.12.0"
-  kailash-kaizen: "2.35.0"
+  kailash-nexus: "2.12.1"
+  kailash-kaizen: "2.37.0"
   kailash-pact: "0.15.0"
   kailash-mcp: "0.4.0"
   kailash-ml: "2.2.2"
   kailash-align: "0.7.4"
-  kaizen-agents: "0.10.0"
+  kaizen-agents: "0.11.1"
 build_source_of_truth:
-  note: "BUILD kailash-py root/__init__ 2.54.0 = PyPI kailash 2.54.0 (team-lead-confirmed authoritative anchor). All bumped pins PyPI-resolvable + install-verified. kailash-kaizen pinned to PyPI-latest 2.35.0, NOT BUILD-main 2.36.0 (unpublished) — pin tracks PyPI-resolvable, never BUILD-main-ahead."
+  note: "BUILD kailash-py pyproject version=2.55.0 = PyPI kailash 2.55.0 (matches). All bumped pins PyPI-resolvable + install-verified. Pins track PyPI-resolvable, never BUILD-main-ahead."
 loom_source_flag:
-  note: "loom .claude/dev-container-templates/py/requirements-coc.txt is STALE at the 2.44.1 set (behind this template's refreshed 2.54.0 pins). emit-dev-container NOT run this cycle (would regress). Requires a separate loom-side dev-container source refresh."
-hooks_resolve: verified              # 28/28 settings.json hook .js scripts present on disk
+  note: "loom .claude/dev-container-templates/py/requirements-coc.txt remains STALE (behind this template's refreshed 2.55.0 pins). emit-dev-container NOT run this cycle (would regress). Requires a separate loom-side dev-container source refresh."
+hooks_resolve: verified              # 38/38 settings.json hook scripts present on disk
 scripts_hooks_refs: 0
 settings_pii: 0                       # 0 /Users|/home tokens
 description_label: "(Python)"         # parenthetical matches variant key py (Step 6b)
 inbox: ensure-exists-noop            # .claude/.proposals/inbox/{README.md,.gitkeep} already present (additive, never-overwrite)
 scaffold:
   symlink: ".claude/codex-mcp-guard -> ../.codex-mcp-guard (resolves)"
-  manifest_distribute: true          # loom sync-manifest.yaml copied to .claude/sync-manifest.yaml (engine-applied)
-template_version: "1.19.0"           # MINOR — SDK pin refresh (this template's 1.16.0/1.17.0 pin-refresh-minor convention)
-coc_obsoleted_paths: 105
+  manifest_distribute: true          # loom sync-manifest.yaml copied to .claude/sync-manifest.yaml
+template_version: "1.20.0"           # MINOR — SDK pin refresh (this template's pin-refresh-minor convention)
 notes:
-  - "Gate-2 re-sync cut from loom@ebb79709 (current loom HEAD; prior content anchor was marker@8b5b6be1)."
-  - "Deterministic engine (sync-tier-aware) apply+verify pre-staged the .claude/ content delta; this Gate-2 enrichment did the PyPI-verified pin refresh + the FULL Rule-8 multi-CLI derived-tree re-emit (emit.mjs --all --lang py / emit-cli-artifacts --target py / emit-coc --target py; all rc=0)."
-  - "FULL re-emit chosen (NOT content-only) because the engine delta included baseline agents.md (Triad clause) + 4 new skills + 3 changed commands, which reach AGENTS.md/GEMINI.md/.codex/.gemini/.coc (verified: fresh emit DIFFERED from the stale worktree trees). Skipping re-emit would ship stale derived trees (sync-completeness Rule 8 defect)."
-  - "SDK pin refresh: 6 of 9 bumped to PyPI-latest (kailash 2.54.0, dataflow 2.18.0, nexus 2.12.0, kaizen 2.35.0, pact 0.15.0 in requirements-coc.txt; mcp 0.4.0 + kaizen-agents 0.10.0 in sdk_packages metadata). ml 2.2.2 + align 0.7.4 held (already latest). install-verify uv pip compile exit 0, 74 packages, zero warnings."
-  - "External .codex-mcp-guard/ tree synced current to loom; policies.json PRESERVED; symlink resolves. POLICIES_POPULATED stays false (runtime predicate loader still gated — do NOT flip)."
-  - "emit-dev-container.mjs NOT run: loom's py dev-container source (.claude/dev-container-templates/py/requirements-coc.txt) is stale at 2.44.1 and would regress the template. requirements-coc.txt pins refreshed template-direct (1.17.0 precedent). Flagged for a separate loom-source refresh."
+  - "Gate-2 re-sync cut from loom@4cb1e6d9 (current loom HEAD; prior content anchor was marker@ebb79709)."
+  - "Deterministic engine (sync-tier-aware) apply+verify pre-staged the 28-status-line .claude/ content delta; this Gate-2 enrichment did the PyPI-verified pin refresh + the FULL Rule-8 multi-CLI derived-tree re-emit (emit.mjs --all --lang py / emit-cli-artifacts --target py / emit-coc --target py; all rc=0)."
+  - "FULL re-emit chosen (NOT content-only) because the engine delta included new baseline rules (security.md path-containment + enforcement-surface-parity, issue-triage-routing, command-skill-parity, handoff-completion, orchestration-launch-ledger) + new 18-security-patterns skills + changed enroll/certify/onboard/whoami/claim commands, which reach AGENTS.md/GEMINI.md/.codex/.gemini/.coc."
+  - "SDK pin refresh: 4 of 9 bumped to PyPI-latest (kailash 2.55.0, nexus 2.12.1, kaizen 2.37.0 in requirements-coc.txt; kaizen-agents 0.11.1 in sdk_packages metadata). dataflow 2.18.0 + pact 0.15.0 + mcp 0.4.0 + ml 2.2.2 + align 0.7.4 held (already PyPI-latest). install-verify uv pip compile exit clean, 74 packages, zero warnings."
+  - "External .codex-mcp-guard/ tree synced current to loom (all files except policies.json); policies.json PRESERVED; symlink resolves. POLICIES_POPULATED stays false (runtime predicate loader still gated — do NOT flip)."
+  - "emit-dev-container.mjs NOT run: loom's py dev-container source is stale and would regress the template. requirements-coc.txt pins refreshed template-direct (1.17.0 precedent). Flagged for a separate loom-source refresh."
