@@ -113,4 +113,5 @@ workspaces/*/.journal-skipped.log
 !.claude/bin/lib/
 !.claude/hooks/lib/
 !.claude/test-harness/lib/
+!.claude/audit-fixtures/**
 # <<< coc:gitignore_additions <<<

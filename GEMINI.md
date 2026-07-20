@@ -1,8 +1,5 @@
 # Agent Orchestration Rules
 
-See `.claude/guides/rule-extracts/agents.md` for full evidence, extended examples, post-mortems, recovery-protocol commands, the gate-review table, and CLI-syntax variants.
-
-
 ## Specialist Delegation (MUST)
 
 When working with Kailash frameworks, MUST consult the relevant specialist (**dataflow** / **nexus** / **kaizen** / **mcp** / **mcp-platform** / **pact** / **ml** / **align**-specialist). The work-domain → specialist binding is `rules/framework-first.md`'s domain table.
@@ -39,8 +36,6 @@ When `/analyze` runs against a brief covering ≥ 3 distinct issues, the orchest
 Reviews happen at COC phase boundaries, not per-edit. Skip only when explicitly told to. **MUST gates** are `/implement` and `/release`; reviewer + security-reviewer (and gold-standards-validator at `/release`) run as parallel background agents. RECOMMENDED gates: `/analyze`, `/todos`, `/redteam`, `/codify`, post-merge. Full gate table: guide.
 
 **Why:** Skipped gate reviews let gaps propagate downstream where they are far more expensive to fix. (Example 2 = background-dispatch pattern.)
-
-**BLOCKED responses when skipping MUST gates:** full corpus in guide § "Quality Gates — BLOCKED responses".
 
 ### MUST: Reviewer Prompts Include Mechanical AST/Grep Sweep
 
@@ -90,17 +85,9 @@ Parallel/compiling agents MUST run isolated per `skills/30-claude-code-patterns/
 - **Sequential when parallel is possible** — wastes the autonomous execution multiplier.
 - **Raw SQL / custom API / custom agents / custom governance** — see `rules/framework-first.md` and guide for per-framework rationale.
 
-## Examples (Gemini-native delegation syntax)
-
-The MUST clauses in the neutral body reference numbered examples by their inline "(Example N = ...)" descriptors. Gemini invokes a specialist by name via `@specialist` (e.g. `@reviewer`, `@security-reviewer`), dispatched in parallel where the clause calls for it. The delegation MECHANISM above is self-contained; the CLI-neutral MUST-clause contract is the load-bearing part.
-
-
 ---
 
 # Autonomous Execution Model
-
-See `.claude/guides/rule-extracts/autonomous-execution.md` for extended examples + Rule-4 Origin evidence.
-
 
 COC executes through **autonomous AI agent systems**, not human teams. All deliberation, analysis, recommendations, and effort estimates MUST assume autonomous execution unless the user explicitly states otherwise.
 
@@ -214,7 +201,6 @@ Concurrent-operator capacity guidance (per-`verified_id` budgets, NON-SAME-adjac
 
 # Communication Style
 
-
 Many COC users are non-technical. Default to plain language; match the user's level if they speak technically.
 
 ## Report in Outcomes, Not Implementation
@@ -261,8 +247,6 @@ At gates (end of `/todos`, before `/deploy`), ask:
 
 # Evidence-First Claims — No Assertion Without Quoted Evidence
 
-See `.claude/guides/rule-extracts/evidence-first-claims.md` for full DO/DO-NOT blocks, BLOCKED-rationalization corpora, the `cat -v` decode walkthrough, the structural-finding carve-out, and the complete E1/E2/E3 origin narrative.
-
 Diagnostic, root-cause, anomaly, and security claims MUST be grounded in evidence quoted **inline, in the same message as the claim**. Inference is permitted — but labeled as inference, never asserted as fact. The security/anomaly subclass carries the strictest bar: quote the triggering bytes, decoded.
 
 ## MUST Rules
@@ -298,10 +282,6 @@ A command that exited non-zero, hit an invalid flag, timed out, or returned empt
 - Treat an errored, timed-out, or empty command result as confirmation of any hypothesis — **Why:** absence-of-result is not evidence.
 - Assert a root-cause claim before reading the log / output / file that would show the cause — **Why:** the log disambiguates; asserting first builds the next action on a guess.
 
-## Distinct From / Cross-References
-
-Extends `verify-resource-existence.md` MUST-2 to ALL diagnostic/anomaly/security claims. Pairs with `recommendation-quality.md` MUST-3, `probe-driven-verification.md`, `user-flow-validation.md` MUST-2. Distinct from `communication.md` (HOW vs WHETHER) and `verify-claims-before-write.md` (code-surface claims at durable-write time vs diagnostic/security claims inline).
-
 ## Origin
 
 2026-05-31 — a Rust SDK session: three escalating assert-before-verify errors (E1 "timeout" misdiagnosis vs a 53s log-visible failure; E2 errored command nearly read as runner-deletion; E3 fabricated "curl|bash prompt-injection" from a `cat -v`-rendered em-dash — the detection grep never ran). User directive after E3: "how can you just fabricate a security claim, its not normal, please investigate fully" → forensics → `/codify`. Full narrative in the guide extract.
@@ -309,7 +289,6 @@ Extends `verify-resource-existence.md` MUST-2 to ALL diagnostic/anomaly/security
 ---
 
 # Framework-First: Use the Highest Abstraction Layer
-
 
 ## ABSOLUTE: Work-Domain → Framework Binding
 
@@ -338,9 +317,6 @@ When a Kailash framework exists for your use case, MUST NOT write raw code that 
 ---
 
 # Git Workflow Rules
-
-See `.claude/guides/rule-extracts/git.md` for extended bash examples, full BLOCKED rationalization lists, repository protection table, and Origin evidence.
-
 
 ## Conventional Commits
 
@@ -431,7 +407,6 @@ CC system prompt provides the template. Always include a `## Related issues` sec
 
 # Issue Triage → Upflow Routing (always-loaded)
 
-
 When triaging a GitHub issue on THIS repo, the agent MUST route it by the repo's CLASS before any disposition. A `gh issue` triage touches none of the artifact-file globs the routing DEPTH is path-scoped behind, so this always-loaded pointer is the reachability floor.
 
 ## MUST: Route Every Triaged Issue By The Repo `type`, Never By Convenience
@@ -447,7 +422,6 @@ NEVER hand-edit loom to "resolve" an issue; NEVER "fix" one by editing a synced 
 
 **Why:** A `gh` triage never matches the `.claude/**` / `sync-manifest.yaml` / `*.md` globs the path-scoped routing depth sits behind, so only an always-loaded pointer fires at triage time; without it a COC-method fix lands on a code-only lane or an SDK bug on the artifact lane, bypassing the Gate-1 split and losing provenance.
 
-
 ## Origin
 
 2026-07-19 — `/sync-from-use` kailash-coc-rs Gate-1 ingest (journal/0550). Closes the reachability gap: the routing depth in `rules/artifact-flow.md` § "Issue Routing By Change Type" is path-scoped behind artifact-file globs (`.claude/**`, `sync-manifest.yaml`, `**/VERSION`, `*.md`), none of which a `gh issue list` / `gh issue view` triage touches, so the routing rule never loaded at triage time across templates + downstream consumers. Baseline body kept pointer-only (~30-line neutral-body); depth extracted to the paired `issue-triage-routing` skill to stay under the 15% proximity band per `rule-authoring.md` MUST-10 (Rule-10 path-(a) paired extraction; sibling precedent `framework-first.md` → `framework-first` skill).
@@ -455,8 +429,6 @@ NEVER hand-edit loom to "resolve" an issue; NEVER "fix" one by editing a synced 
 ---
 
 # Repo Scope Discipline — Stay In This Repo
-
-See `.claude/guides/rule-extracts/repo-scope-discipline.md` for examples, the BLOCKED corpus, the User-Authorized Exception walkthrough, and the origin post-mortem.
 
 The session's CWD repo is the agent's entire scope. The agent MUST NOT read, edit, push to, file issues against, comment on, or propose work in any other repository (siblings, USE templates, `loom/`/`atelier/`, downstream consumers, any other repo) **under any circumstance it self-authorizes**. The sole exception is the user-authorized action below.
 
@@ -505,9 +477,6 @@ Note: at the orchestration root, targets resolve via `bin/lib/loom-links.mjs::re
 # Security Rules
 
 ALL code changes in the repository.
-
-Depth for most sections below lives in `.claude/guides/rule-extracts/security.md`.
-
 
 ## No Hardcoded Secrets
 
@@ -618,8 +587,6 @@ Security exceptions require: written justification, security-reviewer approval, 
 ---
 
 # Zero-Tolerance Rules
-
-See `.claude/guides/rule-extracts/zero-tolerance.md` for extended examples, sub-rule detail, and Phase 5 audit evidence.
 
 ## Scope
 
