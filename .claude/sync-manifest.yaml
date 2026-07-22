@@ -1368,7 +1368,18 @@ tiers:
     # above. Surface-neutral (BE/FE/API/CLI/MCP adapters), NOT CC-specific, so it is NOT
     # in cli_emit_exclusions — it reaches CC + Codex + Gemini, same as spec-compliance.
     # Validator 15 hard-blocks /sync if the skill dir is authored but unregistered.
+    # skills/conformance-walk/command-runbook.md (2026-07-21) is the paired runbook for
+    # commands/conformance-walk.md below — it rides this `**` glob, no separate entry.
     - skills/conformance-walk/**
+    # commands/conformance-walk.md (loom#1218, 2026-07-21): the CW TRIGGER command — auto-
+    # detects the project flavor (kailash-rs/py/other, or non-kailash) and applies the
+    # matching adapter family (kailash reference engine, or core-only). Distributed to
+    # build + use-consumer (see surface_roles below — loom's `platform` role does NOT
+    # surface the producer/consumer verification lifecycle it distributes but never runs
+    # as a splitter, same ontology as the analyze/redteam lifecycle). coc-core reaches
+    # py + rs + base — every axis that runs a testable surface, matching the rule/skill
+    # above. Validator 15 hard-blocks /sync if authored but unregistered.
+    - commands/conformance-walk.md
     - skills/test-skip-discipline/**
     - skills/12-testing-strategies/**
     - skills/16-validation-patterns/**
@@ -2889,6 +2900,8 @@ obsoleted:
   - .claude/bin/validate-envelope-dna.mjs # why: F1030d — orch-only #411 governance envelope-DNA validator (no shipped invoker); off the fail-closed allowlist. Purge stale consumer copy.
   - .claude/bin/emit-dev-container.mjs # why: F1030d — loom Gate-2 dev-container emitter (invoked only by the loom-only coc-sync agent); off the allowlist. Purge stale consumer copy.
   - .claude/bin/repin-targets.local.example.json # why: F1030d — example config for the loom_only repin-downstream.mjs (a consumer never repins downstream); off the allowlist. Purge stale consumer copy.
+  - .claude/audit-fixtures/scan-synced-disclosure/operator-local-md-destination-flip/.claude/variants/rs/rules/ci-runners.operator.local.md # 0558 (loom#676): loom-internal operator-local-md scanner fixture, now exclude:d; purge the shipped BUILD-lane copy.
+  - .claude/audit-fixtures/scan-synced-disclosure/r3-variant-surface/.claude/variants/rs/rules/ci-runners.operator.local.md # 0558 (loom#676): loom-internal operator-local-md scanner fixture, now exclude:d; purge the shipped BUILD-lane copy.
 
 # ─────────────────────────────────────────────────────────────────
 # LOOM-ONLY — POSITIVE never-sync declaration (F104)
@@ -3015,6 +3028,7 @@ loom_only:
   - bin/loom-links-init.mjs # why: F1030a — the loom-links.local.json seeder (loom-doctor --fix spawns it, now fs.existsSync-guarded). Loom-platform; a consumer never seeds resolver links. Under bin/** tier → LOAD-BEARING carve-out.
   - bin/sync-tier-aware.mjs # why: F1030a — loom's Gate-2 tier-aware distribution engine (imports loom-links resolveRepo). Runs ONLY at loom (/sync-to-*, all loom_only); a consumer never distributes. Under bin/** tier → LOAD-BEARING carve-out.
   - bin/sync-gate2-worktree.mjs # why: F1030a — the Gate-2 worktree-from-remote-main driver (imports loom-links resolveRepo). Loom-platform distribution engine; a consumer never runs Gate-2. Under bin/** tier → LOAD-BEARING carve-out.
+  - bin/stamp-template-version.mjs # why: loom Gate-2 VERSION loom-tracking-field stamper (--write) + drift gate (--check), invoked only by the loom-only /sync-to-use enrich (sync-to-use.md Step 2 + pre-commit gate). Loom-platform distribution tool; a consumer never runs /sync-to-use. Community-edition SUBTRACTION (community = published ∖ loom_only); OFF the sync-tier-aware ALWAYS_INCLUDE allowlist so NOT load-bearing for check-8. Sibling of bin/sync-gate2-worktree.mjs above.
   - bin/repin-downstream.mjs # why: F1030a — the fleet SDK-version repin tool (imports loom-links). Loom-orchestration; a consumer never repins the fleet. Under bin/** tier → LOAD-BEARING carve-out.
   - bin/check-sync-freshness.mjs # why: F1030a — the pre-sync local-vs-remote freshness gate for /sync-to-* (dynamic-imports loom-links). Gates loom_only sync commands; a consumer never runs it. Under bin/** tier → LOAD-BEARING carve-out.
   - bin/lib/fleet-deps.mjs # why: F1030a — fleet dependency probe (dynamic-imports loom-links to resolve fleet repos). Loom-orchestration; a consumer has no fleet. Under bin/** tier → LOAD-BEARING carve-out.
@@ -3104,6 +3118,13 @@ surface_roles:
   commands/i-audit.md: [build, use-consumer]
   commands/i-polish.md: [build, use-consumer]
   commands/i-harden.md: [build, use-consumer]
+  # commands/conformance-walk.md (loom#1218, 2026-07-21): the CW trigger command is a
+  # producer/consumer VERIFICATION lifecycle verb — loom DISTRIBUTES it but never runs it
+  # as a splitter (loom does not walk its own testable surfaces via the kailash engine), so
+  # the `platform` role does NOT surface it. Same ontology as the analyze/redteam/codify
+  # lifecycle above → [build, use-consumer]. PROPOSED classification — flagged for co-owner
+  # ratification (T2, loom#1218).
+  commands/conformance-walk.md: [build, use-consumer]
 
 # ─────────────────────────────────────────────────────────────────
 # EXCLUSIONS
@@ -3214,6 +3235,15 @@ gitignore_additions:
   - .claude/learning/learning-digest.json
   - .claude/learning/.heartbeat-cache*
   - .claude/learning/.session-end-cache*
+  # Per-emitter SessionEnd release-lease (#874 Wave B — sessionend-release-lease.js
+  # O_EXCL serialization lease closing the sessionend read->append equivocation
+  # window). Per-clone runtime-only state (the lease IS the "an emitter holds the
+  # sessionend serialization lock" signal); MUST NOT be committed — persisting it
+  # across clones would make the lease forgeable, exactly the codify-lease.json
+  # rationale above. Mirrors loom's own .gitignore line 114. #1280: the pattern
+  # was added to loom's .gitignore in Wave B but never mirrored here, so the
+  # distributable block let a consumer git-commit it (journal/0368 disclosure class).
+  - .claude/learning/sessionend-release-lease-*
   - .claude/learning/observations.archive/
   # Operator roster (MO-OPT W2-c / GAP A — the state-locality policy).
   # The roster carries operator TRUST identity (genesis trust-root, GPG
@@ -3310,6 +3340,7 @@ gitignore_reincludes:
   - "!.claude/bin/lib/"
   - "!.claude/hooks/lib/"
   - "!.claude/test-harness/lib/" # sync-from-backlog-0552 (b): test-harness/lib ships to BUILD (eval probe-schemas); a broad consumer lib/ ignore would swallow it (loom#676)
+  - "!.claude/audit-fixtures/**" # 0556/0558 (loom#676): re-includes distributed audit fixtures a consumer ignore would swallow, ONLY where the negation wins by file order (inside the coc-managed block). Does NOT override a consumer OWN tail ignore that follows the block (e.g. rs *.operator.local.md) — those operator-local-md scanner fixtures are EXCLUDED from distribution instead (see exclude: **/*.operator.local.md).
 
 # FA (2026-05-31) — Visibility-conditional gitignore additions.
 # These patterns are applied to a consumer's `.gitignore` ONLY when the
@@ -3386,6 +3417,7 @@ exclude:
   - scheduled_tasks.lock # Claude Code's per-user scheduled-task lock; loom-local. Pair: `obsoleted: .claude/scheduled_tasks.lock`.
   - test-harness/** # loom's multi-CLI parity test fixtures + result logs; consumers do not run the harness. Pair: `obsoleted: .claude/test-harness/`.
   - "**/*.test.mjs" # loom's OWN unit tests (node:test suites under bin/ etc.) — SAME "consumers do not run loom's tests" class as test-harness/** above. They escaped that exclusion only by living under the synced bin/** tier (not test-harness/**), so 13 bin/*.test.mjs leaked to every USE template. Their fixtures legitimately embed synthetic disclosure shapes (sync-from-canon.test.mjs plants a synthetic /Users/jdoe/ operator-home-path), which is what tripped the Gate-2 scan-synced-disclosure --check at loom-source. Pair: scanner isExcluded source-only `*.test.mjs` skip + the per-file purge of the 13 leaked copies in BOTH `obsoleted:` (BUILD lane) and `use_obsoleted:` (USE lane) below.
+  - "**/*.operator.local.md" # 0558 (loom#676): loom-internal scan-synced-disclosure scanner test fixtures whose *.operator.local.md name is DESIGNED to match a consumer never-track PII rule; loom never distributes operator-local-md files (mirrors the consumer *.operator.local.md ignore). SAME class as **/*.test.mjs above (consumers do not run loom scanner). Fixes the rs USE-lane swallowed-artifact block that #1248 reinclude could not (post-block consumer override).
   - worktrees/** # operator-local agent worktrees (worktree-isolation.md primitive). Transient scratch space; never synced. Pair: scanner isNeverSynced + .gitignore — three-layer defense-in-depth per journal/0142.
 
 # ─────────────────────────────────────────────────────────────────
@@ -3638,6 +3670,8 @@ use_obsoleted:
   - .claude/bin/lib/fleet-freshness-ledger.mjs
   - .claude/bin/lib/fleet-maintain.mjs
   - .claude/audit-fixtures/lint-prose-drift/
+  - .claude/audit-fixtures/scan-synced-disclosure/operator-local-md-destination-flip/.claude/variants/rs/rules/ci-runners.operator.local.md # 0558 (loom#676): loom-internal operator-local-md scanner fixture, now exclude:d; purge the shipped USE-lane copy.
+  - .claude/audit-fixtures/scan-synced-disclosure/r3-variant-surface/.claude/variants/rs/rules/ci-runners.operator.local.md # 0558 (loom#676): loom-internal operator-local-md scanner fixture, now exclude:d; purge the shipped USE-lane copy.
 
 # ─────────────────────────────────────────────────────────────────
 # BUILD REPO MAPPING
@@ -3655,6 +3689,15 @@ repos:
     # source repo). USE-lane distribution is UNAFFECTED — /sync-to-use always
     # applies the py overlay. Absent ⇒ false. (rs declares true — see below.)
     build_variant_overlay: false
+    # build_multi_cli (#181, 2026-07-21 — journal/0563): true → /sync-to-build
+    # ALSO emits the derived multi-CLI trees (.codex/ + .gemini/ + AGENTS.md +
+    # GEMINI.md + .coc/) into the BUILD worktree at Gate-2, symmetric to the
+    # USE-lane multi-cli emission (coc-sync.md Steps 6.5-6.7 / sync-completeness
+    # Rule 8). Positive opt-in (cc-artifacts.md Rule 10 allowlist shape): absent
+    # ⇒ false, so base/prism BUILD repos ship CC-only unless they declare it.
+    # kailash-py BUILD devs use Codex/Gemini alongside Claude Code; the CC-only
+    # BUILD tree was the #181 gap (scoped read 2026-07-21: .codex/.gemini absent).
+    build_multi_cli: true
     # Phase H1 (2026-04-22): parallel targets during multi-CLI rollout.
     # CC-only legacy target stays active for downstream projects that
     # consume it today; multi-CLI target ships AGENTS.md + CLAUDE.md +
@@ -3680,6 +3723,13 @@ repos:
     # sync-to-build.md "use the variant version" intent for a non-Python
     # engine. py declares false because the global IS its native form.
     build_variant_overlay: true
+    # build_multi_cli (#181, 2026-07-21 — journal/0563): true → /sync-to-build rs
+    # ALSO emits the derived multi-CLI trees at Gate-2 (see repos.py.build_multi_cli
+    # above for the full rationale). kailash-rs BUILD ships the rs variant overlay
+    # (build_variant_overlay: true), so its emitted .codex/.gemini/AGENTS.md/
+    # GEMINI.md carry the rs-flavored corpus. Scoped read 2026-07-21: .codex/.gemini
+    # absent on kailash-rs — the #181 gap.
+    build_multi_cli: true
     tier_subscriptions: [cc, coc-core, kailash]
     templates:
       - repo: kailash-coc-claude-rs

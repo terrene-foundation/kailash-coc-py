@@ -1,19 +1,19 @@
 # COC Sync Marker — kailash-coc-py (py lane, multi-CLI)
-timestamp: 2026-07-20T14:39:34Z
+timestamp: 2026-07-22T04:35:00Z
 source: loom/.claude
-loom_sha: c3791c19ef447d7fd50704a7323b449bc1543ec4
+loom_sha: 08cb86fb48eb7cb21051de27fc144aa1e3561a55
 variant: py
 visibility: public
 clis: ["claude", "codex", "gemini"]
 stats:
-  engine_changed: 18
-  version_stamp: "loom-tracking 2.55.0 -> 2.45.0 (own 1.20.0 preserved)"
+  engine_changed: 25
+  version_stamp: "loom-tracking -> 2.45.0 @ 08cb86fb (own version preserved)"
   baselines_emitted:
     cc: 0
     codex: 1
     gemini: 1
   cli_artifacts:
-    codex: { prompts: 41, skills: 39 }
-    gemini: { commands: 41, skills: 39, agents: 22 }
-  coc_artifacts: 194
+    codex: { prompts: 42, skills: 39, agents: 22 }
+    gemini: { commands: 42, skills: 39, agents: 22 }
+  coc_artifacts: 195
   codex_dispatcher: "bin/coc + 28 per-phase symlinks"
