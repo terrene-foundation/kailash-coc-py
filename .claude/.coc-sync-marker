@@ -1,19 +1,34 @@
 # COC Sync Marker — kailash-coc-py (py lane, multi-CLI)
-timestamp: 2026-07-22T04:35:00Z
+timestamp: 2026-08-02T15:28:27Z
 source: loom/.claude
-loom_sha: 08cb86fb48eb7cb21051de27fc144aa1e3561a55
+loom_sha: 43167a54921f7454a3eb2573af0252ca7d16df2a
 variant: py
 visibility: public
 clis: ["claude", "codex", "gemini"]
 stats:
-  engine_changed: 25
-  version_stamp: "loom-tracking -> 2.45.0 @ 08cb86fb (own version preserved)"
+  engine_copied: 2008
+  engine_verified: "2008/2008 delivered — 1949 byte-equal, 59 content-equal after BUILD-internal strip"
+  overlays: "157/157 byte-equal"
+  variant_only: "13/13 byte-equal"
+  purged: 0
+  version_stamp: "loom-tracking -> 2.45.0 @ 43167a54 (own version 1.20.0 -> 1.21.0)"
+  settings_reconcile: "deny(rewrote 20, deduped 20, restored 1), hooks(added 6, pruned 0)"
+  hooks_resolving: "34/34"
   baselines_emitted:
     cc: 0
     codex: 1
     gemini: 1
+  baseline_emission_bytes:
+    block_cap_bytes: 61440
+    warn_cap_bytes: 32768
+    codex: { rules: 11, bytes: 53168, tier: WARN, headroom_pct: 13.46 }
+    gemini: { rules: 11, bytes: 53168, tier: WARN, headroom_pct: 13.46 }
   cli_artifacts:
     codex: { prompts: 42, skills: 39, agents: 22 }
     gemini: { commands: 42, skills: 39, agents: 22 }
-  coc_artifacts: 195
+  coc_artifacts: 198
+  coc_files: 200
   codex_dispatcher: "bin/coc + 28 per-phase symlinks"
+  overlay_drift_resolved:
+    - "hooks/detect-package-manager.js (variant_only-drift -> canon 3100de7d)"
+    - "hooks/validate-prod-deploy.js (drift-from-both -> py overlay 393b82d7)"
