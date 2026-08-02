@@ -1,0 +1,80 @@
+origin: downstream
+template_slug: kailash-coc-py
+template_version: "1.20.0"
+upstream:
+  loom_sha: c3791c19
+submitted: 2026-08-02
+title: >-
+  Consumer-authored rules have no delivery lane to Codex or Gemini —
+  emission runs at loom from loom's corpus, and AGENTS.md/GEMINI.md are in the sync overlay
+
+summary: >-
+  In a downstream coc-project, a rule authored in .claude/rules/ reaches Claude Code only.
+  It cannot reach the Codex or Gemini lanes by any supported path, and this is structural
+  rather than a staleness or configuration problem. Requesting a consumer-local rule lane
+  that survives /sync.
+
+problem:
+  - >-
+    AGENTS.md and GEMINI.md are declared in the sync manifest's overlay `paths:`, annotated
+    "Per-CLI baseline files at repo root. Re-emitted on every loom /sync from .claude/rules/
+    via .claude/bin/emit.mjs --cli {codex,gemini}." So they are emitted AT loom, FROM loom's
+    corpus, and overwritten on every sync.
+  - >-
+    A rule authored in a consumer repo is not in loom's corpus, so loom's emission
+    structurally cannot contain it. Emitting locally does work, but the next /sync
+    overwrites both files because they sit in the overlay `paths:` and not in `preserved:`.
+  - >-
+    This is not a frontmatter problem. Measured in one consumer: two locally-authored rules
+    carrying valid `priority: 0` / `scope: baseline` frontmatter appear zero times in
+    AGENTS.md, while a template-supplied baseline rule appears four times in the same file
+    (positive control — the search instrument works, so the absence is real).
+  - >-
+    Consequence: an operator working in Codex or Gemini runs without every rule their
+    project has authored locally. In the observed consumer that included hook-enforced and
+    ABSOLUTE-marked rules.
+
+secondary_findings:
+  - >-
+    Validator 14 (rule-frontmatter) fails closed on rules missing frontmatter, which is
+    correct — but it masks Validator 15 (tier-completeness), which then fails on
+    project-local artifacts with no declared distribution fate. A consumer that fixes
+    frontmatter still cannot emit, and the second failure is only visible after the first
+    is cleared. Consider reporting both, or naming V15 in V14's failure text.
+  - >-
+    `sync-manifest.yaml § gitignore_reincludes` declares `!.claude/bin/lib/`, but a consumer
+    whose .gitignore carries a bare `lib/` pattern (common in Python templates, for build
+    artifacts) leaves the emitter's own modules untracked — so the emitter runs only in a
+    long-lived checkout where the files happen to exist locally, and fails in CI and in every
+    fresh clone. The reinclude is declared but there appears to be no step that applies it to
+    the consumer's .gitignore. Applying it, or asserting it at sync time, would close this.
+  - >-
+    Headroom is a real constraint on any fix, not an afterthought. In the observed consumer,
+    the emitted codex baseline sits close to its block cap while the unreached local rules are
+    an order of magnitude larger than the remaining headroom. A consumer-local lane therefore
+    needs a size answer (abridgement, a skill-channel route, or a separate emitted file) rather
+    than simply appending to the existing baseline.
+
+requested_change: >-
+  A supported delivery lane for consumer-authored rules to the non-Claude-Code CLIs. Two shapes
+  that would both work, in rough order of preference:
+  (a) a LOCAL-RULES.md (or equivalent) placed in the manifest's `preserved:` set, which the
+  per-CLI emitter appends to its baseline output — so consumer content survives sync by
+  construction rather than by re-running a step after every sync;
+  (b) a consumer-corpus hook in emit.mjs that reads the consumer's .claude/rules/ in addition to
+  loom's, with the headroom accounting extended to cover it.
+  Either shape should also make the failure visible: a consumer whose local rules reach no lane
+  should get a loud, named failure rather than silence.
+
+acceptance_criteria:
+  - "[ ] A rule authored in a downstream coc-project's .claude/rules/ is reachable from Codex and Gemini after a /sync, without a manual post-sync step."
+  - "[ ] The lane survives /sync — verified by running /sync and re-checking presence."
+  - "[ ] A consumer whose local rules reach NO lane fails loudly and by name, rather than emitting silently."
+  - "[ ] Headroom is accounted for the combined corpus; a breach fails closed rather than truncating."
+
+evidence_note: >-
+  All measurements were taken in a downstream consumer and are reported as generic shapes.
+  Per-repo identifiers, paths outside the .claude/ artifact surface, and operator identity are
+  deliberately omitted. Reproduction in any consumer: author a baseline rule locally with valid
+  frontmatter, run /sync, and grep AGENTS.md for it — using a template-supplied rule as a
+  positive control so an absence can be distinguished from a broken search.
