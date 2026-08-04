@@ -12,7 +12,7 @@ Each CLI loads its own root-level baseline file at session start:
 | Codex       | `AGENTS.md`   | `loom/.claude/bin/emit.mjs --cli codex` (post-v6 abridgement) |
 | Gemini CLI  | `GEMINI.md`   | `loom/.claude/bin/emit.mjs --cli gemini`                      |
 
-The rule set, framework directives, and philosophy are identical across the three. Divergence lives only in delegation syntax (`Agent(subagent_type=...)` on CC, native `@<agent>` on Gemini, `/prompts:<name>` on Codex) and per-CLI config trees (`.codex/`, `.gemini/`).
+The rule set, framework directives, and philosophy are identical across the three. Divergence lives only in delegation syntax (`Agent(subagent_type=...)` on CC, native `@<agent>` on Gemini, `bin/coc <phase>` on Codex) and per-CLI config trees (`.codex/`, `.gemini/`).
 
 ## Absolute Directives
 
@@ -60,18 +60,20 @@ When building AI agents: **the LLM does ALL reasoning. Tools are dumb data endpo
 
 Phase commands map 1:1 across the three CLIs. The prompt body is shared — only the invocation surface differs:
 
-| Command      | Phase | CC syntax    | Codex syntax         | Gemini syntax |
-| ------------ | ----- | ------------ | -------------------- | ------------- |
-| `/analyze`   | 01    | `/analyze`   | `/prompts:analyze`   | `/analyze`    |
-| `/todos`     | 02    | `/todos`     | `/prompts:todos`     | `/todos`      |
-| `/implement` | 03    | `/implement` | `/prompts:implement` | `/implement`  |
-| `/redteam`   | 04    | `/redteam`   | `/prompts:redteam`   | `/redteam`    |
-| `/codify`    | 05    | `/codify`    | `/prompts:codify`    | `/codify`     |
-| `/release`   | —     | `/release`   | `/prompts:release`   | `/release`    |
-| `/ws`        | —     | `/ws`        | `/prompts:ws`        | `/ws`         |
-| `/wrapup`    | —     | `/wrapup`    | `/prompts:wrapup`    | `/wrapup`     |
+| Command      | Phase | CC syntax    | Codex syntax        | Gemini syntax |
+| ------------ | ----- | ------------ | ------------------- | ------------- |
+| `/analyze`   | 01    | `/analyze`   | `bin/coc analyze`   | `/analyze`    |
+| `/todos`     | 02    | `/todos`     | `bin/coc todos`     | `/todos`      |
+| `/implement` | 03    | `/implement` | `bin/coc implement` | `/implement`  |
+| `/redteam`   | 04    | `/redteam`   | `bin/coc redteam`   | `/redteam`    |
+| `/codify`    | 05    | `/codify`    | `bin/coc codify`    | `/codify`     |
+| `/release`   | —     | `/release`   | `bin/coc release`   | `/release`    |
+| `/ws`        | —     | `/ws`        | `bin/coc ws`        | `/ws`         |
+| `/wrapup`    | —     | `/wrapup`    | `bin/coc wrapup`    | `/wrapup`     |
 
-Source-of-truth definitions live in `.claude/commands/`; Codex mirrors at `.codex/prompts/<name>.md`; Gemini at `.gemini/commands/<name>.toml`.
+Each phase also has a suffix shim (`bin/coc-analyze`, `bin/coc-todos`, …) that delegates to `bin/coc` with the phase pre-bound.
+
+Source-of-truth definitions live in `.claude/commands/`; Gemini mirrors at `.gemini/commands/<name>.toml`. Codex bodies are emitted to `.codex/prompts/<name>.md`, but that directory is **not an invocation surface** — Codex CLI 0.128+ deprecated custom prompts in favor of skills and loads only `~/.codex/prompts/`, never repo-local (`openai/codex#9848`, closed not-planned). `bin/coc` reads the emitted body and dispatches it, which is why it is the canonical Codex path.
 
 ## Agent Invocation — Per-CLI Syntax
 

@@ -92,7 +92,7 @@ Each CLI loads its own baseline:
 - `AGENTS.md` — regenerated from `.claude/rules/` by `emit.mjs --cli codex`
 - `GEMINI.md` — regenerated from `.claude/rules/` by `emit.mjs --cli gemini`
 
-Slash commands span phases (`/analyze`, `/todos`, `/implement`, `/redteam`, `/codify`, `/release`) and utilities (`/sdk`, `/db`, `/api`, `/ai`, `/test`, `/design`, `/validate`, `/deploy`, `/ws`, `/wrapup`, `/journal`, …). Codex invokes via `/prompts:<name>`; Gemini via `/<name>` (TOML-defined); CC via `/<name>` (Markdown-defined).
+Slash commands span phases (`/analyze`, `/todos`, `/implement`, `/redteam`, `/codify`, `/release`) and utilities (`/sdk`, `/db`, `/api`, `/ai`, `/test`, `/design`, `/validate`, `/deploy`, `/ws`, `/wrapup`, `/journal`, …). Codex invokes via `bin/coc <name>` (the repo-local dispatcher — Codex CLI 0.128+ dropped repo-local `/prompts:<name>`, see `openai/codex#9848`); Gemini via `/<name>` (TOML-defined); CC via `/<name>` (Markdown-defined).
 
 ### Layer 5: Learning — Closed-Loop Evolution
 
