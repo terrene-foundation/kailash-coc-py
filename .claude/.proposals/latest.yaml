@@ -149,4 +149,601 @@ capability_request:
     /sync, and grep AGENTS.md for it — using a template-supplied rule as a positive
     control so an absence can be distinguished from a broken search.
 
+# ============================================================================
+# APPENDED 2026-08-05 — kailash-coc-py's OWN findings (Step-7b origination).
+#
+# APPEND, NEVER OVERWRITE (artifact-flow.md § "Append, Never Overwrite
+# Unprocessed Proposals"): everything above this line is the 2026-08-04
+# RELAYED downstream capability-request and is preserved byte-for-byte.
+# `changes:` above stays [] — that relay authored no artifacts.
+#
+# MIXED PROVENANCE — DECLARED, NOT HIDDEN. The top-level header above reads
+# `origin: downstream, via: kailash-coc-py` and describes the RELAY only. The
+# block below is NOT downstream-relayed: it is this template's own Step-7b
+# origination (`.claude/VERSION::type == "coc-use-template"`, which
+# sync-flow.md § Step-7b's detect predicate routes to 7b, NOT 7c). The header
+# was deliberately left untouched so the relay's Gate-1 routing is not
+# disturbed; this block carries its own provenance keys instead. A Gate-1
+# reviewer keying only on the top-level `origin:` would mis-lane these items —
+# that is why this comment is loud rather than a footnote.
+#
+# SECOND INSTANCE OF THE SCHEMA GAP THIS PROPOSAL ITSELF REPORTS (item 5).
+# Step-7b's `changes:` array models artifacts the ORIGINATOR created/modified
+# (`action: created | modified`, plus required `file:` and `diff_lines:`).
+# Of the TEN items below, EIGHT request changes to LOOM-OWNED artifacts (item 1
+# is explicitly not a code-change request and item 8 asks loom to take no
+# action); this repo authored
+# nothing for them. Fabricating `changes:` rows for files nobody edited would
+# be a false change record (verify-claims-before-write.md MUST-1), so they are
+# carried in an extension block — the same shape the archived proposal's
+# `manifest_directives_proposed:` and the relay's `capability_request:` above
+# both used. `changes: []` is empty BY FACT, not by omission.
+#
+# VERIFICATION DISCIPLINE — READ THIS BEFORE TRIAGING.
+# Every claim below was RE-DERIVED against the current tree on 2026-08-05 by
+# three independent verification agents, because these items were filed across
+# several sessions and a durable upstream claim may not be carried forward
+# unverified (verify-claims-before-write.md MUST-1 + MUST-2). That pass changed
+# the finding set materially:
+#   * item 8 was REFUTED outright and is WITHDRAWN below.
+#   * items 1 and 4 had their premises corrected.
+#   * item 5's scope was corrected (this repo's lane is 7b, not 7c).
+#   * item 9 was briefly downgraded in an intermediate draft; the downgrade was
+#     REFUTED by adversarial review and reverted. It stands EXACTLY as filed.
+# GitHub issue #55 still carries the ORIGINAL, uncorrected text for items 1, 2,
+# 4, 5 and 8. THIS FILE SUPERSEDES IT for those five. Do not re-import their
+# wording. Item 2 is on the list for SEVERITY, not for its finding: #55 calls it
+# "noise, not damage", which this file refutes — the ERROR sentinel embeds TWO
+# operator-absolute paths into a report the command then instructs the agent to
+# commit. Item 2's finding and fix are unchanged and confirmed; only the
+# severity is revised upward, and re-importing #55's wording re-imports the
+# understatement.
+# Item 5 is on this list for a reason easy to miss: #55 names the Step-7c
+# schema, but this repo is `coc-use-template` and routes to Step-7b. The gap it
+# reports is REAL on both, so the item is CONFIRMED — but re-importing #55's
+# wording re-imports the wrong schema scope, and that misrouting would propagate
+# past Gate-1 to every consumer. (Item 3's #55 text was already corrected
+# on-issue, so it is deliberately NOT on this list.)
+# Item 9 is the EXCEPTION: #55's original "absent from BOTH non-CC lanes" is
+# CORRECT and this file AGREES with it. An intermediate draft here wrongly
+# downgraded it; the downgrade was refuted by adversarial review and removed.
+#
+# Disclosure fence (upstream-issue-hygiene.md MUST-2). READ THE ORDER HERE —
+# the HUMAN SCRUB IS THE SOLE FENCE FOR THIS BLOCK, not the scanner.
+# scan-synced-disclosure.mjs CANNOT see this file: `.proposals/` is excluded by
+# construction (scan-synced-disclosure.mjs::isNeverSynced returns true on the
+# `.proposals` path segment), so its result carries ZERO information about this
+# body. Citing it as coverage here would be a non-discriminating instrument
+# presented as evidence (instrument-discipline.md MUST-1) — the run is reported
+# only because it covers the REST of the tree. For anyone re-running it: the
+# "2185 files scanned / 0 findings" figures come from the NO-FLAG human-report
+# mode. The `--check` form is SILENT on clean (exit 0, zero output), so a reader
+# who re-runs `--check` expecting those numbers gets silence, not a discrepancy.
+# The relayed block above carries this same qualification ("the human-scrub-only
+# residual, since .proposals/ is isNeverSynced"); this block initially dropped it
+# and it was restored after an adversarial disclosure review caught the omission.
+# HUMAN SCRUB of this block (the actual fence): no consumer name, no customer or
+# engagement name, no operator identity (no name, email, login, or home-directory
+# fragment), no absolute paths, no workspace identifiers, no finding tags, no
+# credentials; every path named is on the .claude/ artifact surface or the repo
+# root, and every issue number is this template's own.
+# ============================================================================
+
+use_template_findings:
+  source_repo: kailash-coc-py
+  origin: use-template
+  codify_date: 2026-08-05
+  codify_session: >-
+    proposal(loom-emitter): ten COC-artifact findings — nine filed as #55, one surfaced during
+    verification — re-verified. Note not all nine came from the 2026-08-04 /sweep: item 7 was
+    found while verifying the dev-container release path, and item 10 during this verification pass.
+  template_version: "1.21.0"
+  coc_version: "1.21.0"
+  filed_as: >-
+    kailash-coc-py#55 (9 items; body carries 1-3, comments carry 4-9). Item 10 is NOT in #55 —
+    it was surfaced during this verification pass and has no issue of its own.
+
+  verification:
+    method: >-
+      Three independent read-only agents re-derived every factual claim against
+      the tree at main @ 8d2705d on 2026-08-05, each required to name the
+      falsifying result it looked for and to fire a control proving its matcher
+      discriminates in this repo (instrument-discipline.md MUST-1 + MUST-3).
+    outcome: >-
+      Of #55's 9 filed items: 6 CONFIRMED (item 9 exactly as filed; item 5 with its schema
+      scope corrected), 2 CHANGED (premise corrected — items 1 and 4), 1 REFUTED and WITHDRAWN
+      (item 8). Item 10 was newly surfaced during the pass and is CONFIRMED. Three of the nine
+      filed items were materially wrong as filed; had this proposal been written from the issue
+      text it would have carried false claims to Gate-1 and, once split, to every consumer.
+    second_round: >-
+      An adversarial review of THIS block then found that the block itself had introduced a new
+      error in the opposite direction: it had downgraded item 9 (a TRUE claim) to a single-lane
+      finding on a false premise about how codex emits agents. That downgrade is reverted above
+      and item 9 now agrees with #55. Further corrections from the same and subsequent rounds are
+      also applied: item 10's fix RE-ROUTED from `gitignore_additions` to
+      `visibility_gitignore_additions.public` (the single most consequential remedy correction —
+      the original key's all-consumer scope would have ignored per-operator state on precisely the
+      private/team consumers that deliberately track it); the item-4 fix-mechanism (it would have
+      rendered BEFORE the negation and silently done nothing); the item-4 materialized-vs-latent
+      framing; the item-2 disclosure dimension; the item-2 purge attribution (over-corrected once,
+      then fixed — `use_obsoleted` also covers the USE lane); two miscited constants; a `-v`
+      instrument note that led to the opposite verdict; and this audit block's own over-claim of
+      item 10 as mechanism-tested. Recorded because it is the load-bearing lesson of this pass:
+      a verification round can itself inject errors, so the review of the corrections is not
+      optional ceremony.
+    cross_repo_boundary: >-
+      No agent read loom. Anything settleable only at loom is labelled
+      UNVERIFIABLE-HERE below and is NOT asserted as present fact.
+
+  # ---- Cluster A — emitter completeness (the highest-value cluster) ----------
+  # Items 9 and 1 are two MECHANISMS of one failure: an artifact reaches no lane
+  # and nothing says so. ONE fail-closed "reaches no lane" assertion closes both,
+  # and is the same guard the relayed capability_request above asks for in its
+  # third acceptance criterion. Mark this cluster PRIORITY so a partial accept
+  # still lands the structural fix.
+  priority_cluster: A
+
+  items:
+    - id: 9
+      cluster: A
+      status: confirmed-as-filed
+      where: ".claude/sync-manifest.yaml (variant_only:), .claude/bin/emit-cli-artifacts.mjs"
+      finding: >-
+        A `variant_only` artifact is applied by the sync overlay while bypassing
+        the per-CLI emitter, so it reaches Claude Code and no other lane, with no
+        exclusion declared anywhere. `agents/frameworks/infrastructure-specialist.md`
+        is the instance: present at .claude/agents/frameworks/, absent from
+        .gemini/agents/ (which holds 22 files), and declared under `variant_only: py`.
+        It is a real specialist with a full tool list, not a stub.
+      evidence: >-
+        Zero occurrences in either CLI's cli_emit_exclusions block; also zero in
+        emit-cli-artifacts.mjs::GEMINI_AGENT_STRUCTURAL_EXCLUSIONS, whose five entries are
+        agents/codex-architect.md, agents/gemini-architect.md, agents/cli-orchestrator.md,
+        agents/management/** and agents/_README.md. (Note for anyone cross-checking: the
+        first entry is codex-architect, NOT cc-architect — cc-architect heads the separate
+        SIX-entry CODEX constant. An earlier draft conflated the two lists.) Of the 9 files
+        in .claude/agents/frameworks/, 8 have a .gemini/agents/ counterpart and 8 have a
+        .codex/prompts/specialist-*.md counterpart; infrastructure-specialist is the sole
+        omission on each. Control: dataflow-specialist resolves on BOTH non-CC lanes, so the
+        empty infrastructure result is a true negative, not a dead matcher.
+      both_non_cc_lanes_confirmed: >-
+        #55's original wording — "absent from BOTH non-CC lanes" — is CORRECT and stands.
+        An intermediate draft of this proposal wrongly downgraded it to a gemini-only finding
+        on the premise that `.codex/` has no agents directory. That premise is true but
+        IRRELEVANT: codex emits agents as `prompts/specialist-<name>.md`, not as an agents/
+        directory (emit-cli-artifacts.mjs::emitCodexAgentPrompts materializes each eligible
+        .claude/agents/<group>/<name>.md into .codex/prompts/specialist-<name>.md). Both
+        non-CC lanes carry 22 agents each, and `infrastructure-specialist` is the SOLE absence
+        on EACH. Control: a matcher for `dataflow` returns `specialist-dataflow.md`, so the
+        empty `infrastructure` result on the codex lane is a true negative, not a dead matcher.
+        The downgrade was caught by an adversarial review before this proposal left the repo.
+      conflicts_with_declared_behaviour: >-
+        CLAUDE.md states that specialist agents including `agents/frameworks/*` emit to
+        .gemini/agents/<name>.md for Gemini's @<agent> invocation. The drop therefore
+        contradicts a documented promise.
+      unverifiable_here: >-
+        Whether loom's own emitter declares an exclusion for this file. Emission runs at
+        loom; no cross-repo read was authorized. Only "nothing in the CONSUMER tree
+        declares it" is asserted.
+      requested_fix: >-
+        Feed variant_only artifacts into the per-CLI emitter's corpus so a variant-supplied
+        specialist emits on every lane its class declares — OR declare them excluded, in
+        which case CLAUDE.md's `agents/frameworks/*` claim needs qualifying.
+
+    - id: 1
+      cluster: A
+      status: changed-premise-corrected
+      where: ".claude/agents/codex-architect.md"
+      original_claim: "still teaches dead /prompts: invocations, count 2"
+      finding: >-
+        The COUNT is right and the CHARACTERIZATION is wrong. Both hits (lines 26 and 50)
+        are DESCRIPTIVE references to the deprecated `/prompts:<phase>` surface, and each
+        already names `bin/coc` as the replacement in the same sentence. Line 174 is an
+        explicit DO-NOT table row. There is NO dead invocation site to fix in this file.
+      evidence: >-
+        Counted precisely, because an earlier draft of this item got the tally wrong: the file
+        has 10 LINES containing `prompts` and 16 total OCCURRENCES — 2 are `/prompts:` (the
+        subject), 9 are `.codex/prompts/` directory paths (a different string), and 5 are prose
+        ("custom prompts", "hooks / prompts / skills"). The load-bearing fact is unchanged and
+        independently reconfirmed: exactly 2 `/prompts:` hits, both descriptive.
+        Replacement targets fully resolve: all 8 phases (analyze, todos, implement,
+        redteam, codify, release, ws, wrapup) have BOTH a bin/coc-<phase> entry AND a
+        .claude/wrappers/schemas/<phase>.schema.json. 8/8 on both axes.
+      disposition: >-
+        DOWNGRADE, do not drop. There is no defect to fix here, so this is not a code
+        change request. It survives only as the CONTENT SYMPTOM motivating the cluster-A
+        guard: the reason a reader cannot tell an intentional CC-only artifact from a
+        silently-lost one is the same reason this item was mis-filed as a defect.
+        #55's item 1 text should be corrected upstream; it asserts a fix that is not needed.
+      note_on_issue_28: >-
+        #55 states item 1 is "the remaining half of #28". Since there is no dead invocation,
+        that framing does not hold either. #28's other two suggestions were previously
+        verified resolved (bin/coc + symlinks shipped; zero wrappers reference
+        developer_instructions_file). #28 may be closeable — but that is a separate
+        human-gated decision, not part of this proposal.
+
+    - id: 8
+      cluster: A
+      status: WITHDRAWN-refuted
+      where: ".claude/sync-manifest.yaml § cli_emit_exclusions"
+      original_claim: >-
+        cli_emit_exclusions is asymmetric — commands/cc-audit.md and commands/cost-audit.md
+        are declared excluded for codex but NOT for gemini, yet both are absent from
+        .gemini/commands/, making the drop undeclared.
+      finding: "FALSE. Both entries ARE declared under `gemini:` (lines 161-162)."
+      evidence: >-
+        The full gemini exclusion list was printed and read (not tallied) and contains both
+        entries. History check: both were present in the gemini block BOTH at 156c08c^
+        (before the last sync) and at HEAD — identical. So the item was WRONG WHEN FILED,
+        not fixed-since. The observed absence from .gemini/commands/ is exactly what the
+        manifest declares, i.e. correct behaviour correctly declared.
+      residual_finding: >-
+        The ONE real membership asymmetry between the two lists is `guides/codex/**`,
+        which appears in the gemini list (line 163) and not in the codex list. That is
+        almost certainly intentional and correct (codex guides should not reach gemini),
+        but it is the only entry where the lists genuinely diverge. Recorded for
+        completeness; NOT proposed as a change.
+      disposition: >-
+        WITHDRAWN. Loom should take no action. Recorded here rather than silently deleted
+        so that #55's item-8 comment — which is still live and still wrong — is visibly
+        superseded rather than quietly re-imported at a later Gate-1.
+
+    # ---- Cluster B — one-line config defaults, no design work -----------------
+    - id: 3
+      cluster: B
+      status: confirmed
+      where: "loom-side .claude/settings.json source, py lane"
+      finding: >-
+        effortLevel should default to `high` upstream. Operator-ratified in this template
+        via #53 (xhigh -> high) on the basis that no operator should carry a different value.
+        Making it the upstream default is what makes the decision uniform across consumers
+        rather than a per-consumer commit each template re-applies.
+      evidence: >-
+        settings.json:4 currently reads "effortLevel": "high". A corpus-wide grep proves NO
+        file under .claude/hooks/ or .claude/bin/ references effortLevel at all, and the only
+        file in .claude/ that mentions it is settings.json itself. settings-deny-drift-guard.js
+        restores exactly two things — the 11-entry permissions.deny floor and two guard hook
+        registrations — and its write path is gated on those being non-empty, so a drifted
+        effortLevel produces zero restorations and the guard exits without rewriting.
+      correction_carried_forward: >-
+        #55's item 3 originally claimed "a future sync that rewrites this file resets the
+        value". That over-claimed and was already corrected on the issue: the 2026-08-04 sync
+        PRESERVED effortLevel: high (it layered on the target's main rather than regenerating).
+        What stands is the durable-uniformity argument, NOT an imminent regression.
+      requested_fix: >-
+        Set `effortLevel: high` in the loom-side `settings.json` source for the py lane, so the
+        value is the upstream default rather than a per-consumer commit each template re-applies.
+        (This field states explicitly what item 3's `finding` already asked for. It exists so the
+        eight change-requesting items ALL carry a `requested_fix:` key — previously item 3 was the
+        lone exception, and a Gate-1 triager counting keys mechanically would have read seven
+        against a header that says eight.)
+
+    - id: 4
+      cluster: B
+      status: changed-corrected
+      where: ".gitignore"
+      original_claim: >-
+        line ~119 `!.claude/audit-fixtures/**` re-includes .DS_Store despite a .DS_Store rule
+        at ~40; same shape applies to three sibling lib/ negations at ~116-118.
+      finding: >-
+        The core defect is real: `.claude/audit-fixtures/**` uses a `/**` suffix that matches
+        every DESCENDANT, so OS metadata under that tree is re-included and shows up as
+        untracked noise in git status.
+      corrections: >-
+        (a) LINE NUMBERS DRIFTED — the negation is at line 122, not ~119; the .DS_Store rule
+        is at line 40 (as claimed); the sibling lib/ negations are at 119-121, not ~116-118.
+        (b) THE SIBLING HALF IS REFUTED — lines 119-121 (!.claude/bin/lib/, !.claude/hooks/lib/,
+        !.claude/test-harness/lib/) use a TRAILING SLASH, which negates only the directory
+        entry and not its contents. Verified: .claude/hooks/lib/.DS_Store is still ignored and
+        matches .gitignore:40, not :120. Only line 122's `/**` form has the defect.
+        (c) IT DID MATERIALIZE, and recurs — the originating /sweep found and cleaned THIRTEEN
+        such files in this repo. Zero exist right now, but the defect is not hypothetical: it
+        re-materializes on any macOS clone as soon as Finder touches the tree. An earlier draft
+        of this item called it "latent, not materialized", which understated it to a triager.
+        Current-state check confirming the cleanup held — zero .DS_Store files exist in the
+        WORKING TREE (three exist under `.git/`, which is outside the tree, ungoverned by
+        .gitignore, and not what a /sweep cleans — scoped here so the sentence is airtight)
+        and specifically zero anywhere
+        under .claude/, and zero are tracked in the index.
+      evidence: >-
+        `git check-ignore -q` exit codes with controls on both poles: root .DS_Store exits 0
+        (known-ignored control), README.md exits 1 (known-not-ignored control), the
+        audit-fixtures paths exit 1 (NOT ignored — defect confirmed), and all three lib/ paths
+        exit 0 (still ignored — sibling half refuted). INSTRUMENT WARNING, stated precisely
+        because an earlier draft of this note was itself a trap: `check-ignore -v` cannot
+        discriminate here AT ALL — not by its output (it prints a matching line for NEGATED paths
+        too) and not by its exit code (measured: `-v` exits 0 on a re-included path while plain
+        `-q` exits 1 on the same path). The earlier wording said "only the exit code
+        distinguishes", which reads as "run -v and trust its exit code" and yields the OPPOSITE
+        verdict. Use plain / `-q` and read the exit code; `-v` is for locating the matching rule
+        only, never for deciding whether a path is ignored.
+      requested_fix: >-
+        Re-exclude the OS-metadata pattern after the negation, e.g. add
+        `.claude/audit-fixtures/**/.DS_Store` following the line-122 negation. Do NOT apply the
+        same change to the three lib/ negations — they do not have the defect.
+      fix_must_render_AFTER_the_negation: >-
+        CRITICAL MECHANISM CONSTRAINT — do NOT route this through `gitignore_additions`.
+        Render order inside the single managed block is gitignore_additions ->
+        visibility_gitignore_additions -> gitignore_reincludes, and the negation is the LAST
+        line the block emits. Git is last-match-wins, so a re-exclusion inserted via
+        `gitignore_additions` lands BEFORE the negation and is overridden — it would ship a
+        change that silently does nothing. Verified by direct A/B test: with the re-exclusion
+        BEFORE the negation the path is still NOT ignored; with it AFTER, the path IS ignored;
+        control with no fix reproduces the defect. The fix therefore needs a mechanism that
+        renders AFTER `gitignore_reincludes` — either a new post-reinclude slot or an explicit
+        ordering guarantee.
+      do_not_narrow_the_negation: >-
+        Also do NOT "fix" this by narrowing the `/**` to the siblings' trailing-slash form.
+        The two forms rescue against DIFFERENT consumer ignore shapes: against a file-glob
+        ignore (`*.json`) only `/**` rescues the fixtures; against a directory-form ignore
+        (`audit-fixtures/`) only the trailing slash does. The `/**` is load-bearing.
+
+    - id: 10
+      cluster: B
+      status: confirmed-new
+      new_since_issue_55: true
+      where: ".gitignore managed block / sync-manifest.yaml § visibility_gitignore_additions.public"
+      finding: >-
+        Two per-operator local-state paths are NOT covered by the ignore rules, so a `git add -A`
+        commits operator-local content to a tracked surface. This is the same class as item 4 —
+        gitignore coverage gaps in the loom-managed block — but a different and more consequential
+        failure mode: item 4 admits OS noise, this one admits per-operator session state.
+      instance_a: >-
+        `.session-notes.migrated` is NOT ignored. .gitignore covers `.session-notes` (lines 56 and
+        114), `.session-notes.d/` (115) and `.session-notes.shared.md` (116), but nothing matches
+        the `.migrated` suffix that the .session-notes -> .session-notes.d/ migration produces. The
+        leftover file's own opening lines declare it "Local-only by design" and it carries the root
+        forest ledger, traps, and cross-repo receipt pointers.
+      instance_b: >-
+        `.wave-tracker.d/` is NOT ignored, while its sibling `.session-notes.d/` IS (line 115).
+        `commands/wrapup.md` § Wave tracker places per-operator wave DETAIL at
+        `.wave-tracker.d/<display_id>.md`, i.e. exactly the same class of local state, so the
+        omission looks like an oversight when `.session-notes.d/` was added rather than a decision.
+      evidence: >-
+        `git check-ignore -q` exit codes with controls on BOTH poles: `.session-notes.d/<id>.md`
+        exits 0 (known-ignored control) and README.md exits 1 (known-not-ignored control), so the
+        instrument discriminates here. Against that, `.session-notes.migrated` exits 1 and
+        `.wave-tracker.d/<id>.md` exits 1 — both NOT ignored.
+      why_it_matters: >-
+        Committing either is a sensitivity/classification escalation in the
+        recommendation-quality.md MUST-8 sense: per-operator local state — material that SHOULD be
+        gitignored but is not, which is the whole finding — moving onto a committed, all-operator
+        surface. It is mechanically cheap (an ordinary local commit), which is precisely why no
+        action-mechanics gate catches it.
+      why_the_fix_belongs_upstream: >-
+        CASCADE, not impossibility — an earlier draft claimed "NOT locally fixable" and that was
+        wrong. The managed block spans lines 79-123, but the pre-block region (1-78) is editable
+        and persists across syncs: line 56's `**/.session-notes` is a repo-local entry present in
+        NEITHER manifest key, and it has survived every sync alongside the managed block. So a
+        local fix WOULD work here — it would simply reach this one repo. The manifest fix is
+        preferred because it cascades to 30+ consumers, not because a local edit is blocked.
+        Stated precisely so a Gate-1 reviewer is not handed a false structural fact.
+      requested_fix: >-
+        Add `.session-notes.migrated` (or a `.session-notes*` form covering the migration suffix)
+        and `.wave-tracker.d/` to `sync-manifest.yaml § visibility_gitignore_additions.public` —
+        NOT to `gitignore_additions`. The key choice is load-bearing, not cosmetic: all three
+        siblings this item cites as precedent (`.session-notes`, `.session-notes.d/`,
+        `.session-notes.shared.md`) live in `visibility_gitignore_additions.public` and NONE is in
+        `gitignore_additions`. The manifest states that `gitignore_additions` "controls what the
+        consumer's own git tracks" for ALL consumers, whereas private/team consumers deliberately
+        do NOT receive the visibility entries because they TRACK session-notes as shared team
+        institutional knowledge, mirroring loom itself. Routing this through `gitignore_additions`
+        would therefore ignore per-operator state on precisely the consumers that intend to track
+        it — diverging from the sibling policy this item invokes as its own precedent.
+      opt_out_group_assignment_needed: >-
+        ONE THING THIS REPO CANNOT SETTLE, flagged so it is decided rather than defaulted. The
+        manifest documents opt-out granularity as named groups (`visibility_opt_out:
+        [session-notes|workspaces]`). `.session-notes.migrated` sits cleanly in the `session-notes`
+        group. `.wave-tracker.d/` belongs to NEITHER named group. If the applier maps opt-out
+        tokens to literal path sets, adding `.wave-tracker.d/` to `.public` without assigning it a
+        group would leave it un-opt-out-able for a private/team consumer that wants to keep
+        tracking it — reintroducing, for that path, the same all-consumer-scope problem the key
+        re-routing exists to avoid. loom should assign the group explicitly (extend
+        `session-notes`, or mint a `wave-tracker` token). UNVERIFIABLE-HERE: `sync-tier-aware.mjs`
+        is `loom_only` and absent from this repo, so the applier's actual mapping cannot be read
+        from a consumer clone.
+      scope_audit: >-
+        The "are there others?" question was answered here rather than left to loom. Enumerating
+        every untracked-and-not-ignored path in the whole repo returns EXACTLY these two and
+        nothing else, so the gap is bounded at two entries — this is not the visible tip of a
+        wider class. Every other root dotfile and dot-directory is either correctly ignored
+        (`.env`, `.session-notes.d/`, `.session-notes.shared.md`) or legitimately tracked
+        (`.claude/`, `.codex/`, `.gemini/`, `.github/`, `.devcontainer/`). Control: README.md
+        resolves NOT-ignored as expected, so the check discriminates. loom should still apply the
+        fix at the manifest, but need not re-run the discovery.
+      local_disposition: >-
+        QUALITATIVE BY DESIGN — NO COUNT IS STATED HERE, AND THAT IS THE FIX. In the originating
+        repo the leftover `.session-notes.migrated` is superseded in SUBSTANCE: the only content
+        unique to it is the stale, since-rewritten versions of ledger rows (a corrected F15 row, a
+        refuted F11 row, a completed F14 row). Nothing of CURRENT value is unique to it, so deleting
+        it loses nothing — but it is UNTRACKED, so deletion has no reflog (git.md § Destructive
+        Working-Tree Ops) and is human-gated, not an agent action. WHY NO NUMBER: two successive
+        drafts stated a unique-line COUNT and BOTH went stale before this proposal left the repo —
+        first "zero" (true when measured, invalidated by a later edit to the file it compares
+        against), then "three" (invalidated the same way by the next edit, and by prose reflow). A
+        count of a diff between two MUTABLE LOCAL files is not a durable fact and does not belong in
+        an upstream artifact; the qualitative claim is what actually survives, and it is what loom
+        needs. A reader wanting the current number should MEASURE it, not read it here — and if they
+        do: use `LC_ALL=C sort -u` with `comm` plus an IDENTITY control (file vs itself MUST return
+        0), because `grep -Fxv -f` FAILS that identity control on these files and `sort -u` without
+        `LC_ALL=C` is collation-fragile. Two plausible instruments give two wrong answers.
+
+    # ---- Cluster C — independent one-offs, different fix sites ----------------
+    - id: 5
+      cluster: C
+      status: confirmed-scope-corrected
+      where: ".claude/skills/30-claude-code-patterns/sync-flow.md § proposal schemas"
+      finding: >-
+        Neither upflow schema has a shape for a COC-artifact CAPABILITY GAP — a consumer
+        reporting that something does not exist and asking loom to build it. Both model
+        artifact CHANGES only, with a required `file:` and `diff_lines:`, and no `action:`
+        value meaning "requested".
+      scope_correction: >-
+        #55's item 5 named the Step-7c (downstream) schema. For THIS repo that is the wrong
+        schema: `.claude/VERSION::type == "coc-use-template"`, and sync-flow.md's own detect
+        predicates route coc-use-template to Step-7b and coc-project to Step-7c. The gap
+        holds for BOTH, and holds MORE STRONGLY for 7b: its enum is `created | modified`
+        (narrower than 7c's `created | modified | obsolete`).
+      why_route_b_does_not_close_it: >-
+        A capability/bug lane does exist (sync-flow.md § "Route-B Capability/Bug Upflow"),
+        but it produces a human-gated BUILD issue draft rather than a proposal-manifest
+        field, and it fires at a Step-7c step — which does not run for a coc-use-template.
+        So it does not supply the missing shape on this lane.
+      self_demonstrating: >-
+        THIS PROPOSAL IS THE SECOND CONCRETE INSTANCE. The first was the relayed
+        capability_request above (a downstream consumer hitting it at 7c); this block is a
+        USE-template hitting the same wall at 7b, and improvising the same kind of extension.
+        Two independent improvisations of different shapes is exactly the outcome that
+        defeats mechanical Gate-1 triage.
+      requested_fix: >-
+        Add a `capability_request:` block as a first-class sibling of `changes:` in BOTH the
+        Step-7b and Step-7c schemas, with `changes: []` explicitly legal when a request
+        carries no authored artifacts.
+
+    - id: 6
+      cluster: C
+      status: confirmed
+      where: ".claude/hooks/validate-bash-command.js — state-file-mutation block message"
+      finding: >-
+        The guard's BEHAVIOUR is correct and is not disputed. The gap is its remediation text.
+        It tells the reader to use "an interpreter body with NO write token", but never
+        discloses that a shell-out counts as one. A reader with read-only intent does not
+        think of execSync as a write token, so the message sends them straight back into the
+        same block with no way to learn why.
+      evidence: >-
+        A case-insensitive search for execSync|child_process|subprocess|spawn|shell-out|shell
+        across the whole block-message branch returns exactly ONE hit, and reading it (rather
+        than counting it) shows it is a source comment about quoting, outside every emitted
+        string field. The file's three child_process occurrences are its own spawnSync imports,
+        hundreds of lines above the branch. Controls confirm both the slice and the token class
+        are matchable in this file, so the empty result is a true negative.
+      confirmed_mechanism: >-
+        The shell-out class IS live: violation-patterns.js::STATE_INTERP_WRITE_SOURCES
+        category (6) "SHELL-OUT FROM INSIDE THE BODY" compiles into STATE_INTERP_WRITE_RX,
+        matching os.system, subprocess.*, child_process, exec/execFileSync, spawn/spawnSync,
+        Popen/popen, plus ruby/perl %x{} and qx{} command-substitution forms.
+      requested_fix: >-
+        One clause in the remediation text, e.g. "...with NO write token (note: a shell-out
+        such as execSync / child_process / subprocess counts as a write token, because the
+        scanner cannot analyse the inner command — fetch shell values OUTSIDE the interpreter
+        body and pass them in via env or argv)." The final part is the fix a reader actually
+        needs and it is currently stated nowhere in the message.
+
+    - id: 7
+      cluster: C
+      status: confirmed-structural-risk
+      where: "sync-manifest.yaml § dev_container_ownership + .claude/dev-container-templates/py/"
+      finding: >-
+        requirements-coc.txt is loom-distributed, so emit-dev-container can overwrite it from
+        loom's source. It is the install surface the published dev-container image is built
+        from (Dockerfile COPY -> uv pip install -r), so emitting a stale source silently
+        downgrades every framework pin in the next published image.
+      evidence: >-
+        Membership chain verified end-to-end: py is in loom_distributed; loom_distributed.py.classes
+        includes publisher_internal; requirements-coc.txt is in publisher_internal_variants.py; and
+        the manifest states the class lists ARE the distribution set for variants named in
+        loom_distributed, sourced from .claude/dev-container-templates/py/. Independently
+        corroborated by the file's own first line, which declares it "generated INTO consumer
+        templates by /sync-to-use; do not hand-edit the consumer copy".
+      current_state_is_correct: >-
+        The repo-root file matches .claude/VERSION::sdk_packages on all five SDK packages it
+        pins (kailash 2.62.0, dataflow 2.19.1, nexus 2.15.0, kaizen 2.45.0, pact 0.18.0).
+        Accuracy note for triage: sdk_packages has NINE entries, not five — ml and align live in
+        the opt-in requirements-coc-ml.txt, and mcp and kaizen-agents are metadata-only. The file
+        also pins ruff and black, which sdk_packages does not track.
+      unverifiable_here: >-
+        Whether loom's copy is STILL stale. This repo's .claude/VERSION carries a dated
+        self-report (2026-08-02) that loom's copy is at the 2.44.1 set and that
+        emit-dev-container was deliberately NOT run because it would regress these pins. That
+        is a dated claim about another repo, not a current measurement; settling it needs a
+        cross-repo read that was not authorized. Treated as inference, not present fact.
+      requested_fix: >-
+        Preferred (durable): have emit-dev-container REFUSE to emit a requirements-coc.txt whose
+        pins are OLDER than the destination's, failing loud rather than silently downgrading.
+        This converts a silent regression into a blocked sync and does not depend on anyone
+        remembering to refresh the source. Secondary: refresh loom's py source to the current set.
+
+    - id: 2
+      cluster: C
+      status: confirmed-reproduced
+      where: ".claude/commands/sweep.md — Sweep-9 pre-condition gate"
+      finding: >-
+        The gate dynamically imports .claude/bin/lib/loom-links.mjs and attaches .catch() to the
+        import promise chain, so a module-resolution failure and a genuine resolver error land in
+        the same handler and both emit the ERROR sentinel. The N/A sentinel lives inside .then()
+        and is unreachable when the import itself rejects. Because the command's own text states
+        that an ERROR sentinel "is itself a finding", every consumer lacking the module reports a
+        false finding on every /sweep run.
+      evidence: >-
+        REPRODUCED in this repo — running the gate verbatim emits
+        "<!-- sweep-ecosystem:v1:ERROR reason=Cannot find module ... -->". Note the process exits
+        0, so the exit code cannot discriminate; only the emitted sentinel string can. The module
+        is absent BY DESIGN, not by accident: sync-manifest.yaml fences bin/lib/loom-links.mjs as
+        loom_only ("a consumer resolves nothing cross-repo"), which SUPPRESSES future emission —
+        and the already-distributed USE-template copy is purged by the `use_obsoleted:` twin. The
+        `obsoleted:` entry is NOT the USE-lane mechanism: it sits under a BUILD-lane header and
+        purges the BUILD copy only. TWO drafts got this wrong in OPPOSITE directions — the first
+        attributed the USE-lane absence to the BUILD-lane `obsoleted:` entry; the correction then
+        over-swung to "NOT an obsoleted: purge entry", which reads as "no purge entry covers the
+        USE lane" and is equally false. Both `loom_only` AND `use_obsoleted` cover the USE lane, in
+        complementary roles (the manifest states the split explicitly: sync-tier-aware.mjs reads
+        `obsoleted` on the BUILD lane and `use_obsoleted` on the USE lane). So the
+        intended N/A case is precisely the case that produces ERROR.
+      scope: >-
+        Fires on all 30+ consumers, on every run. NOT merely noise — there is a disclosure
+        dimension an earlier draft of this item missed. The ERROR sentinel embeds the failed
+        module's ABSOLUTE path, which on any consumer is an operator home path. sweep.md itself
+        says the ERROR sentinel "is itself a finding — surface it", and the command's Closure
+        step commits the report; the same command separately requires scrubbing operator-absolute
+        paths before committing. So every /sweep run on every consumer manufactures a
+        path-bearing sentinel that the command then instructs the agent to roll into a committed
+        artifact, defended only by a judgment-level scrub (user-flow-validation.md MUST-6). The
+        N/A fix removes the sentinel — and with it the recurring scrub obligation — at the source.
+      self_referential_gate: >-
+        commands/sweep.md IS on the self-referential-codify.md Rule-2 allowlist as a LIVE firing
+        entry (backticked, depth-0, between redteam.md and wrapup.md), so the fix needs the
+        Tier-1 multi-agent gate.
+      requested_fix: >-
+        Discriminate ERR_MODULE_NOT_FOUND from a genuine resolver error and emit the N/A sentinel
+        for the former, keeping ERROR for the latter.
+
+  fix_mechanism_audit: >-
+    RUN DELIBERATELY, because adversarial review found the weakness was concentrated in the
+    REMEDIES rather than the findings: three separate items proposed a fix that would not have
+    worked as written (item 9 narrowed on a refuted premise; item 4 routed to a key that renders
+    BEFORE the negation it must override; item 10 routed to a key with the wrong consumer scope).
+    All three are corrected above. Every `requested_fix` was then re-checked against the surface
+    it would actually be applied to, and the result is recorded per-item rather than asserted
+    wholesale. MECHANISM TESTED, not merely named: item 4 ONLY (A/B check-ignore in an isolated
+    repo with a no-fix control, proving render-order decides the outcome). ROUTING PREMISE
+    VERIFIED BUT FIX NOT TESTABLE HERE AT ALL: item 10 — sibling-key membership was printed for
+    all five paths, which establishes WHICH key is correct but is not a test of the fix; the
+    applier is `sync-tier-aware.mjs`, which is fenced `loom_only` and is ABSENT from this repo, so
+    the fix's behaviour cannot be exercised from a consumer clone by any means. An earlier draft
+    of THIS audit block listed item 10 as MECHANISM TESTED — an over-claim in the one block whose
+    entire purpose is calibrated honesty, caught by adversarial review. MECHANISM SURFACE
+    INSPECTED and the fix site located, but the fix itself NOT executed or tested: items 2
+    (`commands/sweep.md` gate), 5 (both schemas in `sync-flow.md`), 6 (the block-message branch in
+    `validate-bash-command.js`). MECHANISM NAMED BUT NOT VERIFIABLE FROM HERE: items 9, 3 and 7 —
+    each targets loom-side emission or a loom-side source file. Those artifacts are DISTRIBUTED to
+    this repo and were inspected here, but this repo's copy is the OUTPUT of the pipeline, not the
+    source loom edits, so a fix's behaviour at loom cannot be established from a consumer clone.
+    Do NOT read "the file is present here" as "the fix was validated"; those three need loom-side
+    confirmation at Gate-1.
+
+  acceptance_criteria:
+    - "[ ] A variant_only artifact either emits on every lane its class declares, or its exclusion is declared — and an artifact reaching NO lane fails the emit loudly and by name (closes items 9 and 1's symptom, and the relayed capability_request's third criterion)."
+    - "[ ] effortLevel defaults to `high` in the loom-side py settings.json source."
+    - "[ ] .DS_Store is re-excluded after the audit-fixtures negation only; the three lib/ negations are left unchanged."
+    - "[ ] Both Step-7b and Step-7c schemas accept a capability_request block with `changes: []` legal."
+    - "[ ] The state-file-mutation remediation text names shell-outs as write tokens and states the fetch-outside-the-body workaround."
+    - "[ ] emit-dev-container refuses to emit a requirements-coc.txt whose pins are older than the destination's."
+    - "[ ] The Sweep-9 gate emits N/A (not ERROR) on ERR_MODULE_NOT_FOUND."
+    - "[ ] Item 8 is recorded as withdrawn and no change is made to the cc-audit/cost-audit exclusions."
+    - "[ ] `.session-notes.migrated` and `.wave-tracker.d/` are added to `visibility_gitignore_additions.public` — NOT to `gitignore_additions`, whose all-consumer scope would ignore per-operator state on the private/team consumers that deliberately track it — so the managed block regenerates with them; and the list is audited for any other per-operator `.d/` state directory added after `.session-notes.d/`."
+    - "[ ] Item 4's re-exclusion renders AFTER `gitignore_reincludes` (verified by a check-ignore exit code, not by inspection), and line 122's `/**` form is left unnarrowed."
+    - "[ ] #55's item-1 text is corrected upstream to drop the 'dead invocations' framing, since no fix is needed there and the current wording asserts one."
+    - "[ ] If item 9 is resolved by DECLARING variant_only artifacts CC-only rather than emitting them, CLAUDE.md's `agents/frameworks/*` gemini-emitting claim is qualified in the same change — it currently promises the opposite."
+    - "[ ] `.wave-tracker.d/` is assigned an explicit `visibility_opt_out` group (extend `session-notes`, or mint a `wave-tracker` token) rather than being added to `.public` un-grouped — otherwise it is un-opt-out-able for a private/team consumer that wants to keep tracking it, reintroducing for that one path the all-consumer-scope problem the key re-routing exists to avoid. Item 10 states this decision must not be defaulted; this criterion is what stops it being defaulted."
+
 status: pending_review
