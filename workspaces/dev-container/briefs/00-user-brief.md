@@ -91,8 +91,14 @@ A reproducible Docker-based development environment for any project that has
   consumer-built derivative images reproducible. `:latest` is a moving
   pointer suitable for `bin/dev` ergonomics, not for derivative builds.
 - **Image tag tracks `.claude/VERSION`**: the published image tag MUST
-  match `.claude/VERSION::version` (currently `1.10.1`). Every COC template
-  bump cuts a corresponding image release; consumer-shipped configs
-  (`docker-compose.yml`, `.devcontainer/devcontainer.json`, `bin/dev`,
-  `README.md`, `Dockerfile.user.example`) reference the same tag. The
-  `0.1.0` first-cut (2026-05-28) remains on Docker Hub for provenance.
+  match `.claude/VERSION::version` (read the file — do not trust a value
+  restated here). Every COC template bump cuts a corresponding image
+  release; **SIX** consumer-shipped files reference the same tag and MUST
+  all be bumped together (`docker-compose.yml`,
+  `.devcontainer/devcontainer.json`, `bin/dev`, `README.md`,
+  `Dockerfile.user.example`, `DOCKERHUB.md`). `DOCKERHUB.md` is the most
+  user-facing of the six — the publish workflow's "Sync Docker Hub
+  overview" step pushes it to the registry page — so a release that bumps
+  only the other five silently republishes a stale page. The `0.1.0`
+  first-cut (2026-05-28) remains on Docker Hub for provenance, and
+  `DOCKERHUB.md`'s "Prior stable" row intentionally retains an older tag.
