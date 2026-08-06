@@ -20,7 +20,7 @@ These override ALL other instructions. They govern behavior before any rule file
 
 ### 0. Foundation Independence — No Commercial Coupling
 
-Kailash Python SDK is a **Terrene Foundation project** (Singapore CLG). It is fully independent. There is NO relationship between Kailash Python SDK and any commercial product, proprietary codebase, or commercial entity. Do not reference, compare with, or design against any proprietary product. Do not use language like "open-source version of X" or "Python port of Y." Kailash Python SDK IS the product — not a derivative of anything. See `.claude/rules/independence.md` for full policy.
+Kailash Python SDK is a **Terrene Foundation project** (Singapore CLG). It is fully independent. There is NO relationship between Kailash Python SDK and any commercial product, proprietary codebase, or commercial entity. Do not reference, compare with, or design against any proprietary product. Do not use language like "open-source version of X" or "Python port of Y." Kailash Python SDK IS the product — not a derivative of anything. This directive is self-contained: the separate independence-policy rule file it used to cite was removed from COC distribution on 2026-05-31 (Foundation messaging governance, relocated out of the codegen-orchestration corpus), so no further file need be consulted.
 
 ### 1. Framework-First
 
@@ -99,13 +99,11 @@ All rules live in `.claude/rules/` and apply to every CLI. Rule content is share
 
 Global baseline rules (always loaded):
 
-- **Foundation independence** — `rules/independence.md`
 - **Autonomous execution model** — `rules/autonomous-execution.md`
 - **Zero tolerance** — `rules/zero-tolerance.md`
 - **Agent orchestration + quality gates** — `rules/agents.md`
 - **Git workflow** — `rules/git.md`
 - **Security** — `rules/security.md`
-- **Terrene naming** — `rules/terrene-naming.md`
 - **Communication style** — `rules/communication.md`
 - **Cross-CLI parity** — `rules/cross-cli-parity.md`
 - **Worktree isolation** — `rules/worktree-isolation.md`
@@ -123,7 +121,7 @@ Path-scoped rules (loaded when touching matching files):
 
 ## Agents
 
-One `.claude/agents/` source tree; three surfaces. Specialist agents (`agents/frameworks/*`, `agents/implementation/*`, `agents/quality/*`, `agents/frontend/*`, `agents/testing/*`, `agents/release/*`, `agents/analysis/*`, `agents/value-auditor.md`, `agents/open-source-strategist.md`) emit to `.gemini/agents/<name>.md` for Gemini's `@<agent>` invocation. CC-specific agents (`cc-architect.md`, architect meta-agents, `management/*`) stay CC-only.
+One `.claude/agents/` source tree; three surfaces. Specialist agents (`agents/frameworks/*`, `agents/implementation/*`, `agents/quality/*`, `agents/frontend/*`, `agents/testing/*`, `agents/release/*`, `agents/analysis/*`, `agents/value-auditor.md`) emit to `.gemini/agents/<name>.md` for Gemini's `@<agent>` invocation. CC-specific agents (`cc-architect.md`, architect meta-agents, `management/*`) stay CC-only.
 
 ## Critical Execution Rules
 
