@@ -1158,4 +1158,678 @@ use_template_findings_multi_cli_audit:
     host-side only, so the container-parity clause of the brief is NOT closed. The A2/A3 counts are
     LOWER BOUNDS.
 
+use_template_findings_body_parity_and_coc_lane:
+  header: >-
+    Session 3 (2026-08-07). This block CLOSES the two axes the preceding
+    use_template_findings_multi_cli_audit block explicitly left open in its own known_coverage_gaps:
+    (a) per-file BODY parity across the co-present artifact set, which it recorded as "entirely
+    untested", and (b) container-side hook execution, which it recorded as "never exercised". Both
+    were swept this session. It also sweeps a FOURTH lane -- .coc/ -- that no prior block scoped at
+    all, and that lane turned out to carry the most serious defects found.
+
+    EVERY item is labelled VERIFIED-BY-ORCHESTRATOR (re-derived independently by the orchestrator
+    with controls fired in both directions) or LANE-REPORTED (an audit lane's result the orchestrator
+    did not fully re-derive). RESPECT THE LABEL: the second class is a lead to confirm, not
+    established fact. This is the same discipline the preceding block used.
+
+    Method note that bears on how to read the counts below. Every finding here survived an
+    adversarial refutation round in which no lane reviewed its own work. That round CHANGED the
+    disposition of three items and REDUCED the severity of one by roughly 8x. Where a claim was
+    revised, both the original and the correction are recorded rather than the correction alone --
+    the revisions are the most useful signal in this block.
+
+  what_the_adversarial_round_changed: >-
+    Recorded because a Gate-1 reader should see which claims moved under attack.
+
+    (1) A dangling-reference finding was originally filed as "17 rewrite-induced broken references".
+    Refuted: 16 of 18 resolve to an artifact that EXISTS on that lane under its native name (Gemini
+    commands are .toml not .md; Codex agents live at prompts/specialist-<n>.md not agents/; Gemini
+    agents are flat, not nested). GENUINELY absent: 2. Correct framing is "true as a PATH claim,
+    misleading as an AVAILABILITY claim". A broken pointer is still a defect -- an agent following
+    the literal path fails -- but the remedy and severity differ from "missing capability".
+
+    (2) A worktree --force finding was originally filed as "the emitter INVERTED the guidance".
+    Refuted: it is STALENESS. At the last regeneration both lanes carried the byte-identical
+    sentence; CC changed afterwards. The derived lanes are a faithful copy of CC's own former text.
+
+    (3) A rules-softening finding was originally filed as "the softening never propagated", implying
+    oversight. Refuted: sync-manifest.yaml::use_softenings is a DELIBERATE, documented USE-lane
+    transform. Reframed below as a DECISION for the human, not a defect.
+
+    (4) A container depth metric was originally presented in a container-parity frame. Refuted by
+    the measuring lane itself: it measures IDENTICALLY on the host. Reattributed below.
+
+    A fifth, softer lesson: on TWO independent surfaces, a regex-over-prose sweep overstated genuine
+    defects by ~8x (17 vs 2 on one lane; 95 vs 12 on another). That is a property of the INSTRUMENT
+    CLASS, not of either lane -- a path-shaped string in prose cannot be distinguished from a
+    reference by a matcher. Both false-positive sets included a path inside an explicit
+    "do NOT create this file" instruction, counted as a broken link TO that file.
+
+  findings:
+    - id: S3-1
+      title: One missed regeneration accounts for FOUR apparent drift findings
+      evidence_class: VERIFIED-BY-ORCHESTRATOR
+      severity: HIGH
+      finding: >-
+        The derived lanes were last regenerated at commit 537ab6f (2026-08-02). Two CC changes landed
+        together in 156c08c (2026-08-04) and never reached them. This single delta explains four
+        separately-observed defects, and the upstream remedy is ONE action, not four.
+
+        (a) instrument-discipline.md MUST-3 ("Show The Instrument Fires HERE, And Read The Hits") is
+        ENTIRELY ABSENT from both emitted baselines. Orchestrator grep: 1 in the CC source, 0 in each
+        baseline; control matcher on a sibling MUST clause returns 1 in all three, so the matcher
+        works against the baselines. This is NOT sanctioned abridgement -- the manifest's
+        abridgement_protocol mandates preserve "MUST / MUST NOT clauses in full", and the clause is a
+        level-3 heading, outside the level-4+ strip.
+
+        (b) worktree.md --force guidance. CC now reads "never --force ... confirming a clean tree and
+        THEN forcing is the check-then-clobber TOCTOU ... unstaged + untracked-not-ignored work has
+        NO reflog". Both derived lanes read "add --force only after confirming a clean tree" -- the
+        exact practice CC names as blocked, on an operation whose loss is unrecoverable. NOTHING on
+        those lanes restores the prohibition (grep across both derived trees and both baselines
+        returns empty; the same grep on the CC tree hits).
+
+        (c) sweep.md: the worktree reap-audit contract (verdict vocabulary, the sentinel, the
+        --force prohibition) is absent from the derived lanes, which retain an older paragraph naming
+        a different tool.
+
+        (d) codify.md: the lease-takeover paragraph is absent from the derived lanes.
+      verification: >-
+        Orchestrator confirmed both derived surfaces pin to 537ab6f and both CC changes landed in
+        156c08c, by direct git log on each path. The --force wording was read verbatim on all three
+        lanes.
+      honest_counter_not_defeated: >-
+        CC itself shipped the weaker --force guidance from 2026-07-11 to 2026-08-04, across multiple
+        syncs. "The derived lanes are wrong" and "CC was wrong until four days ago" are the same
+        sentence at different times. The accurate upstream claim is "the derived lanes are stale",
+        NOT "the emitter inverted the guidance".
+      requested_fix: >-
+        Regenerate the derived lanes from current CC source. Verify afterwards that MUST-3 is present
+        in both baselines and that the --force prohibition reaches all lanes.
+
+    - id: S3-2
+      title: The shipped .coc/ set FAILS ITS OWN INTEGRITY GATE and refuses to inject
+      evidence_class: VERIFIED-BY-ORCHESTRATOR
+      severity: HIGH
+      finding: >-
+        Running the shipped launcher in dry-run mode exits 1 with:
+        "integrity: hash mismatch for commands/CROSS-REPO-AUTHORIZE.md ... the .coc/ set is tampered
+        or partially written -- refusing to inject". A consumer relying on the .coc/ lane via the
+        reference launcher is HARD-BLOCKED unless it passes --no-verify-lock, which disables the
+        integrity check wholesale.
+
+        Root cause is committed drift, not a local edit: COC.lock was last written by the Gate-2 sync
+        at 537ab6f, where the file's hash matches the lock exactly. Two later commits each edited
+        .coc/commands/CROSS-REPO-AUTHORIZE.md alongside its per-CLI twins, and neither updated
+        COC.lock. Membership is otherwise complete (0 in-lock-missing-on-disk, 0 on-disk-not-in-lock);
+        exactly ONE hash mismatch exists.
+      verification: >-
+        Orchestrator ran the launcher and captured exit 1 -- re-measured WITHOUT a pipe after an
+        initial attempt read the exit status of a downstream pager rather than the launcher.
+        Independent SHA-256 recompute of the file matches the lane's reported digest and differs from
+        the lock's recorded digest. Both poles controlled by the reporting lane: rebuilding the lock
+        from actual bytes yields exit 0, and then tampering one byte in an unrelated file yields exit
+        1 naming that file -- so the verifier genuinely discriminates.
+      requested_fix: >-
+        Regenerate COC.lock, and gate future edits to .coc/** on a lock refresh so an edit cannot
+        land without it. The two commits that introduced the drift each touched three files and the
+        lock was absent from both -- a paired-landing check would have caught it.
+
+    - id: S3-3
+      title: .coc/ BYPASSES the USE-tier exclusion fence that every other lane honours
+      evidence_class: VERIFIED-BY-ORCHESTRATOR
+      severity: HIGH
+      finding: >-
+        Five artifacts declared use_exclude / use_obsoleted in the manifest are ABSENT from the CC
+        lane and from both per-CLI lanes, but PRESENT in .coc/: two BUILD-internal rules, one
+        obsoleted rule, and a harness-orchestration command plus its skill. The manifest's stated
+        rationale for excluding them is that consumers do not run them. The .coc/ lane describes
+        itself as the consumer-facing unified artifact set, so this delivers BUILD-only material to
+        exactly the audience the fence exists to protect.
+
+        This is SELECTIVE, not a blanket failure: other use_exclude entries ARE correctly fenced on
+        .coc/, and a control entry present everywhere behaves correctly.
+
+        Sharpest instance -- a rule whose distribution claim its own repository falsifies. A shipped
+        rule asserts verbatim that the harness command "is use_exclude'd (absent at USE-template and
+        downstream)", while that command sits in this USE template on the .coc/ lane at 5,531 bytes.
+      verification: >-
+        Triangulated across three independent sources. Two audit lanes converged on it separately.
+        The orchestrator then closed the sibling-lane question both lanes had flagged as unmeasured:
+        the per-CLI lanes correctly fence all four probe artifacts, and the excluded rule's content
+        returns 0 in both emitted baselines (control: 45 hits in the .coc/ copy, so the matcher
+        fires). Fence declarations confirmed at their manifest line numbers under a firing control.
+      requested_fix: >-
+        Apply the USE-tier exclusion fence to .coc/ emission. Then re-run the fence across all
+        eleven use_exclude entries -- only six were tested against .coc/, so the five-artifact count
+        is a FLOOR, not a full count.
+
+    - id: S3-4
+      title: tools/ is an UNMANAGED directory; the drift-audit executor never had a delivery path
+      evidence_class: VERIFIED-BY-ORCHESTRATOR
+      severity: MEDIUM
+      finding: >-
+        tools/ has ZERO mentions in sync-manifest.yaml -- it is in no tier, and is neither
+        distributed nor declared loom-only. It arrived exactly once, in the original adopt commit
+        (2026-05-06), and no sync has touched it since; control: the rules tree shows 66 commits over
+        the same span, so the query discriminates.
+
+        Consequence: tools/cli-drift-audit.mjs, which the parity contract names as the executor for
+        the cross-CLI drift verb, landed upstream 2026-05-14 -- eight days AFTER the only delivery
+        event -- and therefore never had a path to this template. Its acceptance fixtures DID arrive,
+        because the fixtures directory IS in a tier. Fixtures ship; the executor does not.
+
+        A related distribution inconsistency: the cli-audit COMMAND was correctly moved to loom-only
+        in a 2026-06-23 leak fix and purged from all three lanes, but the cli-orchestrator AGENT that
+        exists to serve it was only added to the per-CLI exclusion lists for the two non-CC lanes --
+        never to loom-only -- so it still ships to CC consumers. The manifest's own rationale for
+        those exclusions calls it a "loom AUTHORING agent ... NOT a downstream specialist". The net
+        effect on a CC consumer is a live agent in the roster advertising a command that does not
+        exist locally and instructing a tool that cannot arrive.
+      verification: >-
+        Confirmed 5/5 claims under adversarial attack. The strongest counter was built and defeated:
+        tier entries are .claude/-relative, so a tools/** entry would mean .claude/tools/ and the
+        absence would be structurally unfixable rather than an omission. That counter fails because
+        the manifest DOES address repo-root paths elsewhere (repo-root script paths appear in its
+        purge sections) and because sync demonstrably reaches repo-root (a later sync touched a
+        sibling root directory). Commit counts across root siblings: two other root directories have
+        4 commits each; tools/ has 1. It is the only repo-root sibling a later sync never revisited.
+      residual_not_closed: >-
+        The force-ship include list could not be enumerated from a consumer clone -- the tier-
+        selection engine does not ship here and reading upstream is out of scope. The claim is
+        therefore PROVEN for tier-based delivery and only CORROBORATED (one-directionally, by git
+        history) for force-ship.
+      requested_fix: >-
+        Declare tools/ explicitly -- either in a tier so it cascades and stays current, or as
+        loom-only so its absence is intentional and greppable. Either resolves it; silence does not.
+        Separately, move the cli-orchestrator agent to loom-only to match its own command.
+
+    - id: S3-5
+      title: A DATED pipeline regression rewrote canonicity claims on both derived lanes
+      evidence_class: VERIFIED-BY-ORCHESTRATOR
+      severity: MEDIUM
+      finding: >-
+        Two shipped skills tell their reader where the canonical source lives, and on the derived
+        lanes the path in that sentence was rewritten to point at the derived tree itself.
+
+        skill-authoring: CC correctly reads ".claude/skills/<name>/SKILL.md is the canonical source".
+        The Codex copy names the Codex tree; the Gemini copy names the Gemini tree. Both are false --
+        those trees are regenerated and marked do-not-edit.
+
+        command-authoring: CC correctly reads "The authoritative copy lives at
+        .claude/commands/<name>.md". The Gemini copy names a path that exists in NO form (those
+        commands are .toml). The Codex copy names the emitter's OWN OUTPUT, named two clauses later
+        in the same paragraph -- self-contradictory on its own lane.
+
+        Net effect: the two skills that teach artifact authoring instruct two of three audiences to
+        author into a tree the next sync overwrites.
+      verification: >-
+        Provenance SETTLED, which the originating pass could not do. This is sync-pipeline-generated,
+        not hand-edited: at 8eb9b0b (2026-05-13) the derived lane was CORRECT; at db2d50f
+        (2026-05-15, a loom-distribution sync) it was rewritten, and that commit's stat for the CC
+        source file is EMPTY. A sync commit changed derived text without touching its source, which a
+        hand-edit cannot produce. Orchestrator confirmed both the empty CC stat and the known-good
+        predecessor content directly. The identical pattern appears in the second skill at the SAME
+        commit.
+
+        This is therefore a SINGLE DATED PIPELINE EVENT with a known-good predecessor state, not a
+        standing property of the emitter -- materially more actionable. Note the predecessor commit
+        was itself an overlay-regression repair, so this class has recurred before.
+      honest_counter_not_defeated: >-
+        In a USE template the CC tree is ALSO derived (the true canon is upstream), so "canonical" is
+        frame-relative and the CC sentence is itself imprecise. This does not rescue the derived
+        statement -- naming the derived tree is false in every frame -- but it suggests the cleanest
+        fix is to STOP REWRITING this sentence rather than to restore the CC path.
+      requested_fix: >-
+        Exempt canonicity-asserting sentences from lane-root path rewriting. The predecessor commit
+        provides a known-good reference for what the emission should produce.
+
+    - id: S3-6
+      title: .coc/ carries GENUINE SOURCE DIVERGENCE (not staleness) plus a dropped MUST clause
+      evidence_class: LANE-REPORTED
+      severity: MEDIUM
+      finding: >-
+        Distinct from S3-1, and the distinction matters for the remedy. The CC rules softening landed
+        2026-07-19; .coc/ was emitted 2026-08-02 -- two weeks LATER -- and still carries the old
+        pre-softening text. It cannot be explained by staleness the way S3-1 can, and REGENERATION
+        ALONE WILL NOT FIX IT: the emitter is reading a different, older source than .claude/ does.
+
+        FULL BODY-TEXT sweep (superseding the heading-level pass this item originally rested on):
+        193 co-present pairs compared in full, 184 byte-identical after normalizing frontmatter and
+        CC-only slot markers. NINE genuine drifts -- SIX staleness (CC changed 2026-08-04, .coc/
+        untouched; remedy = regenerate) and THREE SOURCE DIVERGENCE on rules/agents,
+        rules/zero-tolerance and rules/testing.
+
+        The DIRECTION of the three is the alarming part: .coc/ ships a HARDER normative contract than
+        the CC source authorizes. MUST/BLOCKED token counts run NEGATIVE (.coc/ carries MORE):
+        agents -4, zero-tolerance -2, testing -1. Example -- CC rules/testing reads "Tier 2: Real
+        infrastructure recommended (mocking discouraged)" while .coc/ reads "Tier 2: Real
+        infrastructure. NO mocking (@patch, MagicMock, unittest.mock -- BLOCKED)".
+
+        Classification instrument, both branches falsifiable: each .coc/ file was compared against
+        `git show <emission-sha>:.claude/<path>` -- the CC source AS IT STOOD AT EMISSION. If
+        staleness, .coc/ == CC-at-emission exactly; if source divergence, it differs even then. The
+        three above differ even then. No variants/ directory exists in this repo, so no overlay
+        explains it; the .coc/ text most closely matches a CC revision from 2026-07-12, i.e. a
+        roughly three-week-stale upstream vintage.
+
+        Skills were also swept, which a prior pass had declined: COC.md § Layout declares one file
+        per skill as "the SKILL.md entry point", so entry-point-to-entry-point IS the contract-sound
+        comparison. Result: 41/41 identical, zero drift. Non-entry-point sibling files are outside
+        .coc/'s declared contract and are not a denominator.
+
+        Also on this lane: a variant-only agent deployed in this template is absent from .coc/ --
+        structurally explained (it is `variant_only: py` with no global source, so the .coc/ composer
+        never sees it) but still a real gap, since a py-only agent that ships to .claude/ never
+        reaches the CLI-neutral set. And 1135 path-bearing references were classified with ZERO
+        intra-set resolution, the largest class (686) being a lowercase-reference-vs-uppercase-
+        filename mismatch.
+
+      CORRECTION_to_this_item_as_first_filed: >-
+        Recorded rather than silently amended, because the error is instructive and this block's
+        whole method is that revisions are the most useful signal.
+
+        This item originally asserted that a zero-tolerance sub-rule (Rule 1d) is ENTIRELY ABSENT
+        from .coc/, and that its absence is an abridgement-protocol violation. BOTH HALVES ARE FALSE
+        and are withdrawn.
+
+        (1) Rule 1d is PRESENT in .coc/. Verified by the orchestrator: it sits at .coc/ line 52 and
+        CC line 53, and BOTH files carry exactly 9 level-3 headings. The only difference is the
+        heading TEXT -- CC "Enumerated Classes Stay Strongly Recommended" vs .coc/ "Enumerated
+        Classes Stay ABSOLUTE". A heading-set comparison keyed on exact string reported a RENAMED
+        heading as a DELETED one. The clause is therefore an INSTANCE of the source-divergence class
+        above, not an absence.
+
+        (2) The abridgement protocol DOES NOT APPLY to .coc/ at all, so no .coc/ difference can be a
+        protocol violation. The protocol is nested under the Codex `project_doc` byte-cap config
+        (`override_flag_required: "-c project_doc_max_bytes=65536"`) and governs the single
+        concatenated root baseline. .coc/ is one file per artifact with no byte cap. Falsifying test,
+        both poles fired: `Origin:` lines and `BLOCKED rationalizations:` sub-lists are both
+        `strip_sections` entries -- .coc/ RETAINS them (52 and 54 files respectively) while the
+        emitted baseline carries ZERO of each. .coc/ is demonstrably not abridged.
+
+        Consequence for any re-derivation: there is no "sanctioned abridgement" rejection class on
+        the .coc/ surface. Every prose difference there is a candidate, and a reviewer who dismisses
+        one as licensed abridgement is applying a contract that does not reach this lane.
+      verification: >-
+        Orchestrator verified the .coc/ lane's two drifted rule texts and the USE-fence leak
+        (S3-3) directly, but did NOT re-derive the reference counts or the agent-enumeration claim.
+        Two absences on this lane were correctly scored Not-Run rather than Fail, because both
+        clauses postdate emission -- they did not exist when .coc/ was generated, so their absence is
+        staleness awaiting regeneration and not drift. (The original wording justified Not-Run on the
+        ground that the clauses "cannot have been stripped", which appealed to the abridgement
+        protocol; per the CORRECTION below that protocol does not govern this lane, so the verdict
+        stands but the reasoning is replaced.)
+      instrument_note_worth_carrying: >-
+        The reporting lane resolved paths by exact-case directory comparison rather than a filesystem
+        existence check: on a case-INSENSITIVE filesystem a naive existence check reports the
+        686-reference class as fully resolving and misses the defect entirely, while the same
+        references break on every case-SENSITIVE consumer. Any upstream re-derivation must therefore
+        use exact-case comparison rather than a bare existence check, or it will reproduce a clean
+        result that carries no information.
+      requested_fix: >-
+        Regenerate .coc/ from current source; restore the dropped MUST clause; include variant-only
+        deployed agents in .coc/ enumeration. The intra-set reference convention needs a decision --
+        the adjudicating contract is external and was not available to this repo, so the lane
+        reported the observed non-resolution WITHOUT asserting a spec violation.
+
+    - id: S3-7
+      title: Small genuine breaks confirmed after severity correction
+      evidence_class: MIXED -- see per-item labels
+      severity: LOW
+      finding: >-
+        (a) VERIFIED-BY-ORCHESTRATOR. Two references to a CC-only agent were rewritten onto both
+        derived lanes, where it exists on neither -- and the Gemini copy points at a CODEX-specific
+        architect. These are the 2 genuine breaks that survived the 17-to-2 severity correction.
+
+        (b) LANE-REPORTED. Twelve genuine CC-side broken references out of 95 raw candidates: stale
+        skill paths in a shipped README, a markdown link with both halves wrong, six flat agent paths
+        from a superseded layout in a plan document, and a present-tense assertion of a fixtures
+        directory that does not exist. These are CC-side, so the emitter propagates them FAITHFULLY
+        to all lanes -- one CC fix repairs every lane at once, which makes them higher-leverage than
+        anything lane-specific here.
+
+        (c) LANE-REPORTED. An orphaned 17,830-byte companion guide whose rule is correctly
+        use_exclude'd -- the fence took the rule but not its guide. The machinery handled 2 of 3 such
+        pairs correctly and leaked once.
+
+        (d) VERIFIED-BY-ORCHESTRATOR. One baseline rule cites a companion guide that does not ship
+        here. Precisely bounded: 26 rule/guide pairs intact, exactly 1 broken. Both control poles
+        fired.
+
+        (e) VERIFIED-BY-ORCHESTRATOR. GH_TOKEN / GITHUB_TOKEN appear ZERO times in the shipped
+        .env.example, so the documented consumer path leaves the GitHub CLI unauthenticated inside
+        the container. See S3-9.
+
+        (f) LANE-REPORTED. The container image lacks the process-listing utility (the base image is a
+        slim variant and the package is not installed), degrading PID-recycling disambiguation to a
+        timestamp-ceiling fallback at two call sites. The fallback is CONSERVATIVE -- it spares
+        rather than reaps -- so this is a loss of detection, not a corruption risk.
+      requested_fix: >-
+        Fix (b) at the CC source since it cascades to every lane. Exempt CC-only agents from
+        lane-root rewriting (a). Take companion guides with their rules through the fence (c, d).
+        Add the token to .env.example or document the credential-passthrough path (e). Add the
+        package to the image or accept the documented degradation (f).
+
+    - id: S3-8
+      title: A rule silently UNDER-FIRES -- two path-scope triggers point at directories that do not exist
+      evidence_class: VERIFIED-BY-ORCHESTRATOR
+      severity: MEDIUM
+      finding: >-
+        sweep-completeness.md declares path-scope triggers including two skill directories that do
+        NOT exist in this template, while two sibling triggers in the same list DO exist and serve as
+        controls. Those two globs can never match, so that share of the rule's activation surface is
+        inert -- the rule silently fails to load in sessions it was authored to govern.
+
+        This is NOT a broken reference and no reference sweep would surface it. It is a rule that
+        under-fires, which is invisible by construction: nothing reports a rule that failed to load.
+      verification: >-
+        Orchestrator read the FULL frontmatter block and confirmed both absent directories and both
+        present controls. Recorded honestly: an initial read used a fixed-line-count grep that
+        TRUNCATED the list before the two entries in question and would have produced a FALSE
+        REFUTATION of this finding. Re-read without truncation.
+      requested_fix: >-
+        Correct the two globs to the directories that exist, or remove them. More usefully, add a
+        validator that fails when a rule declares a path-scope glob matching nothing in the shipped
+        tree -- this class is otherwise undetectable.
+
+  decision_for_the_human_not_a_defect:
+    id: S3-D1
+    title: use_softenings applies to ONE of FOUR output surfaces -- is that intended?
+    evidence_class: VERIFIED-BY-ORCHESTRATOR
+    finding: >-
+      The CC rule tree is SOFTENED for downstream consumers ("guidelines you may relax with intent",
+      "Recommended for downstream") while EVERY OTHER OUTPUT SURFACE carries the older, STRICTER text
+      ("ABSOLUTE and NON-NEGOTIABLE", "MUST gates"). Net effect: in this repo, operators on any
+      non-CC surface are governed by materially stricter rules than CC operators.
+
+      MEASURED across all four surfaces, matcher controlled to fire on each file:
+      .claude/rules -> "ALL sessions, ALL agents, ALL PRODUCTION code" + "Quality Gates (Recommended
+      for downstream)" = SOFTENED. The Codex baseline, the Gemini baseline, and .coc/rules ALL ->
+      "ALL sessions, ALL agents, ALL CODE" + "Quality Gates (MUST -- Gate-Level Review)" = STRICT.
+
+      So the split is ONE softened surface against THREE strict ones -- not, as an earlier draft of
+      this block said, "one of three". The correction matters for the disposition rather than being
+      cosmetic: three INDEPENDENT output surfaces agree on the strict text and only the CC tree
+      diverges. A deliberate per-lane variant would be expected to be lane-aware; a single diverging
+      surface against three agreeing ones is the shape of a transform applied at one point in the
+      pipeline, which is what the manifest describes.
+
+      This was ORIGINALLY filed as "the softening never propagated", implying an oversight. That
+      framing was WRONG and is withdrawn. The mechanism is sync-manifest.yaml::use_softenings -- a
+      deliberate, extensively documented USE-lane find/replace transform carrying an explicit
+      guardrail: soften the FRAMING, preserve the GUIDANCE, and leave safety substance strict
+      ("never relax a real safety gate's substance"). So the divergence is a transform applied to the
+      CC tree that the baselines, generated from pre-softening source, never receive.
+    why_this_is_a_decision_and_not_a_bug: >-
+      The counter could not be defeated: the un-softened baselines are arguably FAIL-SAFE. The two
+      non-CC lanes receive the STRICTER posture, which is the conservative direction. This is only a
+      defect if cross-CLI uniformity is the goal. The manifest's own rationale for softening ("users
+      choose their own workflow") is CLI-agnostic, which argues the divergence is not an intended
+      per-lane variant -- but that is an inference about intent, not evidence of one.
+
+      Unlike every finding above, this does NOT regenerate away. Regenerating the baselines from
+      current source would either propagate the softening to all three lanes or leave the divergence
+      standing, depending on where in the pipeline the transform sits. That is the decision.
+    requested_disposition: >-
+      Ratify or reject: should use_softenings apply to ALL USE-lane output surfaces, or is the
+      stricter non-CC posture intended? No code change is requested until that is answered.
+
+  reattributed_do_not_read_as_a_container_finding:
+    id: S3-R1
+    title: The hook depth-coverage figure is NOT a container property
+    finding: >-
+      Container-side hook execution WAS exercised this session, closing the preceding block's
+      "never exercised" gap. Of 40 hooks run against 12 canonical event payloads on both sides
+      (480 pairs per side), 2 hooks diverge -- see S3-9. Separately, only 13 of 40 hooks exercised
+      substantive logic; the rest returned bare passthrough.
+
+      That depth figure was initially presented in a container-parity frame. The measuring lane
+      then SETTLED it against its own captures and WITHDREW that framing: host and container show
+      IDENTICAL SETS -- not merely identical counts -- 13 substantive, 25 passthrough-only, 2 silent,
+      with ZERO hooks substantive on one side only. It measures the same on the development host.
+    correct_framing_for_any_downstream_use: >-
+      "Depth coverage was 13 of 40 hooks exercising substantive logic -- identical on host and
+      container -- reflecting the synthetic payload set and this repo's coordination-disabled
+      configuration, not any container property."
+    mechanism_now_largely_RESOLVED_and_the_FIGURE_CORRECTED: >-
+      A dedicated per-hook trigger analysis has since classified 18 of the 20 in the target set
+      (90%) and CORRECTS the depth figure UPWARD. Both the original and the correction are recorded,
+      because the correction came from a DIFFERENT INSTRUMENT rather than a re-judgment of the same
+      evidence -- which is the part worth carrying.
+
+      THE FIGURE IS 16 OF 40, NOT 13. Three hooks DID fire during the baseline sweep and were scored
+      bare: they do their work as a FILESYSTEM SIDE EFFECT and emit exactly {"continue":true}. A
+      stdout/stderr classifier -- BOTH lanes' -- structurally cannot see them. Proven empirically:
+      two provenance-capture hooks wrote real ledger rows DURING the 520-run baseline (rows quoted
+      with timestamps inside the sweep window), and a heartbeat hook was proven with BOTH POLES --
+      identity injected but the signing-key env var unset produced NO log append, while the targeted
+      run produced a 174-byte append -- with stdout {"continue":true} in BOTH cases.
+
+      Orchestrator corroboration: all three are REGISTERED in settings.json (so they do fire), the
+      capture hooks reach a `captureProvenance` write path, and the provenance ledger directory
+      exists on disk. Recorded honestly: the orchestrator's FIRST corroboration attempt used a
+      too-narrow write-call matcher and returned zero -- an artifact of the matcher, not evidence of
+      no write. Same instrument-class error this proposal documents elsewhere, caught by widening
+      the matcher rather than by trusting the zero.
+
+      Under TARGETED payloads, 23 of 40 are demonstrably capable of substantive logic in this
+      template (13 baseline + 3 side-effect + 7 payload-set-limitation proven individually, each
+      with a falsifier that stayed bare). So the low baseline number reflects the SYNTHETIC PAYLOAD
+      SET far more than any property of the environment.
+
+      The two hooks that did not fire even when targeted are BOTH payload-set limitation, neither
+      inert: one matches raw library IMPORT statements rather than raw SQL (the targeted payload was
+      simply in the wrong class -- a framework import fires it), and the other is a strip-fence that
+      refuses only when the RESULT of an edit is under-protected -- it fired with a deny decision
+      when given an edit that removes a trust-posture deny line.
+
+      Coordination-disabled remains the explanation for at most 7 (lexical proxy), and those 7 were
+      NOT re-examined. Two hooks remain Not-Run and one Retest (a second gate never reached).
+
+  findings_shipped_but_unwireable:
+    - id: S3-10
+      title: Two shipped hooks CANNOT FIRE, and both sit on the downstream delete-list
+      evidence_class: VERIFIED-BY-ORCHESTRATOR
+      severity: MEDIUM
+      finding: >-
+        `hooks/coc-drift-warn.js` and `hooks/coc-telemetry-autocommit.js` ship in this template but
+        are wired to no event and cannot fire under any input. Three independent facts, each
+        verified by the orchestrator with a control:
+
+        (a) ZERO registrations in `.claude/settings.json` for either. Control: a registered hook
+        returns 5 registrations, so the settings matcher fires.
+
+        (b) BOTH are listed in `.claude/.coc-obsoleted` -- the delete-list a consumer sync reads to
+        REMOVE downstream artifacts. They are simultaneously shipped and marked for deletion.
+
+        (c) NEITHER carries an `@settings-registration:` header marker. Control: an unregistered
+        hook that IS reachable by another surface carries the marker (returns 1), so the marker
+        matcher discriminates unregistered-BY-DESIGN from genuinely unwireable.
+
+        Distinction (c) draws is the load-bearing one. THREE other unregistered hooks are
+        unregistered by design and each documents its alternate surface -- one is installed as a git
+        hook, two are opt-in for a consumer to register in its own settings. Those are correctly
+        absent. These two document nothing and have no surface.
+      why_it_matters: >-
+        The sharper half is (b), which points at a SYNC-APPLICATION gap rather than a hook-design
+        gap: a path on the obsoleted delete-list is still present in the shipped tree. Whether the
+        tier machinery failed to apply the deletion, or the deletion was never propagated, is NOT
+        determinable from a consumer clone -- the emitter is upstream. Reported as the observed
+        asymmetry, not as a confirmed emitter bug.
+      requested_fix: >-
+        Delete both from the shipped set -- they are already on the list that says so -- or, if
+        either is meant to remain reachable, register it or give it an `@settings-registration`
+        marker naming its surface, as the three by-design-unregistered hooks do.
+
+  findings_broken_section_anchors:
+    - id: S3-11
+      title: An extraction left 11 load-bearing citations pointing at clauses that no longer exist
+      evidence_class: VERIFIED-BY-ORCHESTRATOR
+      severity: MEDIUM
+      finding: >-
+        SIXTEEN broken section anchors -- a citation whose FILE resolves but whose named SECTION is
+        gone. This is worse than a fully-broken reference: the path resolves, so the pointer looks
+        live, a reader follows it, and finds nothing. The preceding block named this class as
+        unaudited ("a link may resolve to a real file whose named section is gone"); this closes it.
+
+        THIRTEEN of the sixteen are ONE cluster with ONE root cause. A 2026-06-12 extraction moved
+        the worktree MUST-clauses OUT of `rules/agents.md` and INTO
+        `skills/30-claude-code-patterns/worktree-orchestration.md`, where they were re-hosted under
+        new names ("Rule 1 --", "Rule 2 --", ...). The rule now carries only a delegating section.
+        Every back-reference was left pointing at clause names that no longer exist at the cited
+        path -- including six in the extraction's OWN destination file.
+
+        These are the corpus's most load-bearing citation shape, not passing mentions. Example
+        verbatim: `**Rule:** rules/agents.md § "MUST: Worktree Isolation for Compiling Agents".`
+        An agent following that pointer to find the governing clause finds nothing.
+
+        THREE more are wrong-file citations (a clause attributed to one rule that lives in another,
+        and one whose named section exists nowhere in the corpus), and TWO are singletons pointing
+        at named sections absent from an existing file.
+      verification: >-
+        Orchestrator re-derived the cluster's root cause with a firing control: each cited clause
+        name returns ZERO occurrences in the cited file, while a section that IS present in that
+        file returns 1 -- so the matcher discriminates rather than silently failing. The clauses were
+        confirmed present in the extraction's destination under their new names, and the
+        `**Rule:**` citation shape was read verbatim at its source line.
+      why_it_is_hard_to_see: >-
+        Nothing detects this class. A file-existence sweep passes (the file is there); a link checker
+        that stops at the path passes; and the citation reads as authoritative because the corpus
+        uses `**Rule:**` pointers precisely for its load-bearing cross-references. Several rules
+        MANDATE grep-stable anchors so citations survive edits -- this is what it looks like when an
+        extraction moves the target without updating the anchors.
+      honest_bound_from_the_reporting_lane: >-
+        SIXTEEN IS A FLOOR, NOT A CEILING, and the lane stated why against its own number: its
+        resolver accepts a citation whenever a real heading CONTAINS the cited span, so a rename
+        that preserves the cited keyword resolves OK and is missed. Three such cases were found and
+        deliberately EXCLUDED from the sixteen (the section is still findable), and they are the
+        visible edge of that class. Coverage was 100% of the population it defined -- 466 citations,
+        all 151 non-resolving cases read individually -- with pass-rate reported separately at 96.6%.
+      requested_fix: >-
+        Repoint the 11 cluster citations at the extraction's destination and its new clause names;
+        correct the 3 wrong-file citations; resolve the 2 singletons. More durably: any extraction
+        that moves a clause between artifacts MUST sweep and repoint inbound anchors in the same
+        change -- the extraction here updated the content and left every pointer behind.
+
+  findings_container_parity:
+    - id: S3-9
+      title: Brief Scope 6 is NOT met -- 2 of 40 hooks diverge, on credential and identity passthrough
+      evidence_class: LANE-REPORTED, key facts VERIFIED-BY-ORCHESTRATOR
+      severity: MEDIUM
+      finding: >-
+        Two hooks behave differently inside the container. A session-start hook reports the open-PR
+        queue as NOT VERIFIED on all 12 events, because the GitHub CLI is present and the network
+        reachable but the session is unauthenticated. A multi-operator session-start hook falls back
+        to a solo identity with a null verified id on 9 of 12 events, because no git identity and no
+        signing keyring reach the container.
+
+        Both are HOST-ENVIRONMENT INPUTS the container never receives, not hook code defects, and
+        both FAIL SAFE: one emits a loud explicit warning, the other falls back to a documented
+        unrostered identity at the lowest trust posture. Neither crashes. The runtime major-version
+        delta between host and container was tested and produced NO divergence -- it is not the cause.
+      verified_by_orchestrator: >-
+        The 40-hook denominator; the absence of any GitHub token variable from .env.example; the
+        image tag pinned consistently across the consumer-shipped files.
+      a_concern_raised_and_then_REFUTED_at_the_sink: >-
+        Recorded because the refutation is more valuable than the original concern. The orchestrator
+        asked whether the degraded identity could permit an UN-ATTRIBUTABLE coordination write, which
+        would be far more serious than a cosmetic banner. It cannot, for a structural reason: the
+        shared append helper requires a non-empty verified id AND a non-empty person id and returns a
+        typed failure BEFORE any write, and the solo identity sets person id to null
+        UNCONDITIONALLY -- so even a branch carrying a real key fingerprint still fails the guard.
+        The failure mode is NO RECORD, never a mis-attributed one.
+
+        A follow-on sweep then confirmed both call sites INSPECT that failure and fall through to a
+        write that PRESERVES the row marked as unrostered, so a degraded identity yields an auditable
+        row rather than a silent undercount. The one discarded return in the chain is documented
+        best-effort on a telemetry file that feeds no posture arithmetic (0 mentions in the posture
+        rule; the violations file is named twice).
+      requested_fix: >-
+        Document the credential and identity passthrough path for the container, or add the token to
+        .env.example. The image itself is sound -- every hook loads and runs, no crashes, no timeouts.
+
+  residual_revisit_TRIGGERED_by_this_append: >-
+    The preceding block's RESIDUAL section carries a revisit trigger reading "the next time this
+    proposal is touched for ANY reason". This append IS that event, so the four accepted cosmetic
+    items are RE-SURFACED here rather than silently carried, as that trigger requires.
+
+    They were accepted by the repo owner on 2026-08-05 as a logged bet, and a later session RESOLVED
+    all four rather than re-accepting them. Their status is therefore CLOSED, not deferred, and the
+    residual carries nothing forward. This entry exists to discharge the trigger explicitly and to
+    record that the calendar backstop has nothing left to hold.
+
+  known_coverage_gaps: >-
+    Stated so this block is not read as a complete audit, and to name specifically what remains after
+    the two axes this block closes.
+
+    CLOSED by this block: per-file BODY parity across the co-present skills, rules, commands and
+    agents (the previous block recorded this as entirely untested); and container-side hook execution
+    (recorded as never exercised).
+
+    ALSO CLOSED, and reported as a CLEAN result rather than a finding: unprefixed relative references
+    (paths written WITHOUT the .claude/ prefix -- "rules/foo.md", "skills/<name>/SKILL.md"). An
+    earlier draft of this block named that population as the largest remaining gap and predicted the
+    same rot found elsewhere. SWEPT and REFUTED: 655 source files, 1560 reference occurrences, 315
+    unique paths, 100% of the 97 unresolved unique paths hand-adjudicated by reading prose context.
+    Genuinely broken: ONE unique path (2 occurrences) -- a 99% rejection rate on the raw count.
+    The reference convention was established empirically before judging anything (1340 of 1560
+    unprefixed refs resolve against .claude/), and an exact-case per-segment resolver was used rather
+    than a filesystem existence check, which on a case-insensitive filesystem returns true for
+    mismatched case. Zero case-mismatch defects exist in this population.
+
+    ALSO CLOSED, and it was NOT clean: section-anchor resolution -- the class this proposal's
+    predecessor named as unaudited ("a link may resolve to a real file whose named section is gone").
+    Swept: 466 `§` citations across the same 655 files, 100% of the 151 non-resolving cases read
+    individually, pass-rate 96.6% reported separately. SIXTEEN genuine broken anchors, filed as
+    S3-11. Establishing the conventions first was load-bearing: this corpus anchors on ATX headings,
+    bolded bullet clause names, AND bolded lead-ins, and a heading-only model produced ~90 false
+    positives before that was discovered.
+
+    STILL OPEN, and it is now the largest unmeasured anchor surface: markdown `#fragment` links --
+    317 occurrences, entirely unswept, a LARGER population than the `§` citations that were swept.
+    They resolve under a different model (heading slugification) and would need their own instrument.
+    Numeric `§N` / `§6.4` references (72 occurrences) are likewise unswept, needing section-numbering
+    semantics. Anchors cited FROM non-`.md` sources, and anchors INTO trees outside `.claude/`, are
+    also unswept. And no sweep verified that a resolved section SAYS what its citation claims -- only
+    that it exists.
+
+    The dominant rejection class was manifest-declared absence (30 unique paths / 74 occurrences):
+    artifacts correctly absent under loom_only, use_exclude, or use_obsoleted. That single check is
+    what separates a clean surface from an apparently-broken one, and it is the check any upstream
+    re-derivation of these numbers must apply first.
+
+    The ONE genuine defect is ALREADY FILED in the preceding block and is NOT re-filed here: an
+    absent bin/ instrument that two shipped artifacts instruct the agent to RUN while explicitly
+    forbidding re-derivation, leaving a reader with no path forward. It carries no declared manifest
+    fate (0 mentions; control: a declared sibling returns 5) while 32 peer .mjs files ship, so the
+    tier does reach this template. It is already covered by that block's acceptance criterion B2.
+    Recorded here only as INDEPENDENT CORROBORATION from a different population and a different
+    instrument, which strengthens B2 rather than duplicating it.
+
+    ALSO CLOSED, and it CORRECTED this block: full body-TEXT parity on the .coc/ lane. An earlier
+    pass compared level-3 headings plus targeted greps and this block recorded the residual risk
+    that "a drift living inside prose that leaves headings intact would NOT be detected". That risk
+    MATERIALIZED. The full sweep (193 co-present pairs, 184 byte-identical) found nine drifts, and
+    while six of them alter or delete a heading, the THREE THAT MATTER MOST do not: agents,
+    zero-tolerance and testing invert normative force from "recommended" to "MUST/BLOCKED/ABSOLUTE"
+    while the surrounding structure holds. Those are exactly the prose-interior case, and they are
+    source divergence, so no regeneration clears them. The heading-level pass also produced one
+    FALSE absence, corrected in S3-6.
+
+    .coc/ skills parity is likewise CLOSED (41/41 entry points identical). The earlier objection --
+    that a CC skill is a directory while a .coc/ skill is one file -- does not survive COC.md
+    § Layout, which declares one file per skill as "the SKILL.md entry point"; entry-point-to-
+    entry-point is therefore the contract-sound comparison, and non-entry-point siblings are outside
+    .coc/'s declared contract rather than false positives. The
+    USE-fence check covered 6 of 11 use_exclude entries against .coc/ only, so S3-3's five-artifact
+    count is a FLOOR. Roughly 17 of the 25 passthrough hooks have no identified explanation. Hook
+    write side effects were never diffed -- only exit status, stdout and stderr were compared. Only
+    one CPU architecture was executed. No lane drove a real CLI session; all hook invocations used
+    synthetic payloads.
+
+    Reference-count figures from ANY regex-over-prose sweep in this block should be treated as upper
+    bounds until classified by reading the hits: that instrument class overstated genuine defects by
+    roughly 8x on two independent surfaces here.
+
 status: pending_review
