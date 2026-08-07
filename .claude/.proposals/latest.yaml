@@ -1601,13 +1601,35 @@ use_template_findings_body_parity_and_coc_lane:
     agents (the previous block recorded this as entirely untested); and container-side hook execution
     (recorded as never exercised).
 
+    ALSO CLOSED, and reported as a CLEAN result rather than a finding: unprefixed relative references
+    (paths written WITHOUT the .claude/ prefix -- "rules/foo.md", "skills/<name>/SKILL.md"). An
+    earlier draft of this block named that population as the largest remaining gap and predicted the
+    same rot found elsewhere. SWEPT and REFUTED: 655 source files, 1560 reference occurrences, 315
+    unique paths, 100% of the 97 unresolved unique paths hand-adjudicated by reading prose context.
+    Genuinely broken: ONE unique path (2 occurrences) -- a 99% rejection rate on the raw count.
+    The reference convention was established empirically before judging anything (1340 of 1560
+    unprefixed refs resolve against .claude/), and an exact-case per-segment resolver was used rather
+    than a filesystem existence check, which on a case-insensitive filesystem returns true for
+    mismatched case. Zero case-mismatch defects exist in this population.
+
+    The dominant rejection class was manifest-declared absence (30 unique paths / 74 occurrences):
+    artifacts correctly absent under loom_only, use_exclude, or use_obsoleted. That single check is
+    what separates a clean surface from an apparently-broken one, and it is the check any upstream
+    re-derivation of these numbers must apply first.
+
+    The ONE genuine defect is ALREADY FILED in the preceding block and is NOT re-filed here: an
+    absent bin/ instrument that two shipped artifacts instruct the agent to RUN while explicitly
+    forbidding re-derivation, leaving a reader with no path forward. It carries no declared manifest
+    fate (0 mentions; control: a declared sibling returns 5) while 32 peer .mjs files ship, so the
+    tier does reach this template. It is already covered by that block's acceptance criterion B2.
+    Recorded here only as INDEPENDENT CORROBORATION from a different population and a different
+    instrument, which strengthens B2 rather than duplicating it.
+
     STILL OPEN. Full body-TEXT parity on the .coc/ lane -- that sweep compared level-3 headings plus
     targeted greps, so a drift living inside prose that leaves headings intact would NOT be detected;
     its 79-of-82 clean result is clean-at-heading-level only. .coc/ skills body parity was NOT
     attempted at all, because a CC skill is a directory of many files while a .coc/ skill is a single
-    entry-point file, and comparing them would have manufactured false positives. Unprefixed relative
-    references (paths written without the .claude/ prefix) are entirely unswept and are the largest
-    known remaining gap -- the confirmed stale-path defects suggest the same rot exists there. The
+    entry-point file, and comparing them would have manufactured false positives. The
     USE-fence check covered 6 of 11 use_exclude entries against .coc/ only, so S3-3's five-artifact
     count is a FLOOR. Roughly 17 of the 25 passthrough hooks have no identified explanation. Hook
     write side effects were never diffed -- only exit status, stdout and stderr were compared. Only
