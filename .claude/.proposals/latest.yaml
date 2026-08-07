@@ -1408,10 +1408,11 @@ use_template_findings_body_parity_and_coc_lane:
         lane, because both clauses postdate emission and cannot have been stripped.
       instrument_note_worth_carrying: >-
         The reporting lane resolved paths by exact-case directory comparison rather than a filesystem
-        existence check, because the development platform is case-INSENSITIVE: a naive existence
-        check reports the 686-reference class as fully resolving and misses the defect entirely. It
-        breaks on every case-sensitive consumer. Any upstream re-derivation must not use a bare
-        existence check on a case-insensitive filesystem.
+        existence check: on a case-INSENSITIVE filesystem a naive existence check reports the
+        686-reference class as fully resolving and misses the defect entirely, while the same
+        references break on every case-SENSITIVE consumer. Any upstream re-derivation must therefore
+        use exact-case comparison rather than a bare existence check, or it will reproduce a clean
+        result that carries no information.
       requested_fix: >-
         Regenerate .coc/ from current source; restore the dropped MUST clause; include variant-only
         deployed agents in .coc/ enumeration. The intra-set reference convention needs a decision --
