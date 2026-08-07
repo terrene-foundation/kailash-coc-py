@@ -1391,21 +1391,75 @@ use_template_findings_body_parity_and_coc_lane:
       finding: >-
         Distinct from S3-1, and the distinction matters for the remedy. The CC rules softening landed
         2026-07-19; .coc/ was emitted 2026-08-02 -- two weeks LATER -- and still carries the old
-        pre-softening text on two rules. It cannot be explained by staleness the way S3-1 can.
+        pre-softening text. It cannot be explained by staleness the way S3-1 can, and REGENERATION
+        ALONE WILL NOT FIX IT: the emitter is reading a different, older source than .claude/ does.
 
-        Separately, a zero-tolerance sub-rule that landed 2026-07-12 (three weeks before emission) is
-        ENTIRELY ABSENT from .coc/. Because the abridgement protocol mandates preserving MUST clauses
-        in full, this one IS a protocol violation rather than an aesthetic gap.
+        FULL BODY-TEXT sweep (superseding the heading-level pass this item originally rested on):
+        193 co-present pairs compared in full, 184 byte-identical after normalizing frontmatter and
+        CC-only slot markers. NINE genuine drifts -- SIX staleness (CC changed 2026-08-04, .coc/
+        untouched; remedy = regenerate) and THREE SOURCE DIVERGENCE on rules/agents,
+        rules/zero-tolerance and rules/testing.
 
-        Also on this lane: a variant-only agent deployed in this template is absent from .coc/,
-        suggesting the .coc/ emitter enumerates global agents only and skips variant-only deployed
-        ones. And 1135 path-bearing references were classified with ZERO intra-set resolution, the
-        largest class (686) being a lowercase-reference-vs-uppercase-filename mismatch.
+        The DIRECTION of the three is the alarming part: .coc/ ships a HARDER normative contract than
+        the CC source authorizes. MUST/BLOCKED token counts run NEGATIVE (.coc/ carries MORE):
+        agents -4, zero-tolerance -2, testing -1. Example -- CC rules/testing reads "Tier 2: Real
+        infrastructure recommended (mocking discouraged)" while .coc/ reads "Tier 2: Real
+        infrastructure. NO mocking (@patch, MagicMock, unittest.mock -- BLOCKED)".
+
+        Classification instrument, both branches falsifiable: each .coc/ file was compared against
+        `git show <emission-sha>:.claude/<path>` -- the CC source AS IT STOOD AT EMISSION. If
+        staleness, .coc/ == CC-at-emission exactly; if source divergence, it differs even then. The
+        three above differ even then. No variants/ directory exists in this repo, so no overlay
+        explains it; the .coc/ text most closely matches a CC revision from 2026-07-12, i.e. a
+        roughly three-week-stale upstream vintage.
+
+        Skills were also swept, which a prior pass had declined: COC.md § Layout declares one file
+        per skill as "the SKILL.md entry point", so entry-point-to-entry-point IS the contract-sound
+        comparison. Result: 41/41 identical, zero drift. Non-entry-point sibling files are outside
+        .coc/'s declared contract and are not a denominator.
+
+        Also on this lane: a variant-only agent deployed in this template is absent from .coc/ --
+        structurally explained (it is `variant_only: py` with no global source, so the .coc/ composer
+        never sees it) but still a real gap, since a py-only agent that ships to .claude/ never
+        reaches the CLI-neutral set. And 1135 path-bearing references were classified with ZERO
+        intra-set resolution, the largest class (686) being a lowercase-reference-vs-uppercase-
+        filename mismatch.
+
+      CORRECTION_to_this_item_as_first_filed: >-
+        Recorded rather than silently amended, because the error is instructive and this block's
+        whole method is that revisions are the most useful signal.
+
+        This item originally asserted that a zero-tolerance sub-rule (Rule 1d) is ENTIRELY ABSENT
+        from .coc/, and that its absence is an abridgement-protocol violation. BOTH HALVES ARE FALSE
+        and are withdrawn.
+
+        (1) Rule 1d is PRESENT in .coc/. Verified by the orchestrator: it sits at .coc/ line 52 and
+        CC line 53, and BOTH files carry exactly 9 level-3 headings. The only difference is the
+        heading TEXT -- CC "Enumerated Classes Stay Strongly Recommended" vs .coc/ "Enumerated
+        Classes Stay ABSOLUTE". A heading-set comparison keyed on exact string reported a RENAMED
+        heading as a DELETED one. The clause is therefore an INSTANCE of the source-divergence class
+        above, not an absence.
+
+        (2) The abridgement protocol DOES NOT APPLY to .coc/ at all, so no .coc/ difference can be a
+        protocol violation. The protocol is nested under the Codex `project_doc` byte-cap config
+        (`override_flag_required: "-c project_doc_max_bytes=65536"`) and governs the single
+        concatenated root baseline. .coc/ is one file per artifact with no byte cap. Falsifying test,
+        both poles fired: `Origin:` lines and `BLOCKED rationalizations:` sub-lists are both
+        `strip_sections` entries -- .coc/ RETAINS them (52 and 54 files respectively) while the
+        emitted baseline carries ZERO of each. .coc/ is demonstrably not abridged.
+
+        Consequence for any re-derivation: there is no "sanctioned abridgement" rejection class on
+        the .coc/ surface. Every prose difference there is a candidate, and a reviewer who dismisses
+        one as licensed abridgement is applying a contract that does not reach this lane.
       verification: >-
         Orchestrator verified the .coc/ lane's two drifted rule texts and the USE-fence leak
         (S3-3) directly, but did NOT re-derive the reference counts or the agent-enumeration claim.
-        Two absences on this lane were correctly scored Not-Run rather than Fail by the reporting
-        lane, because both clauses postdate emission and cannot have been stripped.
+        Two absences on this lane were correctly scored Not-Run rather than Fail, because both
+        clauses postdate emission -- they did not exist when .coc/ was generated, so their absence is
+        staleness awaiting regeneration and not drift. (The original wording justified Not-Run on the
+        ground that the clauses "cannot have been stripped", which appealed to the abridgement
+        protocol; per the CORRECTION below that protocol does not govern this lane, so the verdict
+        stands but the reasoning is replaced.)
       instrument_note_worth_carrying: >-
         The reporting lane resolved paths by exact-case directory comparison rather than a filesystem
         existence check: on a case-INSENSITIVE filesystem a naive existence check reports the
@@ -1538,13 +1592,75 @@ use_template_findings_body_parity_and_coc_lane:
       "Depth coverage was 13 of 40 hooks exercising substantive logic -- identical on host and
       container -- reflecting the synthetic payload set and this repo's coordination-disabled
       configuration, not any container property."
-    mechanism_only_partly_understood: >-
-      Stated so this is not over-claimed. Coordination being disabled explains at most 7 of the 25
-      passthrough hooks (a LEXICAL proxy -- no call-graph tracing was done). The other 18 do not
-      reference coordination at all. Of three tested directly with trigger-targeted payloads, one
-      moved to substantive output (payload-set limitation, demonstrated) and two did not fire even
-      when targeted (cause unidentified). Roughly 17 remain unresolved and would need per-hook
-      early-return analysis.
+    mechanism_now_largely_RESOLVED_and_the_FIGURE_CORRECTED: >-
+      A dedicated per-hook trigger analysis has since classified 18 of the 20 in the target set
+      (90%) and CORRECTS the depth figure UPWARD. Both the original and the correction are recorded,
+      because the correction came from a DIFFERENT INSTRUMENT rather than a re-judgment of the same
+      evidence -- which is the part worth carrying.
+
+      THE FIGURE IS 16 OF 40, NOT 13. Three hooks DID fire during the baseline sweep and were scored
+      bare: they do their work as a FILESYSTEM SIDE EFFECT and emit exactly {"continue":true}. A
+      stdout/stderr classifier -- BOTH lanes' -- structurally cannot see them. Proven empirically:
+      two provenance-capture hooks wrote real ledger rows DURING the 520-run baseline (rows quoted
+      with timestamps inside the sweep window), and a heartbeat hook was proven with BOTH POLES --
+      identity injected but the signing-key env var unset produced NO log append, while the targeted
+      run produced a 174-byte append -- with stdout {"continue":true} in BOTH cases.
+
+      Orchestrator corroboration: all three are REGISTERED in settings.json (so they do fire), the
+      capture hooks reach a `captureProvenance` write path, and the provenance ledger directory
+      exists on disk. Recorded honestly: the orchestrator's FIRST corroboration attempt used a
+      too-narrow write-call matcher and returned zero -- an artifact of the matcher, not evidence of
+      no write. Same instrument-class error this proposal documents elsewhere, caught by widening
+      the matcher rather than by trusting the zero.
+
+      Under TARGETED payloads, 23 of 40 are demonstrably capable of substantive logic in this
+      template (13 baseline + 3 side-effect + 7 payload-set-limitation proven individually, each
+      with a falsifier that stayed bare). So the low baseline number reflects the SYNTHETIC PAYLOAD
+      SET far more than any property of the environment.
+
+      The two hooks that did not fire even when targeted are BOTH payload-set limitation, neither
+      inert: one matches raw library IMPORT statements rather than raw SQL (the targeted payload was
+      simply in the wrong class -- a framework import fires it), and the other is a strip-fence that
+      refuses only when the RESULT of an edit is under-protected -- it fired with a deny decision
+      when given an edit that removes a trust-posture deny line.
+
+      Coordination-disabled remains the explanation for at most 7 (lexical proxy), and those 7 were
+      NOT re-examined. Two hooks remain Not-Run and one Retest (a second gate never reached).
+
+  findings_shipped_but_unwireable:
+    - id: S3-10
+      title: Two shipped hooks CANNOT FIRE, and both sit on the downstream delete-list
+      evidence_class: VERIFIED-BY-ORCHESTRATOR
+      severity: MEDIUM
+      finding: >-
+        `hooks/coc-drift-warn.js` and `hooks/coc-telemetry-autocommit.js` ship in this template but
+        are wired to no event and cannot fire under any input. Three independent facts, each
+        verified by the orchestrator with a control:
+
+        (a) ZERO registrations in `.claude/settings.json` for either. Control: a registered hook
+        returns 5 registrations, so the settings matcher fires.
+
+        (b) BOTH are listed in `.claude/.coc-obsoleted` -- the delete-list a consumer sync reads to
+        REMOVE downstream artifacts. They are simultaneously shipped and marked for deletion.
+
+        (c) NEITHER carries an `@settings-registration:` header marker. Control: an unregistered
+        hook that IS reachable by another surface carries the marker (returns 1), so the marker
+        matcher discriminates unregistered-BY-DESIGN from genuinely unwireable.
+
+        Distinction (c) draws is the load-bearing one. THREE other unregistered hooks are
+        unregistered by design and each documents its alternate surface -- one is installed as a git
+        hook, two are opt-in for a consumer to register in its own settings. Those are correctly
+        absent. These two document nothing and have no surface.
+      why_it_matters: >-
+        The sharper half is (b), which points at a SYNC-APPLICATION gap rather than a hook-design
+        gap: a path on the obsoleted delete-list is still present in the shipped tree. Whether the
+        tier machinery failed to apply the deletion, or the deletion was never propagated, is NOT
+        determinable from a consumer clone -- the emitter is upstream. Reported as the observed
+        asymmetry, not as a confirmed emitter bug.
+      requested_fix: >-
+        Delete both from the shipped set -- they are already on the list that says so -- or, if
+        either is meant to remain reachable, register it or give it an `@settings-registration`
+        marker naming its surface, as the three by-design-unregistered hooks do.
 
   findings_container_parity:
     - id: S3-9
@@ -1625,11 +1741,21 @@ use_template_findings_body_parity_and_coc_lane:
     Recorded here only as INDEPENDENT CORROBORATION from a different population and a different
     instrument, which strengthens B2 rather than duplicating it.
 
-    STILL OPEN. Full body-TEXT parity on the .coc/ lane -- that sweep compared level-3 headings plus
-    targeted greps, so a drift living inside prose that leaves headings intact would NOT be detected;
-    its 79-of-82 clean result is clean-at-heading-level only. .coc/ skills body parity was NOT
-    attempted at all, because a CC skill is a directory of many files while a .coc/ skill is a single
-    entry-point file, and comparing them would have manufactured false positives. The
+    ALSO CLOSED, and it CORRECTED this block: full body-TEXT parity on the .coc/ lane. An earlier
+    pass compared level-3 headings plus targeted greps and this block recorded the residual risk
+    that "a drift living inside prose that leaves headings intact would NOT be detected". That risk
+    MATERIALIZED. The full sweep (193 co-present pairs, 184 byte-identical) found nine drifts, and
+    while six of them alter or delete a heading, the THREE THAT MATTER MOST do not: agents,
+    zero-tolerance and testing invert normative force from "recommended" to "MUST/BLOCKED/ABSOLUTE"
+    while the surrounding structure holds. Those are exactly the prose-interior case, and they are
+    source divergence, so no regeneration clears them. The heading-level pass also produced one
+    FALSE absence, corrected in S3-6.
+
+    .coc/ skills parity is likewise CLOSED (41/41 entry points identical). The earlier objection --
+    that a CC skill is a directory while a .coc/ skill is one file -- does not survive COC.md
+    § Layout, which declares one file per skill as "the SKILL.md entry point"; entry-point-to-
+    entry-point is therefore the contract-sound comparison, and non-entry-point siblings are outside
+    .coc/'s declared contract rather than false positives. The
     USE-fence check covered 6 of 11 use_exclude entries against .coc/ only, so S3-3's five-artifact
     count is a FLOOR. Roughly 17 of the 25 passthrough hooks have no identified explanation. Hook
     write side effects were never diffed -- only exit status, stdout and stderr were compared. Only
