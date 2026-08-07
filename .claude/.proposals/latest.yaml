@@ -255,11 +255,11 @@ use_template_findings:
       (item 8). Item 10 was newly surfaced during the pass and is CONFIRMED. Three of the nine
       filed items were materially wrong as filed; had this proposal been written from the issue
       text it would have carried false claims to Gate-1 and, once split, to every consumer.
-    second_round: >-
+    revision_history: >-
       An adversarial review of THIS block then found that the block itself had introduced a new
       error in the opposite direction: it had downgraded item 9 (a TRUE claim) to a single-lane
-      finding on a false premise about how codex emits agents. That downgrade is reverted above
-      and item 9 now agrees with #55. Further corrections from the same and subsequent rounds are
+      finding on a false premise about how codex emits agents. That downgrade is reverted above.
+      Further corrections from the same and subsequent rounds are
       also applied: item 10's fix RE-ROUTED from `gitignore_additions` to
       `visibility_gitignore_additions.public` (the single most consequential remedy correction —
       the original key's all-consumer scope would have ignored per-operator state on precisely the
@@ -268,9 +268,16 @@ use_template_findings:
       framing; the item-2 disclosure dimension; the item-2 purge attribution (over-corrected once,
       then fixed — `use_obsoleted` also covers the USE lane); two miscited constants; a `-v`
       instrument note that led to the opposite verdict; and this audit block's own over-claim of
-      item 10 as mechanism-tested. Recorded because it is the load-bearing lesson of this pass:
+      item 10 as mechanism-tested. Two further item-10 retractions belong in this list and were
+      omitted from it until now: the claim that item 10's exposure was "NOT locally fixable" was
+      RETRACTED (a consumer-local `.gitignore` addition is durable, because
+      `sync-manifest.yaml::gitignore_additions` is additive and MUST NOT remove operator-managed
+      lines), and the claim that the superseded notes file had "zero unique lines" was RETRACTED
+      (three lines were unique, and re-measuring rather than carrying the count was what caught
+      it). Recorded because it is the load-bearing lesson of this pass:
       a verification round can itself inject errors, so the review of the corrections is not
-      optional ceremony.
+      optional ceremony. The key is named `revision_history` rather than `second_round` because
+      its contents now span the second and every subsequent round.
     cross_repo_boundary: >-
       No agent read loom. Anything settleable only at loom is labelled
       UNVERIFIABLE-HERE below and is NOT asserted as present fact.
@@ -437,7 +444,7 @@ use_template_findings:
         entry and not its contents. Verified: .claude/hooks/lib/.DS_Store is still ignored and
         matches .gitignore:40, not :120. Only line 122's `/**` form has the defect.
         (c) IT DID MATERIALIZE, and recurs — the originating /sweep found and cleaned THIRTEEN
-        such files in this repo. Zero exist right now, but the defect is not hypothetical: it
+        such files in this repo. Zero exist in the WORKING TREE right now, but the defect is not hypothetical: it
         re-materializes on any macOS clone as soon as Finder touches the tree. An earlier draft
         of this item called it "latent, not materialized", which understated it to a triager.
         Current-state check confirming the cleanup held — zero .DS_Store files exist in the
