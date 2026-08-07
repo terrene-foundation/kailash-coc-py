@@ -1481,13 +1481,25 @@ use_template_findings_body_parity_and_coc_lane:
 
   decision_for_the_human_not_a_defect:
     id: S3-D1
-    title: use_softenings applies to one of three output surfaces -- is that intended?
+    title: use_softenings applies to ONE of FOUR output surfaces -- is that intended?
     evidence_class: VERIFIED-BY-ORCHESTRATOR
     finding: >-
       The CC rule tree is SOFTENED for downstream consumers ("guidelines you may relax with intent",
-      "Recommended for downstream") while the two emitted baselines carry the older, STRICTER text
-      ("ABSOLUTE and NON-NEGOTIABLE", "MUST gates"). Net effect: in this repo, operators on the two
-      non-CC CLIs are governed by materially stricter rules than CC operators.
+      "Recommended for downstream") while EVERY OTHER OUTPUT SURFACE carries the older, STRICTER text
+      ("ABSOLUTE and NON-NEGOTIABLE", "MUST gates"). Net effect: in this repo, operators on any
+      non-CC surface are governed by materially stricter rules than CC operators.
+
+      MEASURED across all four surfaces, matcher controlled to fire on each file:
+      .claude/rules -> "ALL sessions, ALL agents, ALL PRODUCTION code" + "Quality Gates (Recommended
+      for downstream)" = SOFTENED. The Codex baseline, the Gemini baseline, and .coc/rules ALL ->
+      "ALL sessions, ALL agents, ALL CODE" + "Quality Gates (MUST -- Gate-Level Review)" = STRICT.
+
+      So the split is ONE softened surface against THREE strict ones -- not, as an earlier draft of
+      this block said, "one of three". The correction matters for the disposition rather than being
+      cosmetic: three INDEPENDENT output surfaces agree on the strict text and only the CC tree
+      diverges. A deliberate per-lane variant would be expected to be lane-aware; a single diverging
+      surface against three agreeing ones is the shape of a transform applied at one point in the
+      pipeline, which is what the manifest describes.
 
       This was ORIGINALLY filed as "the softening never propagated", implying an oversight. That
       framing was WRONG and is withdrawn. The mechanism is sync-manifest.yaml::use_softenings -- a
