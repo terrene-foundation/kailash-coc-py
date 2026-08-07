@@ -753,4 +753,409 @@ use_template_findings:
     - "[ ] If item 9 is resolved by DECLARING variant_only artifacts CC-only rather than emitting them, CLAUDE.md's `agents/frameworks/*` gemini-emitting claim is qualified in the same change — it currently promises the opposite."
     - "[ ] `.wave-tracker.d/` is assigned an explicit `visibility_opt_out` group (extend `session-notes`, or mint a `wave-tracker` token) rather than being added to `.public` un-grouped — otherwise it is un-opt-out-able for a private/team consumer that wants to keep tracking it, reintroducing for that one path the all-consumer-scope problem the key re-routing exists to avoid. Item 10 states this decision must not be defaulted; this criterion is what stops it being defaulted."
 
+# ----------------------------------------------------------------------------
+# SECOND FINDINGS BLOCK — appended 2026-08-07, from a systematic multi-CLI audit.
+# APPENDED, never merged into the block above: that one is human-reviewed and
+# closed (artifact-flow.md "Append, Never Overwrite Unprocessed Proposals").
+# Its four deferred residuals were RESOLVED in the same change, not re-accepted.
+#
+# Provenance of confidence — read this before triaging:
+#   VERIFIED-BY-ORCHESTRATOR = re-derived independently with a falsifying result
+#     named and a control fired in BOTH directions.
+#   LANE-REPORTED = surfaced by a specialist audit lane, NOT independently
+#     re-derived. Treat as a lead requiring confirmation, not as established.
+# The distinction is recorded because the prior block's load-bearing lesson was
+# that a verification round can itself inject errors.
+# ----------------------------------------------------------------------------
+use_template_findings_multi_cli_audit:
+  source_repo: kailash-coc-py
+  origin: use-template
+  codify_date: 2026-08-07
+  codify_session: >-
+    Systematic three-lane parity + dangling-reference + hook-executability audit of the
+    shipped template. Closes the discovery half of brief Scope 1 (multi-CLI delivery),
+    which prior passes had only spot-checked from /sweep findings. Four fixes landed
+    locally this session (PRs 61-64); everything below is loom-side and cannot be
+    durably fixed at a consumer.
+  filed_as: >-
+    NOT filed as a GitHub issue. Raised directly here because every item targets a
+    loom-emitted artifact or the emitter itself.
+  method: >-
+    Four parallel read-only lanes. Every lane was required to name a falsifying result
+    before citing any check, and to fire each matcher at a known-positive first. Three
+    lanes caught and discarded a defect in their OWN instrument before reporting -- one
+    resolver reported non-existent modules as resolving and would have returned a clean
+    sweep; a differential ignore-check failed its own probe control; an anchored grep
+    returned zero regardless of the answer because the tool indents its output.
+
+  clusters:
+    A: emitter completeness -- artifacts or rules that reach some CLI lanes and not others
+    B: shipped-but-unrunnable -- artifacts distributed to consumers that cannot execute here
+    C: silent failure -- code that reports success it did not achieve
+    D: distribution mismatch -- what ships disagrees with what the manifest declares
+
+  items:
+    - id: A1
+      cluster: A
+      status: VERIFIED-BY-ORCHESTRATOR
+      severity: HIGH
+      where: .claude/rules/burn-down-reporting.md
+      finding: >-
+        An entire rule reaches the CC lane ONLY. It has zero presence in AGENTS.md, GEMINI.md,
+        .codex/ and .gemini/, and is not mentioned anywhere in sync-manifest.yaml -- so the
+        absence is undeclared, not a scoping decision. The rule declares
+        cli_delivery: skill-channel, meaning it EXPECTS delivery through the rules-reference
+        index, which is the non-CC lanes' only channel for a path-scoped rule.
+      evidence: >-
+        grep across AGENTS.md, GEMINI.md, .codex and .gemini returns ZERO hits, while the same
+        command for a skill-channel sibling (product-completion-first) returns hits in AGENTS.md,
+        GEMINI.md and .codex/ -- so the matcher fires here and the zero is a true negative.
+        sync-manifest.yaml mentions the rule 0 times against 3 for the same sibling. Of the seven
+        rules declaring cli_delivery: skill-channel, six are indexed and this one alone is not.
+        Its sort slot is demonstrably empty: the index is title-sorted and runs BUILD... directly
+        into CI..., with no Burn-Down row between them.
+      why_it_matters: >-
+        Codex and Gemini operators never receive the session/wave close-out reporting contract.
+        Their wave gates and wrapups run unconstrained while CC enforces it -- a silent
+        cross-CLI divergence in what "done" means.
+      requested_fix: >-
+        Index burn-down-reporting.md into the rules-reference skill for both non-CC lanes, OR
+        declare the exclusion explicitly in cli_emit_exclusions. Either is acceptable; silence
+        is not.
+      systemic_question: >-
+        Six of seven indexed and one missed suggests the indexer is not driven by the
+        cli_delivery declaration itself. Worth checking whether the index is generated from a
+        list that must be hand-extended -- if so, every future skill-channel rule inherits this.
+
+    - id: A2
+      cluster: A
+      status: LANE-REPORTED
+      severity: HIGH
+      where: .codex/ (33 citing lines / 30 files), .gemini/ (29 lines / 28 files)
+      finding: >-
+        The emitter rewrites agent citation paths into the target namespace but emits agents
+        under a DIFFERENT layout, so the rewritten citations resolve to nothing. .codex/agents/
+        does not exist at all (agents ship as .codex/prompts/specialist-<stem>.md); .gemini
+        emits agents FLAT while citations retain the CC frameworks/ and implementation/ nesting.
+      why_it_matters: >-
+        The specialist delegation graph is broken on both non-CC lanes and intact on CC. Any
+        operator following a cross-reference lands on a non-existent path.
+      requested_fix: >-
+        Rewrite agent citations to the emitted layout per lane, or emit agents at the cited
+        layout. The counts are LOWER BOUNDS -- the lane matched backticked/bare paths only.
+
+    - id: A3
+      cluster: A
+      status: LANE-REPORTED
+      severity: MEDIUM
+      where: .gemini/ -- 11 lines / 8 files / 7 distinct targets
+      finding: >-
+        Citations point at .gemini/commands/<name>.md while Gemini commands are emitted as
+        .toml. The emitter rewrote the directory segment but not the extension.
+      why_it_matters: >-
+        The affected targets are the enrollment and onboarding ceremonies -- the first paths a
+        NEW Gemini operator walks.
+      requested_fix: Rewrite the extension alongside the directory segment for the gemini lane.
+
+    - id: A4
+      cluster: A
+      status: LANE-REPORTED
+      severity: MEDIUM
+      where: skills/management/release-checklist.md
+      finding: >-
+        Cited by the release command on all three lanes, but the file is variant_only.py, and
+        variant_only additions land on the CC lane only. It resolves on CC and dangles on the
+        other two. This RE-OPENS a DANGLEREF the manifest itself records as closed -- the
+        closure note claims the citation now resolves at the deployed template, which is true
+        for exactly one of three lanes.
+      requested_fix: >-
+        Emit the file to all three lanes, or make the citation lane-conditional. Also correct
+        the manifest closure note, which currently overstates the repair.
+
+    - id: A5
+      cluster: A
+      status: LANE-REPORTED
+      severity: MEDIUM
+      where: .codex/prompts/specialist-reviewer.md, .gemini/agents/reviewer.md
+      finding: >-
+        Both non-CC reviewer agents are instructed to read a skill inside a tree that
+        cli_emit_exclusions DECLARES excluded for those lanes, so the target structurally
+        cannot exist there. The exclusion is correct; the citation into it was not scrubbed.
+      why_it_matters: >-
+        Every non-CC /redteam reviewer is told to read a mandatory convergence-criterion file it
+        cannot open -- a silent instruction failure at a quality gate.
+      requested_fix: Scrub citations into excluded trees at emission, or inline the needed content.
+
+    - id: A6
+      cluster: A
+      status: LANE-REPORTED
+      severity: MEDIUM
+      where: .codex/skills/rules-reference/SKILL.md and its .gemini twin
+      finding: >-
+        The rules-reference index -- the non-CC lanes' only path-scoped-rule channel -- advertises
+        three rules that use_exclude removes from this template. The exclusion is correct; the
+        index generator does not apply it.
+      requested_fix: Apply use_exclude when generating the rules-reference index.
+      note: >-
+        Same generator as A1, opposite failure -- A1 omits a rule that should be indexed, A6
+        indexes three that should not be. Worth treating as one defect in that generator.
+
+    - id: A7
+      cluster: A
+      status: LANE-REPORTED
+      severity: LOW
+      where: AGENTS.md and GEMINI.md (byte-identical)
+      finding: The emitted baselines cite a use_excluded rule, so it dangles on both lanes.
+      requested_fix: Apply use_exclude when emitting baseline bodies.
+
+    - id: A8
+      cluster: A
+      status: VERIFIED-BY-ORCHESTRATOR
+      severity: HIGH
+      where: .codex/prompts/, .gemini/commands/, .coc/commands/ -- cross-repo-authorize
+      finding: >-
+        The CC source command became repo-class-aware (coc-source commits the authorization
+        receipt; coc-use-template does NOT) and arrived here in the last Gate-2 sync. The three
+        DERIVED trees did not re-emit and still carried the pre-fix UNCONDITIONAL step 5,
+        "Commit the receipt for durable team audit", with a bare git add/commit block. This is a
+        sync-completeness MUST-8 gap -- the source refreshed, the derived tree did not.
+      evidence: >-
+        0 VERSION::type references in all three derived files against 1 in the CC source (the
+        control proving the matcher fires). Settled with git that the CC source was NOT
+        hand-edited locally -- it last changed in the Gate-2 sync commit -- so the source is
+        loom-current and the staleness is emitter-side.
+      why_it_matters: >-
+        A Codex or Gemini operator running the ceremony in a USE template is instructed to commit
+        an operator-correlatable receipt (display_id, target org/repo, verbatim user instruction)
+        into a repo that is a GitHub template clients clone, whose own git history is a
+        distribution channel loom has no fence over. The emitter source names exactly this as how
+        two BUILD repos came to track such receipts.
+      local_disposition: >-
+        Bridged locally by transplanting the source block verbatim into all three derived files.
+        That bridge is Class-A and CONVERGES (the next emission produces the same content), but it
+        is re-broken every cycle until the emitter re-emits the full derived tree.
+      requested_fix: >-
+        Re-emit the FULL derived tree on a source change, not just the scaffold. A source-vs-derived
+        idempotency check at emit time would have caught this and A2/A3/A5/A6 as one class.
+
+    - id: B1
+      cluster: B
+      status: VERIFIED-BY-ORCHESTRATOR
+      severity: HIGH
+      where: .claude/bin/sync-from-canon-fetch.mjs
+      finding: >-
+        Statically imports ./lib/loom-links.mjs, which is loom_only and absent from every USE
+        consumer. Being a static top-level import it throws at LINK time, before any evaluation,
+        so there is no guard and no degrade path.
+      evidence: >-
+        Importing the module fails with ERR_MODULE_NOT_FOUND naming the absent path; the control
+        (a sibling bin script) loads OK, proving the probe can report success.
+      why_it_matters: The script is 100% dead on every consumer -- it cannot run at all.
+      requested_fix: >-
+        Exclude the script from the USE lane, or convert to the guarded dynamic-import degrade
+        pattern the sibling loom-doctor.mjs already uses correctly for the SAME module.
+      note: >-
+        loom-doctor.mjs imports the same absent module DYNAMICALLY inside a try/catch with a
+        documented degrade and works correctly. The contrast is the fix.
+
+    - id: B2
+      cluster: B
+      status: VERIFIED-BY-ORCHESTRATOR
+      severity: HIGH
+      where: rules/worktree-isolation.md and skills/30-claude-code-patterns/worktree-orchestration.md
+      finding: >-
+        Both instruct the agent to RUN bin/probe-ancestor-load.mjs, and both explicitly forbid
+        re-deriving it ("the committed instrument -- do NOT re-derive it from prose"). The script
+        is absent from the template and has zero manifest entries, so the absence is undeclared.
+      evidence: >-
+        The file is absent from .claude/bin/; sync-manifest.yaml matches it 0 times while the
+        control term matches 32 times, so the grep fires and the zero is a true negative.
+      why_it_matters: >-
+        No legal action remains: the sanctioned path does not exist and the fallback is forbidden.
+        Worse, the surrounding rule text says a non-zero exit means "ZERO evidence", so a
+        MODULE_NOT_FOUND is primed to be misread as a substantive verdict about ancestor-loading.
+        A RULE carries this, and it is path-scoped on globs consumers match routinely.
+      requested_fix: Ship the script to consumers, or drop the run-instruction and the prohibition.
+
+    - id: B3
+      cluster: B
+      status: VERIFIED-BY-ORCHESTRATOR
+      severity: MEDIUM
+      where: .claude/bin/emit-cli-artifacts.mjs
+      finding: >-
+        Shipped to consumers but cannot run in one. It halts on a missing .claude/variants/py/**
+        overlay, which is loom-side and not distributed, reporting it as a manifest defect.
+      why_it_matters: >-
+        A consumer cannot re-emit its own derived trees. This is why A8 could only be bridged by
+        hand rather than repaired properly.
+      requested_fix: Exclude from the USE lane, or make the variants dependency optional there.
+
+    - id: B4
+      cluster: B
+      status: VERIFIED-BY-ORCHESTRATOR
+      severity: MEDIUM
+      where: .claude/bin/validate-xref-integrity.mjs
+      finding: >-
+        The template ships a cross-reference validator that EXITS 1 on the shipped template
+        itself, and no workflow runs it. That is why corpus drift accumulated unnoticed.
+      evidence: >-
+        Exit 1 with 294 dangling rows after this session's CLAUDE.md repair (298 before). No
+        workflow references it; the control confirms the grep matches the workflow directory.
+      why_it_matters: >-
+        A validator that is red by construction cannot be wired into CI, so the drift it is meant
+        to catch goes uncaught on 30+ consumers.
+      requested_fix: >-
+        Teach the validator its by-design-absent categories (loom_only tooling, journal/, tier
+        artifacts a consumer does not subscribe to) so a clean consumer checkout exits 0, THEN
+        wire it. Do NOT wire it first -- roughly 218 of the 294 rows are legitimate absences,
+        so it would red the board permanently and be disabled.
+
+    - id: C1
+      cluster: C
+      status: VERIFIED-BY-ORCHESTRATOR
+      severity: HIGH
+      where: .claude/hooks/session-end.js
+      finding: >-
+        The hook requires ../learning/digest-builder, which does not exist at that path (the real
+        file lives under scripts/). The require sits inside an EMPTY catch, so the failure is
+        swallowed, and the hook then returns its success string -- which includes the words
+        "learning digest built" -- UNCONDITIONALLY. It reports building a digest it never built.
+        There is a second break in the same chain: the real digest-builder itself requires a
+        learning-utils path that resolves under scripts/hooks/, also absent, a tree the
+        .coc-obsoleted list purges. Repointing only the first require surfaces the second.
+      evidence: >-
+        Requiring the module throws MODULE_NOT_FOUND; the control (a module that does exist)
+        resolves, proving the probe reports success when success is real. The success string is
+        emitted from an unconditional return.
+      why_it_matters: >-
+        /codify consumes the digest that is never produced, and the empty catch guarantees no
+        consumer ever learns why. This is the template violating its OWN zero-tolerance Rule 3
+        (empty catch, error hiding) and Rule 2 (reporting work not performed) in shipped code.
+      requested_fix: >-
+        Repoint BOTH requires, replace the empty catch with a logged failure, and make the success
+        string conditional on the digest actually being written.
+
+    - id: C2
+      cluster: C
+      status: VERIFIED-BY-ORCHESTRATOR
+      severity: MEDIUM
+      where: 8 prose occurrences across 4 command surfaces + 2 code sites in bin/cross-repo-authorize.mjs
+      finding: >-
+        Documentation states the cross-repo receipt guard greps the working tree "within an mtime
+        window". The guard explicitly repudiates mtime -- its own comment says age comes from the
+        receipt's timestamp:/date: FRONTMATTER, NOT filesystem mtime, because git rewrites mtime on
+        checkout, worktree-add and clone -- and it applies a 6-hour window over that frontmatter.
+        A separate claim in the same comment, that "receipts are COMMITTED", is now false for every
+        non-coc-source repo class under the corrected guidance.
+      why_it_matters: >-
+        An operator reasoning about receipt validity from these docs reasons from a false model. It
+        also caused a real misdiagnosis this session: a receipt was believed live when it had in
+        fact expired two days earlier, making an "enforcement preserved" check true but vacuous.
+      requested_fix: >-
+        Replace "mtime window" with "6-hour receipt-timestamp window" across the source command and
+        both code sites, and repair the "receipts are COMMITTED" clause.
+      deliberately_not_fixed_locally: >-
+        Correcting only the derived trees would create the source-vs-derived divergence A8 is about,
+        so the false text was transplanted VERBATIM on purpose. This must be fixed at the source.
+
+    - id: D1
+      cluster: D
+      status: LANE-REPORTED
+      severity: MEDIUM
+      where: 5 files tracked in git AND listed in .claude/.coc-obsoleted
+      finding: >-
+        Five files are distributed while simultaneously appearing on the list that downstream
+        /sync-from-template reads as a DELETE list. New clones receive them; syncing clones lose
+        them, so behaviour diverges by clone age. The manifest confirms purge intent for at least
+        two of them.
+      why_it_matters: >-
+        One of the five is emit-dev-container.mjs, which is load-bearing for the dev-container
+        deliverable -- worth confirming that purge is intended rather than collateral.
+      requested_fix: Reconcile the shipped set against .coc-obsoleted in one direction or the other.
+
+    - id: D2
+      cluster: D
+      status: LANE-REPORTED
+      severity: HIGH
+      where: .claude/skills/18-security-patterns/SKILL.md -- the Reference Documentation section
+      finding: >-
+        All EIGHT entries in the skill's reference index are absent repo-wide. The directory holds
+        eleven files under entirely different names. Unlike the off-by-one class below, no path
+        correction resolves these -- the index was never reconciled to the file set.
+      why_it_matters: The security skill's own table of contents dead-ends on every lookup.
+      requested_fix: Regenerate the index from the directory contents.
+
+    - id: D3
+      cluster: D
+      status: LANE-REPORTED
+      severity: MEDIUM
+      where: Kailash domain skills -- roughly 55 relative links
+      finding: >-
+        Targets EXIST; the paths are wrong. Four sub-shapes: one ../ too many; a missing numeric
+        directory prefix; a redundant re-rooting that yields .claude/.claude/; and a four-level
+        escape that leaves the repo entirely.
+      requested_fix: Mechanical path correction; all intended targets were confirmed to exist.
+
+    - id: D4
+      cluster: D
+      status: LANE-REPORTED
+      severity: MEDIUM
+      where: .claude/skills/project/ -- four files
+      finding: >-
+        Four CC-only skills undeclared in every exclusion stanza. Three are superseded duplicates
+        whose canonical homes reach all three lanes, and the copies have DIVERGED from those
+        canonical versions. The fourth has no counterpart anywhere and zero manifest mentions.
+        This is an ORPHAN-EMISSION defect -- CC is the wrong lane here, not the deprived one.
+      requested_fix: Delete the three diverged duplicates; declare or relocate the orphan.
+
+    - id: D5
+      cluster: D
+      status: VERIFIED-BY-ORCHESTRATOR
+      severity: MEDIUM
+      where: sync-manifest.yaml gitignore_additions
+      finding: >-
+        Extends item 10 of the prior block, which covered ONE path. FOUR sibling per-operator paths
+        are also absent from gitignore_additions, and shipped artifacts already ASSERT that they are
+        gitignored: a hooks library WRITES a header reading "(gitignored, regenerable)" into one of
+        them, and three separate artifacts describe the per-operator local-links file as
+        "gitignored-per-operator", one of them naming the harm as being "one git add -A away from the
+        synced surface". Those local-links files carry operator-absolute cross-repo paths.
+      requested_fix: >-
+        Add the aggregate session-notes view, the per-operator *.local.json files, the transient
+        migration leftover, and the nested-worktree directory to the visibility-scoped
+        gitignore_additions alongside item 10's path.
+      local_disposition: >-
+        Fixed locally this session, which is durable because gitignore_additions is additive and
+        must not remove operator-managed lines. Consumers that never receive this fix stay exposed.
+
+  acceptance_criteria:
+    - "[ ] A1: burn-down-reporting.md appears in the rules-reference index for BOTH non-CC lanes, or its exclusion is declared in cli_emit_exclusions."
+    - "[ ] A1/A6: the index generator is driven by the cli_delivery declaration and by use_exclude, so a new skill-channel rule is indexed automatically and an excluded rule is not."
+    - "[ ] A2/A3: agent and command citations resolve on the lane they are emitted to; a re-run of the citation-resolution sweep returns zero dangling on .codex/ and .gemini/."
+    - "[ ] A8: a source-vs-derived idempotency check runs at emit time and is non-empty ONLY when the source changed; re-running emit after a source change produces no diff."
+    - "[ ] B1: sync-from-canon-fetch.mjs either imports nothing absent on the USE lane, or is excluded from it; importing it on a clean consumer checkout no longer throws."
+    - "[ ] B2: bin/probe-ancestor-load.mjs is present on consumers, OR both the run-instruction and the do-not-re-derive prohibition are removed."
+    - "[ ] B4: validate-xref-integrity.mjs exits 0 on a clean consumer checkout BEFORE any CI wiring is added."
+    - "[ ] C1: session-end.js writes the digest or reports failure; the success string is never emitted when the digest was not built, and the empty catch is gone."
+    - "[ ] C2: no artifact states the receipt guard uses an mtime window; the corrected 6-hour receipt-timestamp wording appears in the source command AND both code sites."
+    - "[ ] D2: every entry in the security skill's reference index resolves to an existing file."
+    - "[ ] D5: all five per-operator paths appear in the visibility-scoped gitignore_additions."
+
+  disclosure_scrub: >-
+    Every path here is on the .claude/ artifact surface. No operator identity, no absolute path, no
+    client or tenant identifier, and no downstream-consumer name appears in this block
+    (upstream-issue-hygiene MUST-2, knowledge-cascade-routing MUST-3). The one place an operator
+    display_id was in scope -- A8's description of what a committed receipt exposes -- is described
+    by FIELD NAME rather than by value.
+
+  known_coverage_gaps: >-
+    Stated so this block is not read as a complete audit. Per-file BODY parity across the 407
+    co-present skills was never diffed -- only file-set membership and citation resolution -- so the
+    cross_cli_drift_audit axis remains entirely untested and that half of the multi-CLI clause is
+    still OPEN. Also unaudited: hook and config parity across lanes, the .coc/ tree's own membership,
+    guides/, bin/, templates/, and section-anchor resolution (a link may resolve to a real file whose
+    named section is gone). Container-side execution was never exercised -- hook verification was
+    host-side only, so the container-parity clause of the brief is NOT closed. The A2/A3 counts are
+    LOWER BOUNDS.
+
 status: pending_review
