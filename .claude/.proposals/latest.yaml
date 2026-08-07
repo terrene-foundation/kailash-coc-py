@@ -1662,6 +1662,56 @@ use_template_findings_body_parity_and_coc_lane:
         either is meant to remain reachable, register it or give it an `@settings-registration`
         marker naming its surface, as the three by-design-unregistered hooks do.
 
+  findings_broken_section_anchors:
+    - id: S3-11
+      title: An extraction left 11 load-bearing citations pointing at clauses that no longer exist
+      evidence_class: VERIFIED-BY-ORCHESTRATOR
+      severity: MEDIUM
+      finding: >-
+        SIXTEEN broken section anchors -- a citation whose FILE resolves but whose named SECTION is
+        gone. This is worse than a fully-broken reference: the path resolves, so the pointer looks
+        live, a reader follows it, and finds nothing. The preceding block named this class as
+        unaudited ("a link may resolve to a real file whose named section is gone"); this closes it.
+
+        THIRTEEN of the sixteen are ONE cluster with ONE root cause. A 2026-06-12 extraction moved
+        the worktree MUST-clauses OUT of `rules/agents.md` and INTO
+        `skills/30-claude-code-patterns/worktree-orchestration.md`, where they were re-hosted under
+        new names ("Rule 1 --", "Rule 2 --", ...). The rule now carries only a delegating section.
+        Every back-reference was left pointing at clause names that no longer exist at the cited
+        path -- including six in the extraction's OWN destination file.
+
+        These are the corpus's most load-bearing citation shape, not passing mentions. Example
+        verbatim: `**Rule:** rules/agents.md § "MUST: Worktree Isolation for Compiling Agents".`
+        An agent following that pointer to find the governing clause finds nothing.
+
+        THREE more are wrong-file citations (a clause attributed to one rule that lives in another,
+        and one whose named section exists nowhere in the corpus), and TWO are singletons pointing
+        at named sections absent from an existing file.
+      verification: >-
+        Orchestrator re-derived the cluster's root cause with a firing control: each cited clause
+        name returns ZERO occurrences in the cited file, while a section that IS present in that
+        file returns 1 -- so the matcher discriminates rather than silently failing. The clauses were
+        confirmed present in the extraction's destination under their new names, and the
+        `**Rule:**` citation shape was read verbatim at its source line.
+      why_it_is_hard_to_see: >-
+        Nothing detects this class. A file-existence sweep passes (the file is there); a link checker
+        that stops at the path passes; and the citation reads as authoritative because the corpus
+        uses `**Rule:**` pointers precisely for its load-bearing cross-references. Several rules
+        MANDATE grep-stable anchors so citations survive edits -- this is what it looks like when an
+        extraction moves the target without updating the anchors.
+      honest_bound_from_the_reporting_lane: >-
+        SIXTEEN IS A FLOOR, NOT A CEILING, and the lane stated why against its own number: its
+        resolver accepts a citation whenever a real heading CONTAINS the cited span, so a rename
+        that preserves the cited keyword resolves OK and is missed. Three such cases were found and
+        deliberately EXCLUDED from the sixteen (the section is still findable), and they are the
+        visible edge of that class. Coverage was 100% of the population it defined -- 466 citations,
+        all 151 non-resolving cases read individually -- with pass-rate reported separately at 96.6%.
+      requested_fix: >-
+        Repoint the 11 cluster citations at the extraction's destination and its new clause names;
+        correct the 3 wrong-file citations; resolve the 2 singletons. More durably: any extraction
+        that moves a clause between artifacts MUST sweep and repoint inbound anchors in the same
+        change -- the extraction here updated the content and left every pointer behind.
+
   findings_container_parity:
     - id: S3-9
       title: Brief Scope 6 is NOT met -- 2 of 40 hooks diverge, on credential and identity passthrough
@@ -1727,6 +1777,22 @@ use_template_findings_body_parity_and_coc_lane:
     unprefixed refs resolve against .claude/), and an exact-case per-segment resolver was used rather
     than a filesystem existence check, which on a case-insensitive filesystem returns true for
     mismatched case. Zero case-mismatch defects exist in this population.
+
+    ALSO CLOSED, and it was NOT clean: section-anchor resolution -- the class this proposal's
+    predecessor named as unaudited ("a link may resolve to a real file whose named section is gone").
+    Swept: 466 `§` citations across the same 655 files, 100% of the 151 non-resolving cases read
+    individually, pass-rate 96.6% reported separately. SIXTEEN genuine broken anchors, filed as
+    S3-11. Establishing the conventions first was load-bearing: this corpus anchors on ATX headings,
+    bolded bullet clause names, AND bolded lead-ins, and a heading-only model produced ~90 false
+    positives before that was discovered.
+
+    STILL OPEN, and it is now the largest unmeasured anchor surface: markdown `#fragment` links --
+    317 occurrences, entirely unswept, a LARGER population than the `§` citations that were swept.
+    They resolve under a different model (heading slugification) and would need their own instrument.
+    Numeric `§N` / `§6.4` references (72 occurrences) are likewise unswept, needing section-numbering
+    semantics. Anchors cited FROM non-`.md` sources, and anchors INTO trees outside `.claude/`, are
+    also unswept. And no sweep verified that a resolved section SAYS what its citation claims -- only
+    that it exists.
 
     The dominant rejection class was manifest-declared absence (30 unique paths / 74 occurrences):
     artifacts correctly absent under loom_only, use_exclude, or use_obsoleted. That single check is
