@@ -2321,4 +2321,134 @@ use_template_findings_xref_classification_and_fragment_rot:
     were deliberately NOT cited by path; where a finding was located in one, it is described by
     field shape instead (upstream-issue-hygiene MUST-2, knowledge-cascade-routing MUST-3).
 
+use_template_root_cause_analysis_and_structural_fix:
+  header: >-
+    Session 4 (2026-08-08), authored AFTER the four findings blocks above and derived from them.
+    This block contains NO new findings. It is a causal analysis plus ONE structural recommendation,
+    and it argues that the sequencing requested by the block above it is BACKWARDS.
+
+    Read it against, not merely alongside, `use_template_findings_xref_classification_and_fragment_rot`.
+    That block asks loom to teach the downstream validator six by-design-absent categories, then wire
+    it. This block argues that the category list is a treadmill by construction, that the information
+    it encodes is already computed elsewhere, and that the gate belongs at emit time instead. The
+    findings block is not wasted under this reading -- its per-token classification is precisely the
+    migration input the structural fix needs, and its acceptance criteria are already the checklist
+    for step 1 -- but its ORDER should be inverted before implementation begins.
+
+    One claim in this block is an ASSUMPTION about a component that cannot be read from a consumer.
+    It is labelled inline and named again in confidence_bound. Do not implement step 2 before
+    checking it at loom.
+
+  root_cause: >-
+    Cross-references in this corpus are UNTYPED STRINGS WITH NO DECLARED AUDIENCE, inside a
+    distribution system that deliberately projects a different file set to every consumer. Every
+    defect class measured in the block above falls out of that one fact, via two distinct mechanisms.
+
+    ROT. A hand-typed path has no compiler, no import resolution, and no rename refactoring. Moving
+    an artifact silently breaks every prose citation naming it -- the pattern-expert case (S4-11).
+    Line-range anchors are the degenerate form: they break when the TARGET is edited, with nobody
+    touching the reference and nothing moving. That is why that class measured a 100% defect rate
+    (S4-3) while path-only classes did not. The defect distribution is what the causal claim
+    predicts, which is the main evidence for it.
+
+    AMBIGUITY. The token `rules/cross-repo.md` is a VALID reference at loom and an unresolvable one
+    at a USE template. The reference carries no information about who is expected to resolve it, so a
+    downstream checker cannot separate "rotted" from "correctly absent here" without consulting a
+    manifest. That is why 225 of 294 findings are noise (S4-1), and why the six-category fix (S4-2)
+    is a treadmill rather than a fix: each new distribution fate adds a seventh category, and the
+    category list is maintained in a different place from the manifest that actually decides.
+
+  recommendation: >-
+    MAKE THE EMITTER THE GATE, NOT THE CONSUMER. Validate references at EMIT time against the exact
+    file set each target receives, and give references a declared KIND so "unresolvable downstream" is
+    stated intent rather than inferred absence. Demote the downstream validator from primary gate to
+    backstop.
+
+    The leverage: the manifest ALREADY COMPUTES THE ANSWER. At Gate-2 the emission engine determines
+    exactly which files a given target will receive. That is the one place where "correct absence"
+    versus "rot" is decidable with zero heuristics and zero hand-maintained categories -- the manifest
+    becomes the category system instead of having one maintained beside it. The present model ships
+    first and asks 30+ consumers each to guess, using a category list, over an input that is ambiguous
+    by construction.
+
+  staged_plan: >-
+    Ordered by ratio of defect-removal to design risk, NOT by severity.
+
+    STEP 1 -- Ban line-number anchors outright and fix the 18. No correct usage of the form exists in
+    this corpus (18 of 18 defective, S4-3): the FORM is unmaintainable, not the instances. Heading
+    anchors survive edits; line numbers cannot. Smallest change, highest defect density, no design
+    work, and it does not depend on any of the steps below. Do this first regardless of what happens
+    to the rest of this block.
+
+    STEP 2 -- Emit-time resolution against the computed per-target file set. Kills the ~225-finding
+    noise class AND the category treadmill in one move, because the manifest stops being consulted by
+    a second, separately-maintained list. THIS IS THE STEP GATED ON THE ASSUMPTION BELOW.
+
+    STEP 3 -- Declared reference kinds for what is legitimately unresolvable downstream: loom
+    provenance pointers (the journal class, S4-6/S4-15) and loom-only tooling (S4-16, S4-14). The
+    `loom/journal/NNNN-...` qualification proposed at S4-5 is exactly this idea applied to one line;
+    generalise the form rather than requalifying line by line. This is a corpus-wide authoring change
+    across roughly 2,600 cross-reference tokens (validator-reported: 2602 scanned), so stage it over
+    several cycles -- it is the slowest part and the least urgent.
+
+    STEP 4 -- Demote the downstream validator to a backstop. Keep it: consumers lag syncs, and a
+    consumer that has not re-synced still needs a local check. But stop treating it as the primary
+    gate, and scope its exit-0 semantics per S4-17 so a green run is read as bounded rather than as a
+    clean bill of health.
+
+    NOTE the interaction with S4-17 (guides tree unscanned): under this plan S4-17 becomes an
+    emit-time scope question rather than a downstream one, but it should still be fixed downstream in
+    the interim because consumers on the current model are silent on the enforcement-bearing half of
+    the rule corpus until step 2 lands.
+
+  honest_cons: >-
+    Stated because they are real and they bound the recommendation, not to balance it.
+
+    (1) It moves work onto the emission engine, which is more complex than a standalone consumer-side
+    script and sits on the `self-referential-codify.md` Bin allowlist -- so every change there pays a
+    Tier-1 multi-agent redteam. Higher cost per change than patching the downstream validator.
+
+    (2) It does nothing for EXISTING consumers until they re-sync. The downstream validator therefore
+    cannot be deleted, only demoted; a transition period exists where both layers run.
+
+    (3) Step 3 is a corpus-wide authoring migration. That is the largest single piece of work implied
+    here and the one most likely to be deferred indefinitely once the acute pain is gone.
+
+    (4) It cannot fix cross-repo provenance pointers. Those are CORRECTLY unresolvable downstream by
+    design; they need declaring (step 3), not resolving. Any expectation that emit-time validation
+    makes every reference resolve everywhere is wrong and would produce pressure to strip legitimate
+    provenance -- the outcome S4-6 explicitly argues against.
+
+    (5) The plan reorders work the block above already specified. If loom has begun implementing the
+    six-category fix, steps 1 and 2 partially strand that effort. The classification itself is NOT
+    stranded -- it is step 2's input -- but the allowlist-authoring portion would be.
+
+  confidence_bound: >-
+    HIGH on the causal analysis. It is derived from measurement rather than intuition, and the
+    observed distribution of defects across classes is what the stated cause predicts: the class that
+    rots without anyone touching it (line ranges) is the class that measured 100% defective, while
+    path-only classes did not.
+
+    LOWER, and explicitly so, on step 2's implementability. The emission engine
+    (`sync-tier-aware.mjs`) is loom-only and ABSENT from a consumer repo, so this recommendation is
+    designed against a component the author could not read. That it computes a per-target file set at
+    Gate-2 is an INFERENCE from manifest commentary and observed sync behaviour, NOT a verified fact,
+    and whether references can be cleanly resolved at that point is unknown from here. CHECK THIS AT
+    LOOM BEFORE COMMITTING TO THE SEQUENCE. If the inference is wrong, step 1 still stands alone,
+    step 3 still stands alone, and only step 2 -- the load-bearing one -- needs redesign.
+
+  acceptance_criteria:
+    - "[ ] Step 1: no line-range anchor form remains in .claude/**, and the form is prohibited in the authoring rules so it cannot re-enter."
+    - "[ ] Step 2 PRECONDITION: someone with loom access confirms or refutes that the emission engine can resolve references against a target's computed file set at Gate-2. Record the answer before any implementation."
+    - "[ ] Step 2: a reference that a given target cannot resolve is detected at EMIT time for that target, with no hand-maintained by-design-absent category list consulted."
+    - "[ ] Step 2: the six categories enumerated at S4-2 are derivable from the manifest rather than restated in the validator."
+    - "[ ] Step 3: every reference that is unresolvable-downstream-by-design carries a declared kind; a bare unqualified path that cannot resolve at its target is a failure, not a judgment call."
+    - "[ ] Step 4: the downstream validator still runs and still catches rot on an unsynced consumer, and its exit-0 semantics are scoped per S4-17."
+    - "[ ] The sequencing conflict with use_template_findings_xref_classification_and_fragment_rot is resolved EXPLICITLY at Gate-1 -- either this block's order is adopted and that block's requested_fix is amended, or this block is rejected with a reason. Both blocks silently proceeding is the failure mode."
+
+  disclosure_scrub: >-
+    This block names only .claude/ artifact-surface paths and loom-side component names already
+    present in the manifest and in the blocks above. No operator identity, no absolute path, no
+    client or tenant identifier, and no downstream-consumer name appears.
+
 status: pending_review
