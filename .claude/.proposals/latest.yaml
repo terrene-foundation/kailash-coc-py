@@ -1832,4 +1832,493 @@ use_template_findings_body_parity_and_coc_lane:
     bounds until classified by reading the hits: that instrument class overstated genuine defects by
     roughly 8x on two independent surfaces here.
 
+use_template_findings_xref_classification_and_fragment_rot:
+  header: >-
+    Session 4 (2026-08-08). This block does NOT re-file B4. B4 already recorded the validator at
+    exit 1 with 294 dangling rows, "no workflow runs it", the fix ordering, and an estimate that
+    "roughly 218 of the 294 rows are legitimate absences". This block supplies what B4's prose-level
+    requested_fix cannot be implemented without: an EXACT per-token classification of all 294 with
+    manifest line numbers, and it corrects two things -- one in B4's framing and one in this
+    session's own earlier framing.
+
+    It also opens a class B4 does not cover at all and that NO instrument in this repo can see:
+    line-range (#L) fragment anchors. That class turned out to carry a 100% defect rate and is the
+    most serious finding here.
+
+    Labels follow the preceding block's discipline. VERIFIED-BY-ORCHESTRATOR = re-derived
+    independently with controls fired in both directions. LANE-REPORTED = an audit lane's result the
+    orchestrator did not fully re-derive. RESPECT THE LABEL.
+
+    Method note: three independent lanes classified one class each (105 journal / 121 backtick /
+    68 md-link = 294, reconciling exactly). Each lane was told to refute the orchestrator where it
+    could, and TWO of the orchestrator's claims were refuted -- both refutations are recorded below
+    in preference to the original claims.
+
+  what_this_session_got_wrong: >-
+    Recorded first, because a Gate-1 reader should discount these two claims wherever else they appear.
+
+    (1) The orchestrator filed `.claude/bin/ecosystem.json` (x10) as a WRONG-PATH defect. REFUTED by
+    the backtick lane and re-verified: sync-manifest.yaml:3267 carries `- bin/ecosystem.json` under
+    `loom_only:`, whose own `why` states that the committed `bin/ecosystem.example.json` (synthetic
+    tokens) is the only ecosystem* file that DOES sync -- and that example file is present at 5811
+    bytes. The cited path is CORRECT; the absence is by design. Root cause of the error: the manifest
+    writes tier-relative `bin/X` for on-disk `.claude/bin/X`, so a `.claude/`-anchored grep misses
+    every such entry. Any future audit of manifest fate MUST search both path forms.
+
+    (2) The orchestrator reported the fragment-anchor surface as "overstated to near-empty" and
+    proposed closing it. REFUTED by the md-link lane and re-verified. The orchestrator measured the
+    SECTION-anchor sub-class, correctly found it inert, then generalised across a surface containing
+    four sub-classes -- while the #L sub-class it had itself counted at 51 is where the rot lives.
+    The prior session's "larger than the 16 section-citation breaks" framing was DEFENSIBLE and
+    UNDERSTATED. See S4-3. Measuring one sub-class and concluding about the whole is the same
+    epistemic shape as trusting a tally over a read.
+
+  findings:
+    - id: S4-1
+      status: VERIFIED-BY-ORCHESTRATOR
+      severity: LOW
+      where: .claude/.proposals/latest.yaml (B4 requested_fix)
+      finding: >-
+        B4's "roughly 218 of the 294 rows are legitimate absences" is ACCURATE in aggregate and
+        MISLEADING in distribution. Exact counts across all three classes: journal 105 legitimate;
+        backtick 120 of 121 legitimate; md-link 0 of 68 legitimate. Total 225 of 294 = 76.5% against
+        the estimate's 74.1%.
+      why_it_matters: >-
+        The estimate implies defects are spread across the corpus. They are not: 68 of the ~70
+        required artifact edits sit in ONE class. A remediation plan built on the aggregate figure
+        would spread effort evenly across three classes, two of which need no artifact edits at all.
+      requested_fix: >-
+        Replace the aggregate estimate with the per-class split. Note the backtick lane's own
+        inference ("the estimate does not hold") was itself too strong -- it generalised from a
+        99.2%-legitimate slice; corrected here by combining all three lanes.
+
+    - id: S4-2
+      status: LANE-REPORTED
+      severity: HIGH
+      where: .claude/.proposals/latest.yaml (B4 requested_fix) + .claude/bin/validate-xref-integrity.mjs
+      finding: >-
+        B4's requested_fix names THREE by-design-absent categories to teach the validator ("loom_only
+        tooling, journal/, tier artifacts a consumer does not subscribe to"). The backtick class alone
+        needs SIX. Missing three: `use_exclude` (16 occurrences), global `exclude:` globs (6), and the
+        post-2026-07-15 fail-closed ALWAYS_INCLUDE bin regime (6).
+      evidence: >-
+        use_exclude tokens with manifest lines: rules/cross-repo.md x10 @3877; rules/loom-csq-boundary.md
+        x4 @3860; rules/cross-sdk-inspection.md x1 @3854; rules/coc-artifact-eval-coverage.md x1 @3865;
+        commands/test-harness-probe.md x1 @3866. Global exclude: rules/local/** @3755 (3 occurrences);
+        **/*.test.mjs @3779 (3). Tier non-subscription: rules/stack-detection.md, tier `onboarding`
+        @1894 vs py tier_subscriptions @4066.
+      why_it_matters: >-
+        A fix built to the three-category spec leaves roughly 28 backtick rows red, so it would FAIL
+        B4's own acceptance criterion ("exits 0 on a clean consumer checkout") while appearing complete.
+      requested_fix: Expand requested_fix to six categories before implementation begins.
+
+    - id: S4-3
+      status: VERIFIED-BY-ORCHESTRATOR
+      severity: HIGH
+      where: 18 distinct #L line-range anchors across .claude/skills/** (x3 mirrored into .codex/ and .gemini/)
+      finding: >-
+        Line-range fragment anchors are a wholly unmeasured rot class with a 100% defect rate. 51
+        occurrences are 17 distinct anchors x 3 mirrored trees (51 = 17x3 exactly), plus an 18th in the
+        backtick class. Verdict on all 18: 8 point PAST end-of-file, 9 resolve but land on unrelated
+        content, 1 never resolves. ZERO are correct.
+      evidence: >-
+        Orchestrator-verified with `wc -l` + `sed -n` (both discriminating in both directions):
+        agents/frameworks/dataflow-specialist.md is 110 lines, and skills/02-dataflow/dataflow-result-access.md:173
+        cites #L991-L1001 -- `sed -n '991,1001p'` returns 0 lines, roughly 880 past EOF.
+        agents/implementation/pattern-expert.md is 84 lines, and skills/31-error-troubleshooting/error-connection-params.md:209
+        cites #L294-L338 while its own shipped prose claims "(lines 294-338)" -- returns 0 lines, i.e. a
+        checkable falsehood in consumer-facing text. Root CLAUDE.md is 166 lines, so the 18th anchor
+        (#L111-L177) overruns EOF by 11. Lane-measured, orchestrator-spot-confirmed: CLAUDE.md#L140 is a
+        bare code-fence terminator cited as "Critical Rules"; #L139-L145 straddles a fence-close into the
+        unrelated "## Kailash Platform" table while claiming "Critical Rules" (ground truth: "## Critical
+        Execution Rules" is lines 126-141).
+      why_it_matters: >-
+        Line numbers drift on every edit, so this class rots silently and continuously. It is invisible
+        to the validator by construction (S4-4), so no existing or planned gate catches it. Consumers are
+        being pointed at wrong content by shipped prose that asserts what the range contains.
+      requested_fix: >-
+        Replace all 18 with section anchors or plain file references, and add a fragment-resolution pass
+        to the validator (heading-slug resolution for #section, an EOF bound for #L). Fix only the
+        .claude/ sources; .codex/ and .gemini/ are regenerated by emit-cli-artifacts.mjs.
+        SEQUENCING CONSTRAINT, load-bearing: a PATH-only fix pass silently PROMOTES dead anchors into
+        live-but-wrong ones. Demonstrated -- skills/16-validation-patterns/validate-workflow-structure.md:290
+        is path-unresolved (4 hops escapes root, so its anchor is never evaluated), but the SAME #L139-L145
+        range is cited from skills/31-error-troubleshooting/error-parameter-validation.md:198 via a 3-hop
+        path that DOES resolve and lands on the wrong table. The path fix and the fragment fix MUST land
+        together.
+
+    - id: S4-4
+      status: VERIFIED-BY-ORCHESTRATOR
+      severity: MEDIUM
+      where: .claude/bin/validate-xref-integrity.mjs:140-141 (MD_LINK_RE)
+      finding: >-
+        MD_LINK_RE captures the path in group 1 and swallows the fragment NON-CAPTURING via
+        `(?:#[^)]*)?`. The validator therefore checks the FILE and never the FRAGMENT, and only for five
+        extensions. S4-3's entire class is structurally invisible to it.
+      why_it_matters: >-
+        Teaching the validator its by-design-absent categories would take it to exit 0 while 51
+        occurrence-level fragment defects remain uncounted. B4's acceptance criterion would then certify
+        corpus health it has not measured.
+      requested_fix: >-
+        Add a fragment-resolution pass, and treat "exits 0" as scoped to the classes the validator can
+        actually see until that pass exists.
+
+    - id: S4-5
+      status: VERIFIED-BY-ORCHESTRATOR
+      severity: MEDIUM
+      where: .claude/skills/30-claude-code-patterns/parallel-merge-workflow.md:140
+      finding: >-
+        The only MIS-RESOLVABLE citation in the corpus. It cites
+        `journal/0003-RISK-spec04-silent-regression-via-parallel-merge.md`, while a live
+        `workspaces/dev-container/journal/0003-DECISION-cross-repo-authorized-close-loom-384.md` exists in
+        this template. Same number, unrelated topic -- a reader who resolves it lands on a cross-repo
+        authorization decision instead of a parallel-merge regression post-mortem.
+      evidence: >-
+        Bounded by the orchestrator as the SOLE case across BOTH citation populations: workspace journal
+        numbers are 0001-0005; cited numbers in the unbackticked population span 0006-0569, giving zero
+        overlap (control: injecting 0003 into the `comm -12` intersection fires). The lane independently
+        bounded the backticked population the same way, and separately attempted to REFUTE this row by
+        surfacing 6 apparent bare `journal/0003` citations in workspace files -- which dissolved on
+        READING: inside a workspace file a bare `journal/NNNN` is workspace-relative and resolves
+        correctly (the cited entry genuinely contains the quoted text, and is the only file in the repo
+        that does). Not collisions, not defects.
+        INSTRUMENT CAVEAT on the orchestrator's own bound, raised by the lane and accepted: with
+        range-min 0006 and workspace numbers 0001-0005, the collision intersection COULD NOT have returned
+        any other answer -- the "0 collisions" result is ENTAILED by the range and therefore carries no
+        independent information about citation hygiene. The injected-0003 control was still the right move
+        (it establishes the matcher can fire), but the conclusion is not load-bearing evidence. What
+        actually bounds this row is the reading of the hits, not the intersection.
+      why_it_matters: >-
+        Every other finding in this class is merely unresolvable, which a reader notices. This one
+        resolves to the WRONG document, which a reader does not notice.
+      requested_fix: >-
+        Requalify to `loom/journal/0003-RISK-...`. Measured side benefit: the qualified form matches NONE
+        of the validator's three extractors (BACKTICK_JOURNAL_RE, BACKTICK_RE whose prefix set excludes
+        `loom/`, MD_LINK_RE), so it self-removes from the scan rather than relocating into a sibling class.
+        Scope to this ONE line; requalifying all 105 would mean 105 edits across 40 synced artifacts.
+
+    - id: S4-6
+      status: LANE-REPORTED
+      severity: MEDIUM
+      where: .claude/bin/validate-xref-integrity.mjs (:419-437 resolver, :649-656 partition, :714-751 reporting)
+      finding: >-
+        All 105 `[journal]` findings are correct-by-design provenance pointers sharing ONE structural
+        cause, not 105 individual defects. A consumer's journals are workspace-scoped
+        (workspaces/<name>/journal/, numbered from 0001); loom's are root-scoped, so a root journal/NNNN
+        can never resolve downstream. 61 of 105 sit in an explicit provenance section; the lane READ the
+        other 44 and found the substantive claim stated inline in every one. Stripping them would violate
+        the Origin-provenance requirements in artifact-flow.md, rule-authoring.md and trust-posture.md --
+        the journal reference IS the audit trail.
+      evidence: >-
+        Deduced from code-path order with no experiment needed: `malformed-journal-token` (:419-420)
+        precedes the readdirSync, so all 105 having reported `journal-dir-missing` proves every token is
+        well-formed. Confirmed by driving the exported resolver against synthetic roots: all 105 resolve
+        once a populated root journal/ exists (57 distinct numbers), zero still dangle, with controls
+        proving the instrument CAN emit `malformed-journal-token` and `journal-entry-not-found`.
+      requested_fix: >-
+        A reason-scoped skip bucket, NOT an allowlist (98 entries would be unmaintainable) and NOT a
+        directory-existence guard. The lane initially proposed adding an existsSync guard and then
+        withdrew it: `journal-dir-missing` is returned from exactly one site and is therefore
+        self-certifying, while a second existsSync probe would return TRUE for a stray `Journal/` on a
+        case-insensitive filesystem and silently un-skip the whole class. Predicate:
+        `finding.kind === "journal" && finding.reason === "journal-dir-missing"`, added to the :649-656
+        partition cascade so the four buckets stay mutually exclusive and sum to notFound.length, plus a
+        labelled reporting bucket and a `skipped_journal_root` array in --json so the skip is auditable
+        rather than silent. `journal-entry-not-found` keeps failing loud, so the check is RELOCATED to
+        loom (where a root journal/ exists and it can discriminate), not deleted. Fixtures required per
+        cc-artifacts.md Rule 9: next free number is 25; add 25 (root absent => skipped not dangling),
+        26 (root present but empty => still dangling -- the fixture that proves this is not a blanket
+        suppression), 27 (the four buckets are mutually exclusive and sum).
+        Pair with ONE note in rules/journal.md rather than 35 near-identical paragraphs; the lane
+        disclosed that this note will not fire at the moment of confusion because journal.md is
+        path-scoped on journal/** and a reader hitting journal/0543 in agents.md never loads it -- the
+        same reachability shape issue-triage-routing.md documents in its own Origin.
+
+    - id: S4-7
+      status: LANE-REPORTED
+      severity: LOW
+      where: .claude/bin/validate-xref-integrity.mjs:431-433
+      finding: >-
+        TWO blind spots with ONE root cause -- `:431-433` prefix-matches via
+        `n === "NNNN.md" || n.startsWith("NNNN-")`, so anything after the number is never examined.
+        (a) SLUG: 13 of the 105 citations are full-filename form, so a right-number/wrong-slug citation
+        resolves GREEN even at loom. (b) RANGE ENDPOINT: a span citation such as `journal/0082-0084`
+        resolves green on its LEFT endpoint alone -- `resolveJournalToken`'s
+        `^journal\/(\.pending\/)?(\d{3,4})` captures only the first number, and `0082-0084` then satisfies
+        the `0082-` prefix match. The right endpoint is never checked even though checking it alone WOULD
+        flag it.
+      evidence: >-
+        Range behaviour measured against the real resolver by the refutation lane, with a control root
+        holding `0082-DECISION-real-entry.md` and deliberately no `0084`: `journal/0082-0084` -> RESOLVED;
+        `journal/0082` -> RESOLVED; `journal/0084` -> journal-entry-not-found (the control proving the
+        missing endpoint IS detectable in isolation); `journal/0082-0084-more` -> RESOLVED. Two range
+        citations exist today (`guides/rule-extracts/artifact-flow.md:126` and one per-operator tracker
+        file), neither currently in scope -- but the guides one enters scope under S4-17.
+      why_it_matters: >-
+        A citation can name the wrong entry, or silently validate a SPAN by testing one end, and pass the
+        very check that exists to catch exactly that. The range case is one degree worse than the slug case
+        because the reader is told a range was verified when only its first element was.
+      requested_fix: >-
+        Compare the full cited filename when one is given, and reject or fully resolve a range form rather
+        than prefix-matching its left endpoint. Both are pre-existing and orthogonal to S4-6; that fix
+        neither creates nor closes either. Note the interaction with S4-17: adding guides to scope brings a
+        live range citation into the extractor, so this row should land with or before S4-17.
+
+    - id: S4-8
+      status: VERIFIED-BY-ORCHESTRATOR
+      severity: LOW
+      where: .claude/bin/validate-xref-integrity.mjs:228-262 (SANCTIONED_ABSENT_REFS entry 2)
+      finding: >-
+        Dead code. The entry sanctions `.claude/rules/local/local-manifest.yaml` with `sources` scoped to
+        `.claude/rules/local/_README.md`, but `rules/local/**` is globally excluded at manifest:3755
+        ("Never distributed to a target"), so that source never ships and the entry can never match at any
+        consumer.
+      requested_fix: Retire or re-scope in the same fix as S4-2.
+
+    - id: S4-9
+      status: VERIFIED-BY-ORCHESTRATOR
+      severity: LOW
+      where: .claude/rules/instrument-discipline.md:78 and .claude/rules/wave-loop.md:303
+      finding: >-
+        Two occurrences an allowlist addition would NOT clear, because the validator's shape guard fails
+        independently of the allowlist. instrument-discipline.md:78 reads "Phase 2 deferred" with no
+        parenthesis while `PHASE2_DEFERRED_RE = /Phase[\s-]?2\s*\(deferred/i` requires a literal `(`
+        (both verified). wave-loop.md:303 carries the path on a CONTINUATION line while the guard is
+        line-scoped.
+      requested_fix: >-
+        Either reword both citing lines into the canonical same-line form, or widen the guard to a
+        paragraph window. The lane proved the guard fails but declined to choose the fix, since the guard
+        lives in a synced script and the choice is loom's.
+
+    - id: S4-10
+      status: LANE-REPORTED
+      severity: LOW
+      where: .claude/bin/validate-xref-integrity.mjs:349-377 (stripFencedBlocks)
+      finding: >-
+        The fence stripper is run-length-blind: it matches `(```+|~~~+)` then compares only `run[0]`, the
+        character, ignoring run length. In a 4-backtick-fenced block containing an inner 3-backtick fence,
+        content between the inner fences SURVIVES stripping where CommonMark would strip it. It produces a
+        parity FLIP, not uniform leakage, so it is a latent source of both false positives and false
+        negatives in any nested-fence file.
+      requested_fix: Compare run length, not just the fence character.
+
+    - id: S4-11
+      status: VERIFIED-BY-ORCHESTRATOR
+      severity: MEDIUM
+      where: .claude/skills/16-validation-patterns/validate-workflow-structure.md:289
+      finding: >-
+        The one genuinely wrong path in the backtick class, found independently by two lanes. It cites
+        `.claude/agents/pattern-expert.md`; the agent lives at
+        `.claude/agents/implementation/pattern-expert.md` (present, manifest-declared in the `kailash` tier
+        @1706) and the cited path does not exist. DOUBLE-broken: the `implementation/` segment is missing
+        AND the `../../../../` depth escapes the repo root for a file at
+        `.claude/skills/16-validation-patterns/`.
+      requested_fix: >-
+        `../../agents/implementation/pattern-expert.md`. Both the backtick token and the md-link half of
+        the same line carry the identical error, and line :290 carries an #L anchor with the same bad
+        depth -- fix all three together per S4-3's sequencing constraint.
+
+    - id: S4-12
+      status: LANE-REPORTED
+      severity: MEDIUM
+      where: .claude/skills/18-security-patterns/SKILL.md:67,68,69,73,74,75,79,80
+      finding: >-
+        Eight phantom citations -- `security-{secrets,input-validation,injection-prevention,auth-patterns,api-keys,tokens,owasp-top10,audit-checklist}.md`.
+        Zero manifest hits for all eight (control: `skills/18-security-patterns` itself has 14 manifest
+        hits, so the matcher fires), and `git log --all --diff-filter=A` shows none ever existed in this
+        repo's history. Only `security-attack-chains.md` did, and it exists. This is a phantom-citation
+        section, not a rename.
+      why_it_matters: >-
+        spec-accuracy.md Rule 1 class -- a reference index whose entries never existed teaches a fictional
+        layout of the security skill.
+      requested_fix: Delete the eight bullets, or author the files.
+
+    - id: S4-13
+      status: LANE-REPORTED
+      severity: MEDIUM
+      where: the state-file-mutation detector reached via the Bash PreToolUse boundary
+      finding: >-
+        Two false positives, both carrying `block` severity (hard stop, not halt-and-report, not
+        advisory), against a read-only repo scan. Layer 3 matched a `json.dump(` token in a python
+        heredoc's SOURCE TEXT; Layer 1 matched a heredoc+redirect BUNDLE SHAPE. Neither command names any
+        state path anywhere -- the only write targets were under /tmp. The second block's stated reason
+        asserts "a redirect ... on a literal state path", which was factually not the case.
+      why_it_matters: >-
+        A lexical source-text match carrying `block` sits in tension with hook-output-discipline.md MUST-2.
+        The detector cannot distinguish an interpreter body writing to /tmp from one writing to a state
+        file, so its output is identical whether the proposition "this command mutates state" is true or
+        false -- non-discriminating on write target per instrument-discipline.md MUST-1, while still hard-
+        stopping. The lane routed around it via a Write-authored script rather than asking a peer to run
+        the blocked command, which would have laundered the permission decision.
+      requested_fix: >-
+        Resolve the write TARGET rather than matching source text, or downgrade the lexical layers to
+        advisory per hook-output-discipline.md MUST-2. Reproduction: any python3 heredoc containing a
+        `json.dump(...)` / `open(...,'w')` token with a /tmp-only target, or any heredoc with a
+        `> /tmp/...` redirect.
+
+    - id: S4-14
+      status: VERIFIED-BY-ORCHESTRATOR
+      severity: LOW
+      where: .claude/rules/worktree-isolation.md:250 and .claude/skills/30-claude-code-patterns/worktree-orchestration.md:719
+      finding: >-
+        A SHIPPED rule instructs the reader "The committed instrument is `bin/probe-ancestor-load.mjs`; do
+        NOT re-derive it from prose" -- and that file is absent from this template. The rule forbids the
+        only workaround it leaves the reader.
+      why_it_matters: >-
+        A consumer told not to re-derive a file it does not have is stuck, and the prohibition is what
+        makes it a defect rather than a missing-nice-to-have.
+      requested_fix: >-
+        Either ship the instrument to the USE lane or soften the prohibition for repos that do not receive
+        it. Note the file's distribution fate is itself unresolved -- see S4-16.
+
+    - id: S4-15
+      status: VERIFIED-BY-ORCHESTRATOR
+      severity: MEDIUM
+      where: .claude/bin/validate-xref-integrity.mjs:136 (BACKTICK_JOURNAL_RE)
+      finding: >-
+        BACKTICK_JOURNAL_RE requires a BACKTICKED `journal/NNNN`, so the validator cannot see journal
+        citations in other shapes. It sees 105 of 604 journal references repo-wide (17%). Blindness splits
+        into ~190 in-scope-but-wrong-shape (186 plain prose + 4 path-qualified) and 309 out-of-scope.
+      evidence: >-
+        SURVIVED an independent refutation round. A second, separately-written instrument (backtick-span
+        membership via a tick-toggle model rather than a negative lookbehind, plus its own fence stripper)
+        reproduced the validator's 105 as a MULTISET-IDENTICAL set -- same file:line:NNNN triples,
+        JSON.stringify equality -- which is the strongest available validation that both matchers agree on
+        members, not just totals. The orchestrator's unbackticked figure of 217 is bracketed at 214-220 by
+        that instrument (fences stripped 214/55/85; fences kept 220/57/88), with the orchestrator's 55
+        files and 85 distinct numbers matching `.claude/**` exactly. A residual 3 is UNRECONCILED and
+        recorded as such rather than explained away. A predicted sub-shape was REFUTED: zero of the
+        unbackticked population sits in `[text](journal/...)` md-link form repo-wide, so within scope
+        unbackticked really does mean invisible.
+      why_it_matters: >-
+        REATTRIBUTED after the refutation round, and this correction matters more than the count. The
+        journal class is NOT where exit 0 overstates corpus health: all 604 references are the same
+        correct-by-design provenance class, the corpus holds roughly ONE genuine defect in it (S4-5), and
+        `journal-entry-not-found` still fires wherever a root journal/ exists -- so after S4-6's fix exit 0
+        will be TRUE about this class. The overstatement lives in three other places, all pre-existing and
+        all untouched by S4-6: the unscanned guides tree (S4-17), the slug blind spot and the range-endpoint
+        blind spot (both S4-7).
+      requested_fix: >-
+        Decide deliberately whether the unbackticked shape is in scope for the extractor, and do NOT widen
+        scope to the 309 out-of-scope references: 229 of those are EMITTED MIRRORS (.coc/rules 135,
+        .coc/{skills,commands,agents} 30, .codex/{skills,prompts} 33, .gemini/skills 23), so scanning them
+        would double-count derived copies and flag generated output. (Inference, labelled: the mirror
+        classification rests on .coc/ carrying a different frontmatter schema and mirroring .claude/
+        filenames 1:1; derived-vs-source was NOT proven. If .coc/ is hand-authored neutral source this
+        needs revisiting -- it changes the size of S4-17's recommendation, not its direction.)
+
+    - id: S4-17
+      status: VERIFIED-BY-ORCHESTRATOR
+      severity: HIGH
+      where: .claude/bin/validate-xref-integrity.mjs:302-308 (DEFAULT_SCOPE_DIRS)
+      finding: >-
+        The validator does not scan `.claude/guides` at all. DEFAULT_SCOPE_DIRS is exactly
+        [".claude/commands", ".claude/rules", ".claude/skills", ".claude/agents"] -- guides is absent.
+        That tree holds 28 rule-depth extracts and 42 journal references across 11 files, 27 of them
+        backticked (i.e. they WOULD be extracted if the tree were in scope).
+      evidence: >-
+        Orchestrator-verified: the DEFAULT_SCOPE_DIRS literal read directly; `ls .claude/guides/rule-extracts/`
+        returns 28 entries; journal-reference counts by grep over the tree. Control: `guides/rule-extracts`
+        appears 4 times in rules/self-referential-codify.md, confirming the tree is on that rule's
+        codify-class allowlist. Independently surfaced by the refutation lane, which measured 41/11/29 --
+        the small deltas against 42/11/27 are its fence-stripping, not a disagreement.
+      why_it_matters: >-
+        This is the real answer to "does exit 0 overstate corpus health", and it is worse than a coverage
+        gap. `self-referential-codify.md` puts `.claude/guides/rule-extracts/**` on its allowlist with an
+        explicit rationale: a rule's extracted depth carries its BLOCKED corpus, so "an edit there changes
+        the rule's enforcement surface exactly as an edit to the rule body does". A cross-reference
+        validator that skips that tree is therefore silent on the ENFORCEMENT-BEARING half of the rule
+        corpus while reporting exit 0 over the other half. The 28 extracts are precisely the depth files
+        the baseline rules point readers to.
+      requested_fix: >-
+        Add `.claude/guides` to DEFAULT_SCOPE_DIRS. Sequence it AFTER the backtick and md-link remediations
+        close, because it will surface new findings in both of those classes and should not be interleaved
+        with them. Separately, scope the exit-0 semantics in the docstring at :78-82: it currently reads as
+        a clean bill of health for cross-references and should name what is NOT examined -- out-of-scope
+        trees, slug tails (S4-7), range endpoints (S4-7). That is a one-paragraph change and it is the
+        difference between "exit 0 means clean" and "exit 0 means clean within a stated boundary".
+
+    - id: S4-16
+      status: LANE-REPORTED
+      severity: LOW
+      where: >-
+        bin/lib/disclosure-adjudication.mjs (x3 citations), bin/probe-ancestor-load.mjs (x2),
+        bin/reconcile-settings-hooks.mjs (x1)
+      finding: >-
+        Four tokens / six findings whose fate CANNOT be determined from inside a consumer. They have zero
+        manifest entries, which after the 2026-07-15 retirement of the `bin/**` tier glob (manifest
+        3161-3170) is the EXPECTED shape for a file off the fail-closed ALWAYS_INCLUDE allowlist -- but
+        that allowlist lives inside `sync-tier-aware.mjs`, which is itself loom_only @3301 and absent here.
+        "Absent with no manifest entry" is produced identically by correct fail-closed exclusion and by a
+        missing allowlist entry.
+      why_it_matters: >-
+        Six of the 294 rows cannot be dispositioned downstream at all. This is a structural limit of
+        auditing distribution fate from the receiving end, not a gap in the audit.
+      requested_fix: >-
+        An operator-side check at loom against ALWAYS_INCLUDE. The lane correctly declined to
+        self-authorize the cross-repo read that would have resolved it (repo-scope-discipline.md), and
+        declined to file the rows as either by-design or defective without it.
+
+  acceptance_criteria:
+    - "[ ] S4-2: the validator's by-design-absent category set covers all SIX categories; a clean consumer checkout exits 0 with zero backtick rows remaining."
+    - "[ ] S4-3: no #L line-range anchor remains in .claude/**; each replaced anchor's target content is confirmed to contain what the citing text claims."
+    - "[ ] S4-3: the path fix and the fragment fix for validate-workflow-structure.md:290 and error-parameter-validation.md:198 land in the SAME change; no anchor is promoted from dead to live-but-wrong."
+    - "[ ] S4-4: the validator resolves fragments (heading-slug for #section, EOF bound for #L), OR its docstring states that exit 0 excludes fragments."
+    - "[ ] S4-5: parallel-merge-workflow.md:140 is requalified and a re-run shows it matching none of the three extractors."
+    - "[ ] S4-6: fixtures 25, 26 and 27 exist and pass; fixture 26 (root present, entry absent => still dangling) demonstrably fails if the skip is widened to the whole token class."
+    - "[ ] S4-8: the dead SANCTIONED_ABSENT_REFS entry is retired or re-scoped."
+    - "[ ] S4-9: both citing lines pass the shape guard, or the guard is paragraph-scoped."
+    - "[ ] S4-11: the pattern-expert citation resolves from its own directory; both the backtick and md-link halves are corrected."
+    - "[ ] S4-12: the eight phantom security-skill bullets are removed or the files authored."
+    - "[ ] S4-13: the state-file detector resolves write targets, or its lexical layers no longer carry block."
+    - "[ ] S4-16: each of the four A-prime tokens is dispositioned against loom's ALWAYS_INCLUDE."
+    - "[ ] S4-17: .claude/guides is in DEFAULT_SCOPE_DIRS, and the findings it surfaces in the backtick and md-link classes are dispositioned rather than deferred."
+    - "[ ] S4-17: the docstring exit-0 paragraph names what the validator does NOT examine (out-of-scope trees, slug tails, range endpoints), so exit 0 reads as bounded rather than as a clean bill of health."
+    - "[ ] S4-7: a right-number/wrong-slug citation FAILS, and a range citation whose right endpoint is absent FAILS -- each pinned by a fixture, since both currently resolve green."
+
+  known_coverage_gaps: >-
+    Stated so a Gate-1 reader does not read this block as a complete audit.
+
+    NOTHING WAS FIXED. Every fix target was checked for durability and all are loom-synced -- the
+    citing artifacts, the validator, the hooks -- so a local edit is rebuilt away by the next
+    /sync-to-use (artifact-flow.md Class-A). This block is the deliverable; the repo is unchanged, and
+    the 294 count is identical at session close (validator --json, dangling_count 294).
+
+    The #L verdict covers 18 distinct anchors. Section-anchor fragments were counted (7, all inert --
+    placeholders, fixture data, one HTTPS URL) but NOT resolved against actual heading slugs; that is a
+    bound, not a clearance. Same-file (11) and backtick-shape (4) fragment anchors were counted and
+    read but not resolved.
+
+    Six rows (S4-16) are undispositionable from a consumer.
+
+    The S4-15 refutation round DID return before close. Its outcome: the orchestrator's count survived
+    (bracketed 214-220 against a stated 217, with files and distinct-number counts matching exactly), one
+    predicted sub-shape was refuted to zero, and a residual 3 remains UNRECONCILED between the two
+    instruments -- attributable to fence handling but not proven, and recorded rather than explained. That
+    round also REATTRIBUTED S4-15's consequence and produced S4-17, which is the more serious finding.
+
+    S4-10 is LANE-REPORTED and was not independently re-derived. S4-7's slug half is LANE-REPORTED; its
+    range half was measured against the real resolver with controls.
+
+    The mirror classification underpinning S4-15's requested_fix (229 of 309 out-of-scope references are
+    emitted copies) rests on a labelled INFERENCE about .coc/ being derived rather than hand-authored
+    source. It was not proven and is flagged inline.
+
+    Two claims from earlier in this session are WITHDRAWN and must not be carried forward: the
+    ecosystem.json wrong-path claim, and the "fragment anchors are near-empty, close F25" conclusion.
+    Both are recorded in what_this_session_got_wrong above.
+
+    Instrument note carried forward and reconfirmed twice this session: reading `$?` after a pipe
+    yields the pipe's exit status, not the command's -- it produced a false GREEN reading of this very
+    validator before being caught. Every exit code in this block was captured by redirecting to a file
+    first. Separately, a class-grouping tally that did not sum to its own total was the only signal
+    that a grouping regex had silently missed 68 findings; the sum check caught what review did not.
+
+  disclosure_scrub: >-
+    Every path in this block is on the .claude/ artifact surface or the workspaces/dev-container/
+    workspace surface. No operator identity, no absolute path, no client or tenant identifier, and no
+    downstream-consumer name appears. Per-operator surfaces that hold a display_id in their filename
+    were deliberately NOT cited by path; where a finding was located in one, it is described by
+    field shape instead (upstream-issue-hygiene MUST-2, knowledge-cascade-routing MUST-3).
+
 status: pending_review
