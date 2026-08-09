@@ -2876,4 +2876,156 @@ use_template_metric_axis_correction_the_headline_count_is_not_a_health_metric:
     Names only `.claude/` artifact paths and manifest key names. No operator identity, no absolute
     path, no client or tenant identifier, no downstream-consumer name.
 
+use_template_findings_emitter_generated_dead_invocation_and_sweep_gate:
+  header: >-
+    Session 5 (2026-08-09). Three findings, all measured this session. The first REFUTES a
+    session-4 conclusion that was about to be acted on: the recommendation to close issue #28
+    rested on a claim that is false, and the defect it missed has a two-line root cause in an
+    emitter template string.
+
+    The other two convert issue #55's items 2 and 3 from "open-unverified" to measured, and
+    answer the standing recommendation's one explicitly-unverified precondition.
+
+    Method note that generalizes past these findings: every session-4 claim was re-measured
+    rather than inherited, and the one that failed had failed in a specific, repeatable way --
+    three named files were measured and the conclusion was generalized to "corpus-wide". That is
+    the same trap session 4's own notes warn about under "measuring one sub-class and concluding
+    about the whole". It recurred within one session of being written down.
+
+  s5_1_emitter_generates_the_dead_invocation_form: >-
+    Session 4 recorded, and used as the basis for recommending #28 be closed: "every surviving
+    ref corpus-wide is a DEPRECATION NOTICE naming `bin/coc` as the replacement, not an
+    instruction to use the dead form." That claim is FALSE.
+
+    Measured, with the matcher shown to fire first (control: `grep -rl 'codex' .claude/wrappers/`
+    returns 28 files, so grep discriminates in that tree):
+      - `.codex/prompts/` files carrying `/prompts:` -- 22
+      - lines carrying it -- 44
+      - of those 44 lines, how many carry any deprecation framing -- 0
+        (`grep -ci 'deprecat\|bin/coc'` over the hit lines)
+      - source agents carrying the phrase -- 0 (`grep -rln 'After invoking' .claude/agents/`
+        exits 1), so this is emitter-generated, not authored
+      - `.coc/` mirror carrying it -- 0
+
+    ROOT CAUSE, two hardcoded template strings:
+      - `.claude/bin/emit-cli-artifacts.mjs:917` -- "After invoking `/prompts:${promptName}`,
+        your context now contains the operating specification below."
+      - `.claude/bin/emit-cli-artifacts.mjs:923` -- "Native subagent spawning is unreliable in
+        headless mode. Use pattern (a): invoke `/prompts:${promptName}`."
+
+    Two further sites are stale internal comments asserting current-tense Codex behaviour that is
+    false under CLI 0.128+: `:34` ("reads it as-is via /prompts:<name>") and `:191` ("Codex reads
+    frontmatter natively via /prompts:<name>").
+
+    USER-FACING IMPACT: pattern (c) in every emitted specialist body instructs a Codex user to
+    invoke a form Codex 0.128+ does not load. `bin/coc` itself is CLEAN -- `bin/coc:4-7,42-44`
+    carry correct deprecation notices. So issue #28 item 3 is NOT resolved; it survives in the
+    emitted tree, at 22x the blast radius of the `codex-architect.md` instance #55 item 1 names.
+
+    WHAT SESSION 4 GOT RIGHT, restated so this block is not misread as overturning all of it:
+    #28 items 1 and 2 ARE resolved (`bin/coc` ships, 3755 B executable, 30 entries under `bin/`;
+    `developer_instructions_file` has zero hits in `.claude/wrappers/`, exit 1 against a control
+    that fires). `CLAUDE.md` and `.claude/guides/codex/README.md` are at 0 refs.
+    `.claude/agents/codex-architect.md`'s 2 hits ARE both deprecation notices, so #55 item 1 is a
+    true false-positive exactly as session 4 said.
+
+  s5_2_issue_55_items_2_and_3_now_measured: >-
+    ITEM 2 -- CONFIRMED, live on this consumer. `.claude/bin/lib/loom-links.mjs` is absent
+    (control: `ls .claude/bin/lib/` fires and lists cli-delivery.mjs, coc-manifest.mjs,
+    ecosystem-config.mjs, emit-axes.mjs, identity-scrub.mjs -- so the directory exists and the
+    miss is a true negative). `.claude/commands/sweep.md:141` ends its dynamic import with
+    `.catch(e=>console.log("<!-- sweep-ecosystem:v1:ERROR ... -->"))`, mapping ANY import failure
+    -- including plain module-not-found -- onto the ERROR sentinel, while `:138` documents an N/A
+    sentinel for exactly the not-orchestration-root case. So `/sweep` emits a false ERROR finding
+    on every run here. This also explains why session 4's Sweep-N enumeration was vacuous.
+
+    SCOPE DISCIPLINE: the issue's "fires on all 30+ consumers" is an INFERENCE, plausible because
+    the module is loom-only and the command is distributed byte-identical, but NOT measured. I
+    verified it fires HERE only.
+
+    ITEM 3 -- locally already satisfied. `.claude/settings.json:4` reads `"effortLevel": "high"`.
+    The local drift #53 ratified is applied. The issue's actual ask -- make `high` the loom-side
+    source default so a future sync cannot reset it -- is untouched by that and remains open.
+
+    NET: #55 is NOT closeable as-is. Its item 1 should be REPLACED by S5-1 (same bug class, 22x
+    blast radius, two-line root cause), item 2 stands confirmed, item 3 stands upstream-only.
+
+  s5_3_the_standing_recommendation_precondition_is_answered: >-
+    Session 4 left one precondition explicitly unverified: whether
+    `derives-from-edge.js::classifyAnchor` can be driven over PROSE BODIES rather than only
+    structured edge records.
+
+    ANSWER: YES, it is driveable -- and reusing it as-is would NOT catch the defect.
+
+    `classifyAnchor` at `.claude/hooks/lib/derives-from-edge.js:307` takes a bare STRING, is
+    documented at `:299` as "PURE (no I/O) -- the SHAPE gate", and is exported at `:783`. Callers
+    pass `a.anchor` / `src.anchor` (`:456`, `:537`) but the function has no record dependency.
+
+    Driven directly, with a control that discriminates in BOTH directions:
+      - `foo.md:471`                        -> ok:false, "bare-line-number-anchor"   (rejects)
+      - `kp://x::y`                          -> ok:false, "mesh-fence-kp-urn-in-anchor" (rejects)
+      - `dataflow-specialist.md#L991-L1001`  -> ok:TRUE, kind:"section"              (PASSES)
+      - `pattern-expert.md#L294-L338`        -> ok:TRUE, kind:"section"              (PASSES)
+      - `CLAUDE.md#L111-L177`                -> ok:TRUE, kind:"section"              (PASSES)
+
+    ROOT CAUSE of the miss: the bare-line guard at `:348` is gated on `kind === "symbol"`. A
+    `#L...` fragment takes the SECTION branch at `:324`, where the only remaining check is the
+    4-char normalized length floor at `:353-354`, which "L294-L338" clears. The exact defect class
+    is invisible to the shape gate.
+
+    SECOND GAP: `classifyAnchor` is PURE by design, so it cannot detect a range pointing past EOF.
+    That needs the separate `validateEdgeAnchorsResolve`. 8 of the 18 defects are past-EOF.
+
+    NOTE an over-claim in the corpus: `specs-authority.md:386` states classifyAnchor "rejects the
+    bare-line and `kp://` anchor shapes". True for `path:471` and `kp://`; FALSE for
+    `path#L471-L480`, which is the form the real defects take.
+
+    RE-COSTING: the recommendation is CHEAP to wire but INCOMPLETE as specified. Wiring is a pure
+    string call, no refactor. Delivering the outcome additionally needs (a) a predicate rejecting
+    `^L?\d+(-L?\d+)?$` section locators and (b) the resolution half for past-EOF. Recommending the
+    reuse WITHOUT both would ship a green gate over a 100%-defective surface.
+
+  s5_4_the_fix_nothing_disposition_is_confirmed_for_the_anchor_class: >-
+    Session 4 fixed nothing, justified by "every defect target is loom-synced, so a local edit is
+    rebuilt away". That justification was carried across a context boundary and was re-measured
+    here rather than inherited. It HOLDS for the anchor class.
+
+    All 18 `#L` occurrences under `.claude/` sit in 15 host files, every one under
+    `.claude/skills/`. All four host directories are claimed by `**` globs in
+    `.claude/sync-manifest.yaml` (`skills/01-core-sdk/**`, `skills/02-dataflow/**`,
+    `skills/16-validation-patterns/**`, `skills/31-error-troubleshooting/**`). So 0 of 18 sites
+    are locally durable; all route upstream.
+
+    The SAME instrument returns the opposite answer for `.github/ISSUE_TEMPLATE/` (absent from the
+    manifest, exit 1, against controls returning 6 and 187 hits on that same file), which is why
+    that one surface WAS fixed locally this session. An instrument that returns "governed" for one
+    tree and "not governed" for another is discriminating; one that returned "governed" for
+    everything would not be evidence.
+
+  requested_fix: >-
+    1. Remove the dead `/prompts:` invocation instruction from
+       `.claude/bin/emit-cli-artifacts.mjs:917` and `:923`, replacing pattern (a)/(c) guidance
+       with the `bin/coc <name>` dispatcher form that `bin/coc:4-7,42-44` already documents
+       correctly. Correct the stale current-tense comments at `:34` and `:191`.
+    2. Discriminate `ERR_MODULE_NOT_FOUND` from a genuine resolver error at
+       `.claude/commands/sweep.md:141` and emit the N/A sentinel for the former, per the case
+       `:138` already documents. Note this file is on the `self-referential-codify.md` Rule-2
+       allowlist, so the fix needs a Tier-1 multi-agent gate.
+    3. Set `effortLevel: high` in the loom-side settings source for the py lane (#55 item 3).
+    4. If the anchor-validation gate is built on `classifyAnchor`, add the two missing halves
+       named in S5-3 -- do not wire it as-is.
+
+  acceptance_criteria:
+    - "[ ] `grep -rn '/prompts:' .codex/prompts/` returns 0 lines that are not deprecation notices, re-derived after re-emission rather than asserted."
+    - "[ ] The emitter change is verified by RE-RUNNING the emitter and re-grepping the output tree, not by reading the template string."
+    - "[ ] `/sweep` on a consumer lacking `loom-links.mjs` emits the N/A sentinel, verified by running it there, not by reading the catch block."
+    - "[ ] Issue #28 is closed ONLY with a commit SHA or PR link covering item 3 (git.md Issue closure), or is left open with item 3 named as the residual."
+    - "[ ] Issue #55 item 1 is superseded by S5-1 rather than closed as a false positive alone -- the false positive is real, but the bug class it points at is not."
+    - "[ ] Any anchor gate built on classifyAnchor is shown to REJECT `foo.md#L294-L338` before it is called done; a green run against the current corpus is not evidence, since the corpus is 100% defective in this class."
+
+  disclosure_scrub: >-
+    Names only `.claude/`, `.codex/`, `.coc/` and `bin/` artifact paths, line numbers, and public
+    upstream references (openai/codex#9848). No operator identity, no absolute path, no client or
+    tenant identifier, no downstream-consumer name.
+
 status: pending_review
