@@ -84,3 +84,70 @@ jobs:
           echo "Rules: $(find .claude/rules -name '*.md' | wc -l)"
           echo "Commands: $(find .claude/commands -name '*.md' | wc -l)"
           echo "All checks passed!"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # Cross-reference integrity — EVIDENCE-PRODUCING, NOT A GATE.
+      #
+      # `continue-on-error: true` is deliberate and load-bearing. The validator
+      # exits 1 on ANY dangling ref, and the standing backlog is dominated by
+      # by-design artifact (a USE template legitimately has no journal/ tree, so
+      # every journal-anchored ref reads as dangling). Wiring this as a blocking
+      # gate would red the board permanently on refs that are correct, which is
+      # the fastest way to train readers to ignore CI entirely.
+      #
+      # Two invocations, because DEFAULT_SCOPE_DIRS in the validator does NOT
+      # include .claude/guides — that tree had never been scanned by any
+      # instrument in this repo until it was measured by hand on 2026-08-10.
+      # The --scope flag needs no validator change.
+      #
+      # DO NOT convert this to a ratchet without pinning the baseline over BOTH
+      # scopes, and without classifying the not-found refs first: a baseline is
+      # a residual per completion-criterion.md MUST-6 and needs a named
+      # acceptor + revisit trigger + calendar backstop. It is a bet, not a
+      # clearance. See .claude/.proposals/latest.yaml § s6_6.
+      - name: Cross-reference integrity (evidence only, non-blocking)
+        continue-on-error: true
+        run: |
+          set -uo pipefail
+          echo "Cross-reference integrity — measurement, not a gate."
+          echo "Counts below are NOT a health metric: much of the standing"
+          echo "total is by-design (journal-dir-missing on a USE template)."
+          echo ""
+
+          summarize() {
+            local label="$1"; shift
+            node .claude/bin/validate-xref-integrity.mjs "$@" --json > /tmp/xref.json 2>/tmp/xref.err || true
+            if [ ! -s /tmp/xref.json ]; then
+              echo "  $label: validator produced no JSON — treat as UNMEASURED, not zero"
+              sed 's/^/    /' /tmp/xref.err | head -5
+              return
+            fi
+            node -e '
+              const fs = require("fs");
+              const label = process.argv[1];
+              let d;
+              try { d = JSON.parse(fs.readFileSync("/tmp/xref.json", "utf8")); }
+              catch (e) { console.log(`  ${label}: unparseable JSON — UNMEASURED`); process.exit(0); }
+              const by = {};
+              for (const x of d.dangling || []) {
+                const r = x.reason || x.kind || "unknown";
+                by[r] = (by[r] || 0) + 1;
+              }
+              const hosts = new Set((d.dangling || []).map(x => x.source || x.host || "?"));
+              console.log(`  ${label}: dangling=${d.dangling_count} across ${hosts.size} host file(s)`);
+              console.log(`    files_scanned=${d.files_scanned} tokens_scanned=${d.tokens_scanned}`);
+              for (const [r, n] of Object.entries(by).sort((a, b) => b[1] - a[1])) {
+                console.log(`    ${r}: ${n}`);
+              }
+            ' "$label"
+          }
+
+          summarize "default scope (commands, rules, skills, agents)"
+          summarize "guides tree (NOT in DEFAULT_SCOPE_DIRS)" --scope .claude/guides
+
+          echo ""
+          echo "Non-blocking by design. A rising not-found count is the signal"
+          echo "worth acting on; journal-dir-missing is expected here."
