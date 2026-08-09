@@ -2581,4 +2581,143 @@ use_template_root_cause_amendment_scope_is_rationed_by_context_budget:
     receipt identifier already present in the cited rule's own Origin. No operator identity, no
     absolute path, no client or tenant identifier, and no downstream-consumer name appears.
 
+use_template_f26_disposition_softening_reaches_one_of_four_surfaces:
+  header: >-
+    Session 4 (2026-08-08). F26 has sat open across FOUR sessions as "ratify the softening split or
+    make it uniform", and stayed open because it LOOKS like a wording preference. It is not. It is an
+    unenforced invariant, and this block measures it, recommends a disposition, and names the fix that
+    stops it recurring.
+
+    Framed as a DECISION PACKET per `recommendation-quality.md` MUST-6: the recommendation is stated
+    so the human RATIFIES or OVERRIDES it, not so the human fills a blank. Both options carry a
+    recommendation, a spec basis and an honest con.
+
+  the_measurement: >-
+    `use_softenings` (`sync-manifest.yaml`) applies find/replace transforms that soften NORMATIVE
+    FRAMING (MUST / BLOCKED / ABSOLUTE -> recommended / watch-for / strongly-recommended) while
+    preserving the GUIDANCE, for downstream consumers. FOUR rules, TWELVE transforms:
+    `rules/agents.md` (4), `rules/testing.md` (2), `rules/zero-tolerance.md` (6 across the set),
+    `rules/git.md`.
+
+    Measured this session against four emitted surfaces, per transform:
+
+      CC (.claude/rules)   SOFTENED 12 / 12
+      Codex (AGENTS.md)    SOFTENED  0 / 12   (8 STRICT, 4 not carried on that surface)
+      Gemini (GEMINI.md)   SOFTENED  0 / 12   (8 STRICT, 4 not carried on that surface)
+      .coc lane            SOFTENED  0 / 12   (12 STRICT)
+
+    The split is CLEAN, not partial: CC is fully softened; the other three carry the strict wording
+    on every transform they carry at all. So on `agents.md`, `testing.md`, `zero-tolerance.md` and
+    `git.md`, a Codex or Gemini or .coc reader is told MUST / BLOCKED where a CC reader in the SAME
+    REPO is told "recommended, at your discretion".
+
+  instrument_correction: >-
+    Recorded because the first measurement was WRONG and its error changed a conclusion.
+
+    The first sweep decoded the manifest's transform strings with `unicode_escape`, which mangles
+    multi-byte UTF-8 (em-dashes became mojibake). A mangled string matches NEITHER its find NOR its
+    replace form, so those rows reported "absent" spuriously, and a blob-concatenated corpus produced
+    one spurious "BOTH". From that faulty run the orchestrator reported to the human that "CC carries
+    a strict residue -- one transform didn't take", and used it as the FIRST of three arguments for
+    the recommendation below.
+
+    RE-MEASURED with `yaml.safe_load` (correct UTF-8) and per-FILE rather than per-blob: zero non-
+    SOFTENED results. CC is cleanly and completely softened. **The strict-residue claim is WITHDRAWN
+    and the argument built on it is retracted.** The same corrected run also showed the softening set
+    is FOUR rules, not the three a hand-written regex had counted.
+
+    Direction of the headline finding was unaffected -- a mangled string can produce a false ABSENCE,
+    never a false positive hit, so the 0-softenings-on-three-surfaces result held. But one supporting
+    argument was fabricated by a broken decoder, and it is retracted here rather than quietly dropped.
+
+  the_two_options: >-
+    OPTION A -- RATIFY THE SPLIT. Softening stays CC-only by policy. Codex / Gemini / .coc readers
+    keep MUST framing; CC readers get "recommended". Cheapest (no change). Now MORE defensible than
+    the orchestrator first said, because the state is clean rather than partial -- someone could
+    reasonably hold that CC is the primary downstream-facing surface and softening belongs there only.
+
+    OPTION B -- MAKE IT UNIFORM. Apply the softenings on every emitted surface so all four carry the
+    same normative force. Costs an emitter change and genuinely relaxes three surfaces.
+
+  recommendation: >-
+    ADOPT OPTION B, on ONE surviving argument plus one piece of negative evidence. The argument the
+    orchestrator originally led with is retracted above.
+
+    (1) THE SOFTENING'S OWN STATED RATIONALE IS AUDIENCE-BASED, AND AUDIENCE DOES NOT VARY BY CLI.
+    The manifest's transforms read "RECOMMENDED for downstream projects -- you choose your own
+    workflow". A downstream project driven by Codex or Gemini is exactly as much a downstream project
+    as one driven by CC. Nothing in the rationale is CLI-specific, so uniform application matches the
+    stated intent while CC-only matches which emission path happened to receive the transform.
+
+    (2) NEGATIVE EVIDENCE THAT CC-ONLY WAS NEVER A DECISION. The `use_softenings` block carries 65
+    lines of comment and documents, in detail: the framing-vs-guidance guardrail, the deliberate
+    safety carve-out, the rs/prism variant overlay that keeps strict wording, and the F-353 Item-1
+    HIGH-2 partial-coherence fix. It says NOTHING about restricting softening to one CLI lane. In a
+    block that meticulous about every other decision, the silence is evidence that the one-of-four
+    outcome is a pipeline artifact rather than a ratified policy.
+
+    (3) DIVERGENT NORMATIVE FORCE IS THE MOST CONSEQUENTIAL PARITY BREAK AVAILABLE. It is not
+    cosmetic wording -- it is whether the rule has teeth. `cross-cli-parity.md` exists precisely so
+    one CLI's users do not receive a silently weaker (or stronger) rule surface.
+
+    (4) B IS SAFE BECAUSE THE SAFETY CARVE-OUT IS ALREADY CORRECT. `zero-tolerance` Rules 2/3 (no
+    stubs, no silent fallbacks, no fake data) are DELIBERATELY left strict on the manifest's own
+    stated principle of never relaxing a real safety gate's substance. Uniform softening therefore
+    relaxes GATE POSTURE, never SAFETY SUBSTANCE.
+
+    HONEST CON, and it is real: B genuinely loosens what Codex, Gemini and .coc readers currently see
+    as MUST. That is a relaxation on three surfaces, not a no-op. If the preference is to tighten
+    rather than loosen, the COHERENT form of that is "revert the CC softening", NOT "keep the split" --
+    keeping the split preserves the divergence either way.
+
+    RATIFY / OVERRIDE.
+
+  the_root_cause_and_the_fix_that_stops_it_recurring: >-
+    F26 keeps recurring because the disposition is not the problem. `use_softenings` is LITERAL
+    FIND/REPLACE APPLIED AT ONE EMISSION POINT IN A PIPELINE WITH FOUR. Three consequences follow
+    mechanically:
+
+    (a) A surface emitted by a different code path never receives the transforms at all -- which is
+    exactly the measured 0/12 on three lanes.
+    (b) When the source text is edited, the `find` string stops matching and the transform SILENTLY
+    NO-OPS. Nothing reports it.
+    (c) Nothing asserts that the four surfaces agree on normative force.
+
+    "Do all emitted surfaces carry the same normative force for rule X?" is a STRING COMPARISON --
+    mechanically decidable, and enforced by nothing. That is the same root cause recorded in
+    `use_template_root_cause_amendment_scope_is_rationed_by_context_budget`: a mechanically-decidable
+    property maintained by hand across multiple paths with no gate. F26 is an INDEPENDENT INSTANCE of
+    it, arrived at from a different surface, which is convergent evidence for that amendment.
+
+    FIX: make softening a DECLARED NORMATIVE-FORCE PROPERTY of the rule, applied by the emitter to
+    every surface, with a CROSS-SURFACE PARITY ASSERTION that fails loud -- instead of twelve literal
+    substitutions on one lane that silently no-op when the text drifts. Then whichever option is
+    ratified is HELD rather than eroding, and F26 stops being a recurring decision.
+
+    Ratifying A or B WITHOUT the parity check means re-answering this question next quarter, because
+    nothing prevents the next drift.
+
+  confidence: >-
+    HIGH on the measurement -- re-derived with a correct decoder, per-file rather than per-blob, and
+    the headline result (0 softenings on three surfaces) rests on positive substring hits that the
+    decoder bug could not fabricate.
+
+    MODERATE on the recommendation. It turns on reading the CC-only split as a pipeline artifact
+    rather than an undocumented deliberate policy. The evidence for that reading is the audience-based
+    rationale plus 65 comment lines that never mention a lane restriction -- strong, but it is
+    inference about intent, not a record of intent. Whoever ratified F-353 Item 1 could refute it in
+    one sentence, and that sentence should be recorded here if so.
+
+  acceptance_criteria:
+    - "[ ] F26 is RATIFIED or OVERRIDDEN explicitly, and the verdict is recorded in the manifest block itself so the next session does not re-derive it."
+    - "[ ] Whichever option is chosen, a cross-surface parity assertion exists that fails loud when the four emitted surfaces disagree on normative force for a softened rule."
+    - "[ ] A transform whose `find` string no longer matches its source FAILS rather than silently no-opping."
+    - "[ ] If Option B: all four surfaces measure SOFTENED on every transform they carry; re-running the measurement in this block returns 12/12 on each surface that carries the text."
+    - "[ ] If Option A: the CC-only restriction is DECLARED in the use_softenings comments with its rationale, so the split is a recorded policy rather than an artifact inferred from silence."
+    - "[ ] The safety carve-out is re-verified after the change: zero-tolerance Rules 2/3 substance remains strict on every surface."
+
+  disclosure_scrub: >-
+    Names only `.claude/` artifact paths, rule filenames and manifest key names. No operator identity,
+    no absolute path, no client or tenant identifier, no downstream-consumer name.
+
 status: pending_review
