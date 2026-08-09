@@ -3254,6 +3254,71 @@ use_template_findings_issue_enumeration_instrument_and_validator_coverage:
     PROPOSED FIX: update the skill text to `.yml`, and prefer the form over a markdown template
     upstream for the same enforcement reason.
 
+  s6_6_the_unscanned_guides_tree_measured_for_the_first_time: >-
+    S6-3 above reports that `validate-xref-integrity.mjs` omits `.claude/guides` from
+    `DEFAULT_SCOPE_DIRS` (verified at `:302-307`). That gap has now been MEASURED rather than
+    merely named, using the validator's own already-shipped `--scope` flag (`:562`) -- so the
+    coverage hole can be closed with no change to the validator itself.
+
+    `node .claude/bin/validate-xref-integrity.mjs --scope .claude/guides --json` -> exit 1:
+      - files_scanned 54, tokens_scanned 263
+      - dangling_count 48, across 14 host files
+      - by reason: `journal-dir-missing` 26, `not-found` 22
+      - skipped_deferred 0, skipped_absent_by_design 0, loose_directory_match 0
+
+    NONE of these 48 has ever been counted by any instrument in this repo, because no invocation
+    in the corpus passes `--scope`. The default-scope run reports 294; the two scopes are disjoint
+    directory sets, so the COMPLETE surface is 342. Any baseline pinned from the default run alone
+    is short by roughly one seventh.
+
+    THE 48 ARE NOT A HEALTH METRIC AND ARE NOT RESTATED AS ONE. Split by class, following the
+    same discipline the 294 required:
+      - 26 `journal-dir-missing` -- the SAME by-design class that dominates the 294. A USE
+        template legitimately has no `journal/` tree; these are artifacts of the scan, not rot.
+      - 22 `not-found` -- CANDIDATE REAL DEFECTS. Spot-checked 3 of 22 by reading the hits rather
+        than the tally; all 3 are genuine stale paths, not resolver artifacts:
+          `guides/claude-code/12-troubleshooting.md:463` -> `.claude/agents/_README.md` (absent,
+            no sibling anywhere)
+          `guides/model-optimization/04-implementation-plan.md:40` ->
+            `.claude/agents/release-specialist.md` (absent; real file is
+            `.claude/agents/release/release-specialist.md`)
+          `guides/model-optimization/04-implementation-plan.md:41` ->
+            `.claude/agents/reviewer.md` (absent; real file is
+            `.claude/agents/quality/reviewer.md`)
+        The pattern in all three is a FLAT agent path where the tree is nested by category.
+        3 of 22 verified -- explicitly NOT generalized to the remaining 19, which are
+        unclassified. Naming the bound because generalizing from a measured subset to a corpus is
+        the exact trap that produced two of this session's other errors.
+
+    ROUTING: the host files are manifest-covered (`guides/claude-code` 3 manifest hits,
+    `guides/model-optimization` 1, `guides/rule-extracts` 12), so the DEFECT fixes are loom-side.
+    The SCAN-COVERAGE fix needs no validator change at all -- only a `--scope` invocation.
+
+  s6_7_two_inherited_pointers_are_wrong_and_a_method_correction: >-
+    (a) F30's FILE pointer was wrong. The finding was carried as `skills/sweep/SKILL.md:141`.
+    Measured: `grep -c 'sweep-ecosystem' .claude/skills/sweep/SKILL.md` -> 0; the same grep against
+    `.claude/commands/sweep.md` -> 2, and the sentinel-emitting `.catch` sits at
+    `.claude/commands/sweep.md:141`. The LINE was right, the FILE was wrong. Both are
+    manifest-covered so the loom-side verdict is unchanged, but the upstream fix must target
+    `commands/sweep.md:141`.
+
+    (b) F25's stated REASON was false, though its verdict survives. The carried claim was "all 15
+    anchor host files sit under `skills/**`". Enumerating EVERY `.md` under `.claude/` carrying a
+    line-range anchor gives 38 host files, of which only 14 are under `skills/`; the covering
+    globs actually in play also include `guides/rule-extracts/**`, `audit-fixtures/**`,
+    `rules/worktree-isolation.md` and roughly twenty others. All 38 of 38 are manifest-covered, so
+    NOT-DURABLE now stands as a verdict measured over the WHOLE set rather than generalized from a
+    sample -- but the "15 under skills" premise must not be repeated.
+
+    (c) METHOD CORRECTION, wider consequence than either pointer: manifest NO-MATCH alone is NOT
+    proof a path is locally durable. Counterexample in this repo -- `.github/coc-sdk-refs-allowlist.txt`
+    has ZERO manifest hits yet carries three `chore(coc): sync loom ...` commits, because loom
+    appends to it out-of-manifest. It was created in the SAME commit as `.github/workflows/validate.yml`
+    (`8c1cea0`), and the two have divergent sync fates, which is what makes the pair decisive. A
+    durability call therefore requires TWO agreeing instruments: manifest coverage AND git
+    provenance (sync-managed files show `chore(sync)`/`chore(coc)` commits; durable ones show only
+    local `feat`/`fix`). Every durability verdict cited in this block was taken on both.
+
   s6_5_sweep7_stub_marker_grep_cannot_distinguish_an_escape_from_a_stub: >-
     INCREMENTAL. `commands/sweep.md:113` greps production code for
     `TODO|FIXME|HACK|XXX|NotImplementedError`. The `XXX` alternation matches the literal `XXX`
@@ -3282,6 +3347,11 @@ use_template_findings_issue_enumeration_instrument_and_validator_coverage:
     - "[ ] The amendment is verified by RUNNING all three forms against an issue with items in BOTH body and comments and showing the counts differ (`--json body` and `--comments` each partial, `--json body,comments` complete) -- not by reading the rule text. A check that only compares the bare form against `--comments` would PASS while the prescribed instrument is still partial."
     - "[ ] No session retires ledger rows F10 or F13 on the ground that #55 items 5 and 9 do not exist -- they do, and both are recorded in #55's own verification comment as standing (item 5 with a scope correction, item 9 confirmed exactly as filed). Re-derived with `--json body,comments` (the complete read -- `--comments` alone omits the body), not inherited from this block."
     - "[ ] Ledger row F11 IS retired, on the correct ground: #55 item 8 is WITHDRAWN upstream because both commands are in fact declared under `gemini:`. Retiring it for the sweep's stated reason (the item does not exist) is BLOCKED even though the outcome coincides."
+    - "[ ] `validate-xref-integrity.mjs` scans `.claude/guides` -- either by adding it to `DEFAULT_SCOPE_DIRS` or by every invocation passing `--scope`. Verified by confirming the guides tree's 48 dangling refs appear in a DEFAULT run, not only in a `--scope` run."
+    - "[ ] Any ratchet baseline is pinned over the COMPLETE surface (342 = 294 default + 48 guides), never the default run alone, and is recorded as a residual with a named acceptor + revisit trigger + calendar backstop per `completion-criterion.md` MUST-6 -- it is a bet, not a clearance."
+    - "[ ] The 19 unclassified `not-found` refs in the guides tree are classified before any of them is called by-design; the 3 verified are genuine stale flat-agent paths and MUST NOT be used to characterize the other 19 in either direction."
+    - "[ ] The F30 upstream fix targets `commands/sweep.md:141`, NOT `skills/sweep/SKILL.md` -- the latter contains zero `sweep-ecosystem` matches."
+    - "[ ] Any future locally-durable determination cites BOTH manifest coverage AND git provenance; `.github/coc-sdk-refs-allowlist.txt` (zero manifest hits, three `chore(coc)` sync commits) is the standing counterexample to the manifest-alone test."
     - "[ ] `validate-forest-ledger.mjs` per-file mode runs L1/L2/L3 against `.session-notes.shared.md` instead of failing L1, verified by pointing it at a shared ledger carrying an open row with an EMPTY value-anchor and confirming it REPORTS that row (a pass on a well-formed file is not evidence -- the check must be shown able to fail)."
     - "[ ] `.claude/skills/sweep/SKILL.md` names `deferred-quality.yml`, and the YAML-form choice is reflected upstream rather than reverted to a markdown template."
     - "[ ] The Sweep-7 stub grep no longer matches a `\\uXXXX` escape in a comment, verified by running the amended grep against a fixture containing both a real stub and an escape and confirming it reports exactly one."
