@@ -2451,4 +2451,134 @@ use_template_root_cause_analysis_and_structural_fix:
     present in the manifest and in the blocks above. No operator identity, no absolute path, no
     client or tenant identifier, and no downstream-consumer name appears.
 
+use_template_root_cause_amendment_scope_is_rationed_by_context_budget:
+  header: >-
+    Session 4 (2026-08-08), authored AFTER and SUPERSEDING the recommendation in
+    `use_template_root_cause_analysis_and_structural_fix`. That block's diagnosis was one layer
+    short and its headline recommendation was partly REDUNDANT WITH MACHINERY THAT ALREADY SHIPS.
+    Both blocks are retained: the superseded one is left standing rather than edited, because the
+    correction trail is itself the finding (the diagnosis only deepened once the corpus was checked
+    for an existing mechanism instead of assumed to lack one).
+
+    What is WITHDRAWN from the prior block: its step-2 framing ("build emit-time resolution") as the
+    load-bearing move, and its confidence_bound, which named an unreadable emitter as the key
+    unknown. The emitter question is now largely moot -- the gate exists. What SURVIVES from it
+    unchanged: step 1 (ban line-number anchors; it is now shown to be an EXISTING rule needing
+    scope, not a new one), step 3 (declared reference kinds), step 4 (demote the downstream
+    validator), and the entire root_cause and honest_cons sections, which remain accurate as far as
+    they go.
+
+  the_finding_that_forced_the_amendment: >-
+    THE RULE THAT BANS THIS EXACT DEFECT ALREADY EXISTS, AND ITS SCOPE EXCLUDES EVERY PLACE THE
+    DEFECT LIVES. Four verified facts, each re-derived this session:
+
+    (1) `.claude/rules/symbol-anchored-citations.md` MUST-1 states verbatim: "A bare `<path>:<NNN>`
+    (or `<path>:<NNN-MMM>`) as the SOLE locator is BLOCKED." Its stated rationale is our failure mode
+    word for word -- a bare line number is "invalidated by ANY insertion above it" and "then silently
+    points at the wrong code". Its Origin (2026-06-30, receipt `journal/0375`) is the same defect
+    found in specs/todos.
+
+    (2) That rule is `scope: path-scoped` with `paths:` = `**/specs/**`,
+    `**/workspaces/**/specs/**`, `**/02-plans/**`, `**/01-analysis/**`, `**/briefs/**`,
+    `**/todos/**`, `**/journal/**`.
+
+    (3) The 18 defective line-range anchors (S4-3) live in `.claude/skills/01-core-sdk`,
+    `.claude/skills/02-dataflow`, `.claude/skills/16-validation-patterns` and
+    `.claude/skills/31-error-troubleshooting`. A grep of the defect sites against the rule's glob
+    set returns ZERO matches. The rule does not load where the defect is authored, so it never fires.
+
+    (4) The emit-time gate the prior block asked loom to BUILD already ships:
+    `.claude/bin/emit-derives-from.mjs`, `.claude/hooks/lib/derives-from-edge.js` (carrying
+    `classifyAnchor` at :307, consumed at :456 and :537) and
+    `.claude/hooks/lib/derives-from-ledger.js`. `specs-authority.md` Rule 11 already mandates
+    grep-stable anchors that resolve TODAY, uniquely and non-vacuously, with a closed `anchor_kind`
+    set, and already fails LOUD (non-zero exit; "the session MUST NOT proceed past it"). It is
+    scoped to the provenance-edge surface, not to prose bodies.
+
+  the_deeper_root_cause: >-
+    SCOPE IS RATIONED BY CONTEXT BUDGET, NOT SET BY SUBJECT. Enforcement rides on per-session rule
+    injection, which is a saturated resource, so widening a rule's coverage costs context in EVERY
+    session forever. Rules therefore get scoped to what fits the budget rather than to what their
+    subject requires -- and defects concentrate precisely in the unscoped remainder.
+
+    The corpus records this about itself, repeatedly and independently of this session:
+    `completion-criterion.md`'s Detection block states that `**/workspaces/**` and `**/journal/**`
+    globs were authored and then REMOVED because the measured injection profile stood at 100.8% of
+    budget BEFORE that rule was added; `burn-down-reporting.md`'s Detection block records that a
+    session editing only `src/` can close without the rule ever loading; and
+    `issue-triage-routing.md` exists ENTIRELY because routing depth sat behind path globs a `gh`
+    triage never matches. Three separate rules, three separate authors, one shape.
+
+    The same pressure produces the cross-references in the first place. Budget saturation is what
+    drives depth OUT of loaded rules into unloaded guide/skill files (`rule-authoring.md` Rule 10
+    paired extraction, `cc-artifacts.md` Rule 3's command cap, `command-skill-parity.md`), and every
+    extraction manufactures pointers as its byproduct. So the budget generates BOTH the pointers AND
+    the blind spot they rot in. That is why the prior block's "untyped strings" diagnosis was true
+    but not root: it described the artifact of the pressure rather than the pressure.
+
+  recommendation: >-
+    STOP ENFORCING MECHANICALLY-DECIDABLE RULES THROUGH INJECTED CONTEXT. Move them into the
+    emit/CI gate, where coverage costs nothing per session, and shrink their prose to a pointer at
+    the check.
+
+    "Is the sole locator a bare `path:NNN`?" is a regex over a diff, not a judgment. It does not need
+    to occupy an agent's context to be enforced -- and once it does not, its scope can be the whole
+    corpus at zero per-session cost. Today, widening coverage and reducing budget pull in OPPOSITE
+    directions; under this change they pull in the SAME direction, which is what makes it a root-cause
+    fix rather than another patch.
+
+    For this defect class specifically: implement `symbol-anchored-citations.md` MUST-1 as a check in
+    the existing gate, REUSING `derives-from-edge.js::classifyAnchor` rather than authoring a second
+    anchor classifier; apply it corpus-wide; reduce the rule body to a pointer. Then the 18 anchors
+    are caught by construction, and so is the next one.
+
+    Generalise by applying ONE test to every clause in the corpus: is it mechanically decidable? If
+    yes, it belongs in a gate and its scope should be universal. If it needs judgment, it has earned
+    its context. At present both classes compete for the same rationed space, and the mechanical
+    clauses are winning context they do not need while losing coverage they do.
+
+  honest_cons: >-
+    (1) A mechanical gate cannot express judgment-bearing clauses, so this drains only part of the
+    corpus -- and MISCLASSIFYING a judgment clause as mechanical would silently weaken a real rule.
+    The classification decision is the risk, not the implementation.
+
+    (2) Gate code sits on the `self-referential-codify.md` Bin allowlist, so each change pays a
+    Tier-1 multi-agent redteam. Higher unit cost than editing rule prose.
+
+    (3) A check only fires where it is wired. This repo's `validate.yml` triggers on `push` and
+    `pull_request` to main, so work landing by any other path is unprotected. That is the SAME
+    class of gap as the original finding, one layer up, and it should be designed for rather than
+    discovered later.
+
+    (4) It does not reduce the corpus's total obligation surface -- it relocates enforcement. A
+    reader looking only at rule prose will see LESS of the contract than is actually enforced, which
+    is a new discoverability cost that the pointer-shrinkage must be written carefully to offset.
+
+  confidence: >-
+    HIGH, and materially higher than the block this supersedes. It rests on four facts re-derived
+    against the tree this session -- the rule exists, its stated rationale matches the observed
+    failure, its globs exclude all four defect directories (grep count zero), and the anchor
+    classifier exists at a named symbol and line -- rather than on an inference about a file that
+    could not be read from a consumer.
+
+    REMAINING UNKNOWN, smaller than the prior block's but real: whether the emit gate can practically
+    walk PROSE BODIES as well as structured edge records. `classifyAnchor` is invoked on edge-record
+    anchors; whether it can be driven over arbitrary artifact prose without a redesign was NOT
+    established here. Check this before implementation, exactly as the prior block's precondition
+    demanded for its own step 2.
+
+  acceptance_criteria:
+    - "[ ] Gate-1 rules explicitly on which of the two root-cause blocks stands; the superseded recommendation is marked superseded rather than left to be reconciled by a later reader."
+    - "[ ] PRECONDITION: someone confirms or refutes that the existing anchor classifier can be driven over prose bodies, not only edge records. Record the answer before implementation."
+    - "[ ] symbol-anchored-citations.md MUST-1 is enforced by a mechanical check whose coverage includes .claude/{rules,skills,agents,commands}/** -- i.e. the four directories where the defect was measured."
+    - "[ ] The check reuses derives-from-edge.js::classifyAnchor; no second anchor classifier is authored."
+    - "[ ] The rule's prose is reduced to a pointer at the check, and the measured injection budget is LOWER after the change than before it -- coverage up, budget down, verified rather than assumed."
+    - "[ ] Every clause relocated from prose to a gate is recorded as mechanically-decidable with a one-line justification, so a judgment clause cannot be relocated by accident."
+    - "[ ] The wiring gap in con (3) is addressed: the check's trigger surface is stated, and any landing path it does not cover is named rather than left implicit."
+
+  disclosure_scrub: >-
+    This block names only `.claude/` artifact-surface paths, rule filenames, and one loom-side
+    receipt identifier already present in the cited rule's own Origin. No operator identity, no
+    absolute path, no client or tenant identifier, and no downstream-consumer name appears.
+
 status: pending_review
