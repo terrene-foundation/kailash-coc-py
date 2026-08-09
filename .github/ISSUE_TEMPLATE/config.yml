@@ -1,0 +1,9 @@
+# Blank issues stay ENABLED deliberately.
+#
+# This repo's normal issue flow is free-form (see #28, #55 — multi-item COC-artifact
+# reports that no fixed form would fit). The deferred-quality form exists to make the
+# four `product-completion-first.md` defer conditions mechanically unskippable for
+# INCREMENTAL items; it is NOT meant to become the only way to open an issue.
+#
+# Turning this off would push every free-form report into a form that does not fit it.
+blank_issues_enabled: true
