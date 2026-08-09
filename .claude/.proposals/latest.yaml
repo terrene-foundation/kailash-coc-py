@@ -3097,8 +3097,35 @@ use_template_findings_issue_enumeration_instrument_and_validator_coverage:
       - `## 8. cli_emit_exclusions is asymmetric -- two commands drop from the Gemini lane undeclared`
       - `## 9. variant_only artifacts reach the CC lane but no non-CC lane, undeclared`
 
-    Verified row mapping: item 5 = F10, item 8 = F11, item 9 = F13. Every retired-row candidate
-    was correctly pointed all along.
+    Verified row mapping: item 5 = F10, item 8 = F11, item 9 = F13. Every one of the three rows
+    the sweep proposed retiring was correctly POINTED all along.
+
+    SELF-CORRECTION, made before this block was merged, because the first draft of it overstated
+    the refutation. "Correctly pointed" is NOT the same as "should be kept", and one of the three
+    should in fact be retired -- for a reason the sweep never gave:
+
+      - F10 (item 5) -- KEEP. #55's own verification comment records item 5 as "scope
+        correction": confirmed, but it names the wrong schema for THIS repo. That is already
+        reflected at `latest.yaml:589-607`. The row stands, with the scope caveat.
+      - F11 (item 8) -- RETIRE. #55's verification comment heads item 8 "WITHDRAWN, the premise
+        is false": both `commands/cc-audit.md` and `commands/cost-audit.md` ARE declared under
+        `gemini:`, verified by printing the full exclusion list rather than sampling it, and
+        present identically at `156c08c^` and at HEAD -- so the item was wrong WHEN FILED, not
+        fixed since. The observed absence from `.gemini/commands/` is exactly what the manifest
+        declares. F11 is a dead finding.
+      - F13 (item 9) -- KEEP. #55's verification comment heads item 9 "confirmed exactly as
+        filed, no correction needed", and explicitly records that an intermediate draft wrongly
+        "corrected" it and that draft was itself refuted.
+
+    So the sweep's CONCLUSION was right for exactly one row of three, by accident, on a reason
+    that does not hold; and wrong for the other two. Retiring on "the item does not exist" would
+    have removed F10 and F13, both live. This is the more precise claim and it supersedes the
+    blunter "the rows were correct all along" framing.
+
+    METHOD NOTE worth more than the specific finding: the disposition data was in the issue's
+    verification comment the whole time, and BOTH the sweep and this block's first draft missed
+    it for the same reason -- neither read the comments. The sweep concluded the items were
+    absent; the draft concluded they were all valid. Opposite errors, one cause.
 
     AGGRAVATING DETAIL, recorded because it is the cheap catch that was available and missed:
     this proposal file already carried the correct enumeration at `latest.yaml:243` --
@@ -3215,7 +3242,8 @@ use_template_findings_issue_enumeration_instrument_and_validator_coverage:
     - "[ ] `rules/wave-loop.md` MUST-7(b) prescribes `gh issue view <N> --comments`, not the bare form, and says why the bare form truncates."
     - "[ ] `rules/handoff-completion.md` MUST-2's `gh issue view` form is amended the same way, or its existence-only scope is stated explicitly so the omission is a decision rather than an oversight."
     - "[ ] The amendment is verified by RUNNING both forms against an issue whose items live in comments and showing they differ -- not by reading the rule text."
-    - "[ ] No session retires ledger rows F10/F11/F13: items 5, 8 and 9 of #55 exist and map to them. Verified with `--comments`, re-derived rather than inherited from this block."
+    - "[ ] No session retires ledger rows F10 or F13 on the ground that #55 items 5 and 9 do not exist -- they do, and both are recorded in #55's own verification comment as standing (item 5 with a scope correction, item 9 confirmed exactly as filed). Re-derived with `--comments`, not inherited from this block."
+    - "[ ] Ledger row F11 IS retired, on the correct ground: #55 item 8 is WITHDRAWN upstream because both commands are in fact declared under `gemini:`. Retiring it for the sweep's stated reason (the item does not exist) is BLOCKED even though the outcome coincides."
     - "[ ] `validate-forest-ledger.mjs` per-file mode runs L1/L2/L3 against `.session-notes.shared.md` instead of failing L1, verified by pointing it at a shared ledger carrying an open row with an EMPTY value-anchor and confirming it REPORTS that row (a pass on a well-formed file is not evidence -- the check must be shown able to fail)."
     - "[ ] `.claude/skills/sweep/SKILL.md` names `deferred-quality.yml`, and the YAML-form choice is reflected upstream rather than reverted to a markdown template."
     - "[ ] The Sweep-7 stub grep no longer matches a `\\uXXXX` escape in a comment, verified by running the amended grep against a fixture containing both a real stub and an escape and confirming it reports exactly one."
