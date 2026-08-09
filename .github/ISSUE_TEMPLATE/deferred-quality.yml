@@ -1,0 +1,102 @@
+name: "Deferred quality (INCREMENTAL improvement)"
+description: "Track an INCREMENTAL-IMPROVEMENT finding deferred from a gate. Not for bugs or invest-now issues — those are fixed in-cycle."
+title: "[deferred-quality] "
+labels: ["deferred-quality"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form **only** for a finding classified INCREMENTAL IMPROVEMENT per
+        `.claude/rules/product-completion-first.md` § "The three categories".
+
+        A **BUG** or an **INVEST-NOW ISSUE** must not be filed here — both are fixed
+        in-cycle to convergence. Relabelling one "incremental" to defer it is BLOCKED
+        (`product-completion-first.md` MUST-2 / MUST-3).
+
+        All four fields below are required. `product-completion-first.md` lines 76-79
+        make a defer missing any one of them *silent deferral*, which is BLOCKED.
+        Sweep 10 (`.claude/commands/sweep.md:157`) enumerates open issues carrying the
+        `deferred-quality` label and groups them by the revisit trigger.
+
+  - type: checkboxes
+    id: category-gate
+    attributes:
+      label: Category gate
+      description: "The classifier is fail-closed: if you cannot affirm both, this is not an INCREMENTAL defer."
+      options:
+        - label: "This finding does NOT block testing or closure of the current item."
+          required: true
+        - label: "This has no forward-impact that makes fixing now the correct investment (i.e. it is not INVEST-NOW)."
+          required: true
+
+  - type: textarea
+    id: blocking-safety-note
+    attributes:
+      label: "1. Blocking-safety note"
+      description: >-
+        Name the shipped / success path this finding does NOT touch. This is what proves the
+        item is genuinely off-path INCREMENTAL rather than a mis-labelled BUG. Be specific
+        about the path, not the intent.
+      placeholder: "Does not touch the shipped validation path; the guard at src/x.py:42 already covers the success case."
+    validations:
+      required: true
+
+  - type: textarea
+    id: value-anchor
+    attributes:
+      label: "2. Value-anchor"
+      description: >-
+        One sentence citing a user-anchored source. The allowed sources are a CLOSED allowlist
+        (value-prioritization.md MUST-2) — cite exactly one of: (a) the user's brief in this
+        session, (b) a brief under `briefs/` in the active workspace, (c) a journal DECISION
+        entry, (d) a literal user quote in this session's transcript, (e) a spec § success
+        criterion the user authored or approved. "Code health", "best practice", "team
+        convention" and "CLAUDE.md says" are NOT user-anchored and do not satisfy this field.
+        If the anchor rests on a current-state claim about the codebase, pin it to a commit
+        SHA + timestamp so re-pickup can re-validate mechanically.
+      placeholder: 'Anchor: briefs/00-user-brief.md § Scope 1 — "delivery integrity of the synced artifact set".'
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: "3. Full-fix acceptance criteria"
+      description: >-
+        The testable definition of done for the FULL fix — not a partial and not a monitoring
+        proxy. State what must be true for this issue to close as delivered, in terms someone
+        else can verify.
+      placeholder: "- [ ] <observable, verifiable condition>"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: revisit-trigger
+    attributes:
+      label: "4. Revisit trigger"
+      description: >-
+        Exactly one trigger. Sweep 10 groups the backlog by this value
+        (`sweep.md:161`), so it must be one of these two forms and nothing else.
+      options:
+        - "on-demand"
+        - "after-milestone"
+    validations:
+      required: true
+
+  - type: input
+    id: milestone-name
+    attributes:
+      label: "Milestone name (required only if trigger is after-milestone)"
+      description: "The milestone that re-surfaces this item. Leave blank when the trigger is on-demand."
+      placeholder: "walking-skeleton"
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        **Closure discipline.** This item carries a value-anchor, so it must NOT be closed as
+        `not_planned` / `wontfix` / "out of scope" without explicit user approval in the same
+        session (`value-prioritization.md` MUST-4, line 126). Auto-closure by age is BLOCKED.
+        At re-pickup the value-anchor above is re-validated before work resumes (MUST-3).
