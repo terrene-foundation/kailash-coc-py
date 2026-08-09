@@ -2980,10 +2980,44 @@ use_template_findings_emitter_generated_dead_invocation_and_sweep_gate:
     bare-line and `kp://` anchor shapes". True for `path:471` and `kp://`; FALSE for
     `path#L471-L480`, which is the form the real defects take.
 
-    RE-COSTING: the recommendation is CHEAP to wire but INCOMPLETE as specified. Wiring is a pure
-    string call, no refactor. Delivering the outcome additionally needs (a) a predicate rejecting
-    `^L?\d+(-L?\d+)?$` section locators and (b) the resolution half for past-EOF. Recommending the
-    reuse WITHOUT both would ship a green gate over a 100%-defective surface.
+    CORRECTION, made in the same session by a ROTATED instrument -- driving the 16 REAL corpus
+    anchors instead of the synthetic strings the first pass used. The mechanism claim above STANDS
+    (0 of 16 were rejected as bare-line; the section branch is genuinely unguarded). The PRACTICAL
+    conclusion drawn from it was WRONG and is withdrawn here rather than left standing.
+
+    Every real anchor in this corpus carries a `../` prefix, and `classifyAnchor` rejects `..`
+    traversal at `:365-366`. So all 16 are REJECTED -- for `path-traversal-segment`, NOT for
+    anything to do with the line range. The first pass tested bare `pattern-expert.md#L294-L338`,
+    which has no `../`, and generalized from it. That is the SAME measure-one-shape-and-generalize
+    error this block criticizes session 4 for, committed by this session one section earlier.
+
+    What the rotated instrument actually shows: the classifier's criterion is ORTHOGONAL to the
+    defect. Measured:
+      - `../../agents/frameworks/dataflow-specialist.md#§ Result Access` (a CORRECT anchor)
+          -> REJECTED, path-traversal-segment          <- false positive
+      - `../../hooks/lib/derives-from-edge.js::classifyAnchor` (a CORRECT anchor)
+          -> REJECTED, path-traversal-segment          <- false positive
+      - `dataflow-specialist.md#L991-L1001` (DEFECTIVE, no `../`)
+          -> PASSES, kind:"section", locator:"L991-L1001"   <- false negative
+      - `agents/frameworks/pattern-expert.md#L294-L338` (DEFECTIVE, no `../`)
+          -> PASSES, kind:"section"                    <- false negative
+
+    RE-COSTING (corrected): the recommendation is CHEAP to wire and WRONG-INSTRUMENT as specified.
+    Wiring is a pure string call, no refactor. But as-is it would NOT ship a "green gate over a
+    defective surface" -- it would ship a RED gate that flags every relative-path anchor in the
+    corpus, correct ones included, while silently passing any non-relative line-range anchor. It
+    discriminates on path traversal, not on line-range-ness, so on this corpus its 16/16 rejection
+    rate is a COINCIDENCE of the corpus being uniformly relative, not detection of the defect.
+
+    Delivering the outcome still needs (a) a predicate rejecting `^L?\d+(-L?\d+)?$` section
+    locators and (b) the resolution half for past-EOF -- and now ALSO (c) a decision about `..`
+    traversal, which is legitimate in prose cross-references and BLOCKED in edge records. Reusing
+    the classifier without (c) makes every relative prose link a finding.
+
+    METHOD NOTE, which is the durable part: the first conclusion was produced by a synthetic
+    instrument and was wrong in a way no amount of re-reading the source would have caught --
+    the source reading was correct. Driving the REAL corpus strings is what falsified it. When a
+    finding rests on constructed inputs, the rotation that matters is to the real ones.
 
   s5_4_the_fix_nothing_disposition_is_confirmed_for_the_anchor_class: >-
     Session 4 fixed nothing, justified by "every defect target is loom-synced, so a local edit is
@@ -3021,7 +3055,8 @@ use_template_findings_emitter_generated_dead_invocation_and_sweep_gate:
     - "[ ] `/sweep` on a consumer lacking `loom-links.mjs` emits the N/A sentinel, verified by running it there, not by reading the catch block."
     - "[ ] Issue #28 is closed ONLY with a commit SHA or PR link covering item 3 (git.md Issue closure), or is left open with item 3 named as the residual."
     - "[ ] Issue #55 item 1 is superseded by S5-1 rather than closed as a false positive alone -- the false positive is real, but the bug class it points at is not."
-    - "[ ] Any anchor gate built on classifyAnchor is shown to REJECT `foo.md#L294-L338` before it is called done; a green run against the current corpus is not evidence, since the corpus is 100% defective in this class."
+    - "[ ] Any anchor gate built on classifyAnchor is shown to REJECT the NON-RELATIVE form `foo.md#L294-L338` (which the classifier currently PASSES) before it is called done."
+    - "[ ] That gate is ALSO shown to ACCEPT a correct relative anchor (`../../foo.md#§ Real Section`), which the classifier currently REJECTS for path-traversal. A run against the current corpus rejecting 16/16 is NOT evidence the gate works: every corpus anchor is relative, so traversal alone explains the result and the line-range predicate is never exercised."
 
   disclosure_scrub: >-
     Names only `.claude/`, `.codex/`, `.coc/` and `bin/` artifact paths, line numbers, and public
