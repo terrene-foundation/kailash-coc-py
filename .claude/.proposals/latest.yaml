@@ -2802,4 +2802,78 @@ use_template_f26_ratification_and_mechanism_evidence:
     containing no identifying detail. No operator identity, no absolute path, no client or tenant
     identifier, no downstream-consumer name.
 
+use_template_metric_axis_correction_the_headline_count_is_not_a_health_metric:
+  header: >-
+    Session 4 (2026-08-08). A REPORTING correction, prompted by the repo owner challenging the
+    number. Every block above, and every session report this session, quoted "294 dangling
+    cross-references" as a health axis. That number is roughly 77% ARTIFACT, and this block replaces
+    it with the axis set that actually means something.
+
+    This is not a new finding -- the 77% was established in
+    `use_template_findings_xref_classification_and_fragment_rot` (S4-1). It is a correction to how
+    that finding was REPORTED, which is a distinct failure: the analysis was right and the metric
+    quoted alongside it was wrong, so the reports implied a large unaddressed problem that does not
+    exist.
+
+  what_was_wrong: >-
+    `validate-xref-integrity.mjs` emits ONE undifferentiated `dangling_count`. It cannot distinguish
+    a reference that is BROKEN from one whose target is DELIBERATELY ABSENT from this repo (a
+    `use_exclude` / `loom_only` / tier-non-subscribed artifact, or a loom-root `journal/` provenance
+    pointer). Both are reported identically.
+
+    So the headline conflates two categories with OPPOSITE meanings, and every consumer of that
+    number inherits the conflation -- a burn-down table, a CI gate, a future session reading the
+    ledger. The orchestrator quoted the raw 294 in six consecutive reports AFTER having established
+    it was mostly by-design, which is the specific error being corrected here.
+
+  the_correct_axes: >-
+    Measured this session from the validator's own `--json`, with the by-design classes removed and
+    the remainder DEDUPED by (source, line) -- because one source line can emit TWO findings when it
+    carries both a backtick token and a markdown link (four such collapses).
+
+      raw headline (do NOT quote)                        294
+      by-design absences (journal 105 + backtick 120)    225   <- not defects
+      real-defect findings                                69
+      real-defect DISTINCT SITES (source,line)            65   <- the honest finding count
+      DISTINCT FILES needing an edit                      20   <- the honest work unit
+      fragment anchors, invisible to this tool            18   <- separate blind class (S4-3)
+
+    The 20 files are concentrated: 16 of them sit under `.claude/skills/{02,03,04,05,08}-*`, and the
+    dominant defect is a relative-path hop error, not semantic rot. The actionable statement is
+    "20 files, one mechanical path-fix pass, plus 18 line-range anchors that need a different
+    treatment" -- NOT "294 problems".
+
+  by_design_is_fixed_by_SANCTIONING_not_editing: >-
+    Load-bearing distinction that the single number destroys. The 225 by-design rows are cleared by
+    teaching the validator its by-design categories (S4-2's six categories, S4-6's journal predicate)
+    -- i.e. by making the tool STOP REPORTING them. They must NOT be "fixed" by editing artifacts;
+    editing them would strip legitimate provenance and cross-tier pointers, which S4-6 argues
+    against explicitly.
+
+    So the two halves of the 294 have OPPOSITE remediations, and a single count cannot express that.
+    That is why the conflated headline is not merely imprecise -- it points at the wrong work.
+
+  root_cause_and_fix: >-
+    Same root cause as the amendment and the F26 disposition: a mechanically-decidable property
+    (is this absence by-design or not?) is derivable from the manifest and is not gated, so it is
+    resolved by human classification after the fact instead of by the tool at report time.
+
+    FIX: the validator MUST PARTITION its output rather than emit one count -- `real_defects`,
+    `by_design_absent` (with the manifest fate that sanctions each), and `not_examined` (surfaces
+    and shapes it cannot see, per S4-4 fragments and S4-17 the unscanned guides tree). The headline
+    number, if one is emitted at all, MUST be `real_defects`. A tool that reports its noise and its
+    signal as one integer will have that integer misquoted by every consumer -- as it was here, by
+    the author of the analysis that had already measured the noise.
+
+  acceptance_criteria:
+    - "[ ] The validator emits partitioned counts (real_defects / by_design_absent / not_examined); any single headline number is real_defects, never the union."
+    - "[ ] by_design_absent rows each carry the manifest fate that sanctions them, so the category is auditable rather than asserted."
+    - "[ ] not_examined names the shapes and trees the tool cannot see (fragments per S4-4; the guides tree per S4-17), so exit 0 cannot be read as corpus-clean."
+    - "[ ] No future report quotes the union count as a health metric. The tracked axes are: distinct files to edit, distinct defect sites, and the not-examined surface."
+    - "[ ] The 20-file / 65-site figure is re-derived after any remediation rather than carried forward from this block."
+
+  disclosure_scrub: >-
+    Names only `.claude/` artifact paths and manifest key names. No operator identity, no absolute
+    path, no client or tenant identifier, no downstream-consumer name.
+
 status: pending_review
