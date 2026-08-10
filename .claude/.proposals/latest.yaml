@@ -3371,6 +3371,60 @@ use_template_findings_issue_enumeration_instrument_and_validator_coverage:
     (or ship both). Worth a sweep -- if the rule/extract pair can split across the `use_exclude`
     boundary once, other pairs may be split the same way, and no validator checks the pairing.
 
+  s6_9_the_xref_validator_mis_parses_nested_fences_root_caused_and_bounded: >-
+    CORRECTS s6_8's disposition for two refs, and root-causes them. s6_8 classified
+    `11-advanced-usage.md:318` (`pattern-1.md`) and `:403` (`../skills/99-my-custom-skill/SKILL.md`)
+    as BY-DESIGN fill-in-template scaffolding and proposed leaving them alone. The CONTENT
+    classification stands -- both sit inside fenced teaching templates. But the remedy was wrong:
+    they are FALSE POSITIVES produced by a defect in the validator's own fence parser, and the fix
+    belongs in the parser, not in the guide.
+
+    ROOT CAUSE, one expression. `.claude/bin/validate-xref-integrity.mjs:359` inside
+    `stripFencedBlocks`:
+
+      const run  = fm[1];      // the full fence run, e.g. "```" or "````"
+      const kind = run[0];     // <-- keeps only the FIRST CHARACTER; LENGTH DISCARDED
+
+    Closing is then tested with `kind === fenceMarker`, i.e. backtick-vs-tilde only. Per CommonMark
+    a fence opened with N backticks is closed only by a run of >= N backticks, so a 3-backtick
+    marker inside a 4-backtick block is CONTENT. Here it closes the block. Every subsequent fence
+    in the file toggles on the wrong phase, and the scanner's notion of "inside a fence"
+    desynchronizes from the document's.
+
+    MEASURED AGAINST THE REAL FILE, not inferred. Driving the validator's OWN `stripFencedBlocks`
+    over `11-advanced-usage.md` and reading the post-strip text at those lines:
+      L318 scanned as: "- **[pattern-1](pattern-1.md)** - Description"
+      L403 scanned as: "- **[my-custom-skill](../skills/99-my-custom-skill/SKILL.md)**"
+    Both SURVIVE stripping -- so they are scanned, hence flagged -- while both are genuinely
+    inside `````markdown` teaching blocks. The trigger in this file is the nested 4-backtick
+    region at :248/:266/:268/:277.
+
+    METHOD NOTE, recorded because it nearly produced a wrong claim. A synthetic minimal fixture
+    (4-backtick outer wrapping a 3-backtick inner, with a ref inside the outer) did NOT reproduce
+    the leak: the ref was stripped and the INNER block's content leaked instead. The fixture landed
+    on the opposite parity phase from the real file. A parity bug is phase-dependent, so a minimal
+    fixture can show the exact OPPOSITE of the real behaviour -- the real file driven through the
+    real function is the only sound instrument here. Do not accept a small green fixture as
+    evidence about a fence-parity defect.
+
+    BLAST RADIUS, bounded rather than asserted. Files carrying a 4+-backtick fence (the trigger):
+    NINE -- `guides/claude-code/{04-the-command-system,05-the-agent-system,10-daily-workflows,
+    11-advanced-usage}.md`, `rules/{upstream-issue-hygiene,variant-authoring}.md`,
+    `skills/17-gold-standards/{documentation-validation-patterns,gold-documentation}.md`,
+    `skills/18-security-patterns/frontmatter-directive-trust-surface.md`. Of the 106 host files
+    carrying a dangling ref, only TWO intersect that set (`11-advanced-usage.md`,
+    `gold-documentation.md`), and FIVE dangling refs live in those two.
+
+    So FIVE is the UPPER BOUND on this false-positive class, against a 342 total -- NOT a
+    systemic inflation of the corpus, and NOT all five are necessarily false positives (only the
+    two above were read). Stated as a bound because it was measured as one; do not restate it as
+    "five false positives".
+
+    REQUESTED FIX: compare fence-run LENGTH, not first character -- record the opening run and
+    close only on a same-marker run of >= that length (CommonMark). Then re-derive both scope
+    counts; any drop is a genuine baseline improvement, and the ratchet's own text already
+    instructs the operator to lower the baseline when counts fall.
+
   s6_5_sweep7_stub_marker_grep_cannot_distinguish_an_escape_from_a_stub: >-
     INCREMENTAL. `commands/sweep.md:113` greps production code for
     `TODO|FIXME|HACK|XXX|NotImplementedError`. The `XXX` alternation matches the literal `XXX`
@@ -3403,6 +3457,8 @@ use_template_findings_issue_enumeration_instrument_and_validator_coverage:
     - "[ ] Any ratchet baseline is pinned over the COMPLETE surface (342 = 294 default + 48 guides), never the default run alone, and is recorded as a residual with a named acceptor + revisit trigger + calendar backstop per `completion-criterion.md` MUST-6 -- it is a bet, not a clearance."
     - "[ ] All 22 guides `not-found` refs are dispositioned per s6_8: 17 by the ONE flat-vs-nested agent-path fix in `guides/model-optimization/04-implementation-plan.md` (+ `12-troubleshooting.md:463`), 2 left alone as fill-in-template scaffolding, 1 deferred fixture dir, 1 marked historical. Verified by re-running `--scope .claude/guides` and confirming the not-found count falls to the 4 non-defect refs, not merely that the file was edited."
     - "[ ] The 5 DEFECT-ABSENT refs (todo-manager x3, gh-manager, agents/_README.md) are DELETED or repointed at a capability that exists -- not path-fixed, since no such agent exists under any nesting."
+    - "[ ] `validate-xref-integrity.mjs::stripFencedBlocks` compares fence-run LENGTH (CommonMark: close only on a same-marker run >= the opening run), not `run[0]`. Verified by driving the REAL function over `11-advanced-usage.md` and confirming L318 and L403 are now stripped — NOT by a synthetic fixture, which is phase-dependent and reproduced the opposite behaviour."
+    - "[ ] After that fix, both scope counts are re-derived and the ratchet baselines LOWERED to match. The class is bounded at <=5 refs across 2 host files, so a drop larger than 5 means something else changed and must be explained before the baseline moves."
     - "[ ] `guides/rule-extracts/cross-sdk-inspection.md` stops shipping to USE templates whose manifest `use_exclude`s `rules/cross-sdk-inspection.md`, OR the rule ships alongside it. An extract whose parent is excluded is an orphan on arrival."
     - "[ ] A sweep confirms no OTHER rule/extract pair is split across the `use_exclude` boundary; if any is, the pairing gets a structural check, since nothing validates it today."
     - "[ ] The F30 upstream fix targets `commands/sweep.md:141`, NOT `skills/sweep/SKILL.md` -- the latter contains zero `sweep-ecosystem` matches."
