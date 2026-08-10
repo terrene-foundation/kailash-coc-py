@@ -108,23 +108,51 @@ jobs:
       # a residual per completion-criterion.md MUST-6 and needs a named
       # acceptor + revisit trigger + calendar backstop. It is a bet, not a
       # clearance. See .claude/.proposals/latest.yaml § s6_6.
-      - name: Cross-reference integrity (evidence only, non-blocking)
-        continue-on-error: true
+      # RATCHET, added after the 22 guides not-found refs were classified
+      # (2026-08-10). It fails ONLY on a count that EXCEEDS the pinned baseline
+      # — never on the standing backlog, which is why it can have teeth without
+      # reding the board.
+      #
+      # BASELINE IS A RESIDUAL, NOT A CLEARANCE (completion-criterion.md MUST-6):
+      #   accepted_by:       repo operator, in-session 2026-08-10
+      #   revisit_trigger:   loom lands the guides path fixes (17 of 22 are one
+      #                      root cause: model-optimization/04-implementation-plan.md
+      #                      cites a FLAT .claude/agents/<name>.md layout that is
+      #                      now nested by category)
+      #   calendar_backstop: 2026-11-10 (90d) — re-derive both baselines then
+      #                      even if the trigger never fires
+      #
+      # Lower the baselines the moment loom's fixes land. A baseline that is
+      # never lowered is how a ratchet becomes a rubber stamp.
+      #
+      # NOTE branch protection carries no required_status_checks, so a red here
+      # is a loud signal, not a merge block. That is the intended strength.
+      - name: Cross-reference integrity (ratchet — fails only on regression)
         run: |
           set -uo pipefail
-          echo "Cross-reference integrity — measurement, not a gate."
-          echo "Counts below are NOT a health metric: much of the standing"
-          echo "total is by-design (journal-dir-missing on a USE template)."
+          BASELINE_DEFAULT=294
+          BASELINE_GUIDES=48
+          echo "Cross-reference integrity — ratchet against pinned baselines."
+          echo "Counts are NOT a health metric: much of the standing total is"
+          echo "by-design (journal-dir-missing on a USE template, 105 + 26)."
+          echo "Baselines: default=$BASELINE_DEFAULT guides=$BASELINE_GUIDES"
           echo ""
 
           summarize() {
             local label="$1"; shift
+            COUNT=UNMEASURED
             node .claude/bin/validate-xref-integrity.mjs "$@" --json > /tmp/xref.json 2>/tmp/xref.err || true
             if [ ! -s /tmp/xref.json ]; then
               echo "  $label: validator produced no JSON — treat as UNMEASURED, not zero"
               sed 's/^/    /' /tmp/xref.err | head -5
               return
             fi
+            COUNT="$(node -e '
+              try {
+                const d = JSON.parse(require("fs").readFileSync("/tmp/xref.json", "utf8"));
+                process.stdout.write(Number.isInteger(d.dangling_count) ? String(d.dangling_count) : "UNMEASURED");
+              } catch (e) { process.stdout.write("UNMEASURED"); }
+            ')"
             node -e '
               const fs = require("fs");
               const label = process.argv[1];
@@ -146,8 +174,33 @@ jobs:
           }
 
           summarize "default scope (commands, rules, skills, agents)"
+          DEFAULT_COUNT="$COUNT"
           summarize "guides tree (NOT in DEFAULT_SCOPE_DIRS)" --scope .claude/guides
+          GUIDES_COUNT="$COUNT"
 
           echo ""
-          echo "Non-blocking by design. A rising not-found count is the signal"
-          echo "worth acting on; journal-dir-missing is expected here."
+          rc=0
+          check() {
+            local label="$1" actual="$2" baseline="$3"
+            if [ "$actual" = "UNMEASURED" ]; then
+              echo "  $label: UNMEASURED — treating as FAILURE, not as zero."
+              echo "    An absent measurement is not a passing measurement."
+              rc=1
+            elif [ "$actual" -gt "$baseline" ]; then
+              echo "  $label: REGRESSION — $actual > baseline $baseline (+$((actual - baseline)))"
+              rc=1
+            elif [ "$actual" -lt "$baseline" ]; then
+              echo "  $label: IMPROVED — $actual < baseline $baseline. Lower the baseline in this file."
+            else
+              echo "  $label: at baseline ($actual)."
+            fi
+          }
+          check "default scope" "$DEFAULT_COUNT" "$BASELINE_DEFAULT"
+          check "guides tree"   "$GUIDES_COUNT"  "$BASELINE_GUIDES"
+
+          if [ "$rc" -ne 0 ]; then
+            echo ""
+            echo "New dangling cross-references, or a measurement that did not run."
+            echo "Fix the new refs — do NOT raise the baseline to make this pass."
+          fi
+          exit "$rc"

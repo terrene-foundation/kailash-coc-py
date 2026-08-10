@@ -3319,6 +3319,58 @@ use_template_findings_issue_enumeration_instrument_and_validator_coverage:
     provenance (sync-managed files show `chore(sync)`/`chore(coc)` commits; durable ones show only
     local `feat`/`fix`). Every durability verdict cited in this block was taken on both.
 
+  s6_8_the_22_guides_not_found_refs_classified_one_root_cause_plus_an_orphan: >-
+    S6-6 measured 48 dangling refs in the never-scanned guides tree and explicitly declined to
+    generalize from the 3 spot-checked to the other 19. All 22 `not-found` refs are now classified
+    by reading each in context, with every target resolved or its absence shown under a firing
+    control. The 26 `journal-dir-missing` are unchanged and remain by-design.
+
+    ONE ROOT CAUSE COVERS 17 OF 22. `.claude/guides/model-optimization/04-implementation-plan.md`
+    cites agents at a FLAT `.claude/agents/<name>.md` layout; the tree is nested by category. Every
+    one of its 16 refs is wrong, plus one more in `12-troubleshooting.md`. This is ONE upstream
+    edit, not nineteen.
+
+      - 12 x DEFECT-STALE-PATH -- target exists, path wrong. Each appears 3x at lines 40-68:
+          `.claude/agents/release-specialist.md` -> `.claude/agents/release/release-specialist.md`
+          `.claude/agents/reviewer.md`           -> `.claude/agents/quality/reviewer.md`
+          `.claude/agents/build-fix.md`          -> `.claude/agents/implementation/build-fix.md`
+          `.claude/agents/testing-specialist.md` -> `.claude/agents/testing/testing-specialist.md`
+        (control: `find .claude/agents -name cc-architect.md` fires, so ABSENT results are real)
+      - 5 x DEFECT-ABSENT -- no such agent anywhere in the tree, under any nesting:
+          `.claude/agents/management/todo-manager.md` (:32), `.claude/agents/todo-manager.md`
+          (:56, :68), `.claude/agents/gh-manager.md` (:44), `.claude/agents/_README.md`
+          (`12-troubleshooting.md:463`). These need deletion or replacement, not a path fix --
+          the referenced capability does not exist in this template at all.
+      - 2 x BY-DESIGN, correctly excluded from any fix: `11-advanced-usage.md:318` (`pattern-1.md`)
+        and `:403` (`../skills/99-my-custom-skill/SKILL.md`) both sit inside a FILL-IN TEMPLATE the
+        guide gives the reader ("[Your most common patterns]", "**[pattern-1](pattern-1.md)** -
+        Description"). A `99-`-prefixed "my-custom-skill" is placeholder scaffolding. The
+        validator's `reason` field cannot distinguish these from prose refs -- only reading can,
+        which is why the 19 were not classified from the reason code alone.
+      - 1 x DEFERRED-FIXTURE: `observability.md:68` names
+        `.claude/audit-fixtures/log-triage-gate/` inside a Trust-Posture Wiring block. Consistent
+        with the corpus-wide "audit fixtures land WITH the Phase-2 detector" convention
+        (`cc-artifacts.md` Rule 9), so the directory legitimately does not exist yet. Flagged
+        rather than silently passed, because the prose asserts it as a present location.
+      - 1 x HISTORICAL-STALE: `sync-completeness.md:76` cites `commands/sync.md` inside an ORIGIN
+        paragraph describing 2026-05-06 state. That file was the D8 deprecated redirect stub,
+        REMOVED 2026-06-25 and obsoleted-purged (manifest `:3044-3047`). The prose is accurate
+        about the past and dead as a pointer; the fix is to mark it historical, not to restore it.
+
+    NEW FINDING, surfaced by classifying #20 -- AN ORPHANED RULE-EXTRACT.
+    `.claude/guides/rule-extracts/cross-sdk-inspection.md:3` opens "Companion reference for
+    `.claude/rules/cross-sdk-inspection.md`". That rule is **`use_exclude`d** (manifest `:3852-3854`)
+    and is correctly ABSENT here -- but its EXTRACT ships. So this template carries a companion
+    document whose parent it is deliberately never given, and every reader following its first
+    line lands on nothing.
+
+    Control establishing this is an asymmetry and not the norm: `rules/zero-tolerance.md` and
+    `guides/rule-extracts/zero-tolerance.md` are BOTH present, which is the intended paired shape.
+
+    The fix is a manifest change, not a prose change: `use_exclude` the extract alongside its rule
+    (or ship both). Worth a sweep -- if the rule/extract pair can split across the `use_exclude`
+    boundary once, other pairs may be split the same way, and no validator checks the pairing.
+
   s6_5_sweep7_stub_marker_grep_cannot_distinguish_an_escape_from_a_stub: >-
     INCREMENTAL. `commands/sweep.md:113` greps production code for
     `TODO|FIXME|HACK|XXX|NotImplementedError`. The `XXX` alternation matches the literal `XXX`
@@ -3349,7 +3401,10 @@ use_template_findings_issue_enumeration_instrument_and_validator_coverage:
     - "[ ] Ledger row F11 IS retired, on the correct ground: #55 item 8 is WITHDRAWN upstream because both commands are in fact declared under `gemini:`. Retiring it for the sweep's stated reason (the item does not exist) is BLOCKED even though the outcome coincides."
     - "[ ] `validate-xref-integrity.mjs` scans `.claude/guides` -- either by adding it to `DEFAULT_SCOPE_DIRS` or by every invocation passing `--scope`. Verified by confirming the guides tree's 48 dangling refs appear in a DEFAULT run, not only in a `--scope` run."
     - "[ ] Any ratchet baseline is pinned over the COMPLETE surface (342 = 294 default + 48 guides), never the default run alone, and is recorded as a residual with a named acceptor + revisit trigger + calendar backstop per `completion-criterion.md` MUST-6 -- it is a bet, not a clearance."
-    - "[ ] The 19 unclassified `not-found` refs in the guides tree are classified before any of them is called by-design; the 3 verified are genuine stale flat-agent paths and MUST NOT be used to characterize the other 19 in either direction."
+    - "[ ] All 22 guides `not-found` refs are dispositioned per s6_8: 17 by the ONE flat-vs-nested agent-path fix in `guides/model-optimization/04-implementation-plan.md` (+ `12-troubleshooting.md:463`), 2 left alone as fill-in-template scaffolding, 1 deferred fixture dir, 1 marked historical. Verified by re-running `--scope .claude/guides` and confirming the not-found count falls to the 4 non-defect refs, not merely that the file was edited."
+    - "[ ] The 5 DEFECT-ABSENT refs (todo-manager x3, gh-manager, agents/_README.md) are DELETED or repointed at a capability that exists -- not path-fixed, since no such agent exists under any nesting."
+    - "[ ] `guides/rule-extracts/cross-sdk-inspection.md` stops shipping to USE templates whose manifest `use_exclude`s `rules/cross-sdk-inspection.md`, OR the rule ships alongside it. An extract whose parent is excluded is an orphan on arrival."
+    - "[ ] A sweep confirms no OTHER rule/extract pair is split across the `use_exclude` boundary; if any is, the pairing gets a structural check, since nothing validates it today."
     - "[ ] The F30 upstream fix targets `commands/sweep.md:141`, NOT `skills/sweep/SKILL.md` -- the latter contains zero `sweep-ecosystem` matches."
     - "[ ] Any future locally-durable determination cites BOTH manifest coverage AND git provenance; `.github/coc-sdk-refs-allowlist.txt` (zero manifest hits, three `chore(coc)` sync commits) is the standing counterexample to the manifest-alone test."
     - "[ ] `validate-forest-ledger.mjs` per-file mode runs L1/L2/L3 against `.session-notes.shared.md` instead of failing L1, verified by pointing it at a shared ledger carrying an open row with an EMPTY value-anchor and confirming it REPORTS that row (a pass on a well-formed file is not evidence -- the check must be shown able to fail)."
