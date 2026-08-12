@@ -89,6 +89,58 @@ jobs:
         with:
           node-version: "20"
 
+      # Image-pin drift gate. workspaces/dev-container/briefs/00-user-brief.md
+      # § Post-pivot declares: "SIX consumer-shipped files reference the same tag
+      # and MUST all be bumped together", and names the failure — the publish
+      # workflow's "Sync Docker Hub overview" step pushes DOCKERHUB.md to the
+      # registry page, so a release that bumps only five silently republishes a
+      # stale page. That MUST had no enforcement until now.
+      #
+      # HARD gate, not advisory: the correct state is currently green (all six at
+      # VERSION), so this reds only on real drift. That is what distinguishes it
+      # from the xref check below, whose standing backlog forces a ratchet.
+      #
+      # Matcher is anchored on `kailash-coc-py:<semver>` deliberately. DOCKERHUB.md
+      # carries a bare `1.10.1` in a "Prior stable — retained for provenance" table
+      # cell; that is BY DESIGN and is not in the pinned-tag form, so this check
+      # structurally cannot trip on it. Do not loosen the anchor to bare versions.
+      - name: Image-pin drift (six consumer-shipped files vs .claude/VERSION)
+        run: |
+          set -uo pipefail
+          # NOT `require("./.claude/VERSION")` — the file is JSON with NO extension,
+          # so require() parses it as JS and throws. That would leave VERSION empty
+          # and red every file on every run: a false-red gate, worse than none.
+          VERSION="$(node -e 'console.log(JSON.parse(require("fs").readFileSync(".claude/VERSION","utf8")).version)')"
+          if [ -z "$VERSION" ]; then
+            echo "  could not read .claude/VERSION::version — failing rather than comparing against empty"
+            exit 1
+          fi
+          echo "VERSION::version = $VERSION"
+          FILES=(docker-compose.yml .devcontainer/devcontainer.json bin/dev
+                 README.md Dockerfile.user.example DOCKERHUB.md)
+          rc=0
+          for f in "${FILES[@]}"; do
+            if [ ! -e "$f" ]; then
+              echo "  MISSING  $f — the brief names it as one of the six"; rc=1; continue
+            fi
+            hits="$(grep -noE 'kailash-coc-py:[0-9]+\.[0-9]+\.[0-9]+' "$f" || true)"
+            if [ -z "$hits" ]; then
+              echo "  NO PIN   $f — carries no kailash-coc-py:<semver> reference"; rc=1; continue
+            fi
+            bad="$(echo "$hits" | grep -v ":kailash-coc-py:${VERSION}\$" || true)"
+            if [ -n "$bad" ]; then
+              echo "  DRIFT    $f"; echo "$bad" | sed 's/^/             line /'; rc=1
+            else
+              echo "  ok       $f ($(echo "$hits" | wc -l | tr -d ' ') pin(s) at $VERSION)"
+            fi
+          done
+          if [ "$rc" -ne 0 ]; then
+            echo ""
+            echo "Image-pin drift. All six files MUST carry the same tag as .claude/VERSION."
+            echo "A release that bumps only some of them republishes a stale Docker Hub page."
+          fi
+          exit "$rc"
+
       # Cross-reference integrity — EVIDENCE-PRODUCING, NOT A GATE.
       #
       # `continue-on-error: true` is deliberate and load-bearing. The validator
