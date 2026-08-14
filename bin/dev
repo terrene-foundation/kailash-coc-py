@@ -29,7 +29,7 @@ if [ "$#" -eq 0 ]; then set -- bash; fi
 # DEV_IMAGE override from .env (e.g. for template developers rebuilding the recipe).
 # shellcheck disable=SC1091
 [ -f .env ] && set -a && . ./.env && set +a
-DEV_IMAGE="${DEV_IMAGE:-docker.io/terrenefoundation/kailash-coc-py:1.21.0}"
+DEV_IMAGE="${DEV_IMAGE:-docker.io/terrenefoundation/kailash-coc-py:1.22.0}"
 
 # Pre-flight: pull the published image when not present locally, with a clear error
 # on network/registry failure. Template developers using a local-build tag (no `/` in
