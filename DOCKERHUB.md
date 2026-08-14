@@ -60,7 +60,7 @@ A **single shared virtualenv** lives at `/opt/venv` and is on `$PATH`. The baked
 docker run --rm -it \
   -v "$PWD:/workspace" \
   -w /workspace \
-  terrenefoundation/kailash-coc-py:1.21.0
+  terrenefoundation/kailash-coc-py:1.22.0
 ```
 
 You land in `/workspace` as the non-root user `dev` with every CLI, framework, and runtime ready.
@@ -90,10 +90,11 @@ Image tags follow the COC template version (`.claude/VERSION::version` in the so
 
 | Tag      | Meaning                                                                                 |
 | -------- | --------------------------------------------------------------------------------------- |
-| `1.21.0` | Current stable. Pinned semantic version — recommended for derivative builds.            |
+| `1.22.0` | Current stable. Pinned semantic version — recommended for derivative builds.            |
 | `latest` | Moving pointer to the most recent stable release.                                       |
+| `1.21.0` | Prior stable (2026-08-04). Retained for provenance.                                     |
 | `1.10.1` | Prior stable (2026-05-31). Retained for provenance.                                     |
-| `0.1.0`  | First-cut release (2026-05-28). Retained for provenance; prefer `1.21.0+` for new work. |
+| `0.1.0`  | First-cut release (2026-05-28). Retained for provenance; prefer `1.22.0+` for new work. |
 
 The `:latest` tag is suitable for `bin/dev` ergonomics. **For reproducible derivative builds, pin a digest** — see _Building on top of this image_ below.
 
@@ -115,7 +116,7 @@ The image is intentionally **closed for OS package additions** during runtime �
 
 ```dockerfile
 # Dockerfile.user — pin a digest for reproducibility
-FROM terrenefoundation/kailash-coc-py:1.21.0@sha256:<digest>
+FROM terrenefoundation/kailash-coc-py:1.22.0@sha256:<digest>
 
 USER root
 RUN apt-get update \
@@ -127,7 +128,7 @@ USER dev
 Get the current digest:
 
 ```bash
-docker manifest inspect terrenefoundation/kailash-coc-py:1.21.0
+docker manifest inspect terrenefoundation/kailash-coc-py:1.22.0
 ```
 
 **Python and Node dependencies do NOT need a rebuild** — drop them in `requirements-user.txt` / `package.json` and let the container's `postCreate` step install them into the shared venv on next start.
@@ -190,7 +191,7 @@ Read more:
 After pulling, verify the image is intact:
 
 ```bash
-docker run --rm terrenefoundation/kailash-coc-py:1.21.0 bash -c '
+docker run --rm terrenefoundation/kailash-coc-py:1.22.0 bash -c '
   claude --version
   codex --version
   gemini --version
