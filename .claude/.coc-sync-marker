@@ -1,34 +1,56 @@
 # COC Sync Marker — kailash-coc-py (py lane, multi-CLI)
-timestamp: 2026-08-02T15:28:27Z
+timestamp: 2026-08-13T08:04:27Z
 source: loom/.claude
-loom_sha: 43167a54921f7454a3eb2573af0252ca7d16df2a
+loom_sha: dc07a7c6cc4d29906551cbe0634f2ca220bb1e1a
 variant: py
 visibility: public
 clis: ["claude", "codex", "gemini"]
+base_sha: 0c0c3a16d0e46f5c01190977908706f228466166
 stats:
-  engine_copied: 2008
-  engine_verified: "2008/2008 delivered — 1949 byte-equal, 59 content-equal after BUILD-internal strip"
-  overlays: "157/157 byte-equal"
-  variant_only: "13/13 byte-equal"
+  engine_verify: "CONSISTENT — 2368 in-plan files checked, every one matches expected; no obsoleted path present (sync-tier-aware --target py --template kailash-coc-py --verify, exit 0)"
+  changed_paths_total: 555 # git status --porcelain -uall (NOT the bare form — it collapses untracked dirs); counted AFTER this marker + VERSION were written
+  changed_by_prefix:
+    .claude: 327
+    .coc: 86
+    .gemini: 69
+    .codex: 67
+    .codex-mcp-guard: 3
+    root: 2 # AGENTS.md, GEMINI.md
+    .gitignore: 1
   purged: 0
-  version_stamp: "loom-tracking -> 2.45.0 @ 43167a54 (own version 1.20.0 -> 1.21.0)"
-  settings_reconcile: "deny(rewrote 20, deduped 20, restored 1), hooks(added 6, pruned 0)"
-  hooks_resolving: "34/34"
+  version_stamp: "loom-tracking -> 2.45.0 @ dc07a7c6 (stamp-template-version --write --repo terrene-foundation/kailash-coc-py); own version 1.21.0 -> 1.22.0"
+  hooks_resolving: "36/36"
+  settings_pii_scan: "clean — 0 /Users/ or /home/ hits in .claude/settings.json"
   baselines_emitted:
-    cc: 0
-    codex: 1
-    gemini: 1
+    cc: 0 # CLAUDE.md is template-owned, preserved not emitted
+    codex: 1 # AGENTS.md
+    gemini: 1 # GEMINI.md
   baseline_emission_bytes:
-    block_cap_bytes: 61440
+    block_cap_bytes: 65536
     warn_cap_bytes: 32768
-    codex: { rules: 11, bytes: 53168, tier: WARN, headroom_pct: 13.46 }
-    gemini: { rules: 11, bytes: 53168, tier: WARN, headroom_pct: 13.46 }
+    codex: { rules: 11, bytes: 56230, tier: WARN, headroom_pct: 14.2 }
+    gemini: { rules: 11, bytes: 56230, tier: WARN, headroom_pct: 14.2 }
+    note: "ADVISORY — 14.2% is inside the 15% proximity band; the next baseline MUST addition requires paired extraction OR a named-rationale exception per rule-authoring.md Rule 10."
   cli_artifacts:
-    codex: { prompts: 42, skills: 39, agents: 22 }
+    codex: { prompts: 42, skills: 39, agent_prompts: 22 }
     gemini: { commands: 42, skills: 39, agents: 22 }
-  coc_artifacts: 198
-  coc_files: 200
-  codex_dispatcher: "bin/coc + 28 per-phase symlinks"
-  overlay_drift_resolved:
-    - "hooks/detect-package-manager.js (variant_only-drift -> canon 3100de7d)"
-    - "hooks/validate-prod-deploy.js (drift-from-both -> py overlay 393b82d7)"
+    rules_reference_skill: { codex: 1, gemini: 1, path_scoped_rules_indexed: 79 }
+    skipped_by_exclusions: { commands: 17, skills: 14, codex_agent_prompts: 18, gemini_agents: 18 }
+  coc_artifacts: 203 # rules=91 agents=25 skills=42 commands=45
+  coc_files: 205
+  coc_version: "1.0.0"
+  coc_emit_warn: "rules/STATE-FILE-WRITE-GUARD.md 82132B exceeds the 60KiB producer budget by 20692B — emitted, not truncated (spec-09 imposes no consumer cap)"
+  codex_dispatcher: "bin/coc + 28 per-phase symlinks (== 28 loom wrapper schemas); unchanged vs base"
+  scaffold:
+    symlink: ".claude/codex-mcp-guard -> ../.codex-mcp-guard (resolves)"
+    manifest_distribute: "true — .claude/sync-manifest.yaml byte-identical to loom"
+    codex_mcp_guard_tree: "0 diffs vs loom .claude/codex-mcp-guard/ (sync-completeness Rule 5)"
+  inbox: "already present (README.md + .gitkeep) — additive ensure-exists, zero diff"
+  idempotency_check: "an INDEPENDENT emit into a scratch dir diffed against the worktree: codex/prompts 0, codex/skills 0, gemini/commands 0, gemini/skills 0, gemini/agents 0, .coc 0 differing files; AGENTS.md + GEMINI.md byte-identical"
+  disclosure_gate: "scan-synced-disclosure.mjs --check — 3008 files scanned, 0 findings, exit 0"
+  sdk_pins:
+    install_surface: "requirements-coc.txt — ALL FIVE HELD at PyPI-latest (kailash 2.62.0, dataflow 2.19.1, nexus 2.15.0, kaizen 2.45.0, pact 0.18.0); BUILD @f0dfac30 declares newer for four of them but each returns HTTP 404 on PyPI (unreleased)"
+    ml_overlay: "requirements-coc-ml.txt — HELD (kailash-ml 2.2.2, kailash-align 0.7.4)"
+    metadata_only: "sdk_packages kailash-mcp 0.4.3 -> 0.5.1 (PyPI-present, HTTP 200); kaizen-agents HELD 0.12.0 (BUILD 0.13.0 -> 404)"
+    install_verify: "uv pip compile requirements-coc.txt exit 0 (74 pkgs, 0 warn/error/conflict); requirements-coc-ml.txt exit 0; uv sync N/A (exit 2 — no pyproject.toml in this template)"
+  carried_forward: "loom .claude/dev-container-templates/py/requirements-coc.txt is STALE (behind this template); emit-dev-container NOT run this cycle because it would REGRESS these pins — separate loom-source refresh still owed"

@@ -183,44 +183,59 @@ jobs:
       # gate would red the board permanently on refs that are correct, which is
       # the fastest way to train readers to ignore CI entirely.
       #
-      # Two invocations, because DEFAULT_SCOPE_DIRS in the validator does NOT
-      # include .claude/guides — that tree had never been scanned by any
-      # instrument in this repo until it was measured by hand on 2026-08-10.
-      # The --scope flag needs no validator change.
+      # ONE invocation. Until 2026-08-14 this ran twice, because the validator's
+      # DEFAULT_SCOPE_DIRS excluded .claude/guides and that tree had never been
+      # scanned by any instrument here. loom's guides-scope fix added it, so the
+      # default run now covers guides and a second --scope run would double-count
+      # a subset. Do not re-add one.
       #
-      # DO NOT convert this to a ratchet without pinning the baseline over BOTH
-      # scopes, and without classifying the not-found refs first: a baseline is
-      # a residual per completion-criterion.md MUST-6 and needs a named
-      # acceptor + revisit trigger + calendar backstop. It is a bet, not a
-      # clearance. See .claude/.proposals/latest.yaml § s6_6.
-      # RATCHET, added after the 22 guides not-found refs were classified
-      # (2026-08-10). It fails ONLY on a count that EXCEEDS the pinned baseline
-      # — never on the standing backlog, which is why it can have teeth without
-      # reding the board.
+      # RATCHET: fails ONLY on a count EXCEEDING the pinned baseline — never on
+      # the standing backlog, which is why it can have teeth without reding the
+      # board.
       #
       # BASELINE IS A RESIDUAL, NOT A CLEARANCE (completion-criterion.md MUST-6):
-      #   accepted_by:       repo operator, in-session 2026-08-10
-      #   revisit_trigger:   loom lands the guides path fixes (17 of 22 are one
-      #                      root cause: model-optimization/04-implementation-plan.md
-      #                      cites a FLAT .claude/agents/<name>.md layout that is
-      #                      now nested by category)
-      #   calendar_backstop: 2026-11-10 (90d) — re-derive both baselines then
-      #                      even if the trigger never fires
+      #   accepted_by:       repo operator, in-session 2026-08-10; re-pinned
+      #                      2026-08-14 for the scope change (see run block)
+      #   revisit_trigger:   loom lands the remaining guides path fixes. Partly
+      #                      FIRED already — guides not-found fell 22 -> 9 in the
+      #                      1.22.0 sync; 9 remain.
+      #   calendar_backstop: 2026-11-10 (90d) — re-derive then even if the
+      #                      trigger never fires again
       #
-      # Lower the baselines the moment loom's fixes land. A baseline that is
-      # never lowered is how a ratchet becomes a rubber stamp.
+      # Lower the baseline the moment further fixes land. A baseline that is
+      # never lowered is how a ratchet becomes a rubber stamp. But a baseline
+      # moved for a SCOPE change is neither a lowering nor a raise — re-derive
+      # from scratch and say so, as the 2026-08-14 re-pin does.
       #
       # NOTE branch protection carries no required_status_checks, so a red here
       # is a loud signal, not a merge block. That is the intended strength.
       - name: Cross-reference integrity (ratchet — fails only on regression)
         run: |
           set -uo pipefail
-          BASELINE_DEFAULT=294
-          BASELINE_GUIDES=48
-          echo "Cross-reference integrity — ratchet against pinned baselines."
-          echo "Counts are NOT a health metric: much of the standing total is"
-          echo "by-design (journal-dir-missing on a USE template, 105 + 26)."
-          echo "Baselines: default=$BASELINE_DEFAULT guides=$BASELINE_GUIDES"
+          # RE-BASELINED 2026-08-14 for a SCOPE CHANGE, not an improvement.
+          # loom's guides-scope fix added ".claude/guides" to the validator's
+          # DEFAULT_SCOPE_DIRS, so the default run now ABSORBS the guides tree
+          # and the old two-baseline split (294 default + 48 guides) no longer
+          # measures two disjoint sets — the second run became a SUBSET of the
+          # first. Both old numbers are void; comparing against them is
+          # meaningless in either direction.
+          #
+          # What actually moved, separated from the scope shift:
+          #   default journal-dir-missing 105 -> 131  (+26 = exactly the guides
+          #     tree's own 26, i.e. absorbed, not new rot)
+          #   default not-found           189 -> 186  (-3,  real improvement)
+          #   guides  not-found            22 -> 9    (-13, loom's fixes landing)
+          # The raw +23 on the default scope was the absorption; the underlying
+          # not-found surface IMPROVED.
+          #
+          # Now ONE scope, ONE baseline. Do not re-add a guides sub-run: it
+          # double-counts a subset. Still not a health metric — 131 of 317 are
+          # by-design journal-dir-missing on a USE template.
+          BASELINE_DEFAULT=317
+          echo "Cross-reference integrity — ratchet against a pinned baseline."
+          echo "NOT a health metric: 131 of the standing total are by-design"
+          echo "(journal-dir-missing on a USE template, which has no journal/ tree)."
+          echo "Baseline: default=$BASELINE_DEFAULT (now INCLUDES .claude/guides)"
           echo ""
 
           summarize() {
@@ -258,10 +273,8 @@ jobs:
             ' "$label"
           }
 
-          summarize "default scope (commands, rules, skills, agents)"
+          summarize "default scope (commands, rules, skills, agents, guides)"
           DEFAULT_COUNT="$COUNT"
-          summarize "guides tree (NOT in DEFAULT_SCOPE_DIRS)" --scope .claude/guides
-          GUIDES_COUNT="$COUNT"
 
           echo ""
           rc=0
@@ -281,7 +294,6 @@ jobs:
             fi
           }
           check "default scope" "$DEFAULT_COUNT" "$BASELINE_DEFAULT"
-          check "guides tree"   "$GUIDES_COUNT"  "$BASELINE_GUIDES"
 
           if [ "$rc" -ne 0 ]; then
             echo ""
