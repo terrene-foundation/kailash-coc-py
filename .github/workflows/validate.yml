@@ -89,55 +89,88 @@ jobs:
         with:
           node-version: "20"
 
-      # Image-pin drift gate. workspaces/dev-container/briefs/00-user-brief.md
-      # § Post-pivot declares: "SIX consumer-shipped files reference the same tag
-      # and MUST all be bumped together", and names the failure — the publish
-      # workflow's "Sync Docker Hub overview" step pushes DOCKERHUB.md to the
-      # registry page, so a release that bumps only five silently republishes a
-      # stale page. That MUST had no enforcement until now.
+      # Image-pin MUTUAL-CONSISTENCY gate.
       #
-      # HARD gate, not advisory: the correct state is currently green (all six at
-      # VERSION), so this reds only on real drift. That is what distinguishes it
-      # from the xref check below, whose standing backlog forces a ratchet.
+      # TWO DIFFERENT INVARIANTS LIVE HERE. The first version of this step
+      # conflated them and was WRONG — it red the 1.22.0 sync PR (#83), which was
+      # a correct, intended state. Read this before changing the check:
+      #
+      #   A. The six pins agree WITH EACH OTHER.  TRUE ALWAYS.  <-- enforced here
+      #      This is the failure the brief actually names: "a release that bumps
+      #      only the other five silently republishes a stale page", because the
+      #      publish workflow pushes DOCKERHUB.md to the registry overview.
+      #
+      #   B. The six equal .claude/VERSION.  TRUE ONLY AT/AFTER RELEASE.
+      #      FALSE BY DESIGN in the sync→release window: loom's Gate-2 sync bumps
+      #      VERSION, and the six are repointed later by a local release commit,
+      #      once the image for that tag actually EXISTS on the registry. You
+      #      cannot point a config at an unpublished image.
+      #      Evidence: 537ab6f (2026-08-02) bumped VERSION to 1.21.0; af3eeff
+      #      (2026-08-04, two days later) bumped exactly these six together —
+      #      "release(dev-image): point consumer configs at the published 1.21.0
+      #      image". That two-day gap is the normal window, not drift.
+      #
+      # B's real enforcement point is TAG TIME — publish-dev-image.yml, which
+      # triggers on `push: tags: v*` and is the moment an image is cut. This
+      # workflow runs only on push/PR to main and never sees a tag, so it cannot
+      # enforce B even in principle. publish-dev-image.yml is loom-synced ("do not
+      # hand-edit the consumer copy"), so wiring B there is an UPSTREAM ask.
+      #
+      # B is therefore reported ADVISORY below — visible, never blocking.
       #
       # Matcher is anchored on `kailash-coc-py:<semver>` deliberately. DOCKERHUB.md
       # carries a bare `1.10.1` in a "Prior stable — retained for provenance" table
       # cell; that is BY DESIGN and is not in the pinned-tag form, so this check
       # structurally cannot trip on it. Do not loosen the anchor to bare versions.
-      - name: Image-pin drift (six consumer-shipped files vs .claude/VERSION)
+      - name: Image-pin mutual consistency (the six agree with each other)
         run: |
           set -uo pipefail
           # NOT `require("./.claude/VERSION")` — the file is JSON with NO extension,
-          # so require() parses it as JS and throws. That would leave VERSION empty
-          # and red every file on every run: a false-red gate, worse than none.
+          # so require() parses it as JS and throws.
           VERSION="$(node -e 'console.log(JSON.parse(require("fs").readFileSync(".claude/VERSION","utf8")).version)')"
           if [ -z "$VERSION" ]; then
             echo "  could not read .claude/VERSION::version — failing rather than comparing against empty"
             exit 1
           fi
-          echo "VERSION::version = $VERSION"
+          echo "VERSION::version = $VERSION (advisory reference only — see invariant B above)"
           FILES=(docker-compose.yml .devcontainer/devcontainer.json bin/dev
                  README.md Dockerfile.user.example DOCKERHUB.md)
           rc=0
+          seen=""
           for f in "${FILES[@]}"; do
             if [ ! -e "$f" ]; then
               echo "  MISSING  $f — the brief names it as one of the six"; rc=1; continue
             fi
-            hits="$(grep -noE 'kailash-coc-py:[0-9]+\.[0-9]+\.[0-9]+' "$f" || true)"
-            if [ -z "$hits" ]; then
+            vals="$(grep -oE 'kailash-coc-py:[0-9]+\.[0-9]+\.[0-9]+' "$f" | sed 's/.*://' | sort -u)"
+            if [ -z "$vals" ]; then
               echo "  NO PIN   $f — carries no kailash-coc-py:<semver> reference"; rc=1; continue
             fi
-            bad="$(echo "$hits" | grep -v ":kailash-coc-py:${VERSION}\$" || true)"
-            if [ -n "$bad" ]; then
-              echo "  DRIFT    $f"; echo "$bad" | sed 's/^/             line /'; rc=1
-            else
-              echo "  ok       $f ($(echo "$hits" | wc -l | tr -d ' ') pin(s) at $VERSION)"
+            n="$(echo "$vals" | wc -l | tr -d ' ')"
+            if [ "$n" -ne 1 ]; then
+              echo "  SPLIT    $f disagrees with ITSELF: $(echo "$vals" | tr '\n' ' ')"; rc=1; continue
             fi
+            echo "  ok       $f -> $vals"
+            seen="$seen$vals"$'\n'
           done
-          if [ "$rc" -ne 0 ]; then
+
+          # INVARIANT A — the blocking one.
+          distinct="$(printf '%s' "$seen" | grep -v '^$' | sort -u)"
+          count="$(printf '%s\n' "$distinct" | grep -vc '^$' || true)"
+          if [ "$count" -gt 1 ]; then
             echo ""
-            echo "Image-pin drift. All six files MUST carry the same tag as .claude/VERSION."
-            echo "A release that bumps only some of them republishes a stale Docker Hub page."
+            echo "  INCONSISTENT — the six do not agree: $(printf '%s' "$distinct" | tr '\n' ' ')"
+            echo "  This is the failure the brief names: bumping only some of them"
+            echo "  republishes a stale Docker Hub overview page. Bump ALL six together."
+            rc=1
+          elif [ "$rc" -eq 0 ]; then
+            echo ""
+            echo "  CONSISTENT — all six at $distinct"
+            # INVARIANT B — advisory ONLY. Never sets rc.
+            if [ "$distinct" != "$VERSION" ]; then
+              echo "  note: pins ($distinct) lag VERSION ($VERSION). EXPECTED between a loom"
+              echo "        sync and the release commit that repoints them once the image for"
+              echo "        $VERSION is published. NOT drift, and deliberately not blocking."
+            fi
           fi
           exit "$rc"
 
