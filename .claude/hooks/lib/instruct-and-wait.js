@@ -20,16 +20,18 @@
  * MUST-1 mandates for every halting hook, so the drop degraded the structured
  * handoff fleet-wide.
  *
- * Three severities:
+ * Severities:
  *   - block            tool call BLOCKED. Only meaningful at PreToolUse.
  *   - halt-and-report  tool ran (or event already fired); agent must surface and wait.
- *   - advisory         soft warning; agent acknowledges, may proceed.
+ *   - advisory         soft warning; the tool RAN; agent acknowledges, may proceed.
+ *   - pre-action       PreToolUse only: the call is NOT blocked and has NOT run yet.
  *   - post-mortem      forensic only (Stop-class events); surfaces at next SessionStart.
  */
 
 const STOP_LIKE_EVENTS = new Set(["Stop", "SessionEnd", "PreCompact"]);
 
 function buildValidationBody({
+  hookEvent,
   severity,
   what_happened,
   why,
@@ -48,6 +50,32 @@ function buildValidationBody({
   // under one — the hook text arrived in the same tool result as the successful
   // exit code. Every non-block head now states the ACTION'S FATE in its first
   // words, so the outcome is legible without inspecting the transport.
+  //
+  // loom#1715 H-1 — THE FATE INVARIANT HAD NO PRE-ACTION REGISTER, and a
+  // PreToolUse GUIDE-FIRST surface has no head that is TRUE. Measured on
+  // `git push origin HEAD` against the T4 CI-cost delivery, a PreToolUse
+  // non-block finding: the rendered head read "the action ALREADY RAN" while
+  // the push had not run at all, and the delivery's own closing line is "no
+  // check has judged your push. Read it and decide" — an agent told the action
+  // already happened has no decision left to make. The `advisory` head is wrong
+  // for the same reason ("the action proceeded" — it has not). So the register
+  // is ADDED rather than an existing one reused: `pre-action` is the only head
+  // that states a PreToolUse non-block fate truthfully.
+  //
+  // AND IT IS GATED ON THE LIFECYCLE MOMENT, not applied globally. This renderer
+  // serves BOTH PreToolUse and PostToolUse, whose truth conditions are OPPOSITE:
+  // at PostToolUse the action genuinely HAS run, so "ALREADY RAN" is CORRECT
+  // there and rewriting it would trade one false head for a worse one — e.g.
+  // `session-notes-guard.js`'s PostToolUse arm, which is `halt-and-report` and
+  // is right to be. Measured before this clause: the head was selected by
+  // SEVERITY ALONE and was identical across all seven hook events, so a bare
+  // `pre-action` branch would have rendered "has NOT run yet" at PostToolUse
+  // and at the Stop-class events too. Gating it on PreToolUse makes this whole
+  // change a STRICT NO-OP at every other event — at those, `pre-action` falls
+  // through to the same advisory head an unrecognized severity already got, so
+  // the rendered bytes are identical to pre-fix. That is measured across the
+  // full 7-event × 6-severity matrix in ci-cost-reach.test.mjs, not reasoned.
+  const isPreAction = severity === "pre-action" && hookEvent === "PreToolUse";
   const head =
     severity === "block"
       ? // Kept verbatim: it is the one head that means "did not run", and
@@ -55,9 +83,11 @@ function buildValidationBody({
         "STOP — Tool call blocked."
       : severity === "halt-and-report"
         ? "NOT BLOCKED — the action ALREADY RAN. Report it and wait."
-        : severity === "post-mortem"
-          ? "POST-MORTEM — already happened; recorded for next session."
-          : "ADVISORY — the action proceeded. Acknowledge in next message.";
+        : isPreAction
+          ? "NOT BLOCKED — the action has NOT run yet. Read this, then decide."
+          : severity === "post-mortem"
+            ? "POST-MORTEM — already happened; recorded for next session."
+            : "ADVISORY — the action proceeded. Acknowledge in next message.";
   const reportBlock =
     Array.isArray(agent_must_report) && agent_must_report.length
       ? "REPORT TO USER (do not skip any):\n" +
@@ -92,6 +122,12 @@ function instructAndWait({
   user_summary,
 }) {
   const validation = buildValidationBody({
+    // loom#1715 — the RENDERER needs the lifecycle moment, because `pre-action`
+    // is only true at PreToolUse. `buildValidationBody` is module-private (the
+    // exports below are `instructAndWait` / `emit` / `STOP_LIKE_EVENTS`), so
+    // this is an internal parameter, NOT a public signature change; every
+    // caller already passes `hookEvent` to `instructAndWait`.
+    hookEvent,
     severity,
     what_happened,
     why,

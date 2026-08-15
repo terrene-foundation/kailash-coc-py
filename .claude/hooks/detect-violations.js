@@ -643,6 +643,11 @@ function logAllAndEmit(payload, event, entries) {
         // `gh issue close --reason not_planned/wontfix` — agent must
         // surface user-gate prose justification in the next response.
         { finding: P.detectGhIssueCloseAsNotPlanned(cmd), what },
+        // git.md § Discipline: a `gh issue close` claiming COMPLETED must cite
+        // a commit SHA / PR number / merged-PR link in its comment. Sibling of
+        // the row above — that one asks whether a NOT-completed disposition was
+        // justified, this one whether a completed one carries any evidence.
+        { finding: P.detectGhIssueCloseWithoutEvidence(cmd), what },
       ];
       if (bashEntries.some((e) => e.finding))
         return logAllAndEmit(payload, event, bashEntries);
@@ -698,6 +703,17 @@ function logAllAndEmit(payload, event, entries) {
           mutationEntries.push({
             finding: must6Finding,
             what: `MUST-6 verbatim-quote sweep on ${fp.slice(0, 80)}`,
+          });
+      }
+      // deploy-hygiene/9a — whole-context `COPY` in a Dockerfile. Gated on the
+      // BASENAME inside the detector (structural, read off this tool call), so
+      // no path pre-filter is duplicated here: one owner for the predicate.
+      if (newSource) {
+        const copyFinding = P.detectDockerfileWholeContextCopy(fp, newSource);
+        if (copyFinding)
+          mutationEntries.push({
+            finding: copyFinding,
+            what: `positive-COPY sweep on ${fp.slice(0, 80)}`,
           });
       }
       if (mutationEntries.some((e) => e.finding))

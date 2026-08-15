@@ -39,8 +39,32 @@ const {
 // from constants, so no ambient `GIT_DIR` can re-point a guard's git at another
 // repository. Already required by guard-path-scope.js and coordination-mode.js.
 const { resolveGitBinary, gitEnv } = require("./lib/git-subprocess-env.js");
+// T5 — the closed-literal-enum PCF category read for `gh pr create`. The enum
+// lives in ONE module so the hook, the tests and any future consumer cannot
+// drift on what the three valid values are (security.md § Multi-Site Kwarg
+// Plumbing, the same one-parser rationale git-command-parse.js was extracted on).
+const {
+  classifyPrCreate,
+  formatCategoryAdvisory,
+} = require("./lib/pcf-category.js");
+// T4 — CI-cost contract REACHABILITY. `ci-cost-discipline.md` is path-scoped, and a
+// `git push` touches no file, so no `paths:` glob can inject it at the moment it
+// governs. Delivered here instead, from the same hook and the same command as the PCF
+// read above: "packing more into PRs" and "aligned with PCF triaging" are one decision,
+// so they are now one code path rather than two artifacts that never meet.
+const {
+  classifyCiSpend,
+  formatReachAdvisory,
+  alreadyDelivered,
+  recordDelivered,
+} = require("./lib/ci-cost-reach.js");
 const { isCoordinationEnabled } = require("./lib/coordination-mode");
 const { resolveMainCheckout } = require("./lib/state-resolver");
+// loom#1703 residual (k) — the PATH-IDENTITY oracle. Turns "the command CONTAINS
+// the spelling of a protected path" into "the resolved target IS protected
+// state", so a throwaway `$(mktemp -d)/.claude/learning/…` sandbox stops
+// blocking while a symlink escaping INTO the live tree starts blocking.
+const { createStateTargetScope, SCOPE } = require("./lib/state-target-scope.js");
 /**
  * Environment for a NODE child this hook spawns (loom#1471 shard 6).
  *
@@ -170,6 +194,23 @@ function findCommitInvocation(command) {
 }
 
 /**
+ * The ONE push-detection predicate for this hook (loom#1715 same-class fold-in).
+ *
+ * Same shape and same rationale as `findCommitInvocation` above, one verb over.
+ * The security-review reminder below was the last site in this file still
+ * substring-matching `/git\s+push/` against the RAW command, so it fired on
+ * `git push` appearing as DATA — inside a JS string, a quoted argument, a
+ * heredoc body or a comment — which is loom#1714 MEDIUM-1's class exactly, and
+ * was reproduced live on a `node -e` probe during the loom#1715 review.
+ *
+ * @param {string} command
+ * @returns {{sub:string,dir:string|null,args:string,argv:string[],unresolvable:string|null}|null}
+ */
+function findPushInvocation(command) {
+  return parseGitInvocations(command).find((g) => g.sub === "push") || null;
+}
+
+/**
  * Structural working-tree signal — the canonical example hook-output-
  * discipline.md MUST-2 names as the basis for `severity: "block"` ("git
  * status --porcelain non-empty before --hard"). Runs in the `-C` target dir
@@ -266,6 +307,32 @@ function validateBashCommand(data) {
   // a bare advisory. A legacy `{continue:true, message}` result carries no
   // severity, so its message rides out as a trailing report line rather than
   // being dropped when a finding is pending.
+  //
+  // loom#1715 H-1 — the ALL-PRE-ACTION carve-out. The collapse-to-
+  // `halt-and-report` default renders the head "the action ALREADY RAN", which
+  // is FALSE for every finding this hook emits: it is a PreToolUse hook, so
+  // nothing has run when it speaks. The carve-out is deliberately the NARROWEST
+  // that fixes the measured case — it fires only when EVERY finding in the merge
+  // is `pre-action`, so any pre-existing combination (which contains no
+  // `pre-action` finding at all) still collapses to `halt-and-report` and every
+  // existing head renders byte-identically. That is measured, not assumed:
+  // ci-cost-reach.test.mjs pins the cross-repo finding's rendered head against a
+  // snapshot taken before this change.
+  //
+  // THE RESIDUAL IS STATED, AND IT IS NOT HYPOTHETICAL — it was MEASURED on the
+  // second of the two commands this surface targets:
+  //   git push origin HEAD  -> "NOT BLOCKED — the action has NOT run yet..."  (fixed)
+  //   gh pr create ...      -> "NOT BLOCKED — the action ALREADY RAN..."      (residual)
+  // `gh pr create` ALWAYS co-fires the PCF-category finding above, which is
+  // registered `halt-and-report`, so the merge collapses and the CI-cost
+  // delivery inherits the false head on that path. Every other deferred finding
+  // in this PreToolUse hook carries the same mis-registration — nothing has run
+  // when this hook speaks — so the general repair is to re-register them, and
+  // that is deliberately NOT done here: those findings ship from other lanes
+  // (the PCF block is at origin/main, from T5), and silently changing another
+  // lane's delivered head is a wider blast radius than this fix is scoped to
+  // carry. Recorded so the next session inherits the measurement, not a
+  // surprise.
   const withDeferred = (result) => {
     if (deferredFindings.length === 0) return result;
     const all = result.severity
@@ -274,7 +341,9 @@ function validateBashCommand(data) {
     const merged = {
       severity: all.some((f) => f.severity === "block")
         ? "block"
-        : "halt-and-report",
+        : all.every((f) => f.severity === "pre-action")
+          ? "pre-action"
+          : "halt-and-report",
       what_happened: all.map((f) => f.what_happened).join("\n\n"),
       why: all.map((f) => f.why).join("\n\n"),
       agent_must_report: all.flatMap((f) => f.agent_must_report || []),
@@ -334,6 +403,112 @@ function validateBashCommand(data) {
         "Do not run the cross-repo command until /cross-repo-authorize has written the receipt (or the user explicitly redirects).",
       user_summary: `${crossRepo.rule_id} — cross-repo ${intent} ${target}: run /cross-repo-authorize first`,
     });
+  }
+
+  // PCF CATEGORY on `gh pr create` (T5). `product-completion-first.md` MUST-1
+  // requires every gate-surfaced finding to carry a category; measured
+  // 2026-08-14 that category was UNOBSERVABLE on a PR — 0 of the last 40 PRs
+  // carried any label and 0 of the last 30 bodies any category field, so no
+  // instrument could return either verdict. This is the read.
+  //
+  // Hosted here rather than in a new hook file because this hook is ALREADY
+  // the PreToolUse Bash tripwire with a `hook_delivery` lane, a settings.json
+  // registration and a Codex shell mirror — a second registration would buy
+  // nothing and cost a fourth surface to keep in parity.
+  //
+  // DEFERRED, never returned: `detectRepoScopeDriftBash` above is
+  // segment-anchored, and the loom#1606 lesson is that a `return` here would
+  // suppress every fence below it. halt-and-report, never `block`: the verdict
+  // is a lexical read of a command string, which hook-output-discipline.md
+  // MUST-2 bars from carrying block severity — and whether a change is a BUG
+  // or an INCREMENTAL is judgment-bearing besides.
+  //
+  // SILENT on CATEGORIZED. A hook that speaks on every PR teaches the agent to
+  // ignore it, which is the NON-DISCRIMINATION failure mode that made
+  // `wrapup-after-landing.js` dismissible — not a frequency problem.
+  const pcf = classifyPrCreate(command, { repoRoot: cwd });
+  const pcfAdvisory = formatCategoryAdvisory(pcf);
+  if (pcfAdvisory) {
+    deferredFindings.push({
+      severity: "halt-and-report",
+      what_happened: `\`gh pr create\` was invoked and the PR carries no readable Product-Completion-First category (state: ${pcf.state}).`,
+      why: "product-completion-first.md MUST-1",
+      agent_must_report: [
+        pcfAdvisory,
+        `State is ${pcf.state} — NOT "clean" and NOT a boolean false. UNCATEGORIZED means the body was read and carries no field; NOT_VERIFIED means the body could not be read at all, so the category is UNKNOWN.`,
+        "Re-issue the command with the field in the body. The field is the durable record — a label is not, because it lives in GitHub's mutable remote registry rather than in the PR's own text.",
+      ],
+      agent_must_wait:
+        "Report the category you are assigning before re-issuing the create.",
+      user_summary: `PR category ${pcf.state} — product-completion-first.md MUST-1`,
+    });
+  }
+
+  // CI-COST CONTRACT REACHABILITY (T4). `ci-cost-discipline.md` governs `git push` and
+  // `gh pr create`, and a `paths:` glob cannot be TRIGGERED BY either: path-scoped rules
+  // inject off a session's TOUCHED-FILE set, and a push touches no file. What a broad
+  // glob COULD do — narrowed here after loom#1715 M-4 found the original claim
+  // over-stated — is reach the push MOMENT in a session that happened to touch a matching
+  // file EARLIER, because injection is sticky-once per session
+  // (`check-rule-injection-budget.mjs`: "inject their WHOLE body once per session, the
+  // first time a tool call touches a path matching the rule's `paths:` globs
+  // (sticky-once, verified 2026-06-27)"). That is a coincidence, not a guarantee: the
+  // session that edits only `src/` and pushes still gets nothing, and the glob that would
+  // widen the odds is separately BLOCKED on injection headroom (the rule's own Origin
+  // measures 765 B against the `workspace-note` ceiling, less than a tenth of the rule).
+  // The hook fires regardless of what the session touched, which is the property a glob
+  // cannot offer at any headroom — and that, not impossibility, is why this is the surface.
+  //
+  // DELIVERY, NOT A VERDICT. Nothing here judges whether the push is wasteful — that is
+  // the deferred Phase-2 detector, and two ways of building it are already known-bad: a
+  // network read HANGS the push (execFileSync blocks the loop, so the Rule-7 timer cannot
+  // preempt it), and an "is a run in flight?" signal is consistent with BOTH a wasteful
+  // and a legitimate push, so it could not falsify anything (instrument-discipline.md
+  // MUST-1). This makes no subprocess call at all.
+  //
+  // ONCE PER SESSION, and that IS the discrimination. A hook that speaks on every push
+  // becomes wallpaper — the failure that made wrapup-after-landing.js dismissible, which
+  // is a discrimination disease with a frequency symptom. The falsifying result is local
+  // and nameable: an already-delivered session is delivered to again. Fails OPEN toward
+  // speaking (a marker whose path cannot be resolved, or cannot be written, yields one
+  // extra delivery), because the silent-never failure is invisible and is exactly what T4
+  // exists to end.
+  //
+  // SEVERITY IS `pre-action`, NOT `advisory` (loom#1715 H-1). Both of the pre-existing
+  // non-block registers state a FATE that is false here — `halt-and-report` says the
+  // action ALREADY RAN and `advisory` says it PROCEEDED, and at PreToolUse the push has
+  // done neither. Delivering "no check has judged your push, read it and decide" under a
+  // head that says the push already happened leaves the agent no decision to make, which
+  // is the whole point of the surface.
+  const ciSpend = classifyCiSpend(command);
+  if (ciSpend) {
+    // loom#1715 (d) — the FALLBACK MUST NOT be a shared constant. `"unknown-session"`
+    // put every id-less session on one clone into ONE marker, so the FIRST such session
+    // was delivered to and every later one was silently never delivered — precisely the
+    // silent-never failure this module exists to end, reintroduced by its own fallback.
+    // `process.ppid` is the CC host process: stable across this session's many hook
+    // invocations (so the once-per-session property holds) and distinct per host process
+    // (so a later session is a different subject). Residual, stated: OS pid reuse could
+    // hand a later session a live marker and cost it ONE delivery — strictly better than
+    // the shared bucket, which cost EVERY later session its delivery.
+    const sessionId =
+      data.session_id ||
+      process.env.CLAUDE_SESSION_ID ||
+      `ppid-${process.ppid}`;
+    if (!alreadyDelivered(cwd, sessionId)) {
+      const reach = formatReachAdvisory(ciSpend.kind);
+      if (reach) {
+        recordDelivered(cwd, sessionId);
+        deferredFindings.push({
+          severity: "pre-action",
+          what_happened: `A CI-spending command (\`${ciSpend.kind === "push" ? "git push" : "gh pr create"}\`) is ABOUT TO RUN — it has not run yet. The CI-cost contract does not otherwise load at this moment.`,
+          why: "ci-cost-discipline.md (reachability — a `paths:` glob cannot be triggered by a command that touches no file)",
+          agent_must_report: [reach],
+          agent_must_wait: null,
+          user_summary: "CI-cost contract delivered (once per session)",
+        });
+      }
+    }
   }
 
   // ADVISORY (loom #19 P3): branch-scope warn on `git commit` invocations.
@@ -734,24 +909,29 @@ function validateBashCommand(data) {
   // stated its scope. Re-derive with the command above rather than trusting either set;
   // the point is the ordering, not the multiplier.)
   //
-  // Consequence: the two OPEN over-block residuals now reach the most-documented path in
-  // the corpus. Both are recorded in state-file-write-guard.md § "Known residuals" and
-  // each is owed its OWN shard — do NOT attempt either here:
-  //   (k) a write to a THROWAWAY sandbox path ending in this basename still flags
-  //       (Layer 1 and Layer 3), because the detector has no notion of WHICH repo root
-  //       a state path belongs to.
-  //   (l) a heredoc report that merely QUOTES a write command as an EXAMPLE flags at
-  //       Layer 1, because a file-util verb next to a literal state path inside a
-  //       multi-command bundle is indistinguishable from the real thing.
+  // Consequence: the two over-block residuals reached the most-documented path in the
+  // corpus. BOTH WERE ADDRESSED IN loom#1703 — this block is the historical record of
+  // WHY, kept because the reasoning is the load-bearing part; the current dispositions
+  // live in state-file-write-guard.md § "Known residuals" (k)/(l):
+  //   (k) CLOSED (Bash lane). A write to a THROWAWAY sandbox path ending in a protected
+  //       basename used to flag at Layers 1/2/3 because the detector had no notion of
+  //       WHICH repo root a state path belonged to. It now resolves the matched TOKEN
+  //       through `lib/state-target-scope.js` and decides on the CANONICAL form —
+  //       in-tree blocks, out-of-tree passes, unresolvable blocks and SAYS it could not
+  //       resolve. The Edit/Write lane half (`guard-path-scope.js`) is still open.
+  //   (l) PARTIALLY CLOSED. A heredoc report that merely QUOTES a write command as an
+  //       EXAMPLE no longer flags at Layers 1/2: a heredoc body is not shell text, so
+  //       inert bodies are blanked in the STRUCTURE view those two layers read. Layer 3
+  //       is deliberately NOT masked (that would delete a real control), so a body
+  //       quoting an INTERPRETER + a write token still flags. Both halves are pinned by
+  //       assertions in test-harness/tests/state-target-scope-1703.test.mjs.
   //
-  // This is not theoretical and this shard's own review paid it twice: residual (l) is
-  // recorded as having blocked three independent actors in ONE round, every one while
-  // VERIFYING this guard — and the adversarial reviewer of THIS PR could not run its
-  // symlink-containment attack at all, because (k) fenced the sandbox path it needed to
-  // stage in. Extending (l) to a path with this prose frequency raises that self-sealing
-  // cost, and argues for bumping (l)'s priority on the #1363 shard. Direction is
-  // fail-CLOSED (over-block, never fail-open), which is why it is a disclosure and not a
-  // blocker.
+  // This was never theoretical and the #1399 shard's own review paid it twice: residual
+  // (l) blocked three independent actors in ONE round, every one while VERIFYING this
+  // guard, and the adversarial reviewer of that PR could not run its symlink-containment
+  // attack at all because (k) fenced the sandbox path it needed to stage in. That attack
+  // is now a committed test (FLOOR 2 in the suite above), which is the concrete measure
+  // of what closing (k) bought.
   //
   // OVER-BLOCK measured, then removed (the one legitimate Bash-lane writer class): a
   // 15-command legitimate corpus was run through the REAL detector under this regex
@@ -835,9 +1015,28 @@ function validateBashCommand(data) {
   // Its rows carry `surfaces.bash: true`; #1409's redundant-separator token and
   // the `i` flag are properties of the builder, so both apply to every surface
   // at once rather than needing three hand-edits.
+  // loom#1703 — the boundary roots the containment test resolves against. BOTH
+  // the session's own toplevel AND the main checkout are included, so a linked
+  // worktree does not accidentally exempt the repo it belongs to (and vice
+  // versa). `resolveMainCheckout` is the same resolver the rest of this hook
+  // already uses. Any failure leaves the list SHORT, which is fail-closed: the
+  // oracle then falls back to its is-there-a-`.git`-above test, and anything it
+  // still cannot attribute returns "unresolved" → the block is retained.
+  const stateScopeRoots = [];
+  if (cwd) stateScopeRoots.push(cwd);
+  try {
+    const mainCheckout = resolveMainCheckout(cwd);
+    if (mainCheckout) stateScopeRoots.push(mainCheckout);
+  } catch {}
+  const stateTargetScope = createStateTargetScope({
+    cwd,
+    boundaryRoots: stateScopeRoots,
+    command,
+  });
   const stateFileMutation = detectStateFileMutationSegmentAware(
     command,
     STATE_PATH_RX,
+    { scope: stateTargetScope },
   );
   if (stateFileMutation) {
     try {
@@ -896,25 +1095,50 @@ function validateBashCommand(data) {
     // `surfaces.layer3: true` — the subset whose forged write is NOT re-derived
     // away by a fold. It was "surface 2 of 3" for the case-insensitivity
     // dimension; there is now ONE surface to teach.
+    // loom#1703 — HONESTY SPLIT. Pre-#1703 every Layer-1/2 hit was announced as
+    // "a structurally-unambiguous mutation", which was TRUE for a redirect onto
+    // the live path and FALSE for the two documented over-blocks: the decision
+    // was keyed on token presence near a verb, i.e. lexical. Now the detector
+    // reports HOW it decided, and the message says which:
+    //
+    //   scope === "in-tree"     the target was RESOLVED (candidate and boundary
+    //                           root both canonicalized) and lands in protected
+    //                           state. "Structurally unambiguous" is now earned.
+    //   scope === "unresolved"  the target could NOT be resolved — a `$VAR` the
+    //                           command assigns, a glob, a `$(…)`. Still BLOCKED
+    //                           (fail closed), but announced as an unresolved
+    //                           lexical match, naming what actually matched, per
+    //                           `hook-output-discipline.md` MUST-2.
+    const isResolvedInTree = stateFileMutation.scope === SCOPE.IN_TREE;
     const isStructural =
-      stateFileMutation.layer === 1 || stateFileMutation.layer === 2;
+      (stateFileMutation.layer === 1 || stateFileMutation.layer === 2) &&
+      isResolvedInTree;
+    const isUnresolvedShellOp =
+      (stateFileMutation.layer === 1 || stateFileMutation.layer === 2) &&
+      !isResolvedInTree;
     const isLayer3BlockPath =
       stateFileMutation.layer === 3 && LAYER3_BLOCK_RX.test(command);
-    if (isStructural || isLayer3BlockPath) {
+    if (isStructural || isUnresolvedShellOp || isLayer3BlockPath) {
       return withDeferred({
         severity: "block",
         what_happened: isStructural
           ? `Bash command attempts to mutate trust-posture state file (Layer ${stateFileMutation.layer}: ${stateFileMutation.kind}): ${command.slice(0, 120)}`
-          : `Bash command attempts to mutate trust-posture state file — an interpreter-body write to non-fold-derived autonomy/authority state (posture/.initialized/presence/violations/roster/coordination-log/settings.json/VERSION) (Layer 3: ${stateFileMutation.kind}): ${command.slice(0, 120)}`,
+          : isUnresolvedShellOp
+            ? `Bash command carries a redirect/file-util verb on a protected-state path that the hook could NOT RESOLVE (Layer ${stateFileMutation.layer}: ${stateFileMutation.kind}): ${command.slice(0, 120)}`
+            : `Bash command attempts to mutate trust-posture state file — an interpreter-body write to non-fold-derived autonomy/authority state (posture/.initialized/presence/violations/roster/coordination-log/settings.json/VERSION) (Layer 3: ${stateFileMutation.kind}): ${command.slice(0, 120)}`,
         why: isStructural
-          ? "trust-posture/state-file-mutation — a redirect/file-util verb on a literal state path (posture.json, violations.jsonl, coordination-log.jsonl, .initialized) is a structurally-unambiguous mutation; state files are owned by hooks and agent edits are BLOCKED"
-          : "trust-posture/state-file-mutation — this path is NOT re-derived away by the signed fold (coordination is OFF by default downstream, so no fold runs): a forged posture.json is a trusted L5 grant, deleting .initialized resets to fresh-repo L5, wiping violations.jsonl evades cumulative downgrade, presence-mechanism.json is a standalone provisioning contract, roster/coordination-log are committed/append-authority, settings.json is the file-tool deny CONTRACT protecting all of them (#1309), and .claude/VERSION is the repo-CLASS root of trust whose `type` readRepoClass trusts verbatim — a forged class silently no-ops Validator 15, Validator 17's half B, and V16's presence classifier while printing green (#1399). An interpreter-body WRITE to any of them stays BLOCKED at the Bash boundary (#1293 Option X; #635 guarantee)",
+          ? "trust-posture/state-file-mutation — a redirect/file-util verb whose RESOLVED target lands inside this repo's protected state (posture.json, violations.jsonl, coordination-log.jsonl, .initialized, settings.json, roster, VERSION, .git). Candidate and boundary root were BOTH canonicalized before the comparison (security.md § Path Containment), so this is a structurally-unambiguous mutation, not a name match: a symlink pointing into the live tree resolves here too. State files are owned by hooks and agent edits are BLOCKED"
+          : isUnresolvedShellOp
+            ? "trust-posture/state-file-mutation — HONEST STATEMENT OF WHAT MATCHED (hook-output-discipline.md MUST-2): this is NOT a resolved containment hit. What matched is LEXICAL — a redirect or file-util verb next to a token SPELLED like a protected state path, where the token could not be resolved to a real location. The usual causes are a shell variable the command itself assigns (`T=$(mktemp -d); … > \"$T/.claude/learning/posture.json\"`), a glob metacharacter, or a `$(…)` substitution — the hook does not expand shell syntax (MUST-3), so it cannot tell a sandbox path from the live file here. It FAILS CLOSED and blocks. If the target is genuinely a throwaway sandbox, re-issue it with the directory spelled LITERALLY (`> /var/folders/…/tmp.XYZ/.claude/learning/posture.json`) and it will resolve out-of-tree and pass"
+            : "trust-posture/state-file-mutation — this path is NOT re-derived away by the signed fold (coordination is OFF by default downstream, so no fold runs): a forged posture.json is a trusted L5 grant, deleting .initialized resets to fresh-repo L5, wiping violations.jsonl evades cumulative downgrade, presence-mechanism.json is a standalone provisioning contract, roster/coordination-log are committed/append-authority, settings.json is the file-tool deny CONTRACT protecting all of them (#1309), and .claude/VERSION is the repo-CLASS root of trust whose `type` readRepoClass trusts verbatim — a forged class silently no-ops Validator 15, Validator 17's half B, and V16's presence classifier while printing green (#1399). An interpreter-body WRITE to any of them stays BLOCKED at the Bash boundary (#1293 Option X; #635 guarantee)",
         agent_must_report: [
           "Quote the exact bash command that was attempted",
           "State whether you intended to read, debug, or modify the state",
           isStructural
             ? "If reading: use `cat` (allowed); if modifying: use /posture command instead"
-            : "If reading: use `cat`, or an interpreter body with NO write token (a read-only `-e`/`-c` body passes the #1292 gate — this is how /codify Step 6b filters the violation records). NOTE: a SHELL-OUT from inside the interpreter body counts as a write token — `execSync` / `child_process` / `subprocess.*` / `os.system` / `spawn`(`Sync`) / `Popen` / ruby-perl `%x{}` / `qx{}` all match, because the scanner cannot analyse the inner command and so must rank it write. Fetch the shell value OUTSIDE the interpreter body and pass it in via env or argv. Posture routes through /posture, roster through /whoami --register, coordination-log through the canonical signed-append ceremony — never an inline interpreter write",
+            : isUnresolvedShellOp
+              ? "State which DIRECTORY the target actually lands in. If it is a throwaway sandbox, re-issue the command with that directory spelled LITERALLY instead of behind a variable/glob — the guard resolves literal paths and lets out-of-tree ones through. If it is the live state file, stop and use /posture."
+              : "If reading: use `cat`, or an interpreter body with NO write token (a read-only `-e`/`-c` body passes the #1292 gate — this is how /codify Step 6b filters the violation records). NOTE: a SHELL-OUT from inside the interpreter body counts as a write token — `execSync` / `child_process` / `subprocess.*` / `os.system` / `spawn`(`Sync`) / `Popen` / ruby-perl `%x{}` / `qx{}` all match, because the scanner cannot analyse the inner command and so must rank it write. Fetch the shell value OUTSIDE the interpreter body and pass it in via env or argv. Posture routes through /posture, roster through /whoami --register, coordination-log through the canonical signed-append ceremony — never an inline interpreter write",
           // #1363: the WRITING-ABOUT-state-files case. A protected path quoted in
           // human prose is masked (quote-aware, every prose carrier), but a body
           // that genuinely EXECUTES — a live backtick or `$(…)` inside DOUBLE
@@ -925,7 +1149,7 @@ function validateBashCommand(data) {
         ],
         agent_must_wait:
           "Do not retry the same form. State-file mutations route through the canonical ceremony (challenge-nonce / quorum / signed-append gated), never directly. If the command was PROSE about a state file rather than a mutation, re-issue it in the quoted/`--body-file` form above rather than re-running it verbatim.",
-        user_summary: `state-file mutation blocked (Layer ${stateFileMutation.layer}${isStructural ? "" : ", non-fold-derived"})`,
+        user_summary: `state-file mutation blocked (Layer ${stateFileMutation.layer}${isStructural ? ", resolved in-tree" : isUnresolvedShellOp ? ", target UNRESOLVED — lexical match, failed closed" : ", non-fold-derived"})`,
       });
     }
     // Layer 3 on a genuinely-bounded path (observations.jsonl / ephemeral caches)
@@ -1811,8 +2035,28 @@ function validateBashCommand(data) {
     }
   }
 
-  // WARN: Git push - reminder for security review
-  if (/git\s+push/.test(command)) {
+  // WARN: Git push - reminder for security review.
+  //
+  // loom#1715 SAME-CLASS FOLD-IN (autonomous-execution.md MUST-4). This was the
+  // LAST bare `/git\s+push/` substring matcher in this file, and it is the same
+  // DATA-POSITION false-positive class as loom#1714 MEDIUM-1: the pattern reads
+  // the RAW command string, so `git push` sitting inside a JS string literal, a
+  // quoted argument, a heredoc body or a shell comment fires it. MEASURED on the
+  // review session that found it —
+  //   node -e 'const s = "git push origin main"; console.log(s.length)'
+  //     before: REMINDER fired (nothing is being pushed)
+  //     after : silent
+  //   git push origin HEAD          -> REMINDER still fires (positive control)
+  // — and the CI-cost classifier added above was ALREADY correct on that same
+  // input, because it routes through this parser. Two matchers over one concept
+  // in one file, one hardened and one not, is the divergence
+  // `security.md` § Multi-Site Kwarg Plumbing exists to prevent, so the old one
+  // is retired onto the shared parser rather than left as the weaker sibling.
+  // `findPushInvocation` dispatches on SUBCOMMAND POSITION and already handles
+  // `cd x && git push`, `git -C /repo push`, `sudo git push`, `env FOO=1 git push`
+  // and `sh -c "git push"` — every one of which the substring form also matched,
+  // so this narrows the FALSE positives without narrowing the true ones.
+  if (findPushInvocation(command)) {
     return withDeferred({
       continue: true,
       exitCode: 0,

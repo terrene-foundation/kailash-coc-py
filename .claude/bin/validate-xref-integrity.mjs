@@ -340,8 +340,14 @@ const SANCTIONED_DEFERRED_FIXTURES = new Set([
   "audit-fixtures/command-skill-parity",
   // conformance-walk.md Detection mechanism.
   "audit-fixtures/conformance-walk",
-  // deploy-hygiene.md § positive-COPY Detection mechanism.
-  "audit-fixtures/deploy-hygiene-positive-copy",
+  // deploy-hygiene.md § positive-COPY — REMOVED 2026-08-14 (W2-DEFER / T6). The
+  // detector GRADUATED, so its fixtures now EXIST and need no absence excuse; and
+  // they live at `audit-fixtures/violation-patterns/detectDockerfileWholeContextCopy/`
+  // (the per-detector location `validate-emit.mjs::audit-fixture-coverage` enforces),
+  // which the rule now cites, so nothing references the old path any more. Left in
+  // place it would be a lingering entry pre-clearing the NEXT dangling reference
+  // registered at `audit-fixtures/deploy-hygiene-positive-copy` — the same
+  // stale-excuse hazard the deferral registry's own staleness checks exist to stop.
   // handoff-completion.md Detection mechanism.
   "audit-fixtures/handoff-completion",
   // hook-output-discipline.md MUST-5(a) Detection mechanism. NOTE: this clause
