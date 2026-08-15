@@ -95,6 +95,8 @@ workspaces/*/.journal-skipped.log
 .claude/learning/.session-end-cache*
 .claude/learning/derives-from/
 **/.claude/learning/derives-from/
+.claude/learning/dispatch-reconcile/
+.claude/learning/ci-cost-reach/
 .claude/learning/sessionend-release-lease-*
 .claude/learning/.tmp-sereleaselease-*
 .claude/learning/observations.archive/

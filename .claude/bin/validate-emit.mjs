@@ -1515,8 +1515,44 @@ const LOOM_ONLY_TIER_CARVEOUTS = new Set([
   // carve-out, same class as the weft-* / o1-citation / distillation-claim siblings above.
   "hooks/emit-artifact-activation.js",
   "hooks/emit-artifact-activation-session.js",
+  // loom#1410 — the de-scoping gate's fixture runner. It `import`s the loom-only
+  // `bin/check-descoping.mjs` directly, so shipping it would orphan it: every
+  // community consumer would take an ERR_MODULE_NOT_FOUND on load. That is not a
+  // prediction — `community-import-closure.test.mjs` R2-HIGH-7 measured exactly
+  // this edge and went RED until the loom_only fence landed. It sits under the
+  // synced `audit-fixtures/**` tier, so the collision is real and the carve-out is
+  // LOAD-BEARING, the same class as the weft-* / o1-citation siblings above. Listed
+  // as the concrete FILE because this check only honours wildcard-free entries.
   "hooks/lib/artifact-activation-event.js",
   "hooks/lib/artifact-activation-ledger.js",
+  "audit-fixtures/descoping-gate/run.mjs",
+  // loom#E6 (2026-08-14) — `hooks/lib/deferral-surface.js` was HERE and is now
+  // REMOVED alongside its `sync-manifest.yaml::loom_only` line: the surface
+  // CASCADES. Its fence was load-bearing only while the sole file it could read
+  // shipped nowhere; `.claude/deferrals.json` now ships to every target via the
+  // CONCRETE `sync-tier-aware.mjs::ALWAYS_INCLUDE` entry, so reader and readable
+  // file arrive together. Do NOT restore the entry without also removing that
+  // ALWAYS_INCLUDE path — `consumer-deferral-cascade.test.mjs` REDs on either
+  // half alone, which is the point: the two are one decision.
+  //
+  // The deferral surface's probe-candidate fixtures + answer-key sidecars STAY
+  // loom_only, and the reason is now different from the lib's. They are not
+  // orphan-data-for-an-absent-lib any more; they are candidates for an LLM-judge
+  // probe suite under `test-harness/**`, which is universally `exclude`d and
+  // reaches no consumer on either lane. Shipping fixtures for a suite that
+  // cannot run there is the orphan, so the fence holds on its own footing.
+  // Concrete files, not a glob: check-8 accepts a collision only wildcard-free
+  // (`!lo.includes("*")`) — the same constraint the descoping-gate/run.mjs
+  // sibling records. A ninth fixture MUST be added here too;
+  // `deferral-surface.test.mjs` enumerates the directory and REDs otherwise.
+  "audit-fixtures/deferral-surface/clean-past-expiry-characterized.expected",
+  "audit-fixtures/deferral-surface/clean-past-expiry-characterized.txt",
+  "audit-fixtures/deferral-surface/clean-unverified-characterized.expected",
+  "audit-fixtures/deferral-surface/clean-unverified-characterized.txt",
+  "audit-fixtures/deferral-surface/flag-past-expiry-mischaracterized.expected",
+  "audit-fixtures/deferral-surface/flag-past-expiry-mischaracterized.txt",
+  "audit-fixtures/deferral-surface/flag-unverified-rendered-as-zero.expected",
+  "audit-fixtures/deferral-surface/flag-unverified-rendered-as-zero.txt",
 ]);
 
 // Positive allowlist (cc-artifacts.md Rule 10) of concrete loom_only files that
@@ -4206,6 +4242,14 @@ const LOOM_ONLY_LEARNING_EXCLUSIONS = new Set([
   // observability), so it never materializes at a consumer; loom-only, not a
   // gitignore_additions disclosure-parity requirement.
   "artifact-activation",
+  // T2 (runtime-enforcement-2026-08-14) — the deferral surface's last-seen
+  // pointer, written ONLY by the loom_only `hooks/lib/deferral-surface.js`, so
+  // it never materializes at a consumer; loom-only, not a gitignore_additions
+  // disclosure-parity requirement. Same reasoning as `artifact-activation`
+  // above. It carries a COUNT and an ISO timestamp only — nothing
+  // operator-correlatable — but is still fenced so `git add -A` cannot sweep
+  // per-clone runtime state into a commit.
+  ".deferral-surface-last-seen",
 ]);
 
 const LEARNING_PREFIX = ".claude/learning/";
