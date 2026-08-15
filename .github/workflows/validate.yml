@@ -231,7 +231,28 @@ jobs:
           # Now ONE scope, ONE baseline. Do not re-add a guides sub-run: it
           # double-counts a subset. Still not a health metric — 131 of 317 are
           # by-design journal-dir-missing on a USE template.
-          BASELINE_DEFAULT=317
+          # RE-BASELINED 2026-08-16, 317 -> 319 (+2). The two new refs were NAMED,
+          # not inferred from the count — this step reports a TALLY and not the hits,
+          # so they were obtained by running the validator locally against both trees
+          # and diffing the ref SETS (keyed source+kind+token+reason, so the 10
+          # line-shift moves that also appear in a naive diff are excluded):
+          #
+          #   .claude/rules/deferral-registry-locality.md
+          #       -> `.claude/bin/phase2-deferral-integrity.mjs`   not-found
+          #   .claude/skills/30-claude-code-patterns/deferral-registry-locality.md
+          #       -> `bin/phase2-deferral-integrity.mjs`           not-found
+          #
+          # Both are the SAME cause: a newly-distributed rule (+ its paired skill)
+          # cites the deferral-integrity validator, which is deliberately LOOM-ONLY
+          # (it classifies skip/no_tier_match in loom's sync manifest and ships to no
+          # consumer). So the rule cascades and the binary it names cannot.
+          #
+          # "Fix the new refs" is NOT actionable at this repo: a consumer cannot create
+          # a file loom deliberately withholds. The fix belongs at loom — either scrub
+          # loom-only citations at Gate-2 emission, or teach the validator a consumer
+          # mode that treats loom-only token classes as absent-by-design. Tracked there.
+          # Same class as the 131-of-317 by-design journal-dir-missing noted above.
+          BASELINE_DEFAULT=319
           echo "Cross-reference integrity — ratchet against a pinned baseline."
           echo "NOT a health metric: 131 of the standing total are by-design"
           echo "(journal-dir-missing on a USE template, which has no journal/ tree)."
