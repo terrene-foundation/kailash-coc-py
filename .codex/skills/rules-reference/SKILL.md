@@ -37,6 +37,7 @@ A path-scoped rule you have not read is a rule you are not honoring.
 | DataFlow Classification Redaction Rules | `**/dataflow/**`, `**/kailash-dataflow/**`, `**/*classification*`, `**/*redact*` | `.claude/rules/dataflow-classification.md` |
 | DataFlow Identifier Safety Rules | `**/dataflow/**`, `**/sql*`, `**/dialect*`, `**/migrations/**` | `.claude/rules/dataflow-identifier-safety.md` |
 | DataFlow Pool Configuration Rules | `**/dataflow/**` | `.claude/rules/dataflow-pool.md` |
+| Deferral-Registry Locality — Every Repo Owns Its Own Backlog | `.claude/rules/project/**`, `.claude/agents/project/**`, `.claude/commands/project/**`, `.claude/skills/project/**`, `**/deferrals.json`, `**/phase2-deferrals.json` | `.claude/rules/deferral-registry-locality.md` |
 | Dependency Rules | `pyproject.toml`, `Cargo.toml`, `package.json`, `**/*.py`, `**/*.rs`, `**/*.ts`, `**/*.tsx`, `**/*.js`, `**/*.jsx` | `.claude/rules/dependencies.md` |
 | Deploy Hygiene — Committed ≠ Deployed | `**/Dockerfile`, `**/*.dockerfile`, `deploy/**`, `**/k8s/**`, `**/kubernetes/**`, `**/helm/**`, `**/.github/workflows/**`, `**/fly.toml`, `**/vercel.json`, `**/app.yaml`, `**/serverless.yml`, `**/wrangler.toml`, `**/Procfile`, `**/next.config.*`, `**/vite.config.*`, `**/package.json`, `deploy/deployment-config.md` | `.claude/rules/deploy-hygiene.md` |
 | SDK Release Rules | `deploy/**`, `.github/**`, `pyproject.toml`, `CHANGELOG.md` | `.claude/rules/deployment.md` |
@@ -61,6 +62,7 @@ A path-scoped rule you have not read is a rule you are not honoring.
 | Nexus Webhook HMAC Rules | `**/nexus/**`, `**/webhook*`, `**/*hmac*`, `**/signature*` | `.claude/rules/nexus-webhook-hmac.md` |
 | Observability Rules | `**/*.py`, `**/*.rs`, `**/*.ts`, `**/*.tsx`, `**/*.js`, `**/*.jsx` | `.claude/rules/observability.md` |
 | Orchestration Launch-Ledger — Track Spawned Agents In A Durable Artifact That Survives Context Boundaries | `**/workspaces/**`, `**/.session-notes*`, `journal/**` | `.claude/rules/orchestration-launch-ledger.md` |
+| Orchestrator Context Economy — Main-Agent Context Is A Coordination Resource | `.claude/agents/**`, `**/.claude/agents/**`, `**/.claude/hooks/**`, `**/.claude/settings.json` | `.claude/rules/orchestrator-context-economy.md` |
 | Orphan Detection Rules | `packages/**`, `src/**`, `**/tests/**` | `.claude/rules/orphan-detection.md` |
 | PACT Governance Rules | `**/pact/**`, `**/governance/**` | `.claude/rules/pact-governance.md` |
 | Kailash Pattern Rules | `**/*.py`, `**/*.ts`, `**/*.js`, `**/*.rs` | `.claude/rules/patterns.md` |
@@ -98,4 +100,4 @@ A path-scoped rule you have not read is a rule you are not honoring.
 | Wave-Loop — Verify-And-Feed-Forward Between Milestone-Groups | `**/workspaces/**`, `**/todos/**`, `**/.claude/commands/**`, `**/02-plans/**` | `.claude/rules/wave-loop.md` |
 | Worktree Isolation Rules | `.claude/agents/**`, `.claude/commands/**`, `.claude/skills/**`, `**/*worktree*`, `**/workspaces/**` | `.claude/rules/worktree-isolation.md` |
 
-79 path-scoped rules indexed.
+81 path-scoped rules indexed.
