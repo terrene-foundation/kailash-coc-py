@@ -14,7 +14,7 @@ services:
   dev:
     # Pull the publisher-built image from Docker Hub (Architecture B, 2026-05-28 pivot).
     # Override DEV_IMAGE in .env to use a local-build tag for publisher recipe iteration.
-    image: ${DEV_IMAGE:-docker.io/terrenefoundation/kailash-coc-py:1.22.0}
+    image: ${DEV_IMAGE:-docker.io/terrenefoundation/kailash-coc-py:1.23.0}
     # Build path is OPT-IN for template developers iterating on the publisher recipe.
     # Uncomment + set `DEV_IMAGE=kailash-coc-dev:local` in .env to activate.
     # build:
