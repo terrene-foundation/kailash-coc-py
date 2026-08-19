@@ -3596,6 +3596,29 @@ use_template_gate2_wrote_950_files_to_undeclared_dotless_surfaces:
     BOUND: `sync-tier-aware.mjs` is `loom_only` and absent at this template, so the failing line
     inside Step 6.6 is NOT named here and was not read. What is claimed is the STEP, derived from
     files this repo actually holds.
+
+  s7_6_the_sibling_emitter_asymmetry_is_the_structural_cause: >-
+    MEASURED, both emitters present locally and read directly:
+
+      emit-coc.mjs:776           `path.join(outDir, ".coc")`        <- DOTTED, final name
+      emit-cli-artifacts.mjs:209 `path.join(outDir, "codex", ...)`  <- DOTLESS, staging name
+                            :227 `path.join(outDir, "gemini", ...)`
+                           :1026 `path.join(outDir, "codex", ...)`
+                           :1089 `path.join(outDir, "gemini", ...)`
+
+    Two sibling emitters, the SAME `--out` staging contract, OPPOSITE root conventions. One writes
+    the surface's final name and needs no relocation; the other writes a staging name and depends on
+    coc-sync Step 6.6 to rename it.
+
+    That asymmetry predicts the observed data exactly: `.coc/` has NEVER leaked in any of the four
+    deliveries, while `codex/` and `gemini/` leaked in two. A tree that needs no relocation step
+    cannot be damaged by that step failing to run.
+
+    So the deeper cause is not "Step 6.6 is buggy" but "one emitter requires a relocation its sibling
+    does not, and nothing enforces that the relocation ran". Option B removes the requirement;
+    Option A repairs the mechanism while leaving the requirement -- and therefore the class -- alive.
+    This is the s7_5 finding carried one level further, and it SUPERSEDES s7_5's recommendation while
+    leaving s7_5's measurements intact.
   acceptance_criteria:
     - "[ ] The Gate-2 emission path that writes the per-CLI derived trees is corrected so output lands on the DECLARED roots `.codex/**` and `.gemini/**`. The writer named by `owned_surfaces` for both surfaces is `emit-cli-artifacts.mjs + .claude/{codex,gemini}-templates/ (coc-sync Step 6.6)`; that declaration is the starting point for locating it, not a claim about which line is wrong."
     - "[ ] Verified by running the emitter and asserting the produced paths BEGIN with a dot -- not by reading the diff of a fixed sync, which cannot distinguish 'the bug is fixed' from 'this cycle happened to emit nothing for those trees'. A cycle with zero per-CLI changes would show an identical clean diff either way."
@@ -3606,7 +3629,7 @@ use_template_gate2_wrote_950_files_to_undeclared_dotless_surfaces:
     - "[ ] Consider whether `check-owned-surfaces.mjs` (which `artifact-flow.md` names as the structural half of the Owned-Surface Bound wiring) covers the EMISSION path as well as the manifest declaration. It reds on `undeclared-write-surface` per that rule's Detection block, yet this emission shipped -- so either it does not run over Gate-2 output, or its notion of write-surface is manifest-derived only. Which of the two is the case should be measured and recorded, since the rule's Wiring currently reads as though this class were structurally covered."
 
     - "[ ] The fix accounts for the INTERMITTENCY measured in s7_4 (dc07a7c6 clean, 74f60056 defective, a44083a5 clean, 0c663306 defective, with DIFFERING stray sets). A one-line path correction that assumes a constant regression would leave the conditional cause in place and the defect would recur. Verified by emitting from at least two loom revisions -- ideally one previously-clean and one previously-defective -- not from a single run."
-    - "[ ] The fix targets the coc-sync Step 6.6 RELOCATION, not `emit-cli-artifacts.mjs`. Per s7_5 the emitter writes dotless roots BY DESIGN into a staging `--out` dir and carries no dot mapping (control: zero hits for a dotted `path.join` write root across `.claude/bin/*.mjs`); dot-prefixing the emitter would instead break every caller that relocates correctly today, including `validate-emit.mjs::emitFresh`."
+    - "[ ] The fix is chosen between TWO options, both stated in s7_6, and the choice is recorded. OPTION A (minimal): repair the coc-sync Step 6.6 relocation. OPTION B (structural, RECOMMENDED): make `emit-cli-artifacts.mjs` write the FINAL dotted root as its sibling `emit-coc.mjs:776` already does, deleting the relocation requirement and the whole failure class with it; Option B REQUIRES updating every caller that relocates today (Step 6.6 becomes a straight copy, and `validate-emit.mjs::emitFresh` + its `installed:.codex/skills` pairing at :1224 must move together), so it is a coordinated change, not a one-line edit. A CORRECTION is recorded here: an earlier criterion in this block asserted the fix must target Step 6.6 and NOT the emitter. That was too strong and is withdrawn -- it was written before the sibling-emitter asymmetry was measured."
   disclosure_scrub: >-
     Names only `.claude/`, `.codex/`, `.gemini/` and `.github/` artifact paths, this repo's own
     public PR number (#89) and its own commit SHAs (`2dffe11`, `ec51007`, `ee274d7`, `0c663306`
