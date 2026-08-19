@@ -3474,4 +3474,77 @@ use_template_findings_issue_enumeration_instrument_and_validator_coverage:
     path, no client or tenant identifier, no downstream-consumer name. The single operator display
     id that appears in the ledger owner column is NOT reproduced here.
 
+
+use_template_gate2_wrote_950_files_to_undeclared_dotless_surfaces:
+  s7_1_the_measurement: >-
+    Gate-2 sync PR #89 (loom@0c663306, merged `2dffe11`) added 950 files under NEW TOP-LEVEL
+    `codex/` and `gemini/` trees -- WITHOUT the leading dot. The same commit's
+    `sync-manifest.yaml::owned_surfaces` declares the owned surfaces as `.codex/**` (writer:
+    "emit-cli-artifacts.mjs + .claude/codex-templates/ (coc-sync Step 6.6)") and `.gemini/**`
+    (same writer). A write to `codex/**` is therefore a write to an UNDECLARED surface -- the
+    `artifact-flow.md` § "The Owned-Surface Bound" violation, shipped by the very sync that
+    carries that clause.
+
+    Measured on the PR branch before merge, against `main`:
+      - first path segment of every added file: 475 `gemini`, 475 `codex`, 166 `.claude`, 9 `.coc`
+      - dotless `codex/` and `gemini/` on main BEFORE the PR: 0 files each (net-new trees)
+      - `.codex/` and `.gemini/` on main: 477 files each; changed BY the PR: 0 and 0
+      - of the 950 dotless files, 944 are BYTE-IDENTICAL (`git rev-parse <ref>:<path>`) to their
+        dotted twin already on main; 6 differ
+
+    The 6 that differ are the cycle's ONLY genuine artifact updates:
+    `codex/prompts/wrapup.md`, `codex/skills/{rules-reference,wrapup}/SKILL.md`,
+    `gemini/commands/wrapup.toml`, `gemini/skills/{rules-reference,wrapup}/SKILL.md`.
+
+    So the defect is LOSSY, not merely noisy: this cycle's `wrapup` + `rules-reference` updates
+    landed on a path no CLI reads, while the live `.codex/` and `.gemini/` trees -- the ones
+    Codex and Gemini actually load -- received nothing at all.
+
+  s7_2_why_no_gate_caught_it: >-
+    This template's `.github/workflows/validate.yml` passed GREEN on the defective commit. All
+    three of its steps scope to `.claude/` (structure validation, image-pin consistency,
+    xref-integrity ratchet), so none could observe a stray top-level tree. The green was
+    accurate about what it measured and silent about the defect -- the
+    `verification-gate-integrity.md` MUST-3(a) coverage shape, where a check's SCOPE excludes
+    the class under review.
+
+    Nothing on the loom side caught it either, or the PR would not have been opened. A
+    `--verify` residual check that compares against the emitted set cannot see this: the files
+    WERE emitted, just to the wrong root, so an emitted-vs-landed reconciliation agrees with
+    itself. That is the same self-certifying shape MUST-3(a) names.
+
+  s7_3_local_disposition_and_what_remains_upstream: >-
+    Fixed LOCALLY at this template (PR #89, commits `ec51007` + `ee274d7`): the 6 genuinely-new
+    artifacts were relocated onto their declared dotted paths and the 950-file dotless trees
+    dropped, so the merged state is correct. A hard gate was added to `validate.yml`
+    ("Undeclared top-level surfaces") deriving its allowlist FROM `owned_surfaces` rather than
+    restating it, carrying both a negative control (a synthetic stray root must be detected) and
+    a positive control (`.claude` must not be flagged), both running in the same job as the
+    check. Verified able to go RED: it flags exactly `codex` and `gemini` on the pre-fix tree and
+    is clean after.
+
+    NONE of that fixes the cause. The emitter is loom-side and this template cannot reach it;
+    the local relocation is Class-A non-durable by construction (`.codex/**` is a loom-written
+    surface, rebuilt by the next `/sync-to-use`). Absent an upstream fix the next Gate-2 run
+    re-creates all 950 files -- the difference now being that the new gate REDS the sync PR
+    loudly instead of letting it merge silently.
+
+    The observable is stated rather than the loom-side line diagnosed: this template cannot read
+    loom's tree, so locating the dot-dropping construction is Gate-1's step, not this block's.
+
+  acceptance_criteria:
+    - "[ ] The Gate-2 emission path that writes the per-CLI derived trees is corrected so output lands on the DECLARED roots `.codex/**` and `.gemini/**`. The writer named by `owned_surfaces` for both surfaces is `emit-cli-artifacts.mjs + .claude/{codex,gemini}-templates/ (coc-sync Step 6.6)`; that declaration is the starting point for locating it, not a claim about which line is wrong."
+    - "[ ] Verified by running the emitter and asserting the produced paths BEGIN with a dot -- not by reading the diff of a fixed sync, which cannot distinguish 'the bug is fixed' from 'this cycle happened to emit nothing for those trees'. A cycle with zero per-CLI changes would show an identical clean diff either way."
+    - "[ ] A loom-side check asserts every Gate-2-written path falls inside a declared `owned_surfaces` glob BEFORE the PR is opened, and is shown able to FAIL by feeding it a dot-stripped path. Absent that, the class recurs on the next emitter refactor and is caught only at whichever consumers happen to carry their own gate."
+    - "[ ] The check compares against the DECLARED surface list, never against 'whatever the emitter produced' -- an emitted-vs-landed reconciliation agrees with itself on this defect and would have passed on PR #89."
+    - "[ ] Whether OTHER USE templates and BUILD targets received the same defective emission from loom@0c663306 is determined and stated. This template can only measure itself; a per-target answer is only derivable at loom, and silence would leave siblings carrying 950 stray files with no gate to surface them."
+    - "[ ] The 6 lost artifact updates (`wrapup` prompt/command + `wrapup` and `rules-reference` skills, both CLIs) are confirmed present on the declared dotted paths at every target that took loom@0c663306 -- not merely at this one, which self-repaired."
+    - "[ ] Consider whether `check-owned-surfaces.mjs` (which `artifact-flow.md` names as the structural half of the Owned-Surface Bound wiring) covers the EMISSION path as well as the manifest declaration. It reds on `undeclared-write-surface` per that rule's Detection block, yet this emission shipped -- so either it does not run over Gate-2 output, or its notion of write-surface is manifest-derived only. Which of the two is the case should be measured and recorded, since the rule's Wiring currently reads as though this class were structurally covered."
+
+  disclosure_scrub: >-
+    Names only `.claude/`, `.codex/`, `.gemini/` and `.github/` artifact paths, this repo's own
+    public PR number (#89) and its own commit SHAs (`2dffe11`, `ec51007`, `ee274d7`, `0c663306`
+    as the loom source ref already recorded in `.claude/VERSION`). No operator identity, no
+    absolute path, no client or tenant identifier, no downstream-consumer name.
+
 status: pending_review
