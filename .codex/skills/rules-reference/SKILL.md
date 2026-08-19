@@ -23,6 +23,7 @@ A path-scoped rule you have not read is a rule you are not honoring.
 | Artifact Flow Rules | `.claude/**`, `sync-manifest.yaml`, `**/VERSION` | `.claude/rules/artifact-flow.md` |
 | BUILD Repo Release Discipline | `pyproject.toml`, `packages/**/pyproject.toml`, `CHANGELOG.md`, `packages/**/CHANGELOG.md`, `packages/**/__init__.py`, `src/kailash/__init__.py`, `.github/workflows/publish-pypi.yml`, `.github/workflows/publish-*.yml`, `.github/workflows/release*.yml`, `deploy/deployment-config.md` | `.claude/rules/build-repo-release-discipline.md` |
 | Burn-Down Reporting — A Number Against A Number, Every Session And Every Wave | `**/workspaces/**`, `**/.session-notes*`, `**/.session-notes.d/**`, `**/.wave-tracker*`, `**/.wave-tracker.d/**`, `**/todos/**`, `journal/**` | `.claude/rules/burn-down-reporting.md` |
+| Burndown Integrity — The Block Is Generated, And It Is The Only Quote | `**/workspaces/**`, `**/.session-notes*`, `**/.session-notes.d/**`, `journal/**`, `**/*REGISTER*`, `**/*BURNDOWN*`, `**/burndown/**` | `.claude/rules/burndown-integrity.md` |
 | CI Cost Discipline — A Gate Run Is A Purchased Resource, And The Dominant Waste Is Re-Pushing | `**/todos/**`, `**/.wave-tracker*`, `**/.wave-tracker.d/**`, `**/.github/workflows/**` | `.claude/rules/ci-cost-discipline.md` |
 | CI Runner Rules | `.github/workflows/**`, `**/ci/**`, `**/.github/**` | `.claude/rules/ci-runners.md` |
 | COC Artifact Eval Coverage — Every Artifact Ships Structural Fixtures AND A Probe Set | `.claude/**` | `.claude/rules/coc-artifact-eval-coverage.md` |
@@ -53,6 +54,7 @@ A path-scoped rule you have not read is a rule you are not honoring.
 | Hook Event Selection — The Event Is A Deliberated Choice | `**/.claude/hooks/**`, `**/.claude/variants/**/hooks/**`, `**/.claude/settings.json` | `.claude/rules/hook-event-selection.md` |
 | Hook Output Discipline — No Raw exit(2) | `**/.claude/hooks/**`, `**/.claude/variants/**/hooks/**`, `**/.claude/test-harness/**` | `.claude/rules/hook-output-discipline.md` |
 | Infrastructure SQL Rules | `**/db/**`, `**/infrastructure/**` | `.claude/rules/infrastructure-sql.md` |
+| Instrument Bipolarity — Discrimination Is Recorded At AUTHORSHIP | `**/.claude/bin/**`, `**/.claude/hooks/**`, `**/.claude/audit-fixtures/**`, `**/.claude/test-harness/**`, `**/.github/workflows/**`, `**/tests/**`, `**/*.test.*`, `**/*_test.*`, `**/test_*.py` | `.claude/rules/instrument-bipolarity.md` |
 | Journal Author Discipline — Verifiable, Not Trusted | `journal/**`, `**/journal/**` | `.claude/rules/journal-author-discipline.md` |
 | Journal Rules | `journal/**`, `**/journal/**` | `.claude/rules/journal.md` |
 | Knowledge-Cascade Routing — Cascade-Valuable Knowledge Lands In A Manifest-Registered COC Artifact, Never Agent Memory | `**/MEMORY.md`, `**/memory/**/*.md`, `journal/**`, `**/.session-notes*`, `.claude/rules/**`, `.claude/.proposals/**` | `.claude/rules/knowledge-cascade-routing.md` |
@@ -100,4 +102,4 @@ A path-scoped rule you have not read is a rule you are not honoring.
 | Wave-Loop — Verify-And-Feed-Forward Between Milestone-Groups | `**/workspaces/**`, `**/todos/**`, `**/.claude/commands/**`, `**/02-plans/**` | `.claude/rules/wave-loop.md` |
 | Worktree Isolation Rules | `.claude/agents/**`, `.claude/commands/**`, `.claude/skills/**`, `**/*worktree*`, `**/workspaces/**` | `.claude/rules/worktree-isolation.md` |
 
-81 path-scoped rules indexed.
+83 path-scoped rules indexed.
