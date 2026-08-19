@@ -15,7 +15,7 @@
 # ── Build & wire it ────────────────────────────────────────────────────────────────
 #   1. The base image is published — no local build needed. Optionally pre-pull
 #      (use the published reference printed in your README / devcontainer.json):
-#        docker pull <registry-host>/<registry-org>/kailash-coc-py:1.22.0
+#        docker pull <registry-host>/<registry-org>/kailash-coc-py:1.23.0
 #   2. Build your layer:
 #        docker build -f Dockerfile.user -t kailash-coc-dev:myproject .
 #   3. Point Compose at it (in compose.override.yml):
@@ -32,16 +32,16 @@
 #   ergonomics, NOT for derivative builds — a silent base-image revision would change
 #   your derivative's bytes between rebuilds. Resolve the digest for the tag you want
 #   to pin to via:
-#        docker manifest inspect <registry-host>/<registry-org>/kailash-coc-py:1.22.0
+#        docker manifest inspect <registry-host>/<registry-org>/kailash-coc-py:1.23.0
 #   …and substitute it below in place of `<digest>` BEFORE running `docker build`.
 #   Bump both the tag and the digest together on each base-image upgrade.
 
 # Replace <registry-host>/<registry-org> with the published reference for your ecosystem
 # (the same one printed in your README / .devcontainer/devcontainer.json):
-FROM <registry-host>/<registry-org>/kailash-coc-py:1.22.0@sha256:<digest>
+FROM <registry-host>/<registry-org>/kailash-coc-py:1.23.0@sha256:<digest>
 # Tag-only form — accepts the moving-pointer trade-off; NOT spec-compliant for derivative builds.
 # Use only if you understand and accept R-B1 tag-trust drift (rebuilds may pull a different base):
-# FROM <registry-host>/<registry-org>/kailash-coc-py:1.22.0
+# FROM <registry-host>/<registry-org>/kailash-coc-py:1.23.0
 
 # OS packages need root; the base runs as the non-root `dev` user, so switch to root for the
 # install, then switch back. Keep `dev` as the final user (file ownership / hook write paths).

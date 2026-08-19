@@ -122,7 +122,7 @@ Hooks validate your environment on session start. Rules, skills, and specialist 
 
 ## Development Environment (Docker)
 
-A reproducible development container is available as a published image on Docker Hub: **`terrenefoundation/kailash-coc-py:1.22.0`** (multi-arch amd64+arm64). It carries all three CLIs (`claude`, `codex`, `gemini`), Python plus the baked Kailash frameworks (Core SDK, DataFlow, Nexus, Kaizen, PACT), Node, and every tool the hooks shell out to (`git`, `gh`, `jq`, `yq`, `rg`, `gnupg`). Your API keys are read from `.env` at runtime — never baked into an image layer.
+A reproducible development container is available as a published image on Docker Hub: **`terrenefoundation/kailash-coc-py:1.23.0`** (multi-arch amd64+arm64). It carries all three CLIs (`claude`, `codex`, `gemini`), Python plus the baked Kailash frameworks (Core SDK, DataFlow, Nexus, Kaizen, PACT), Node, and every tool the hooks shell out to (`git`, `gh`, `jq`, `yq`, `rg`, `gnupg`). Your API keys are read from `.env` at runtime — never baked into an image layer.
 
 Consumer-shipped configs (`docker-compose.yml`, `.devcontainer/devcontainer.json`, `bin/dev`) ship at the repo root and reference the published image. The `Dockerfile` + `requirements-coc*.txt` at the repo root are the publisher's build recipe (provenance + the input to the publish workflow); consumers do not execute them on first run.
 
@@ -133,7 +133,7 @@ cp .env.example .env        # fill ANTHROPIC_API_KEY / OPENAI_API_KEY / GOOGLE_A
 ./bin/dev                   # pulls the published image on first run, then shells in as user `dev`
 ```
 
-First run pulls `terrenefoundation/kailash-coc-py:1.22.0` from Docker Hub (one-time, cached thereafter). No local build. Inside the shell, every binary resolves and the frameworks import:
+First run pulls `terrenefoundation/kailash-coc-py:1.23.0` from Docker Hub (one-time, cached thereafter). No local build. Inside the shell, every binary resolves and the frameworks import:
 
 ```bash
 claude --version && codex --version && gemini --version
@@ -145,7 +145,7 @@ Need a database? `docker compose --profile db up -d` brings up loopback-bound `p
 
 ### Editor door (VS Code / Cursor / Codespaces / JetBrains)
 
-Open the folder → **Dev Containers: Reopen in Container**. The editor pulls the registry image referenced in `.devcontainer/devcontainer.json` (`docker.io/terrenefoundation/kailash-coc-py:1.22.0`), aligns the container user to your host UID (files stay yours), and runs `.devcontainer/postCreate.sh`. Copy `.env.example` → `.env` first — the container reads it at create time.
+Open the folder → **Dev Containers: Reopen in Container**. The editor pulls the registry image referenced in `.devcontainer/devcontainer.json` (`docker.io/terrenefoundation/kailash-coc-py:1.23.0`), aligns the container user to your host UID (files stay yours), and runs `.devcontainer/postCreate.sh`. Copy `.env.example` → `.env` first — the container reads it at create time.
 
 ### Rebuild the publisher recipe locally (template developers only)
 

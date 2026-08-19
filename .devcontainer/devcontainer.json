@@ -13,7 +13,7 @@
   // Architecture B); consumers reference the published manifest here, they do not rebuild.
   // updateRemoteUserUID below re-aligns the container user UID at attach time on Linux;
   // macOS Docker Desktop remaps transparently.
-  "image": "docker.io/terrenefoundation/kailash-coc-py:1.22.0",
+  "image": "docker.io/terrenefoundation/kailash-coc-py:1.23.0",
 
   "remoteUser": "dev",
   "updateRemoteUserUID": true,
