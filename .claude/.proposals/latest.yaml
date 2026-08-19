@@ -3532,6 +3532,32 @@ use_template_gate2_wrote_950_files_to_undeclared_dotless_surfaces:
     The observable is stated rather than the loom-side line diagnosed: this template cannot read
     loom's tree, so locating the dot-dropping construction is Gate-1's step, not this block's.
 
+
+  s7_4_the_defect_is_INTERMITTENT_across_loom_revisions_not_a_constant_regression: >-
+    Measured across the four Gate-2 deliveries this template received, by listing top-level
+    directories at each delivery commit and subtracting the dotted + repo-native roots:
+
+      loom@dc07a7c6  (PR #86, MERGED)          stray trees: none
+      loom@74f60056  (PR #87, CLOSED unmerged) stray trees: codex-mcp-guard, codex, gemini
+      loom@a44083a5  (PR #88, MERGED)          stray trees: none
+      loom@0c663306  (PR #89, MERGED + fixed)  stray trees: codex, gemini
+
+    The falsifying result was named before reading: all four defective (or all four clean) would
+    mean a constant regression after some fixed point, and the fix would be a one-line path
+    correction. That is NOT what the data shows. The defect ALTERNATES, and the SET of stray trees
+    differs between the two bad runs -- 74f60056 also emitted `codex-mcp-guard/` (the third
+    declared surface, `.codex-mcp-guard/**`), which 0c663306 did not.
+
+    So the cause is CONDITIONAL, not a static typo: two loom revisions in the same week emitted
+    correctly and two did not, with differing stray sets. Candidate shapes this points at -- stated
+    as directions to test, NOT as a diagnosis this template can make -- are a cwd- or
+    root-resolution that differs by invocation path, a partially-applied change across the emit
+    steps, or a per-surface loop where the root prefix is recomputed per iteration.
+
+    NOTE #87 was CLOSED, not merged, so the 2026-08-16 defect never reached this template's main.
+    Its branch `sync/2026-08-16-loom-use-py` still exists on the remote carrying all three stray
+    trees; it is loom's branch and is left untouched here. Whether it was closed BECAUSE the defect
+    was noticed, or superseded for an unrelated reason, is not determinable from this repo.
   acceptance_criteria:
     - "[ ] The Gate-2 emission path that writes the per-CLI derived trees is corrected so output lands on the DECLARED roots `.codex/**` and `.gemini/**`. The writer named by `owned_surfaces` for both surfaces is `emit-cli-artifacts.mjs + .claude/{codex,gemini}-templates/ (coc-sync Step 6.6)`; that declaration is the starting point for locating it, not a claim about which line is wrong."
     - "[ ] Verified by running the emitter and asserting the produced paths BEGIN with a dot -- not by reading the diff of a fixed sync, which cannot distinguish 'the bug is fixed' from 'this cycle happened to emit nothing for those trees'. A cycle with zero per-CLI changes would show an identical clean diff either way."
@@ -3541,6 +3567,7 @@ use_template_gate2_wrote_950_files_to_undeclared_dotless_surfaces:
     - "[ ] The 6 lost artifact updates (`wrapup` prompt/command + `wrapup` and `rules-reference` skills, both CLIs) are confirmed present on the declared dotted paths at every target that took loom@0c663306 -- not merely at this one, which self-repaired."
     - "[ ] Consider whether `check-owned-surfaces.mjs` (which `artifact-flow.md` names as the structural half of the Owned-Surface Bound wiring) covers the EMISSION path as well as the manifest declaration. It reds on `undeclared-write-surface` per that rule's Detection block, yet this emission shipped -- so either it does not run over Gate-2 output, or its notion of write-surface is manifest-derived only. Which of the two is the case should be measured and recorded, since the rule's Wiring currently reads as though this class were structurally covered."
 
+    - "[ ] The fix accounts for the INTERMITTENCY measured in s7_4 (dc07a7c6 clean, 74f60056 defective, a44083a5 clean, 0c663306 defective, with DIFFERING stray sets). A one-line path correction that assumes a constant regression would leave the conditional cause in place and the defect would recur. Verified by emitting from at least two loom revisions -- ideally one previously-clean and one previously-defective -- not from a single run."
   disclosure_scrub: >-
     Names only `.claude/`, `.codex/`, `.gemini/` and `.github/` artifact paths, this repo's own
     public PR number (#89) and its own commit SHAs (`2dffe11`, `ec51007`, `ee274d7`, `0c663306`
