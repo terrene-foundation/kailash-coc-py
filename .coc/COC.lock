@@ -3,7 +3,7 @@
   "files": [
     {
       "path": "COC.md",
-      "sha256": "686e4f540016a12a77126c2573687db1030a0eb21dbe090f1cdb07c7bd4d64e4"
+      "sha256": "749143763723372b6894764f6ddad5519745ed57dfc435c036c1eb3959f6a584"
     },
     {
       "path": "agents/ALIGN-SPECIALIST.md",
@@ -275,7 +275,7 @@
     },
     {
       "path": "commands/WRAPUP.md",
-      "sha256": "b585949bc64a7bd86990c844975591dd69bfd82afbd558949053f269648b89c1"
+      "sha256": "b3e5330039b2f313cd8d8c36b03523b52e17b0e1d97d54f7cde85086543bfe2e"
     },
     {
       "path": "commands/WS.md",
@@ -308,6 +308,10 @@
     {
       "path": "rules/BURN-DOWN-REPORTING.md",
       "sha256": "a4ed76fccd924e6d94c2f37a60929be6d686496ac41692e6cde1fc125ec6be67"
+    },
+    {
+      "path": "rules/BURNDOWN-INTEGRITY.md",
+      "sha256": "5e5150e70ead12d9f7185715307ae88dc95dcec60137eaeea8d15ceb777b2681"
     },
     {
       "path": "rules/CC-ARTIFACTS.md",
@@ -438,6 +442,10 @@
       "sha256": "a30eede3c1457d242a4e5e6c4192fa643de08047a1d4005c98c0512f624d6c6e"
     },
     {
+      "path": "rules/INSTRUMENT-BIPOLARITY.md",
+      "sha256": "89d779410f56ee4848a6d1b2118d9b37a8893500a7468230e2f8403282852954"
+    },
+    {
       "path": "rules/INSTRUMENT-DISCIPLINE.md",
       "sha256": "3c9c4b61fea502bd1f6c1c701b4841e62a53b848f1de9bd5a42c3731a1329779"
     },
@@ -543,7 +551,7 @@
     },
     {
       "path": "rules/SELF-REFERENTIAL-CODIFY.md",
-      "sha256": "9b2bfbff212561db23287acffcca58745181b54c8f700bcbef60377dee4981c0"
+      "sha256": "34af00c7e8748f9db2ebee73338496c679dbb39f58cc43179d16114798e397f7"
     },
     {
       "path": "rules/SESSION-NOTES-CONTINUITY.md",
@@ -631,11 +639,11 @@
     },
     {
       "path": "rules/WAVE-LOOP.md",
-      "sha256": "da4128ab335154e43e58a3afd2bb41fff9d9a49264f1defd380d551bc4148c7f"
+      "sha256": "bf88574c4e9d7b88bdf8ceb5cb04b3b6a621b7baba14c528bb38a852d7a5ce4b"
     },
     {
       "path": "rules/WORKTREE-ISOLATION.md",
-      "sha256": "6a62f0e315521a17502739cad39a23515fd20e5b451befcc21580767d05e663e"
+      "sha256": "3307ff7dcdd777d3611a2493d0ee642cec40e0d35b7f3c4fe1d7bdc564dd3fc9"
     },
     {
       "path": "rules/ZERO-TOLERANCE.md",
@@ -807,7 +815,7 @@
     },
     {
       "path": "skills/WRAPUP.md",
-      "sha256": "744bdf9d3d15b6922975463dc5790d2304447050c91d42989720a511f63802db"
+      "sha256": "fbb348b1ae12a70fa822128006c7a43fc7cd881e7b350b504f4a3fd9c21b2f2e"
     }
   ]
 }

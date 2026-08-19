@@ -322,3 +322,94 @@ jobs:
             echo "Fix the new refs — do NOT raise the baseline to make this pass."
           fi
           exit "$rc"
+
+      # Undeclared top-level write surfaces — HARD gate.
+      #
+      # Added 2026-08-19 after sync PR #89 wrote 950 files into DOTLESS `codex/`
+      # and `gemini/` trees while the manifest it shipped declares the owned
+      # surfaces as `.codex/**` and `.gemini/**`. 944 were byte-identical
+      # duplicates of files already on main; the other 6 were the cycle's ONLY
+      # real artifact updates (wrapup + rules-reference, both CLIs), so they
+      # landed on a dead path while the live trees received nothing. All three
+      # pre-existing steps scope to `.claude/`, so none could see it.
+      #
+      # HARD gate, not a ratchet: unlike the xref backlog there is no standing
+      # population of undeclared roots to burn down. The correct state is
+      # already empty, so any hit is a regression by construction.
+      #
+      # The allowlist is DERIVED from `.claude/sync-manifest.yaml::owned_surfaces`
+      # (the authority per artifact-flow.md § The Owned-Surface Bound), never
+      # restated — a hand-copied list drifts from the contract it enforces.
+      #
+      # SCOPE, stated so a green is not over-read: this checks top-level
+      # DIRECTORIES only. The defect class is a stray emitted TREE. A stray
+      # top-level FILE is NOT covered here — root files legitimately exist that
+      # owned_surfaces does not enumerate (README.md, DOCKERHUB.md), and the
+      # ones that carry contracts are already gated by the image-pin step above.
+      - name: Undeclared top-level surfaces (hard gate)
+        run: |
+          set -uo pipefail
+
+          # Repo-native roots: target-owned, never written by a loom sync.
+          # Newline-delimited on purpose — an unquoted space-separated string
+          # word-splits under bash but NOT under zsh, so the same script would
+          # behave differently on a runner than in a local pre-flight. That
+          # exact discrepancy was caught pre-push; do not collapse it to spaces.
+          PINNED='scripts
+          tools
+          workspaces'
+
+          ALLOWED="$( { grep -E '^[[:space:]]+- surface:' .claude/sync-manifest.yaml \
+                          | awk '{print $3}' | sed 's#/.*##'
+                        printf '%s\n' "$PINNED" | sed 's/^[[:space:]]*//'
+                      } | sed 's#^\./##' | grep -v '^$' | sort -u )"
+
+          if [ "$(printf '%s\n' "$ALLOWED" | wc -l | tr -d ' ')" -lt 5 ]; then
+            echo "FAIL: derived only $(printf '%s\n' "$ALLOWED" | wc -l | tr -d ' ') allowed roots — the manifest parse broke."
+            echo "Refusing to pass: a truncated allowlist flags healthy roots as"
+            echo "stray, and an empty one cannot discriminate at all."
+            exit 1
+          fi
+          echo "Derived $(printf '%s\n' "$ALLOWED" | wc -l | tr -d ' ') allowed top-level roots (manifest + pinned repo-native)."
+
+          # NEGATIVE CONTROL (verification-gate-integrity.md MUST-1): the gate
+          # must be shown able to go RED here, in this job, on this runner,
+          # before its green is read as evidence. The synthetic stray root is
+          # fed through the SAME comparison the real check uses below.
+          CONTROL="$(printf '%s\ncodex\n' "$ALLOWED" | sort -u \
+                      | comm -23 - <(printf '%s\n' "$ALLOWED"))"
+          if [ "$CONTROL" != "codex" ]; then
+            echo "FAIL: negative control did not fire — the comparison cannot"
+            echo "detect a stray root, so a green from it would mean nothing."
+            echo "  expected 'codex', got: '${CONTROL}'"
+            exit 1
+          fi
+          echo "✓ negative control fired (synthetic 'codex' root detected)"
+
+          # Positive control: a root known to be legitimate must NOT be flagged,
+          # or the gate is simply flagging everything and its RED means nothing.
+          if printf '%s\n' ".claude" | comm -23 - <(printf '%s\n' "$ALLOWED") | grep -q .; then
+            echo "FAIL: positive control fired — '.claude' read as stray."
+            exit 1
+          fi
+          echo "✓ positive control clean ('.claude' not flagged)"
+          echo ""
+
+          ACTUAL="$(git ls-tree -d --name-only HEAD | sed 's#/$##' | sort -u)"
+          STRAY="$(printf '%s\n' "$ACTUAL" | comm -23 - <(printf '%s\n' "$ALLOWED"))"
+
+          if [ -n "$STRAY" ]; then
+            echo "FAIL: undeclared top-level director(ies) present:"
+            printf '%s\n' "$STRAY" | sed 's/^/  /'
+            echo ""
+            echo "Every top-level tree must be declared in"
+            echo "  .claude/sync-manifest.yaml::owned_surfaces"
+            echo "or be a pinned repo-native root (scripts, tools, workspaces)."
+            echo ""
+            echo "A DOTLESS twin of a declared surface (codex/ vs .codex/) is the"
+            echo "known loom Gate-2 emission defect: strip the stray tree and"
+            echo "relocate any genuinely-new files onto the declared dotted path."
+            exit 1
+          fi
+
+          echo "✓ no undeclared top-level directories"
