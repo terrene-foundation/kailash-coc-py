@@ -252,7 +252,30 @@ jobs:
           # loom-only citations at Gate-2 emission, or teach the validator a consumer
           # mode that treats loom-only token classes as absent-by-design. Tracked there.
           # Same class as the 131-of-317 by-design journal-dir-missing noted above.
-          BASELINE_DEFAULT=319
+          # RE-BASELINED 2026-08-19, 319 -> 61. A SCOPE CHANGE, not an improvement —
+          # re-derived from scratch, exactly as the 2026-08-14 note above requires.
+          #
+          # The loom@0c663306 sync taught validate-xref-integrity.mjs to CLASSIFY what it
+          # used to lump together. `dangling_count` — the field this gate reads — now
+          # EXCLUDES three new buckets it previously counted:
+          #     skipped_deferred            34   (sanctioned deferred-fixture refs)
+          #     skipped_absent_by_design   152   (148 declared shipped-file + 4 in-code)
+          #     not_applicable             144   (journal-tree-absent on a USE template)
+          # so the same tree that read ~319 under the old denominator reads 61 under the new
+          # one. NOTHING WAS FIXED; the question the number answers changed.
+          #
+          # This left the gate DISARMED for one release: 61 against a 319 baseline takes the
+          # "IMPROVED" branch and passes, so it would have absorbed 258 NEW dangling refs in
+          # silence. That is the `instrument-bipolarity.md` MUST-1 "red pole that stops
+          # redding" case — which is why the pole pair below now ships with it.
+          #
+          # Measured at re-baseline: 61 dangling, concentrated in inherited SDK-skill docs
+          # (nexus 10+4, validation-patterns 6, cc-audit 4, kaizen 4+3, mcp 4+4). The four
+          # rules this sync ADDED (burndown-integrity, deferral-registry-locality,
+          # instrument-bipolarity, orchestrator-context-economy) contribute ZERO — verified
+          # from --json `dangling[].source`, not from grepping the human-readable output,
+          # which also matches lines where a rule is the TARGET rather than the source.
+          BASELINE_DEFAULT=61
           echo "Cross-reference integrity — ratchet against a pinned baseline."
           echo "NOT a health metric: 131 of the standing total are by-design"
           echo "(journal-dir-missing on a USE template, which has no journal/ tree)."
@@ -314,6 +337,39 @@ jobs:
               echo "  $label: at baseline ($actual)."
             fi
           }
+          # POLE PAIR (instrument-bipolarity.md MUST-1 + MUST-2). This gate sat DISARMED
+          # for a release because its baseline outran its denominator, and nothing here
+          # could have told us. Both poles run in the same job, through the SAME check()
+          # the real assertion uses, and the harness asserts the verdicts DIFFER.
+          #
+          # MUST-2: the red pole matches a failure IDENTITY (the literal REGRESSION
+          # message), never merely a non-zero exit — an exit code is a quantity, and
+          # asserting only that survives the obvious repair.
+          pole_rc=0
+          red_out="$(rc=0; check "red pole" "$((BASELINE_DEFAULT + 1))" "$BASELINE_DEFAULT"; echo "rc=$rc")"
+          green_out="$(rc=0; check "green pole" "$BASELINE_DEFAULT" "$BASELINE_DEFAULT"; echo "rc=$rc")"
+
+          case "$red_out" in
+            *REGRESSION*rc=1*) echo "  ✓ red pole: REGRESSION identity raised, rc=1" ;;
+            *) echo "  ✗ red pole DISARMED — expected a REGRESSION verdict with rc=1, got:"
+               printf '%s\n' "$red_out" | sed 's/^/      /'; pole_rc=1 ;;
+          esac
+          case "$green_out" in
+            *"at baseline"*rc=0*) echo "  ✓ green pole: accepted at baseline, rc=0" ;;
+            *) echo "  ✗ green pole rejects a compliant input — the gate would red on healthy trees:"
+               printf '%s\n' "$green_out" | sed 's/^/      /'; pole_rc=1 ;;
+          esac
+          if [ "$red_out" = "$green_out" ]; then
+            echo "  ✗ VACUOUS pair — both poles produced an identical verdict, so this"
+            echo "    comparison cannot discriminate and its green means nothing."
+            pole_rc=1
+          fi
+          if [ "$pole_rc" -ne 0 ]; then
+            echo "Refusing to report a ratchet verdict from an unproven comparison."
+            exit 1
+          fi
+          echo ""
+
           check "default scope" "$DEFAULT_COUNT" "$BASELINE_DEFAULT"
 
           if [ "$rc" -ne 0 ]; then
