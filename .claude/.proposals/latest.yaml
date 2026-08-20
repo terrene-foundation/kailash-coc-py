@@ -3651,4 +3651,126 @@ use_template_gate2_wrote_950_files_to_undeclared_dotless_surfaces:
     as the loom source ref already recorded in `.claude/VERSION`). No operator identity, no
     absolute path, no client or tenant identifier, no downstream-consumer name.
 
+use_template_migrate_step7_ships_a_template_only_validate_yml_to_every_consumer:
+  s8_0_the_defect: >-
+    `commands/migrate.md` Step 7 instructs a migrating repo to copy
+    `.github/workflows/auto-merge.yml`, `.github/workflows/validate.yml` and
+    `.github/coc-sdk-refs-allowlist.txt` from the sister template, on the stated reasoning that
+    "multi-CLI templates carry the multi-CLI-aware schema". That reasoning holds for the first
+    and third. It does NOT hold for `validate.yml`: three of its four steps assert invariants
+    only a `coc-use-template` can satisfy, so every repo that completes `/migrate` lands with a
+    FAILING `validate` run on its first push. The failure is not a consumer misconfiguration --
+    it is the distributed artifact asserting the distributor's own invariants inside a repo that
+    is architecturally forbidden to hold them.
+  s8_1_the_three_steps_measured: >-
+    Measured against this template's `validate.yml` at 1.23.0 (471 lines, four named steps).
+    STEP AT LINE 125, "Image-pin mutual consistency": iterates a hard-coded six-file list
+    (`docker-compose.yml`, `.devcontainer/devcontainer.json`, `bin/dev`, `README.md`,
+    `Dockerfile.user.example`, `DOCKERHUB.md`) and emits `MISSING <f>` with `rc=1` for any that
+    is absent. The first three are dev-container scaffold distributed by
+    `sync-manifest.yaml::multi_cli_overlays.multi-cli.dev_container_ownership` (manifest lines
+    108-110) to USE templates ONLY, and are not in the consumer copy set. This is the observed
+    downstream failure.
+    STEP AT LINE 212, "Cross-reference integrity": compares against `BASELINE_DEFAULT`, a
+    constant measured on THIS template's own tree (61, re-derived 2026-08-19 at PR #95 -- note
+    the figure moved from ~319 and any statement of it should be re-measured rather than quoted).
+    A consumer's dangling count differs by construction, so the comparison carries no information
+    there. The step's own in-file comment already concedes the tree-specificity: it states that
+    131 of the standing total are by-design `journal-dir-missing` "on a USE template, which has
+    no journal/ tree".
+    STEP AT LINE 405, "Undeclared top-level surfaces": derives its allowlist by parsing
+    `.claude/sync-manifest.yaml`, and fails closed when fewer than 5 roots are derived. A
+    consumer holds no manifest, so the parse yields nothing and the step's own guard reds it.
+    Even given a manifest, the derived allowlist would flag the consumer's own application roots.
+    Only the STEP AT LINE 17, "Validate structure", is consumer-applicable -- and it is the one
+    that actually guards a multi-CLI migration (per-CLI baselines at root, the four `.claude/`
+    subtrees). It uses no `node` and sits before `setup-node@v4`.
+  s8_2_the_internal_contradiction_is_LIVE_AT_THE_TEMPLATE_not_only_downstream: >-
+    The referring report identified a contradiction between the line-405 step (which REQUIRES
+    `.claude/sync-manifest.yaml`) and `emit.mjs` Validator 16 (which FORBIDS it in a
+    `coc-project`). That contradiction is real, and it is SHARPER than reported: it is live at
+    this template right now, not only downstream.
+    `bin/lib/manifest-source.mjs:215` declares
+    `MANIFEST_FORBIDDEN_CLASSES = ["coc-build", "coc-use-template", "coc-project"]`. This repo's
+    `.claude/VERSION::type` is `coc-use-template` and it holds a 468 KB
+    `.claude/sync-manifest.yaml` that is load-bearing here (the line-405 step parses it; the
+    whole `use_exclude` / `loom_only` / `owned_surfaces` machinery lives in it; loom itself syncs
+    it here). MEASURED, on the real shipped path, on a clean tree:
+    `node .claude/bin/emit.mjs --cli codex` exits 1 with
+    `[validator-16] manifest-yaml: FAIL (class:coc-use-template -> manifest FORBIDDEN)`.
+    It does not dirty the tree -- V16 sits in `main()` at emit.mjs:3190, ahead of any write --
+    but the shipped local emitter cannot complete at a USE template AT ALL. The `CLAUDE.md`
+    Regeneration path only works because it runs LOOM's copy at loom, where the class is
+    `coc-source` and the manifest is REQUIRED.
+    Two readings are possible and this template cannot adjudicate between them; loom must.
+    READING A: `MANIFEST_FORBIDDEN_CLASSES` is wrong and should forbid `coc-project` only,
+    because a USE template demonstrably needs the manifest to know distribution fates.
+    READING B: the class list is right and a USE template should not hold a manifest, in which
+    case the line-405 step, the `owned_surfaces` consumers, and loom's own decision to sync the
+    manifest here are all wrong together. Reading A is the more likely, but the choice is loom's
+    and the evidence for it is not derivable from inside this repo.
+  s8_3_validate_yml_has_no_distribution_contract_at_all: >-
+    Probable root cause of why this went uncaught. `validate.yml` appears NOWHERE in
+    `.claude/sync-manifest.yaml`. Measured with a fired control: `grep -c 'owned_surfaces'` on
+    the same file returns 3 and `.github` returns hits at lines 309/1938/3533/3535/3632, so the
+    matcher demonstrably works on this file -- and `validate.yml` returns zero. Manifest line
+    3633 is explicit that this is deliberate for the sibling artifact: `.github/**` is NOT
+    declared, and only `.github/workflows/publish-dev-image.yml` is declared by path, precisely
+    so that any broader workflow distribution reds as an undeclared surface.
+    The consequence is that `validate.yml` reaches consumers through exactly ONE prose sentence
+    in `commands/migrate.md` Step 7. No emitter writes it, no validator inspects it, no parity
+    check compares it across lanes, and no `owned_surfaces` row governs it. A distribution
+    channel made of prose is invisible to every structural gate loom operates, which is why a
+    template-only artifact could be handed to every consumer for as long as it has been.
+  s8_4_local_disposition_and_what_remains_upstream: >-
+    Fixed LOCALLY at this template (PR #97): a `Resolve repo class` step publishes
+    `.claude/VERSION::type` via the already-shipping `.claude/bin/repo-class.mjs`, and the three
+    template-only steps gate on `steps.class.outputs.class == 'coc-use-template'`. Gated
+    POSITIVELY on the class rather than negatively on `!= 'coc-project'` as the referring report
+    proposed, because a `coc-build` repo cannot satisfy these three either and the negative form
+    would still mis-fire there. An UNRESOLVABLE class hard-fails the job rather than skipping:
+    skipping would hand a false green to the one repo whose `VERSION` is broken. The resolve
+    step carries a negative control (a synthetic `coc-project` tree must resolve to a DIFFERENT
+    class in the same job) so that its green is not consistent with a resolver that always
+    returns `coc-use-template`.
+    That local fix is durable HERE -- unusually so, and only because of s8_3: `validate.yml` has
+    no manifest declaration, so no `/sync-to-use` rebuilds it and the Class-A non-durability that
+    applies to a synced artifact does not apply. It does NOT fix the cause for the fleet: the
+    prose instruction in `commands/migrate.md` is manifest-declared (`tiers`, manifest line 2045)
+    and therefore loom-owned, so a local edit to it would be non-durable by construction and is
+    deliberately NOT attempted here. Consumers already migrated keep their red until they either
+    re-copy from a fixed template or trim locally.
+  s8_5_the_ratified_D3_note_a_use_template_has_no_journal_decision_surface: >-
+    Recorded here because the referring session hit it while ratifying an unrelated decision, and
+    it is the same shape as s8_3 -- a contract prescribing a surface the repo class does not
+    have. `commands/journal.md` directs a DECISION entry to `journal/` or
+    `workspaces/<name>/journal`. At this template BOTH are unusable: there is no root `journal/`
+    tree (its absence is DESIGNED -- the line-212 xref step counts 131 refs as by-design
+    `journal-dir-missing` precisely because a USE template has none, so creating one would
+    silently re-classify that population and move the ratchet denominator), and `/workspaces/*`
+    is gitignored at `.gitignore:126`, so a workspace journal entry is never committed and is not
+    a durable record.
+    The practical effect is that a USE template cannot record a ratified decision in the form its
+    own tooling prescribes. This is the same conflict already recorded four sweeps running as the
+    "sweep report cannot be committed" finding, and it generalises beyond the sweep report to
+    every DECISION-class artifact. Requested: state where a `coc-use-template` is meant to record
+    a durable decision, or declare that the journal contract does not apply to this class so the
+    gap stops being re-derived every sweep.
+  acceptance_criteria:
+    - "[ ] `commands/migrate.md` Step 7 stops instructing an unconditional verbatim copy of `.github/workflows/validate.yml`. Either the file is made class-aware at the template (the PR #97 shape, which a copy then inherits for free), or Step 7 is narrowed to the artifacts that genuinely carry a multi-CLI-aware schema and validate.yml is dropped from the list."
+    - "[ ] Verified by RUNNING the copied workflow in a repo whose `.claude/VERSION::type` is `coc-project`, not by reading the diff. A migrated consumer with none of the six pin files present is the discriminating case; a green from a repo that happens to hold them proves nothing about the defect."
+    - "[ ] The `MANIFEST_FORBIDDEN_CLASSES` contradiction in s8_2 is adjudicated and RECORDED as Reading A or Reading B. Today `node .claude/bin/emit.mjs --cli <cli>` exits 1 at Validator 16 in every `coc-use-template`, including this one, so the shipped emitter is unrunnable there whichever reading is correct."
+    - "[ ] If Reading A is chosen, `MANIFEST_FORBIDDEN_CLASSES` is narrowed and the change is verified by running the real emitter to exit 0 at a USE template -- not by unit-testing `_classifyManifestPresence` in isolation, which would agree with whatever the constant says."
+    - "[ ] A decision is recorded on whether `.github/workflows/validate.yml` gets a `sync-manifest.yaml` distribution contract or is explicitly declared undistributed. Per s8_3 it currently has NEITHER, which is why no structural gate ever inspected it. Declaring it undistributed is an acceptable outcome; leaving it undeclared while `migrate.md` prose distributes it is not."
+    - "[ ] Whether the same prose-only channel distributes any OTHER artifact is determined. Step 7 names three files and only one was audited here; `auto-merge.yml` and `coc-sdk-refs-allowlist.txt` were asserted consumer-safe by the referring report but were NOT independently measured in this proposal, and that gap is stated rather than hidden."
+    - "[ ] s8_5 is answered: the surface on which a `coc-use-template` records a durable ratified decision is named, or the journal contract is declared inapplicable to the class. Note that the fix is NOT 'create a root journal/ tree at USE templates' unless the xref baseline is re-derived in the same change -- 131 refs are currently classified by-design absent BECAUSE the tree is missing."
+  disclosure_scrub: >-
+    Names only `.claude/`, `.github/` and `.codex/`/`.gemini/` artifact paths, this repo's own
+    public PR numbers (#95, #97), its own class string as recorded in `.claude/VERSION`, and
+    line numbers within its own tracked files. A downstream consumer's repository name and PR
+    number appeared in the referring report as corroborating evidence and are deliberately
+    OMITTED here per the no-downstream-consumer-name convention; the corroboration is stated
+    generically as "a downstream consumer trimmed its copy to the one applicable step and went
+    green". No operator identity, no absolute path, no client or tenant identifier.
+
 status: pending_review
