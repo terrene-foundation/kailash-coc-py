@@ -3474,8 +3474,23 @@ use_template_findings_issue_enumeration_instrument_and_validator_coverage:
     path, no client or tenant identifier, no downstream-consumer name. The single operator display
     id that appears in the ledger owner column is NOT reproduced here.
 
-
 use_template_gate2_wrote_950_files_to_undeclared_dotless_surfaces:
+  s7_0_ALSO_FILED_AS_AN_UPSTREAM_ISSUE_close_one_against_the_other: >-
+    This block was ALSO filed as an issue on the loom repository (issue 1833, 2026-08-20) under an
+    explicit operator instruction, through the `repo-scope-discipline.md` User-Authorized Exception
+    (write-tier ceremony, receipt written BEFORE the action, uncommitted per the `coc-use-template`
+    branch of `/cross-repo-authorize` step 5).
+
+    THEY ARE THE SAME FINDING. The issue carries the same measurements, the same root-cause
+    localization and the same Option A / Option B recommendation as sub-keys s7_1..s7_6 below, and
+    it names this block explicitly. Gate-1 should CLOSE ONE AGAINST THE OTHER rather than
+    actioning both -- the canonical lane for a `coc-use-template` is this proposal (Step 7b); the
+    issue is additive TRACKING, opened so loom has a place to reply.
+
+    Recorded here because the reverse pointer is the half that goes missing: the issue names the
+    block, so without this line the proposal is the only surface that does not know the issue
+    exists, and Gate-1 reads the proposal.
+
   s7_1_the_measurement: >-
     Gate-2 sync PR #89 (loom@0c663306, merged `2dffe11`) added 950 files under NEW TOP-LEVEL
     `codex/` and `gemini/` trees -- WITHOUT the leading dot. The same commit's
@@ -3532,8 +3547,8 @@ use_template_gate2_wrote_950_files_to_undeclared_dotless_surfaces:
     The observable is stated rather than the loom-side line diagnosed: this template cannot read
     loom's tree, so locating the dot-dropping construction is Gate-1's step, not this block's.
 
-
-  s7_4_the_defect_is_INTERMITTENT_across_loom_revisions_not_a_constant_regression: >-
+  s7_4_the_defect_is_INTERMITTENT_across_loom_revisions_not_a_constant_regression:
+    >-
     Measured across the four Gate-2 deliveries this template received, by listing top-level
     directories at each delivery commit and subtracting the dotted + repo-native roots:
 
