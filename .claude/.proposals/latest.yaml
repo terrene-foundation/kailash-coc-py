@@ -3756,6 +3756,24 @@ use_template_migrate_step7_ships_a_template_only_validate_yml_to_every_consumer:
     every DECISION-class artifact. Requested: state where a `coc-use-template` is meant to record
     a durable decision, or declare that the journal contract does not apply to this class so the
     gap stops being re-derived every sweep.
+    STRENGTHENED after the initial filing, by measurement rather than inference: the class has NO
+    committed decision surface AT ALL, and two shipped artifacts contradict each other about it.
+    The `.session-notes.d/` fragment header and the `.session-notes.aggregate.md` header BOTH
+    describe the per-operator fragments plus `.session-notes.shared.md` as "the TRACKED split",
+    with only the aggregate gitignored as a regenerable per-clone view. In this repo
+    `.gitignore:124-125` ignores `.session-notes.d/` AND `.session-notes.shared.md` as well
+    (introduced by `ddc2fc3`, "ignore per-operator state that artifacts already call ignored"), so
+    `git ls-files | grep session-notes` returns only audit fixtures and library code -- no live
+    notes surface is tracked. Loom's own `gitignore_additions` declares only
+    `.session-notes.aggregate.md`, `.session-notes.migrated` and `.session-notes.migrate.lock`, so
+    the two extra ignore lines are LOCAL and directly contradict the shipped headers.
+    A second consequence follows and is measured: `.session-notes.shared.md`'s header states the
+    forest ledger is "Merged via the `coc-ledger` driver (.gitattributes)". There is NO
+    `.gitattributes` file in this repo, so that driver is unregistered -- and it could never run
+    regardless, because a merge driver does not execute on an ignored path. The forest-ledger rows
+    F10/F13/F14 are therefore per-clone, which is not what a multi-operator ledger design intends.
+    This is deliberately NOT fixed locally. Un-ignoring those paths would commit operator-authored
+    session notes into a distributed template, which is a disclosure decision, not a cleanup.
   acceptance_criteria:
     - "[ ] `commands/migrate.md` Step 7 stops instructing an unconditional verbatim copy of `.github/workflows/validate.yml`. Either the file is made class-aware at the template (the PR #97 shape, which a copy then inherits for free), or Step 7 is narrowed to the artifacts that genuinely carry a multi-CLI-aware schema and validate.yml is dropped from the list."
     - "[ ] Verified by RUNNING the copied workflow in a repo whose `.claude/VERSION::type` is `coc-project`, not by reading the diff. A migrated consumer with none of the six pin files present is the discriminating case; a green from a repo that happens to hold them proves nothing about the defect."
@@ -3763,6 +3781,8 @@ use_template_migrate_step7_ships_a_template_only_validate_yml_to_every_consumer:
     - "[ ] If Reading A is chosen, `MANIFEST_FORBIDDEN_CLASSES` is narrowed and the change is verified by running the real emitter to exit 0 at a USE template -- not by unit-testing `_classifyManifestPresence` in isolation, which would agree with whatever the constant says."
     - "[ ] A decision is recorded on whether `.github/workflows/validate.yml` gets a `sync-manifest.yaml` distribution contract or is explicitly declared undistributed. Per s8_3 it currently has NEITHER, which is why no structural gate ever inspected it. Declaring it undistributed is an acceptable outcome; leaving it undeclared while `migrate.md` prose distributes it is not."
     - "[ ] Whether the same prose-only channel distributes any OTHER artifact is determined. Step 7 names three files and only one was audited here; `auto-merge.yml` and `coc-sdk-refs-allowlist.txt` were asserted consumer-safe by the referring report but were NOT independently measured in this proposal, and that gap is stated rather than hidden."
+    - "[ ] The tracked-vs-ignored status of `.session-notes.d/` and `.session-notes.shared.md` is settled, because two shipped artifacts currently disagree with the repo. Both headers call the split TRACKED; loom's `gitignore_additions` declares only the aggregate; this repo ignores all three. Whichever way it is settled, the HEADERS and the ignore set must end up saying the same thing -- a header that calls a file tracked while `.gitignore` hides it is worse than either choice alone."
+    - "[ ] The `coc-ledger` merge driver named in `.session-notes.shared.md`'s header is either registered via a shipped `.gitattributes` or the header stops naming it. Measured: no `.gitattributes` exists in this repo, and a merge driver cannot run on a gitignored path anyway, so the forest ledger's multi-operator merge story does not hold here today."
     - "[ ] s8_5 is answered: the surface on which a `coc-use-template` records a durable ratified decision is named, or the journal contract is declared inapplicable to the class. Note that the fix is NOT 'create a root journal/ tree at USE templates' unless the xref baseline is re-derived in the same change -- 131 refs are currently classified by-design absent BECAUSE the tree is missing."
   disclosure_scrub: >-
     Names only `.claude/`, `.github/` and `.codex/`/`.gemini/` artifact paths, this repo's own
