@@ -89,6 +89,52 @@ jobs:
         with:
           node-version: "20"
 
+      # ── Repo class — gates the three template-only steps below ──────────────
+      # validate.yml is copied VERBATIM into downstream consumers by
+      # commands/migrate.md Step 7. Three of its four steps assert invariants
+      # only a coc-use-template can satisfy (the six dev-container image pins,
+      # an xref baseline measured on THIS tree, and a .claude/sync-manifest.yaml
+      # that emit.mjs Validator 16 forbids a consumer to hold). Ungated, every
+      # migrated consumer lands with a red first run. Gate them POSITIVELY on
+      # the class rather than negatively on 'coc-project': a coc-build repo
+      # cannot satisfy them either.
+      - name: Resolve repo class
+        id: class
+        run: |
+          set -uo pipefail
+          # exit 0 = resolved; 1 = unresolvable; 2 = usage; 3 = undeclared.
+          # Assignment-then-$? is safe here (a command substitution, NOT a
+          # pipe — reading $? after a pipe would yield the pipe's status).
+          CLASS="$(node .claude/bin/repo-class.mjs)"; rc=$?
+          if [ "$rc" -ne 0 ] || [ -z "$CLASS" ]; then
+            echo "FAIL: repo class UNRESOLVED (repo-class.mjs exit $rc)."
+            echo "Refusing to guess: skipping the class-gated steps on an"
+            echo "unresolved class would hand back a FALSE GREEN on the very"
+            echo "repo whose .claude/VERSION is broken. Repair VERSION::type."
+            exit 1
+          fi
+
+          # NEGATIVE CONTROL (the discipline the undeclared-surfaces step below
+          # already applies): the resolver must be shown able to return a
+          # DIFFERENT class here, in this job, on this runner — otherwise a
+          # green from it is consistent with a resolver that always says
+          # 'coc-use-template', and the gate would be decorative.
+          CTRL_DIR="$(mktemp -d)"
+          mkdir -p "$CTRL_DIR/.claude"
+          printf '{"version":"0.0.0","type":"coc-project"}\n' > "$CTRL_DIR/.claude/VERSION"
+          CTRL="$(node .claude/bin/repo-class.mjs --root "$CTRL_DIR")" || true
+          rm -rf "$CTRL_DIR"
+          if [ "$CTRL" != "coc-project" ]; then
+            echo "FAIL: negative control did not fire — the resolver returned"
+            echo "'$CTRL' for a synthetic coc-project tree, so it cannot"
+            echo "discriminate and its verdict on THIS repo means nothing."
+            exit 1
+          fi
+          echo "✓ negative control fired (synthetic tree resolved as coc-project)"
+
+          echo "Resolved class: $CLASS"
+          echo "class=$CLASS" >> "$GITHUB_OUTPUT"
+
       # Image-pin MUTUAL-CONSISTENCY gate.
       #
       # TWO DIFFERENT INVARIANTS LIVE HERE. The first version of this step
@@ -123,6 +169,7 @@ jobs:
       # cell; that is BY DESIGN and is not in the pinned-tag form, so this check
       # structurally cannot trip on it. Do not loosen the anchor to bare versions.
       - name: Image-pin mutual consistency (the six agree with each other)
+        if: steps.class.outputs.class == 'coc-use-template'
         run: |
           set -uo pipefail
           # NOT `require("./.claude/VERSION")` — the file is JSON with NO extension,
@@ -210,6 +257,7 @@ jobs:
       # NOTE branch protection carries no required_status_checks, so a red here
       # is a loud signal, not a merge block. That is the intended strength.
       - name: Cross-reference integrity (ratchet — fails only on regression)
+        if: steps.class.outputs.class == 'coc-use-template'
         run: |
           set -uo pipefail
           # RE-BASELINED 2026-08-14 for a SCOPE CHANGE, not an improvement.
@@ -403,6 +451,7 @@ jobs:
       # owned_surfaces does not enumerate (README.md, DOCKERHUB.md), and the
       # ones that carry contracts are already gated by the image-pin step above.
       - name: Undeclared top-level surfaces (hard gate)
+        if: steps.class.outputs.class == 'coc-use-template'
         run: |
           set -uo pipefail
 
