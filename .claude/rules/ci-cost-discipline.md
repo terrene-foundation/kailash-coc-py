@@ -96,7 +96,7 @@ git commit --amend && git push --force     # queue position discarded, new one b
 - "It is one character"
 - "The maintainer will ask for it anyway"
 
-**Why:** A queued run is a claimed position in the resource that dominates elapsed time — 78% of it — not a free option; discarding it re-queues behind everything that arrived since. The failure mode is that the cost is reasoned about as marginal *because* the run had not started, when the un-started run is precisely the one whose whole value was its queue position. "It had not started yet" is not mitigation; it is the loss.
+**Why:** A queued run is a claimed position in the resource that dominates elapsed time — 78% of it — not a free option; discarding it re-queues behind everything that arrived since. The failure mode is that the cost is reasoned about as marginal _because_ the run had not started, when the un-started run is precisely the one whose whole value was its queue position. "It had not started yet" is not mitigation; it is the loss.
 
 ### 4. Merge Cadence — Serialize Or Batch Merges Into A Shared-Concurrency Branch
 
@@ -165,7 +165,51 @@ A: FALSE (`push: ['**']`) → DO NOT FOLD, and say so: folding would cost 5 runs
 
 **Why:** the mechanism is real and was measured at a consumer, not here — a BUILD sibling at ~18 runs/PR, where folding a wave is decisive. But it does NOT generalize unconditionally: it rests on a branch push being free, which is a property of the workflow's trigger shape and false wherever `push:` is branch-general. Shipping it unconditionally would hand every consumer a change that silently inverts in exactly the repos whose CI is already worst. Both preconditions are cheap to evaluate, so making them mandatory costs one `grep` and one `gh run list` against a wave that would otherwise cost N full runs.
 
+### 6. A New PR-Reachable CI Job Is A DECLARED Act
+
+MUST-1..5 govern how often a run is SPENT. This governs how much a run COSTS by
+construction. Any change that adds a job reachable from a `pull_request` trigger MUST
+declare it in `scripts/ci/job-budget.d/_meta.json` with exactly one disposition —
+`required` (a branch-protection required context), `relevance_gated` (a job-level `if:`
+or a trigger-level `paths:` filter keeps it off PRs it cannot bear on), or `budgeted`
+(neither, but explicitly accepted, with a DATED rationale). Adding a job is legitimate;
+adding one silently is BLOCKED. Widening matrix fan-out is the same act — the census
+counts demand, not job rows.
+
+```text
+# DO — the job lands together with its disposition
+jobs.lint added  +  _meta.json row {disposition: relevance_gated, rationale: "..."}
+# DO NOT — the job lands alone, and nothing anywhere says the footprint grew
+jobs.lint added  →  every future PR silently pays it
+```
+
+**BLOCKED rationalizations:**
+
+- "It is one small job" (every accreted job was one small job)
+- "It only runs on PRs that touch X" — then it is `relevance_gated`; declare it as that
+- "The declaration is bureaucracy" (it is the only artifact that makes the footprint legible)
+- "I will declare it once the job stabilizes"
+- "GitHub-hosted runners are elastic, so there is no ceiling to hit"
+- "The audit passed" — the audit checks DECLARATION completeness; it cannot tell you a
+  declared job is worth its cost. That judgment is yours and the declaration is where it goes.
+
+**Why:** CI footprints grow one unremarkable job at a time, and nothing in the loop says
+anything at the moment each is added — which is precisely when the decision is cheapest to
+make and cheapest to reverse. Enforced by `scripts/ci/job-budget-audit.mjs` (CI, authority)
+and surfaced at edit time by `scripts/ci/ci-job-budget-guard.js` (advisory).
+
+**Scope, stated rather than assumed.** This is a METER, not a cure: it measures and names
+the per-PR footprint, it does not reduce it. The originating artifact set models POOLS with
+fixed capacities because it runs on a self-hosted fleet where demand can exhaust supply.
+This repo runs on GitHub-hosted runners, which are elastic and billed rather than pooled, so
+that half is deliberately NOT adopted — a capacity ceiling here would be a number with no
+referent, and comparing demand against a fiction would produce a green that means nothing.
+
 ## MUST NOT
+
+- Add a PR-reachable job, or widen a matrix, without a declared disposition in the job budget
+
+**Why:** an undeclared job is paid by every future PR while no artifact records that anyone chose it.
 
 - Fold a wave onto one branch without having measured BOTH preconditions in THIS repo
 
@@ -197,6 +241,19 @@ A: FALSE (`push: ['**']`) → DO NOT FOLD, and say so: folding would cost 5 runs
 - **Detection mechanism:** Phase 1 (manual, gate-review) — reviewer at `/implement` + cc-architect at `/codify` inspect any session that opened or updated a PR and confirm (a) each push to an open PR names the local CI-parity command set it ran first, (b) a wave producing more than one PR states the revert-safety boundary that forced the split, (c) no amendment to a queued PR is justified as free, (d) burst merges used a queue where one exists, and (e) any wave folded onto an integration branch RECORDS the two measured preconditions — the workflow trigger read and the runs-per-PR figure with its `--limit` — rather than asserting them. **No probe suite and no audit fixtures ship with this rule** — stated explicitly rather than naming a path that does not resolve, which would red `detection-binding-check.mjs::dangling-probes-binding`. The semantic tier is therefore UNCOVERED at landing and is DECLARED, not silently omitted: `.claude/test-harness/probes/ci-cost-discipline.probes.json` is UNWRITTEN, and a dated entry for it — reason, graduation condition and an `expires` date — sits in `.claude/test-harness/phase2-deferrals.json::probe_authorship_deferrals`, and `deferrals` carries the matching Phase-2 detector entry. Both are hard-failed past their dates by `phase2-deferral-integrity.mjs`, so the omission ages out rather than becoming permanent. Scanner: none — a lexical detector cannot see whether a local pre-flight ran, and building one that guessed would instance `instrument-discipline.md` MUST-1. Phase 2 (deferred per `trust-posture.md` § Two-Phase Rollout) — an advisory `PreToolUse` detector on `git push` to a branch with an open PR, flagging the absence of a same-session CI-parity invocation; its audit fixtures land WITH it per `cc-artifacts.md` Rule 9.
 - **Violation scope:** MUST-1 (un-pre-flighted push to an open PR) + MUST-2 (revert-safe wave split, or non-revert-safe bundle) + MUST-3 (amendment to a queued PR reasoned as free) + MUST-4 (burst merge where a queue exists) + MUST-5 (folding without having measured BOTH preconditions in this repo, or folding under ¬A). Every `violations.jsonl` row names the PR and the clause.
 - **Origin:** See § Origin.
+
+## Trust Posture Wiring — MUST-6 (job budget / accretion axis)
+
+Applies to the **MUST-6** clause ONLY (added 2026-08-21; adapted from the artifact set proposed at loom#1877, originating repo kailash-rs). Ships canonical-8-field-compliant per `trust-posture.md` MUST-8; the rule-wide block above governs MUST-1..5 and is unchanged until itself `/codify`-touched (clause-scoped precedent: `security.md` § Enforcement-Surface Parity, `git.md` § CI-check/merge).
+
+- **Severity:** `block` at the CI layer — `scripts/ci/job-budget-audit.mjs` exits non-zero on an undeclared PR-reachable job, and that is a structural fact about the workflow tree read from the YAML, not a lexical guess. `advisory` at the hook layer per `hook-output-discipline.md` MUST-2: `scripts/ci/ci-job-budget-guard.js` emits `continue: true` unconditionally, because adding a job is legitimate and the hook's job is to name it at edit time, never to refuse the edit. `halt-and-report` at gate-review (reviewer at `/implement` confirms a workflow diff that adds a job carries the matching declaration row).
+- **Grace period:** 7 days from clause landing (2026-08-21 → 2026-08-28).
+- **Cumulative posture impact:** same-class violations (a PR-reachable job added with no declared disposition; a matrix widened without re-declaring; a `budgeted` row carrying no dated rationale; a declaration row left behind for a job that no longer exists) contribute to `trust-posture.md` MUST-4 cumulative-window math (3× same-rule in 30d → drop 1 posture; 5× total in 30d → drop 1 posture).
+- **Regression-within-grace:** GENERIC `regression_within_grace` emergency trigger per `trust-posture.md` MUST-4 (1× = drop 1 posture) — NO dedicated per-clause key. Named deviation per `trust-posture.md` Rule 8, with this clause's own reason rather than the rule-wide one: the CI gate already refuses the merge structurally, so the violation cannot land silently and does not additionally warrant an instant-drop key; minting one would also drag `trust-posture.md`, a `self-referential-codify.md` allowlist file, into a self-referential edit.
+- **Receipt requirement:** SessionStart soft-gate `[ack: ci-cost-discipline]` IFF `posture.json::pending_verification` includes the `ci-cost-discipline` rule_id (shared rule_id; one ack covers MUST-1..6).
+- **Detection mechanism:** STRUCTURAL, and it ships with this clause rather than being deferred. `scripts/ci/job-budget-audit.mjs` runs in the `validate` workflow — which IS a branch-protection required context, re-measured 2026-08-21 (`contexts: ["validate"]`, `enforce_admins: false`, so an admin merge still bypasses it; that is mutable repo state, so re-measure rather than citing this line). Its negative control runs in the SAME job and BEFORE the audit (`--selftest`, which prints its own case count rather than having any prose restate a number that would go stale), so a green audit is only ever read after the auditor has been shown able to reach a different verdict on that runner — `verification-gate-integrity.md` MUST-1. A repo with no declaration is reported INERT and LOUDLY at exit 0 rather than silently passing, per `security.md` § Secure-Default: a copy of this workflow must not red on a declaration it was never given, but it must also never render as "no findings". Mutation evidence at landing: 9/9 behavioural mutants killed with an INERT control that SURVIVED in the same sweep, so the sweep is demonstrably capable of reporting a survivor — a 100% kill rate with no surviving control would be `instrument-discipline.md` MUST-2(b). One real survivor was found and FIXED rather than accepted: the fail-closed fan-out guard was unreachable, which also meant a `matrix: ${{ fromJSON(...) }}` expression counted as fan-out 1 and silently under-reported demand for exactly the jobs most likely to fan out widely. **No probe suite ships** — stated explicitly rather than naming a path that does not resolve; the semantic tier is UNCOVERED for this clause and is owed at gate-review via `/test-harness-probe`.
+- **Violation scope:** MUST-6 ONLY (clause-scoped) — an undeclared PR-reachable job, an undeclared matrix widening, an unjustified `budgeted` row, or a stale declaration row. Every `violations.jsonl` row names the workflow, the job, and which of the four applies. MUST-1..5 keep their existing scope under the rule-wide block above.
+- **Origin:** See § Origin — 2026-08-21, adapted from loom#1877.
 
 ## Distinct From / Cross-References
 

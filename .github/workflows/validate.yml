@@ -168,6 +168,31 @@ jobs:
       # carries a bare `1.10.1` in a "Prior stable — retained for provenance" table
       # cell; that is BY DESIGN and is not in the pinned-tag form, so this check
       # structurally cannot trip on it. Do not loosen the anchor to bare versions.
+      # ── CI job budget — census of PR-reachable jobs ────────────────────────
+      # CI jobs accrete one unremarkable job at a time and nothing says anything
+      # at the moment each is added. This makes adding a job a DECLARED act.
+      # It is a METER, not a cure: it names the footprint, it does not shrink it.
+      # The spend axis (re-push waste, PR consolidation) is rules/ci-cost-discipline.md.
+      #
+      # NOT class-gated, unlike the three steps below it. This one is genuinely
+      # consumer-applicable: any repo with workflows has a job footprint. A repo
+      # with no declaration is reported INERT and loudly, and exits 0 — a copy of
+      # this workflow must not red on a declaration it was never given.
+      - name: CI job budget (census of PR-reachable jobs)
+        run: |
+          set -uo pipefail
+          # The selftest runs FIRST and in the same job as the audit: a green
+          # audit is only evidence if the auditor is shown able to reach a
+          # different verdict here, on this runner. It prints its own case
+          # count so no comment has to restate a number that would go stale.
+          node scripts/ci/job-budget-audit.mjs --selftest || {
+            echo "FAIL: the auditor's own selftest did not pass — its verdict on"
+            echo "this repo cannot be read as evidence. Refusing to report a green."
+            exit 1
+          }
+          echo ""
+          node scripts/ci/job-budget-audit.mjs
+
       - name: Image-pin mutual consistency (the six agree with each other)
         if: steps.class.outputs.class == 'coc-use-template'
         run: |

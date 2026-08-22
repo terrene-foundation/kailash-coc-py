@@ -248,6 +248,11 @@
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/burndown-quote-write-guard.js\"",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/ci/ci-job-budget-guard.js\"",
+            "timeout": 5
           }
         ]
       }
