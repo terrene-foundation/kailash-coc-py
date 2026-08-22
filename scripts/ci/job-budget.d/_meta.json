@@ -1,0 +1,61 @@
+{
+  "$comment": [
+    "Declaration of every PR-reachable CI job in this repository.",
+    "",
+    "WHY THIS EXISTS: CI jobs accrete one unremarkable job at a time, and without a",
+    "declaration nothing says anything at the moment each is added. This file makes",
+    "adding a job a DECLARED ACT rather than a silent one. It is a METER, not a cure:",
+    "it measures and names the footprint, it does not reduce it.",
+    "",
+    "CAPACITY MODEL — the deliberate divergence from the originating repo.",
+    "The upstream artifact set (kailash-rs, loom#1877) models pools with fixed",
+    "capacities because it runs on a self-hosted fleet where 33 jobs against a pool",
+    "of 24 is a real exhaustion. THIS repo runs entirely on GitHub-hosted runners,",
+    "which are elastic and billed rather than pooled, so a capacity ceiling would be",
+    "a number with no referent. Inventing one would be worse than omitting it: the",
+    "gate would compare demand against a fiction and report a green that means",
+    "nothing. So the capacity half is NOT adopted, and this gate checks DECLARATION",
+    "COMPLETENESS instead — every PR-reachable job must be accounted for.",
+    "The spend axis is owned separately by rules/ci-cost-discipline.md.",
+    "",
+    "DISPOSITIONS (exactly one per job):",
+    "  required         - a branch-protection required status context; gates merges.",
+    "  relevance_gated  - carries a job-level `if:` or a trigger-level paths filter,",
+    "                     so it does not fire on PRs it cannot be relevant to.",
+    "  budgeted         - neither of the above, but explicitly accepted. REQUIRES a",
+    "                     dated rationale; the audit rejects a budgeted entry without",
+    "                     one, so this cannot become a silent catch-all."
+  ],
+  "schema_version": 1,
+  "capacity_model": "github-hosted-elastic",
+  "capacity_note": "No fixed pool. This gate does not compare demand against a capacity ceiling; see $comment.",
+  "required_contexts": ["validate"],
+  "required_contexts_source": {
+    "measured_from": "gh api repos/:owner/:repo/branches/main/protection",
+    "measured_on": "2026-08-21",
+    "measured_value": ["validate"],
+    "enforce_admins": false,
+    "note": "Branch protection is MUTABLE repo state. Re-measure rather than citing this block; the audit reads THIS file, so a drifted protection setting shows up as a stale declaration, not as a silently-passing gate."
+  },
+  "jobs": [
+    {
+      "workflow": "validate.yml",
+      "job": "validate",
+      "disposition": "required",
+      "rationale": "The merge gate. Structure, image-pin consistency, cross-reference ratchet, undeclared-surface hard gate."
+    },
+    {
+      "workflow": "docker-build.yml",
+      "job": "build-and-smoke",
+      "disposition": "relevance_gated",
+      "rationale": "Job-level `if:` skips metadata-only release/* branches, so a version bump does not pay a container build."
+    },
+    {
+      "workflow": "auto-merge.yml",
+      "job": "notify",
+      "disposition": "relevance_gated",
+      "rationale": "Job-level `if:` restricts it to the auto-merge path; it is a notification, not a gate."
+    }
+  ],
+  "budgeted_exemptions": []
+}
