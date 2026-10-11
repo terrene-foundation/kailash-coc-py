@@ -330,6 +330,6 @@ result = await agent.run_autonomous(task="Complex task")
 
 ## Related Skills
 
-- **[kaizen-checkpoint-resume](kaizen-checkpoint-resume.md)** - Checkpoint and resume system
-- **[kaizen-observability-hooks](kaizen-observability-hooks.md)** - Lifecycle hooks
-- **[kaizen-control-protocol](kaizen-control-protocol.md)** - Bidirectional communication
+- **[kaizen-checkpoint-resume](../../../.claude/skills/04-kaizen/kaizen-checkpoint-resume.md)** - Checkpoint and resume system
+- **[kaizen-observability-hooks](../../../.claude/skills/04-kaizen/kaizen-observability-hooks.md)** - Lifecycle hooks
+- **[kaizen-control-protocol](../../../.claude/skills/04-kaizen/kaizen-control-protocol.md)** - Bidirectional communication

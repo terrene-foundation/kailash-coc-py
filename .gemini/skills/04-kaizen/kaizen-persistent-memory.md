@@ -396,6 +396,6 @@ worker2 = WorkerAgent(config, db, agent_id=shared_id)
 
 ## Related Skills
 
-- **[kaizen-memory-system](kaizen-memory-system.md)** - Complete memory system overview
-- **[kaizen-checkpoint-resume](kaizen-checkpoint-resume.md)** - Checkpoint and resume
-- **[02-dataflow](../02-dataflow/SKILL.md)** - DataFlow framework
+- **[kaizen-memory-system](../../../.claude/skills/04-kaizen/kaizen-memory-system.md)** - Complete memory system overview
+- **[kaizen-checkpoint-resume](../../../.claude/skills/04-kaizen/kaizen-checkpoint-resume.md)** - Checkpoint and resume
+- **[02-dataflow](../../../.claude/skills/02-dataflow/SKILL.md)** - DataFlow framework

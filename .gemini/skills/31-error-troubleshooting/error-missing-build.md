@@ -11,7 +11,7 @@ Fix the most common Kailash SDK error - forgetting to call `.build()` before exe
 > Category: `cross-cutting` (error-resolution)
 > Priority: `CRITICAL` (Most common SDK error)
 > SDK Version: `0.9.0+`
-> Related Skills: [`workflow-quickstart`](../01-core-sdk/workflow-quickstart.md), [`runtime-execution`](../01-core-sdk/runtime-execution.md)
+> Related Skills: [`workflow-quickstart`](../../../.claude/skills/01-core-sdk/workflow-quickstart.md), [`runtime-execution`](../../../.claude/skills/01-core-sdk/runtime-execution.md)
 > Related Subagents: `pattern-expert` (complex debugging)
 
 ## The Error
@@ -154,11 +154,11 @@ results, run_id = runtime.execute(workflow.build())
 
 ## Related Patterns
 
-- **Workflow creation**: [`workflow-quickstart`](../01-core-sdk/workflow-quickstart.md)
-- **Runtime options**: [`runtime-execution`](../01-core-sdk/runtime-execution.md)
-- **Other common errors**: [`common-mistakes-catalog`](../06-cheatsheets/common-mistakes-catalog.md)
-- **Parameter errors**: [`error-parameter-validation`](error-parameter-validation.md)
-- **Connection errors**: [`error-connection-params`](error-connection-params.md)
+- **Workflow creation**: [`workflow-quickstart`](../../../.claude/skills/01-core-sdk/workflow-quickstart.md)
+- **Runtime options**: [`runtime-execution`](../../../.claude/skills/01-core-sdk/runtime-execution.md)
+- **Other common errors**: [`common-mistakes-catalog`](../../../.claude/skills/06-cheatsheets/common-mistakes-catalog.md)
+- **Parameter errors**: [`error-parameter-validation`](../../../.claude/skills/31-error-troubleshooting/error-parameter-validation.md)
+- **Connection errors**: [`error-connection-params`](../../../.claude/skills/31-error-troubleshooting/error-connection-params.md)
 
 ## When to Escalate to Subagent
 
@@ -173,7 +173,7 @@ Use `pattern-expert` subagent when:
 
 ### Primary Sources
 
-- **Pattern Expert**: [`.gemini/agents/pattern-expert.md`](../../agents/implementation/pattern-expert.md)
+- **Pattern Expert**: [`.gemini/agents/pattern-expert.md`](../../../.claude/agents/implementation/pattern-expert.md)
 - **Essential Pattern**: [`CLAUDE.md`](../../../CLAUDE.md)
 
 ### Related Documentation

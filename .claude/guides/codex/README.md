@@ -1,132 +1,229 @@
 # Working with Codex CLI on loom COC
 
-A starter guide for developers using the Codex CLI (`@openai/codex`, v0.128+) on a loom-powered COC-enabled repo. Peer guide to `.claude/guides/claude-code/` (CC) and `.claude/guides/gemini/` (Gemini).
+The installed version and `exec --help` were rechecked on 2026-10-02:
+`codex-cli 0.159.3`. Native hook contracts were checked against the official
+documentation on the same date. Earlier version-specific runtime probes below
+retain their original scope; an installed version is not a public release claim.
+Use `codex --version` and command-specific `--help` on another installation.
 
-> **Heads up (2026-05-28, issue #385):** OpenAI deprecated custom prompts in favor of skills, and Codex CLI 0.128+ no longer discovers repo-local `.codex/prompts/` (only `~/.codex/prompts/`; see openai/codex#9848). loom's canonical Codex invocation is the **`bin/coc <phase> "<prompt>"` dispatcher** emitted by `/sync` to `<repo>/bin/coc`. Phase shims `bin/coc-<phase>` are symlinks to the same dispatcher.
-
-## What Codex is
-
-OpenAI's local coding agent CLI. Runs in terminal; reads `AGENTS.md` at session start; spawns shell commands; integrates MCP servers.
-
-```bash
-codex                  # interactive session
-codex exec "<prompt>"  # one-shot non-interactive
-codex review           # git-diff-aware review
-```
-
-Install: `npm install -g @openai/codex` (or `brew install codex` on macOS).
-
-## How loom integrates with Codex
-
-loom emits the Codex-side artifacts at `/sync` time:
-
-| Artifact                                 | Source                                 | Emitted to                                                    |
-| ---------------------------------------- | -------------------------------------- | ------------------------------------------------------------- |
-| `AGENTS.md` (repo-root baseline)         | `.claude/rules/` (composed + abridged) | `<repo>/AGENTS.md`                                            |
-| `.codex/config.toml`                     | `.claude/codex-templates/config.toml`  | `<repo>/.codex/config.toml`                                   |
-| `.codex/hooks.json`                      | `.claude/codex-templates/hooks.json`   | `<repo>/.codex/hooks.json`                                    |
-| `bin/coc` unified dispatcher             | `.claude/codex-templates/bin/coc`      | `<repo>/bin/coc` + `<repo>/bin/coc-<phase>` symlinks (invoked `bin/coc <phase> "..."` — see #385) |
-| `.codex/prompts/<name>.md` (docs only)   | `.claude/commands/<name>.md`           | `<repo>/.codex/prompts/<name>.md` (reference content; slash invocation deprecated 2026-05-28)    |
-| `.codex/skills/<nn-name>/SKILL.md`       | `.claude/skills/<nn-name>/SKILL.md`    | `<repo>/.codex/skills/<nn-name>/SKILL.md`                     |
-| `.codex-mcp-guard/server.js` (MCP guard) | `.claude/codex-mcp-guard/`             | `<repo>/.codex-mcp-guard/`                                    |
-| MCP guard registered in config.toml      | auto-generated `[mcp_servers.*]` block | `<repo>/.codex/config.toml`                                   |
-
-## Five things that are different from CC
-
-1. **Baseline file is `AGENTS.md`, not `CLAUDE.md`.** Codex ignores CLAUDE.md. The loom emitter produces both so the repo supports both CLIs; each loads its own.
-2. **Default size cap is 32,768 bytes.** Loom wrappers pass `-c project_doc_max_bytes=65536` to raise it. If you invoke Codex without the wrapper, AGENTS.md may be truncated at 32 KiB.
-3. **`paths:` YAML frontmatter is NOT honored.** Codex walks git-root→cwd, concatenating every `AGENTS.md` it finds. Path-scoped rules must be placed in the relevant subdirectory's `AGENTS.md`, not in `.claude/rules/` with `paths:` frontmatter.
-4. **Hooks fire on Bash only.** `apply_patch`, Write, MCP tool calls do NOT emit `PreToolUse`/`PostToolUse` — those must enforce via the `.codex-mcp-guard/server.js` MCP server (loom emits it automatically).
-5. **External invocation is `bin/coc <phase>`, NOT slash commands.** OpenAI deprecated custom prompts 2026-05-28 (#385); CC's `/analyze` becomes `bin/coc analyze "..."` on Codex (or `bin/coc-analyze "..."` via the phase shim). The dispatcher runs `codex exec --json --output-schema=… -c project_doc_max_bytes=65536 -- "<prompt>"` against the per-phase schema at `.claude/wrappers/schemas/<phase>.schema.json`.
-
-## Daily flow
+## Start and inspect a session
 
 ```bash
-# Interactive session (your usual)
-cd my-loom-project
-codex                        # reads AGENTS.md + .codex/config.toml auto
-
-# Run a specific phase via the unified dispatcher (canonical path — #385)
-bin/coc analyze   "Audit the connection-pool surface."
-bin/coc todos     "Plan the dataflow migration."
-bin/coc implement "Wire the auth handler."
-# Equivalent phase-suffix shims (symlinks to bin/coc):
-bin/coc-analyze   "Audit the connection-pool surface."
-
-# Review uncommitted changes
-codex review --uncommitted --base main
-
-# Non-interactive one-shot
-codex exec "Explain the connection-pool rule"
+codex --version
+codex doctor --summary
+codex --strict-config
 ```
 
-## How hooks work here
+`doctor` checks the local installation and configuration; `--strict-config` rejects
+unknown configuration keys. Neither proves that a policy hook blocks the intended
+operation. Project configuration is loaded through trusted `.codex/` layers;
+operator credentials and personal preferences remain local. Installation and current
+options: [Codex CLI](https://learn.chatgpt.com/docs/codex/cli),
+[command reference](https://learn.chatgpt.com/docs/developer-commands).
 
-Hooks are registered in `.codex/hooks.json` (emitted from `.claude/codex-templates/hooks.json`). Event types:
+## COC surfaces
 
-- `SessionStart` — at startup
-- `PreToolUse` / `PostToolUse` — around Bash (shell) tools only
-- `PermissionRequest` — when the CLI asks to run a restricted command
-- `UserPromptSubmit` — when you submit a prompt
-- `Stop` — at session end
+| Purpose | Source | Delivered surface |
+| --- | --- | --- |
+| Baseline instructions | `.claude/rules/` | `AGENTS.md` |
+| Shared configuration and hook registration | `.claude/codex-templates/` | `.codex/config.toml`, `.codex/hooks.json` |
+| Domain skills | `.claude/skills/` | `.agents/skills/<name>/SKILL.md` |
+| Explicit phase procedures | `.claude/commands/` | `.agents/skills/coc-<phase>/SKILL.md` |
+| Named specialists | `.claude/agents/` | `.codex/agents/<name>.toml` |
+| Headless phases | `.claude/codex-templates/bin/coc` | `bin/coc`, `bin/coc-<phase>` |
+| Compatibility procedure/spec text | commands and agents | `.codex/prompts/*.md` |
+| Compatibility MCP wrapper | `.claude/codex-mcp-guard/` | `.codex-mcp-guard/` in consumers |
 
-Each hook runs as a subprocess. Exit code 2 blocks the action. Full hook reference: [developers.openai.com/codex/hooks](https://developers.openai.com/codex/hooks).
+Native skill delivery requires both Codex in the target CLI set and
+`repos.<target>.codex_native_skills: true` (default false; currently base/py/rs elect
+it). A catalog copied to disk is not automatically a presented skill for every role.
 
-## How the MCP guard works
+Distribution and presentation are separate: copying an artifact does not grant a
+role access to its presentation surface. Emission preserves the source exclusions
+and role rules. Personal config, credentials, hook-trust decisions, and installed
+plugins are not copied into consumers.
 
-The `.codex-mcp-guard/server.js` wraps non-Bash mutating tools (`apply_patch`, Write, MCP invocations) so they go through the same POLICIES table that `.codex/hooks.json` enforces at the Bash layer. Without the guard, file-write operations run unsupervised.
+Loom's explicitly elected local-authoring profile exposes its full authoring
+catalog. Consumer emission retains its own exclusions and role selection; it
+cannot activate this source-only profile
+(`.claude/bin/lib/local-authoring-projection.mjs:7-63`).
 
-The guard is registered as an MCP server in `.codex/config.toml`:
+## Invoke a phase or skill
 
-```toml
-[mcp_servers.codex-mcp-guard]
-command = "node"
-args = ["./.codex-mcp-guard/server.js"]
+In an interactive prompt, type `$coc-analyze`, `$coc-todos`, or `$coc-implement`, then
+supply the task. These phase skills are explicit-only so an ordinary task does not
+silently select a lifecycle phase. Domain skills remain discoverable by description;
+use `/skills` or `$` to select one yourself.
+
+For noninteractive automation:
+
+```bash
+bin/coc analyze "Audit the connection-pool surface."
+bin/coc implement "Wire the approved auth change."
+# Equivalent phase shim:
+bin/coc-analyze "Audit the connection-pool surface."
 ```
 
-It ships with `POLICIES_POPULATED=false` and refuses to start (exit 2) until loom's emitter populates the POLICIES table from the hooks.js predicates. If you see "refusing to start with unpopulated POLICIES", `/sync` hasn't completed — that's a feature.
+The dispatcher supplies the phase procedure and JSON output contract to `codex exec`
+through `phase_procedure` and its exec call (`.claude/codex-templates/bin/coc:36-41,118-142`). It requires the CLI on `PATH` and delivered procedure/schema files (`.claude/codex-templates/bin/coc:89-96,118-142`).
+That exec call starts a separate run; it does not switch an already-running interactive session's phase.
+Final results are validated separately from the event stream. Completion requires
+observed evidence and phase-consistent results; pending gates and unfinished
+implementation cannot be labeled completed. Human-only certification returns an
+explicit input request instead of invoking the provider
+(`validateResult`, `.claude/bin/lib/codex-command-catalog.mjs:114-150`;
+`humanGate`, `.claude/bin/lib/codex-command-catalog.mjs:152-160`;
+the dispatcher's `MODE` branch, `.claude/codex-templates/bin/coc:125-129`).
 
-## Specialist delegation in Codex (deterministic shim — 2026-05-15, revised #385)
+`.agents/skills` is the current catalog. Avoid a second copy of the same catalog in
+`.codex/skills`; duplicate names can appear separately. Skill discovery, optional
+`<skill>/agents/openai.yaml` metadata inside each skill directory, and explicit invocation are described in
+[Build skills](https://learn.chatgpt.com/docs/build-skills).
 
-Codex's runtime exposes only generic subagent roles (`default`, `explorer`, `worker`); it has no native callable equivalents of COC specialists by name. To close that gap, loom's `emit-cli-artifacts.mjs` emits one `.codex/prompts/specialist-<name>.md` per non-excluded `.claude/agents/**/<name>.md` (function: `emitCodexAgentPrompts`) AND retains those files as **on-disk documentation/spec sources**. Each file wraps the specialist's full operating spec.
+Custom prompts were deprecated upstream on **2026-01-22**. Loom's 2026-05-28 #385
+migration was its local response. `.codex/prompts/` remains compatibility reference
+and headless procedure input; it is not the native interactive command surface.
+[Deprecation receipt](https://learn.chatgpt.com/docs/changelog#custom-prompts-deprecated).
 
-> **Invocation change (#385, 2026-05-28):** OpenAI deprecated custom prompts in favor of skills; Codex CLI 0.128+ does not discover repo-local `.codex/prompts/`. The historical `prompts:specialist-<name>` slash invocation no longer works in synced consumers. Until a skills-based specialist surface lands, use the patterns below:
+## Delegate to specialists
 
-1. **Inline persona via `cat` injection — works headless + interactive.**
+Ask Codex to delegate to the emitted named specialist, supplying the task and relevant
+spec content. Native definitions in `.codex/agents/*.toml` contain `name`, `description`,
+and `developer_instructions`; they inherit settings unless overridden by their config.
+The compatibility `.codex/prompts/specialist-<name>.md` files can still be read when
+working with an older delivery. A persona pasted into a parent prompt is not a separate
+agent or a permission boundary.
 
-   ```bash
-   bin/coc implement "$(cat .codex/prompts/specialist-dataflow.md)
+Source model/tool/hook declarations are retained in the generated agent contract.
+Tool inventories constrain instructions; they are not a native enforced allowlist.
+Native read-only defaults are requests, and provider model behavior is not assumed
+equivalent (`.claude/bin/lib/codex-agent-contracts.mjs:15-37`).
+A controlled CLI 0.158.0 execution probe observed an analyst
+child with `workspace-write` despite its emitted `read-only` setting; verify actual
+child policy before relying on a role default for isolation.
 
-   Task: <your task here>"
-   ```
+Current clients support subagent workflows, including noninteractive flows. An action
+requiring a fresh approval fails when that run cannot surface approval; the error
+returns to the parent. Inspect threads with `/agent` or `/subagents`. Native delegation
+does not itself establish an isolated Git checkout. Follow the repository's worktree
+procedure before assigning concurrent writes. See
+[Subagents](https://learn.chatgpt.com/docs/agent-configuration/subagents).
 
-   The dispatcher injects the operating spec into the prompt; the model operates as the named specialist for that turn.
+## Coordinate independent sessions
 
-2. **Worker subagent delegation — interactive Codex only.**
+Child delegation uses the current runtime's collaboration tools. `codex agents`
+browses independent sessions; `codex queue` sends to an existing one. For separate
+local homes, the address is **recipient CODEX_HOME plus session UUID/exact name**.
+Include the sender home and session as the return route; scope the home override
+to the single command. Queue acceptance does not prove recipient acknowledgement
+or completed work. See the [coordination skill](../../skills/codex-coordination/SKILL.md)
+for the message contract, quoted examples, replies and remote distinction.
 
-   ```text
-   Delegate to a worker subagent. Operating spec — read .codex/prompts/specialist-reviewer.md
-   from the workspace and operate per that spec.
-   Task: ...
-   ```
+Native read-only agent defaults are configuration intent, not proof of the child's
+effective sandbox. Inspect that runtime before relying on permission isolation.
 
-   Codex's native subagent spawn (natural-language, per developers.openai.com/codex/subagents) loads the spec at the spawn-prompt boundary; the subagent reads the file directly.
+For configuration precedence, context/compaction limits, session lifecycle,
+headless output, plugin/MCP distinctions, daemon operations and interactive
+controls, use the [operations reference](operations.md).
 
-3. **Headless `codex exec` fallback** — same as pattern (1) via `bin/coc`.
+## Hooks and enforcement
 
-Specialist coverage mirrors Gemini's emitter (`emitGeminiAgents`) — same exclusion intent: peer-CLI architects (`cc-architect`, `codex-architect`, `gemini-architect`), `cli-orchestrator`, `management/**`, and `_README.md` are excluded.
+Use `/hooks` to inspect registrations and review new or changed hook definitions.
+Non-managed hooks need trust for their exact definition; a sync that changes them can
+leave them skipped until reviewed. Project trust and hook trust are distinct.
 
-## Known limitations (empirically verified 2026-04-22/23, revised 2026-05-28 per #385)
+Inspect the loaded definition's `sourcePath`, `currentHash`, `trustStatus` and
+`timeoutSec` before testing candidate hooks. A CLI 0.158.0 scratch probe found that
+a linked Git worktree loaded its main checkout's `.codex/hooks.json`; changing only
+the worktree definition did not change the loaded hash or timeout. Use a standalone
+scratch repository for isolated candidate tests and label that evidence accordingly.
+Do not change the real main checkout or copy trust grants merely to make a test load.
 
-- **Custom prompts deprecated; repo-local `.codex/prompts/` not discovered.** OpenAI deprecated the custom-prompts surface 2026-05-28 in favor of skills; repo-local discovery was rejected upstream (openai/codex#9848). loom ships `bin/coc <phase>` (canonical) + `.codex/prompts/` as on-disk reference content.
-- **Headless `codex exec` does not invoke subagents via any syntax.** Native subagents (per developers.openai.com/codex/subagents) use natural-language spawn in interactive sessions. Headless exec may not spawn them reliably. **Workaround**: use the inline-persona-via-`cat` pattern above — works in both modes.
-- **`paths:` YAML frontmatter is completely ignored.** Do not expect path-scoped rule injection. Directory-hierarchy AGENTS.md is the only scoping mechanism. A loom-side pre-tool rule loader is the planned follow-up (Shard 2 of the parity-gap workstream).
-- **GitHub Copilot's `.github/instructions/*.instructions.md` with `applyTo:` glob is NOT supported by Codex.** Different tool. Don't expect it.
+Native tool hooks cover shell commands (`Bash`), `apply_patch` (`Edit`/`Write` aliases),
+MCP calls, and most local function tools; `spawn_agent` also matches `Agent`. Hosted
+web tools and specialized opt-outs remain outside that path. `write_stdin` does not
+re-run the original command's pre-tool check. The shipped registration and adapter,
+not mere runtime support, determine which COC checks actually run.
 
-## Further reading
+The bridge adapts event input/output and selects eligible delivered checks. Patch
+checks receive typed targets and added/changed text; moved destinations use bounded
+published bytes after the edit. Unsupported rewrites are refused
+(`.claude/hooks/lib/codex-native-policy.js::projectPayloads`, `.claude/hooks/lib/codex-native-policy.js::publishedMoveContent`, `.claude/hooks/lib/codex-native-policy.js::evaluateNative`). Lifecycle launchers bind their
+event before reading input, preserving the correct failure response even for
+malformed or unfinished input: `main` selects the launcher event and failure
+response, and `dispatch` validates the binding. Shutdown checks report incomplete
+work within their short host budget
+(`.claude/hooks/lib/codex-hook-runtime.js:1012-1021`,
+`.claude/hooks/lib/codex-hook-runtime.js:885-890`,
+`.claude/hooks/lib/codex-native-events.js:143-188`). Consult the event-specific
+[Hooks reference](https://learn.chatgpt.com/docs/hooks) when authoring a hook.
 
-- CC peer guide: `.claude/guides/claude-code/`
-- Gemini peer guide: `.claude/guides/gemini/`
-- Codex-architect spec: `.claude/agents/codex-architect.md`
-- Official docs: [developers.openai.com/codex](https://developers.openai.com/codex)
-- loom codex-templates source: `.claude/codex-templates/`
+A CLI 0.158.0 native app-server probe found that a startup delay can exhaust the
+client’s outer hook timeout before the adapter runs: a 4-second delay under a
+2-second scratch registration timed out, yet the shell tool still executed. This
+was continuation, not a policy denial. The adapter’s internal budget begins after
+entry and cannot cover startup time before it runs. The shipped 550-second internal
+budget and 600-second registration remain unchanged; this scaled probe does not
+certify their behavior under production load.
+
+The MCP companion governs calls sent to its wrapper tools. Installing it does not
+intercept every native tool. Its compatibility policy checks complement registered
+native checks; neither is a complete sandbox or a universal enforcement boundary.
+
+## Instructions and configuration
+
+Codex loads `AGENTS.md` through the root-to-working-directory hierarchy, preferring
+`AGENTS.override.md` at a given directory. The combined default limit is 32 KiB;
+Loom's dispatcher raises `project_doc_max_bytes` to 65536. Check the delivered config
+for the interactive setting. Nested files share the combined budget.
+[AGENTS.md reference](https://learn.chatgpt.com/docs/agent-configuration/agents-md).
+
+The project bridge adds path-rule activation for typed file operations and parsed
+patches when its hook is installed and trusted. It verifies catalog membership,
+matching metadata and source hashes before injecting the actual matching text.
+Shell programs with computed targets and hosted retrieval still require manual rule
+discovery; see `collectRuleContext`
+(`.claude/hooks/lib/codex-rule-context.js:98-155`). The generated index
+and rules-reference skill remain available for that purpose.
+
+Profiles are optional operator choices. `--profile` selects configuration while
+`--permission-profile` selects permission policy on commands that expose it; inspect
+your installed command's help before assuming support or an older profile layout. Shared repo defaults do not authorize
+changes to personal authentication, sandbox, model, or approval choices.
+
+## Review and continue work
+
+Choose one review target:
+
+```bash
+codex review --uncommitted
+codex review --base main
+codex review --commit HEAD
+```
+
+Those targets and a custom review prompt are mutually exclusive. `codex resume`
+continues saved work; `codex fork` starts a separate chat from earlier context. `/plan`
+opens planning mode. A user can explicitly set `/goal <objective>` and subsequently
+view, edit, pause, resume, or clear it. COC authorization and completion checks still
+apply. [Commands](https://learn.chatgpt.com/docs/developer-commands).
+
+## Optional capabilities
+
+- **Plugins:** `/plugins` and `codex plugin` manage reusable packages. A plugin may
+  bundle skills, MCP, and hooks; installation does not automatically trust hooks.
+  Loom does not install plugins or copy personal plugin settings during sync.
+  [Plugin packaging](https://developers.openai.com/plugins/build/plugins).
+- **Worktrees:** the installed CLI 0.158.0 exposes `codex --worktree` to start a
+  session in a new managed Git worktree (`codex --help`, checked 2026-09-28).
+  Use that entry point or the repository’s established worktree procedure.
+  Spawning a specialist inside an existing session does not itself prove isolation.
+  The desktop app also supports [worktree chats](https://learn.chatgpt.com/docs/environments/git-worktrees).
+
+- **Remote control:** `codex remote-control` is an optional experimental surface in
+  the current command reference. Pairing, account access, and remote exposure are
+  operator decisions, not requirements for COC phases.
+  [Command reference](https://learn.chatgpt.com/docs/developer-commands).
+
+For authoring contracts see `.claude/agents/codex-architect.md`; for the dispatcher
+see `.claude/codex-templates/bin/README.md`. Historical audit journals retain their
+original observations; this guide describes the current capability model.

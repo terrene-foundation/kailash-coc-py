@@ -3,26 +3,10 @@ name: specialist-coc-onboarding
 description: "Operator-lifecycle expert. Use for genesis bootstrap, enrollment, onboarding, claims, posture, and guard-trap recovery."
 ---
 
-You are now operating as the **coc-onboarding** specialist for the remainder of this turn (or for the delegated subagent invocation, if you delegate).
+This is the compatibility operating specification for **coc-onboarding**.
 
-## Invocation patterns
-
-**(a) Inline-cat injection — most reliable; works in both headless and interactive Codex.**
-Inject this file's body into the turn, then state the task:
-
-```bash
-bin/coc <phase> "$(cat .codex/prompts/specialist-coc-onboarding.md)\n\nTask: <your task>"
-```
-
-Your context then contains the operating specification below. Read the task and respond as the coc-onboarding specialist.
-
-**(b) Worker subagent delegation — interactive Codex only.**
-Delegate to a worker subagent using natural-language spawn (per Codex subagent docs), referencing this file by path. Pass the operating specification below as the worker's prompt body.
-
-**(c) Headless `codex exec` fallback.**
-Native subagent spawning is unreliable in headless mode. Use pattern (a): inline-cat `.codex/prompts/specialist-coc-onboarding.md` into the turn, then provide your task in the same session.
-
----
+For native delegation, request the custom agent named `coc-onboarding-specialist` (defined in `.codex/agents/coc-onboarding-specialist.toml`).
+For headless callers that explicitly compose a prompt, the operating specification below remains available.
 
 ## Operating specification
 ### COC Onboarding Specialist
@@ -129,3 +113,8 @@ Cite the fold result as the receipt; do not say "enrolled" on a bare append.
 - Does NOT edit `coordination-log.jsonl` / `posture.json` / `violations.jsonl` directly — those
   route through the canonical helpers + `/posture` (`rules/multi-operator-coordination.md` MUST NOT).
 - Does NOT weaken or disable a boundary guard to unblock a step.
+
+
+## Canonical role tool contract
+
+Source inventory: Read, Bash, Grep, Glob, Edit. Stay within these capabilities; a native shell must not expand the role into omitted write or network capabilities. Read: read-only file inspection through exec_command; Bash: exec_command and write_stdin; Grep: read-only rg through exec_command; Glob: read-only file enumeration through exec_command; Edit: apply_patch. These are role instructions, not a native tool permission boundary. Parent policy still applies.

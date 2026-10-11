@@ -363,9 +363,9 @@ Use `dataflow-specialist` subagent when:
 
 ## Related Skills
 
-- **[dataflow-queries](dataflow-queries.md)** -- MongoDB-style query filters (ListNode)
-- **[dataflow-count-node](dataflow-count-node.md)** -- Simple COUNT(\*) without GROUP BY
-- **[dataflow-performance](dataflow-performance.md)** -- Query performance optimization
-- **[dataflow-dialects](dataflow-dialects.md)** -- Cross-database SQL dialect handling
+- **[dataflow-queries](../../../.claude/skills/02-dataflow/dataflow-queries.md)** -- MongoDB-style query filters (ListNode)
+- **[dataflow-count-node](../../../.claude/skills/02-dataflow/dataflow-count-node.md)** -- Simple COUNT(\*) without GROUP BY
+- **[dataflow-performance](../../../.claude/skills/02-dataflow/dataflow-performance.md)** -- Query performance optimization
+- **[dataflow-dialects](../../../.claude/skills/02-dataflow/dataflow-dialects.md)** -- Cross-database SQL dialect handling
 
 <!-- Trigger Keywords: DataFlow aggregation, count_by, sum_by, aggregate, GROUP BY, AggregateOp, AggregateSpec, COUNT GROUP BY, SUM GROUP BY, AVG, MIN, MAX, dashboard analytics, reporting queries, SQL aggregation, aggregation queries -->

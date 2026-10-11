@@ -214,11 +214,11 @@ except Exception as exc:
 
 ## Behavioral Test Vectors
 
-45+ cross-SDK conformance tests define the canonical security behavior across Python and Rust SDKs. See `workspaces/kaizen-agents/01-analysis/01-research/13-behavioral-test-vectors.md`.
+45+ cross-SDK conformance tests define the canonical security behavior across Python and Rust SDKs. See (loom-internal reference).
 
 ## Related
 
 - `.claude/rules/security.md` — Global security rules
 - `.claude/rules/trust-plane-security.md` — Trust-plane specific patterns
 - `.claude/rules/pact-governance.md` — PACT governance rules
-- **[kaizen-agents-governance](kaizen-agents-governance.md)** — Governance module reference
+- **[kaizen-agents-governance](../../../.claude/skills/04-kaizen/kaizen-agents-governance.md)** — Governance module reference

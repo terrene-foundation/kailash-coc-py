@@ -262,5 +262,5 @@ Without this bypass, the pool would hand out a different connection than the tra
 
 ## Related Skills
 
-- **[dataflow-sqlite-concurrency](../02-dataflow/dataflow-sqlite-concurrency.md)** — SQLite-specific pool config, acquisition, query routing, memory mode
-- **[dataflow-gotchas](../02-dataflow/dataflow-gotchas.md)** — DataFlow common pitfalls including URI shared-cache
+- **[dataflow-sqlite-concurrency](../../../.claude/skills/02-dataflow/dataflow-sqlite-concurrency.md)** — SQLite-specific pool config, acquisition, query routing, memory mode
+- **[dataflow-gotchas](../../../.claude/skills/02-dataflow/dataflow-gotchas.md)** — DataFlow common pitfalls including URI shared-cache

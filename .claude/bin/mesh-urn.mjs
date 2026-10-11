@@ -49,10 +49,10 @@
 import fs from "node:fs";
 import crypto from "node:crypto";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 
 import { isOpaqueHandle, ENUMS, VERSION_GRAMMAR } from "./mesh-registry-scrub.mjs";
 import { loadKey, mintKey, mintKeyHex, MeshKeyError, findCommittedKeyFiles } from "./lib/mesh-keys.mjs";
+import { isMainModule } from "./lib/entry-point.mjs";
 
 const OWNING_LEVELS = ENUMS.owning_level; // {platform, build, use} — single source.
 
@@ -209,7 +209,7 @@ export function registryPullPath(root) {
 
 /**
  * Assert the vault path is NOT under the registry pull path (clause (c) — a
- * vault committed beside the registry is fetched UP into loom-command). Throws.
+ * vault committed beside the registry is fetched UP into the UP-pull aggregator). Throws.
  */
 export function assertVaultOutsidePullPath(vaultPath, root) {
   const pull = registryPullPath(root);
@@ -218,7 +218,7 @@ export function assertVaultOutsidePullPath(vaultPath, root) {
   if (inside) {
     throw new MeshUrnError(
       `vault path ${vaultPath} is UNDER the registry pull path ${pull} — the vault would be ` +
-        `git-fetched UP into loom-command as the deanonymization table (clause (c)). Move it out.`,
+        `git-fetched UP into the UP-pull aggregator as the deanonymization table (clause (c)). Move it out.`,
     );
   }
 }
@@ -396,8 +396,8 @@ function main() {
   return 2;
 }
 
-const isMain = process.argv[1] && import.meta.url === `file://${process.argv[1]}`;
-if (isMain) process.exit(main());
+// Entry-point check: .claude/bin/lib/entry-point.mjs (symlink-safe; a lexical compare exits 0 silently).
+if (isMainModule(import.meta.url)) process.exit(main());
 
 export {
   mintKey,

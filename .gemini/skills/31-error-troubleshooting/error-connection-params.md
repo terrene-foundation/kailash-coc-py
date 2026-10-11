@@ -11,7 +11,7 @@ Fix connection-related errors including wrong parameter order, missing parameter
 > Category: `cross-cutting` (error-resolution)
 > Priority: `CRITICAL` (Very common error #2)
 > SDK Version: `0.9.0+`
-> Related Skills: [`workflow-quickstart`](../01-core-sdk/workflow-quickstart.md), [`connection-patterns`](../01-core-sdk/connection-patterns.md)
+> Related Skills: [`workflow-quickstart`](../../../.claude/skills/01-core-sdk/workflow-quickstart.md), [`connection-patterns`](../../../.claude/skills/01-core-sdk/connection-patterns.md)
 > Related Subagents: `pattern-expert` (complex connection debugging)
 
 ## Common Error Messages
@@ -202,10 +202,10 @@ workflow.add_connection(
 
 ## Related Patterns
 
-- **Connection basics**: [`connection-patterns`](../01-core-sdk/connection-patterns.md)
-- **Workflow creation**: [`workflow-quickstart`](../01-core-sdk/workflow-quickstart.md)
-- **Other errors**: [`error-missing-build`](error-missing-build.md), [`error-parameter-validation`](error-parameter-validation.md)
-- **Parameter passing**: [`param-passing-quick`](../01-core-sdk/param-passing-quick.md)
+- **Connection basics**: [`connection-patterns`](../../../.claude/skills/01-core-sdk/connection-patterns.md)
+- **Workflow creation**: [`workflow-quickstart`](../../../.claude/skills/01-core-sdk/workflow-quickstart.md)
+- **Other errors**: [`error-missing-build`](../../../.claude/skills/31-error-troubleshooting/error-missing-build.md), [`error-parameter-validation`](../../../.claude/skills/31-error-troubleshooting/error-parameter-validation.md)
+- **Parameter passing**: [`param-passing-quick`](../../../.claude/skills/01-core-sdk/param-passing-quick.md)
 
 ## When to Escalate to Subagent
 
@@ -220,7 +220,7 @@ Use `pattern-expert` subagent when:
 
 ### Primary Sources
 
-- **Pattern Expert**: [`.gemini/agents/pattern-expert.md`](../../agents/implementation/pattern-expert.md)
+- **Pattern Expert**: [`.gemini/agents/pattern-expert.md`](../../../.claude/agents/implementation/pattern-expert.md)
 
 ### Related Documentation
 

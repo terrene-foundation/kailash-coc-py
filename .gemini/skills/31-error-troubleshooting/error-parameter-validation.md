@@ -11,7 +11,7 @@ Fix parameter validation errors including missing required inputs, wrong paramet
 > Category: `cross-cutting` (error-resolution)
 > Priority: `CRITICAL` (Common error #3)
 > SDK Version: `0.7.0+`
-> Related Skills: [`param-passing-quick`](../01-core-sdk/param-passing-quick.md), [`workflow-quickstart`](../01-core-sdk/workflow-quickstart.md)
+> Related Skills: [`param-passing-quick`](../../../.claude/skills/01-core-sdk/param-passing-quick.md), [`workflow-quickstart`](../../../.claude/skills/01-core-sdk/workflow-quickstart.md)
 > Related Subagents: `pattern-expert` (complex parameter debugging)
 
 ## Common Error Messages
@@ -189,9 +189,9 @@ workflow.add_node("CustomNode", "node", {
 
 ## Related Patterns
 
-- **3 Methods Guide**: [`param-passing-quick`](../01-core-sdk/param-passing-quick.md)
-- **Connection patterns**: [`connection-patterns`](../01-core-sdk/connection-patterns.md)
-- **Gold standard**: [`gold-parameter-passing`](../17-gold-standards/gold-parameter-passing.md)
+- **3 Methods Guide**: [`param-passing-quick`](../../../.claude/skills/01-core-sdk/param-passing-quick.md)
+- **Connection patterns**: [`connection-patterns`](../../../.claude/skills/01-core-sdk/connection-patterns.md)
+- **Gold standard**: [`gold-parameter-passing`](../../../.claude/skills/17-gold-standards/gold-parameter-passing.md)
 
 ## When to Escalate to Subagent
 

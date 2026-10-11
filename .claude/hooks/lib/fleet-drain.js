@@ -65,21 +65,152 @@
  * a live-but-wedged lane counts as running, correctly for the refill question and wrongly for any
  * other.
  *
- * THE MEASURED HOLE, and why it forces UNKNOWN rather than a number. A dispatch made without a
- * `name` writes `dispatch_name: null`, so it is absent from the launched set; its `reconcile` rows
- * arrive under an unnormalizable `a<16hex>` generation that joins to nothing. Measured across the
- * 9 ledgers on this clone: unnamed launches per session 0, 0, 0, 0, 1, 2, 2, 6, 22 — present in 5
- * of 9 — and hex-only reconcile generations OUTNUMBER them wildly (one session: 22 unnamed
- * launches against 401 distinct hex generations, i.e. ~one per event, not one per lane). So the
- * unnamed population can be neither joined NOR subtracted numerically.
+ * THE MEASURED HOLE, and why this instrument can only ever be a LOWER bound. A dispatch made
+ * without a `name` writes `dispatch_name: null`, so it is absent from the launched set; its
+ * `reconcile` rows arrive under an unnormalizable `a<16hex>` generation that joins to nothing.
+ * Measured across the 9 ledgers on this clone: unnamed launches per session 0, 0, 0, 0, 1, 2, 2, 6,
+ * 22 — present in 5 of 9 — and hex-only reconcile generations OUTNUMBER them wildly (one session:
+ * 22 unnamed launches against 401 distinct hex generations, i.e. ~one per event, not one per lane).
+ * So the unnamed population can be neither joined NOR subtracted numerically.
  *
  * That asymmetry decides the design. The named difference is a LOWER bound on running lanes; this
  * detector fires on running being LOW, so what it needs is an UPPER bound, which is exactly what
- * the unnamed population denies it. A session with unnamed launches is therefore UNKNOWN — the
- * detector goes silent rather than firing on a fleet it cannot see. Measured cost: silence in
- * roughly 5 of 9 sessions. That is a real coverage hole and it is stated rather than papered over;
- * the alternative is a guard that announces a drained fleet while lanes are running, which is the
- * one failure that gets a guard switched off.
+ * the unnamed population denies it.
+ *
+ * UNTIL 2026-08-20 THIS MODULE RESOLVED THAT BY REFUSING: `countRunningLanes` returned `ok:false`
+ * whenever `unnamed > 0`, and the whole session went UNKNOWN. That refusal was correct given ONE
+ * instrument, and it cost silence in roughly 5 of 9 sessions. It is superseded — not softened — by
+ * INSTRUMENT C below, which supplies the upper bound the ledger cannot. `countRunningLanes` now
+ * REPORTS the unnamed count and flags `boundedAbove:false` instead of failing; `ok` here means the
+ * ledger was READ, and the bound question is settled at the reconciliation step. Nothing else about
+ * its scope moved.
+ *
+ * ─── INSTRUMENT C — background_tasks, the harness's own statement of what is running ─────────────
+ *
+ * The `Stop` payload carries a `background_tasks` key. It is a STRUCTURAL fact produced by the
+ * harness, not a count this repo derives, and before 2026-08-20 ZERO hooks in this corpus read it
+ * (`grep -rln background_tasks .claude/` returned nothing, against a control: the same grep form
+ * DOES find `stop_hook_active`, so the negative was real and not a broken matcher).
+ *
+ * ITS SHAPE WAS MEASURED, NEVER INFERRED FROM THE NAME. An isolated throwaway sandbox
+ * (`/tmp/bgtasks-probe`, a `Stop` + `SubagentStop` hook that dumps the raw value, driven by
+ * `claude -p --permission-mode bypassPermissions`) produced these four conditions, verbatim:
+ *
+ *   A  nothing running                  Stop          `[]`                              len 0
+ *   B  background SHELL running         Stop          `[{id, type:"shell",    status:"running",
+ *                                                        description, command}]`        len 1
+ *   C  background SUBAGENT running      Stop          `[{id, type:"subagent", status:"running",
+ *                                                        description, agent_type}]`     len 1
+ *   C' same session, SubagentStop        SubagentStop  identical to C (status still "running":
+ *                                                      the event fires INSIDE the stopping lane)
+ *   C'' same session, after it finished  Stop          `[]`                              len 0
+ *   D  background shell run to completion, then Stop → `[]`                            len 0
+ *
+ * (Condition D's driver prompt ran a 3s background shell and then a 12s FOREGROUND wait, so the
+ * shell had certainly finished before the turn ended. That timing lives in the probe's driver
+ * invocation, NOT in `fire.log`, which records no timings — cited here as the driver's parameter
+ * rather than as something the log shows, because the log does not show it.)
+ *
+ * FOUR THINGS ARE ESTABLISHED BY THAT, AND EXACTLY FOUR:
+ *   (1) it is an ARRAY, present on every `Stop` payload observed (5 of 5 fires);
+ *   (2) a running SUBAGENT appears, with `type:"subagent"` — so lanes ARE visible here, which is
+ *       the whole reason this instrument can bound the ledger's hole;
+ *   (3) a running background SHELL also appears, under `type:"shell"` — so array LENGTH is not a
+ *       lane count and must be classified by `type`, not counted raw;
+ *   (4) a task that has FINISHED is ABSENT (C'', D) — it does not linger under a terminal status.
+ *
+ * WHAT WAS NOT ESTABLISHED IS TREATED AS UNKNOWN, not guessed:
+ *   • the exhaustive `type` vocabulary. Only `"shell"` and `"subagent"` were observed. An element
+ *     whose type is neither makes this instrument REFUSE (`ok:false`) rather than assume it is not
+ *     a lane — assuming would be the confidently-wrong direction for a detector that fires on
+ *     running being LOW. The remedy when a new type appears is to classify it here, and the refusal
+ *     is what makes it visible instead of silently disarming the guard.
+ *   • the `status` vocabulary. Only `"running"` was ever observed. So this instrument does NOT
+ *     filter on `status`: PRESENCE in the array is occupancy. That direction is deliberate — (4)
+ *     says terminal tasks are absent today, and IF a future harness lingers them under a terminal
+ *     status, counting presence over-counts occupancy, which makes this detector quieter, never
+ *     falsely louder.
+ *   • whether a SUBAGENT'S OWN nested background tasks appear in the MAIN session's array. Not
+ *     constructed, therefore UNKNOWN — and it is NOT bounded. An earlier draft of this comment
+ *     bounded it with INSTRUMENT A's generation-filter argument ("while a nested lane runs, its
+ *     parent runs too"), and that argument is FALSE in the one state that matters: a nested lane
+ *     that OUTLIVES its parent — the detached spawn mode `agents.md` § Agent-Result-Delivery
+ *     describes, which opens no return path. Constructed against this module, a nested lane whose
+ *     parent has reconciled and which the harness array omits yields `ADVISE / drained` with
+ *     `boundedAbove:true`, i.e. FLEET DRAINED while a lane runs, with nothing in the verdict
+ *     signalling the blind spot. See § RESIDUAL RISK below; the claim is withdrawn rather than
+ *     repaired, because no measurement here supports either half of it.
+ *   • whether a harness that predates this key exists in the field. If `background_tasks` is
+ *     ABSENT, this instrument refuses and the session is UNKNOWN. That is not a hedge, it is the
+ *     same refusal INSTRUMENT A used to make alone: with no upper bound from anywhere, a
+ *     drain verdict is unbounded-above and would be exactly the confident wrong answer this whole
+ *     module is organised against. Measured cost on THIS harness: zero — the key was present on
+ *     every payload observed.
+ *
+ * THE UNNAMED QUESTION, WHICH IS THE LOAD-BEARING ONE, AND IS MEASURED RATHER THAN INFERRED. The
+ * probe was built to answer "does a background SUBAGENT appear here". This module reads the answer
+ * for a DIFFERENT question — "does an UNNAMED lane appear here" — and that second question is the
+ * only one that makes INSTRUMENT C an upper bound over INSTRUMENT A's blind spot, so
+ * `instrument-discipline.md` MUST-4 requires its own falsifying result rather than a re-read. It
+ * has one, from the same capture: `dispatch-ledger.js::dispatchNameOf` derives `dispatch_name` from
+ * `tool_input.name` ALONE, and probe condition C dispatched with `subagent_type` and `description`
+ * but NO `name` — so that lane was UNNAMED in exactly the ledger's sense, and it appeared in
+ * `background_tasks` regardless. FALSIFYING RESULT: had the harness keyed its array on the same
+ * field the ledger does, condition C would have produced `[]` like condition A, and INSTRUMENT C
+ * would have inherited INSTRUMENT A's blind spot instead of covering it. It produced one element.
+ *
+ * KNOWN-ANSWER CONTROL (`instrument-discipline.md` MUST-3(a)). The captured condition-C payload —
+ * one subagent that was DEFINITIVELY running, because the probe fired while it slept — must read as
+ * 1 lane; the captured condition-A and condition-D payloads, in which nothing was running, must read
+ * as 0. FALSIFYING RESULT: had this instrument been broken, condition C would have read 0 lanes,
+ * i.e. IDENTICAL to the idle conditions, and the two states would be indistinguishable. Both poles
+ * are pinned as fixtures against the VERBATIM captured payloads, so the control travels with the
+ * code rather than living only in this comment.
+ *
+ * ─── RECONCILIATION — two instruments, and neither is preferred by faith ─────────────────────────
+ *
+ * A and C do NOT measure the same population, so comparing their exact COUNTS would be reading each
+ * for a question it was not built for (`instrument-discipline.md` MUST-4). A counts NAMED lanes the
+ * MAIN agent launched this session and that have not reconciled; C counts what the harness says is
+ * running right now, named or not. They differ by construction and a difference is not a defect.
+ *
+ * What they BOTH answer is the one proposition this detector turns on: IS ANYTHING RUNNING. So the
+ * reconciliation is on that boolean, and it is asymmetric because the instruments' errors are:
+ *
+ *   • ledger BOUNDED (`unnamed === 0`): its zero is a genuine claim of idleness. Any disagreement
+ *     with C on the boolean is a real contradiction ⇒ UNKNOWN, in BOTH directions.
+ *   • ledger UNBOUNDED (`unnamed > 0`): its zero is an ACKNOWLEDGED BLIND SPOT, not a claim. It can
+ *     only under-report busy. So "ledger idle, harness busy" is EXPECTED and C is used; but "ledger
+ *     busy, harness idle" is still a real contradiction ⇒ UNKNOWN.
+ *
+ * That is what fixes both halves of the original defect at once. The FALSE POSITIVE — ledger says
+ * drained while lanes run — now hits the contradiction arm and goes UNKNOWN instead of ADVISE. The
+ * COVERAGE HOLE — 5 of 9 sessions silenced by an unnamed launch — now resolves whenever C supplies
+ * the upper bound the ledger lacked. Neither instrument overrides the other silently: every
+ * non-agreeing state is named in the verdict data and in the rendered reason.
+ *
+ * ─── RESIDUAL RISK — the state BOTH instruments miss, stated because it still exists ────────────
+ *
+ * The reconciliation is exhaustive over the two instruments' readings: ADVISE requires BOTH to read
+ * exactly zero, and every disagreement they can express routes to UNKNOWN. What it CANNOT reach is
+ * a running lane that is invisible to both at once. Two such states are known and neither is closed
+ * here:
+ *
+ *   (a) A NESTED LANE THAT OUTLIVES ITS PARENT. The ledger's launch filter is scoped to the MAIN
+ *       agent's generation by design, so a subagent-spawned lane never enters `launched`; if the
+ *       harness array is also session-scoped and omits it, both read zero while it runs.
+ *   (b) `boundedAbove` NAMES MORE THAN IT HOLDS. It bounds ONE hole — unnamed MAIN-AGENT launches —
+ *       and nothing else. A NAMED launch under a subagent generation is excluded from `launched` by
+ *       the same deliberate filter and counted by nothing, yet `boundedAbove` still returns `true`,
+ *       and the contradiction arm reads that as "the ledger asserts idleness". The field is
+ *       correctly named for what `countRunningLanes` computes and is OVER-read by the reconciler.
+ *
+ * BOTH ARE THE SAME UNDERLYING STATE, and it is the one this change does NOT fix. It is narrower
+ * than the defect it replaces — that one fired on any unnamed dispatch, present in 5 of 9 sessions,
+ * whereas this needs a lane that outlives its parent AND is absent from the harness array, the
+ * second half of which is UNMEASURED. Closing it needs a nested-lane visibility measurement this
+ * lane did not construct; recording it as a bounded blind spot would be the false bound the § above
+ * withdraws.
  *
  * ─── INSTRUMENT B — open work ───────────────────────────────────────────────────────────────────
  *
@@ -144,7 +275,9 @@
  * goes QUIET. That is an affordance, not a detection claim, and until rows carry the marker this
  * detector WILL speak on a turn that is correctly waiting. Three things bound the cost: the
  * severity cannot block, the per-signature dedupe means a persisting state is surfaced once rather
- * than every turn, and the kill switch exists.
+ * than every turn, and the kill switch exists. THE 2026-08-20 INSTRUMENT CHANGE MOVED NONE OF THOSE
+ * THREE. This module stays non-refusing; converting it to refuse is a separate, later, gated step
+ * and is deliberately not attempted here.
  *
  * TRI-STATE, NEVER A BOOLEAN. ADVISE / OBSERVE / QUIET / UNKNOWN. An absent, unreadable, or
  * unnamed-contaminated ledger is UNKNOWN and says so. Reporting QUIET from a ledger never read
@@ -160,10 +293,15 @@
 
 "use strict";
 
+const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
 
-const { appendSinkLine } = require("./append-sink.js");
+const {
+  appendSinkLine,
+  readSinkFile,
+  mainCheckoutBoundaryRoots,
+} = require("./append-sink.js");
 
 /**
  * The main-agent generation sentinel. IMPORTED from the producer, never restated. A local copy of
@@ -213,18 +351,55 @@ const HUMAN_BLOCKED_RE = /\b(?:blocked[-\s]on[-\s]human|awaiting[-\s]human|human
 
 // ── forest-ledger anchors ─────────────────────────────────────────────────────────────────────
 //
-// MIRRORED from `.claude/bin/validate-forest-ledger.mjs`, which is an ESM CLI with no exports and
-// therefore not requirable from a CJS hook. Restating the anchors is the lesser of two evils
-// against re-inventing a second dialect for one surface; if that validator's anchors move, this
-// parse is what a fixture reds. Both accepted shapes are the ones IT accepts.
-const HEADING_RE = /^##[ \t]+Outstanding ledger \(forest\)\s*$/i;
-const SHARED_HEADING_RE = /^#[ \t]+Forest Ledger\b/i;
-const NEXT_SECTION_RE = /^##[ \t]+\S/;
-const FENCE_RE = /^\s*(?:```+|~~~+)/;
+// MIRRORED BY HAND from `.claude/bin/validate-forest-ledger.mjs`, which is an ESM CLI with no exports
+// and therefore not requirable from a CJS hook. Restating the anchors is the lesser of two evils
+// against re-inventing a second dialect for one surface. NOTHING PINS THE MIRROR: when that
+// validator's section boundary moved, no fixture here went red (review-cor-r9-F6), so a change to
+// its heading, section-end, fence or line-ending rules MUST be copied here by hand. Kept in step:
+// the ledger heading may be indented up to three spaces; the INLINE section ends at an UNINDENTED
+// `## ` heading with text only (the validator refuses an indented or empty one); every line ending (LF, CRLF, bare CR) splits a
+// line; a line-start code span (```x```) is not a fence; a fence closes only on the same
+// marker at least as long; the whole-file SHARED form runs to EOF (case 13), as the validator's
+// now does. What this does NOT mirror: the validator's refusals (grammar, malformed rows, headings
+// inside the shared form) — this parse only COUNTS open work for an advisory, and the validator
+// is the gate.
+const HEADING_RE = /^ {0,3}##[ \t]+Outstanding ledger \(forest\)\s*$/i;
+const SHARED_HEADING_RE = /^ {0,3}#[ \t]+Forest Ledger\b/i;
+const NEXT_SECTION_RE = /^##[ \t]+[^ \t]/;
+const FENCE_RE = /^\s*(```+|~~~+)(.*)$/;
+
+/** The fence run a line opens or closes, or null — never a line-start code span, whose info string holds a backtick. */
+function _fenceRun(line) {
+  const m = line.match(FENCE_RE);
+  if (m === null || (m[1][0] === "`" && m[2].includes("`"))) return null;
+  return m[1];
+}
 const EMPTY_FOREST_RE = /^\s*forest empty\b/im;
 
 function _isNonEmptyString(v) {
   return typeof v === "string" && v.length > 0;
+}
+
+/**
+ * Extract a message from a thrown value WITHOUT trusting it.
+ *
+ * The reflex `e && e.message ? e.message : String(e)` reads a property and coerces to string, and
+ * BOTH are throw sites: a hostile `message` getter, or a throwing `toString`. A catch block that
+ * can itself throw is not a catch block, and this module's whole contract is that nothing escapes
+ * (`cc-artifacts.md` Rule 7). Every failure here degrades to a constant.
+ */
+function _safeErrMessage(e) {
+  try {
+    const m = e && e.message;
+    if (typeof m === "string" && m.length > 0) return m.slice(0, 200);
+  } catch {
+    return "<unreadable error>";
+  }
+  try {
+    return String(e).slice(0, 200);
+  } catch {
+    return "<unstringifiable error>";
+  }
 }
 
 /**
@@ -280,10 +455,96 @@ function resolveEnabled(env) {
  *
  * Pure: takes ledger rows, returns plain data. No IO, no clock.
  *
+ * ## ONE ROOT CAUSE, TWO DEFECTS: SET SEMANTICS WHERE MULTIPLICITY IS THE WHOLE QUESTION
+ *
+ * The first cut of this function reduced both readings to NAME SETS — `launched` and `terminated`
+ * were `Set`s of names and everything downstream read `.size`. A name set cannot represent a lane
+ * that ran, stopped, and ran AGAIN under the same name, which is not an exotic shape: it is a
+ * repeated review loop (`correctness` + `security` each round) and it is `agents.md` § RECOVERY's
+ * resume-a-lane-under-its-original-name path. `dispatch-ledger.js` § "KNOWN RESIDUAL" already
+ * records same-(generation, name) reuse as live. Two defects fell out of that one choice, MEASURED
+ * on this repo 2026-08-20:
+ *
+ *   OCCUPANCY WAS WRONG.  `running` was {launched names} \ {terminated names}. Relaunch `alpha`
+ *     after it stopped and `alpha` sits in BOTH sets, so it is subtracted away: the detector
+ *     reported `running: 0` WHILE `alpha` WAS RUNNING, and would advise "0 lanes, refill now" into
+ *     a live fleet. That is a wrong answer about the world, not merely a dedupe fault.
+ *
+ *   THE EPOCH WAS FROZEN.  `signatureOf` keys the per-session dedupe on `launched`/`terminated`
+ *     precisely so a NEW drain is not suppressed as a repeat of an old one. Refill using only names
+ *     already in both sets and NEITHER cardinality moves — so the second drain's signature is
+ *     byte-identical to the one already marked and is suppressed for the rest of the session. The
+ *     detector goes permanently silent on exactly the recurring-wave workflow it is most valuable
+ *     on.
+ *
+ * ## The fix, in two halves that must not be conflated
+ *
+ *   `launched` / `terminated`  — the FLEET EPOCH, as ROW COUNTS. Every launch row and every
+ *                                reconcile row advances them, whether or not the name is new, so a
+ *                                reused name still moves the epoch. Rows are append-only and
+ *                                per-session, so the pair is still monotonic and is unchanged
+ *                                exactly when nothing happened. This half is unchanged and is what
+ *                                fixed the frozen epoch.
+ *   `running`                   — names whose LAST row in the ledger is a launch. ORDER-AWARE
+ *                                LAST-WRITE-WINS, not a balance. See below.
+ *
+ * ## Why occupancy is LAST-WRITE-WINS and NOT a launch-minus-stop balance
+ *
+ * The first attempt at this fix made occupancy a per-name BALANCE (launch rows minus reconcile
+ * rows, positive ⇒ live). That is ORDER-INSENSITIVE, and order is the entire question. MEASURED
+ * 2026-08-20, the two sequences a balance CANNOT tell apart:
+ *
+ *     launch a, launch a, stop a   balance 1 ⇒ "live"   TRUTH: DEAD — the first launch row never
+ *                                                       produced a lane, the second did and stopped
+ *     launch a, stop a, launch a   balance 1 ⇒ "live"   TRUTH: LIVE — relaunched after stopping
+ *
+ * The first shape is not hypothetical. `emit-dispatch-ledger.js` writes the launch row at
+ * `PreToolUse` — BEFORE the dispatch runs — while `dispatch-contract-guard.js` refuses on the SAME
+ * matcher, so a REFUSED dispatch leaves a launch row behind with no lane and no reconcile row to
+ * ever balance it. Relaunch under the same name (the `agents.md` § RECOVERY workflow this whole fix
+ * exists to serve) and the balance sticks permanently above zero: a PHANTOM lane, `OBSERVE` instead
+ * of `ADVISE`, silence for the rest of the session. That is a REGRESSION against the name-set
+ * difference this replaced, which returned `[]` there and correctly advised.
+ *
+ * LAST-WRITE-WINS is licensed by the design's own premise, not by convenience: the name IS the
+ * `SendMessage` address (`dispatch-ledger.js` header), so at most ONE lane per name can be live at
+ * a time. With multiplicity ruled out, the last row for a name is the most recent thing known about
+ * it, and it DECIDES — a sum over rows answers a question ("how many net launches") nobody asked.
+ * It also collapses the balance's phantom class by construction: an unbalanced launch row is
+ * overwritten by the next stop for that name, whatever the counts.
+ *
+ * WHAT IT STILL CANNOT DO, and the direction it fails in. A MISSED reconcile row (a `SubagentStop`
+ * hook that times out and fails open) leaves the name's last row a launch, so a dead lane reads as
+ * live and the detector goes quiet rather than advising. No signal exists here to do better — a
+ * lane that never wrote a stop row is indistinguishable from one still running. But the loss does
+ * NOT ACCUMULATE, which is the balance's separate defect: ONE recorded stop for that name clears
+ * it, where a balance inflated by two missed stops needs two extra recorded stops. And `running`
+ * counts DISTINCT NAMES, so N missed stops on ONE name read as one lane, never N — the
+ * `running > laneFloor` saturation-silence a balance could reach on a single name is unreachable
+ * here. On this axis LWW is equal to the balance at one missed stop and strictly better after.
+ *
+ * ## `ok` IS NOT `boundedAbove` — the third field, and why the unnamed refusal is gone
+ *
+ * `ok` MEANS "THE LEDGER WAS READ", NOT "THE COUNT IS BOUNDED ABOVE". Those were the same thing
+ * while this was the only instrument, and conflating them is what made an unnamed launch silence
+ * the whole session. They are now separate fields: `running` is the NAMED difference — a LOWER
+ * bound, always — and `boundedAbove` says whether that lower bound is also an upper one. The upper
+ * bound comes from INSTRUMENT C, and `assessFleetDrain` is where the two are reconciled.
+ *
+ * THE TWO HALVES ARE ORTHOGONAL AND BOTH ARE LOAD-BEARING. The epoch/occupancy split above is about
+ * MULTIPLICITY (a name that runs, stops and runs again); this one is about the UNNAMED population (a
+ * launch row that carries no name at all). Neither subsumes the other: row counts make the epoch
+ * move for a reused name, and `boundedAbove` is what lets INSTRUMENT C cover the hole the names
+ * never entered. Collapsing either back into `ok` reintroduces a measured silence.
+ *
  * @param {object[]|null} rows  `dispatch-ledger.js::readLedger().rows`
  * @param {{reason?:string}} [failure] typed reason when the read failed
  * @returns {{ok:boolean, running:string[]|null, launched:number|null, terminated:number|null,
- *            unnamed:number|null, reason:string|null}}
+ *            unnamed:number|null, boundedAbove:boolean, reason:string|null}}
+ *   `launched`/`terminated` are ROW counts (the epoch); `running` names the lanes whose LAST ledger
+ *   row is a launch (occupancy); `boundedAbove` says whether that occupancy reading is also an UPPER
+ *   bound (it is not, once an unnamed main-agent launch is present). All are `null` on an unmeasured
+ *   reading — never a fabricated 0.
  */
 function countRunningLanes(rows, failure) {
   if (!Array.isArray(rows)) {
@@ -293,15 +554,21 @@ function countRunningLanes(rows, failure) {
       launched: null,
       terminated: null,
       unnamed: null,
+      boundedAbove: false,
       reason:
         (failure && failure.reason) ||
         "no dispatch-ledger rows were readable, so the running-lane count is UNKNOWN — not zero.",
     };
   }
 
-  const launched = new Set();
+  // OCCUPANCY — ORDER-AWARE LAST-WRITE-WINS, one entry per name. The ledger is append-only and
+  // read in append order, so the LAST row mentioning a name is the most recent thing known about
+  // it, and that is its state. Never a sum: see the block above.
+  const lastRow = new Map();
+  // EPOCH — ROW counts, so a REUSED lane name still moves them. See the note above.
+  let launchedRows = 0;
+  let terminatedRows = 0;
   let unnamed = 0;
-  const terminated = new Set();
 
   for (const r of rows) {
     if (!r || typeof r !== "object") continue;
@@ -309,37 +576,184 @@ function countRunningLanes(rows, failure) {
       // The `generation` on a LAUNCH row is the PARENT of the dispatched lane, so this selects
       // the lanes the MAIN agent itself dispatched.
       if (r.generation !== MAIN_GENERATION) continue;
-      if (_isNonEmptyString(r.dispatch_name)) launched.add(r.dispatch_name);
-      else unnamed++;
+      if (_isNonEmptyString(r.dispatch_name)) {
+        lastRow.set(r.dispatch_name, "launch");
+        launchedRows++;
+      } else unnamed++;
     } else if (r.kind === "reconcile") {
       // NOT generation-filtered, and deliberately so: the `generation` on a RECONCILE row is the
       // STOPPING LANE'S OWN name, not its parent's. Filtering it to `(main-agent)` would discard
       // every real termination signal and report the whole fleet as permanently running.
-      if (_isNonEmptyString(r.generation)) terminated.add(r.generation);
+      //
+      // A stop for a name the MAIN agent never launched (a nested lane) records `"stop"` and so
+      // never enters `running`. It is kept in the map rather than skipped so that a LATER main
+      // launch under that name still wins the slot — the sequence a refused-then-retried dispatch
+      // actually produces.
+      if (_isNonEmptyString(r.generation)) {
+        lastRow.set(r.generation, "stop");
+        terminatedRows++;
+      }
     }
   }
 
-  // THE UPPER-BOUND REFUSAL. An unnamed launch is unjoinable in both directions (see the header):
-  // it never enters `launched`, and its reconcile rows arrive under a hex generation that matches
-  // nothing. The named difference stays a valid LOWER bound on running lanes, but this detector
-  // fires on running being LOW and therefore needs an UPPER bound. Returning a number here would
-  // be a confident wrong answer on exactly the sessions with the busiest fleets.
+  // OCCUPANCY, computed ONCE and BEFORE the unnamed branch — order-aware last-write-wins over
+  // `lastRow`. It is hoisted above that branch because, since 2026-08-20, the unnamed branch no
+  // longer refuses: it returns this SAME occupancy reading flagged as a lower bound only. Leaving
+  // the computation below the branch is what forced the old `running: null` refusal.
+  const running = [];
+  for (const [name, state] of lastRow) {
+    if (state === "launch") running.push(name);
+  }
+  running.sort();
+
+  // THE UPPER-BOUND DECLARATION (was a refusal until 2026-08-20). An unnamed launch is unjoinable
+  // in both directions (see the header): it never enters `lastRow`, and its reconcile rows arrive
+  // under a hex generation that matches nothing. So the LWW reading stays a valid LOWER bound and is
+  // NOT an upper one. This function no longer decides what to do about that — it REPORTS it, and
+  // `assessFleetDrain` reconciles it against INSTRUMENT C, which can supply the upper bound.
+  // Returning `ok:false` here is what silenced 5 of 9 sessions when the ledger was the only signal.
+  //
+  // THE EPOCH IS RETURNED ON THIS PATH TOO, and that is not cosmetic. `signatureOf` keys the ADVISE
+  // arm's dedupe on the epoch, so an unnamed-contaminated session that reaches ADVISE through
+  // INSTRUMENT C must still be able to re-surface when a lane completes. Nulling the counters here
+  // would reintroduce the frozen-epoch CRIT on exactly the sessions this branch exists to un-silence.
   if (unnamed > 0) {
     return {
-      ok: false,
-      running: null,
-      launched: launched.size,
-      terminated: terminated.size,
+      ok: true,
+      running,
+      launched: launchedRows,
+      terminated: terminatedRows,
       unnamed,
+      boundedAbove: false,
       reason:
         `${unnamed} main-agent launch row(s) carry no dispatch name, and an unnamed lane's termination rows ` +
-        "arrive under an unjoinable agent id — so the number of RUNNING lanes cannot be bounded " +
-        "from above. Lane occupancy is UNKNOWN for this session, not idle.",
+        "arrive under an unjoinable agent id — so this ledger reading is a LOWER bound on running " +
+        "lanes only. Its zero is a blind spot, not a claim of idleness.",
     };
   }
 
-  const running = [...launched].filter((n) => !terminated.has(n)).sort();
-  return { ok: true, running, launched: launched.size, terminated: terminated.size, unnamed: 0, reason: null };
+  return {
+    ok: true,
+    running,
+    launched: launchedRows,
+    terminated: terminatedRows,
+    unnamed: 0,
+    boundedAbove: true,
+    reason: null,
+  };
+}
+
+// ── INSTRUMENT C — background_tasks, the harness's own statement of what is running ───────────
+
+/**
+ * The MEASURED `type` vocabulary of a `background_tasks` element. Both values were observed
+ * verbatim in the probe (see the header): a background shell and a background subagent. Anything
+ * else is UNCLASSIFIED and makes this instrument refuse — never silently "not a lane".
+ */
+const TASK_TYPE_LANE = "subagent";
+const TASK_TYPE_SHELL = "shell";
+
+/**
+ * Read the harness's `background_tasks` array off the `Stop` payload and classify it.
+ *
+ * PRESENCE IS OCCUPANCY — `status` is deliberately NOT filtered on. Measured: a finished task is
+ * ABSENT from the array (probe conditions C'' and D), and the only `status` value ever observed was
+ * `"running"`. Filtering on an unmeasured status vocabulary could drop a live task and under-count
+ * occupancy, which is the direction that makes this detector falsely LOUD. Counting presence can
+ * only make it quieter.
+ *
+ * REFUSES RATHER THAN GUESSES on: an absent key (no upper bound available at all), a non-array
+ * value, and any element whose `type` is outside the measured vocabulary. Each refusal is a typed
+ * `reason` that names what was seen, so a harness change surfaces as UNKNOWN with a diagnosis
+ * rather than as a silently disarmed guard.
+ *
+ * Pure: takes the payload, returns plain data. No IO, no clock. NEVER throws.
+ *
+ * @param {object|null} payload the hook's parsed stdin payload
+ * @returns {{ok:boolean, present:boolean, lanes:number|null, laneIds:string[]|null,
+ *            shells:number|null, total:number|null, unclassified:string[]|null, reason:string|null}}
+ */
+function readBackgroundTasks(payload) {
+  const fail = (reason, present) => ({
+    ok: false,
+    present: !!present,
+    lanes: null,
+    laneIds: null,
+    shells: null,
+    total: null,
+    unclassified: null,
+    reason,
+  });
+
+  try {
+    if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+      return fail("the hook payload was not a readable object, so `background_tasks` is UNKNOWN — not empty.", false);
+    }
+    if (!Object.prototype.hasOwnProperty.call(payload, "background_tasks")) {
+      return fail(
+        "this payload carries no `background_tasks` key, so the harness supplied no upper bound on " +
+          "what is running. Lane occupancy is UNKNOWN for this turn, not idle.",
+        false,
+      );
+    }
+
+    const bt = payload.background_tasks;
+    if (!Array.isArray(bt)) {
+      return fail(
+        `\`background_tasks\` was ${bt === null ? "null" : typeof bt}, not the array this instrument was ` +
+          "measured against, so it is UNKNOWN — not empty.",
+        true,
+      );
+    }
+
+    const laneIds = [];
+    let shells = 0;
+    const unclassified = [];
+
+    for (const t of bt) {
+      if (!t || typeof t !== "object" || Array.isArray(t)) {
+        unclassified.push(`<${t === null ? "null" : typeof t}>`);
+        continue;
+      }
+      if (t.type === TASK_TYPE_LANE) {
+        laneIds.push(_isNonEmptyString(t.id) ? t.id : _isNonEmptyString(t.description) ? t.description : "<unnamed>");
+      } else if (t.type === TASK_TYPE_SHELL) {
+        // A background SHELL is occupancy of the machine, but it is NOT a lane, and MUST-6 is about
+        // lanes. Counted separately and reported, never folded into the lane count and never
+        // allowed to silence the drain arm — a `sleep` in the background is not a dispatched agent.
+        shells++;
+      } else {
+        unclassified.push(_isNonEmptyString(t.type) ? t.type : `<${typeof t.type}>`);
+      }
+    }
+
+    if (unclassified.length > 0) {
+      const seen = [...new Set(unclassified)].slice(0, MAX_NAMED).join(", ");
+      return fail(
+        `\`background_tasks\` carried ${unclassified.length} element(s) of unmeasured type (${seen}); only ` +
+          `\`${TASK_TYPE_LANE}\` and \`${TASK_TYPE_SHELL}\` were ever observed. An unclassifiable RUNNING task ` +
+          "cannot be ruled out as a lane, so occupancy is UNKNOWN rather than assumed idle.",
+        true,
+      );
+    }
+
+    return {
+      ok: true,
+      present: true,
+      lanes: laneIds.length,
+      laneIds: laneIds.sort(),
+      shells,
+      total: bt.length,
+      unclassified: [],
+      reason: null,
+    };
+  } catch (e) {
+    // `_safeErrMessage` and NOT the usual `e.message ? e.message : String(e)`: that idiom is itself
+    // a throw site when the thrown value carries a hostile `message` getter or a throwing
+    // `toString`, which would turn this catch — the last line of the fails-open contract — into the
+    // thing that breaks it.
+    return fail(`reading \`background_tasks\` failed: ${_safeErrMessage(e)}`, false);
+  }
 }
 
 // ── INSTRUMENT B — open work ──────────────────────────────────────────────────────────────────
@@ -357,19 +771,29 @@ function countRunningLanes(rows, failure) {
 function parseForestLedger(text) {
   if (typeof text !== "string" || text.length === 0) return { found: false, rows: [] };
 
-  const lines = text.split("\n");
+  const lines = text.split(/\r\n|\r|\n/);
   let inSection = false;
   let shared = false;
-  let inFence = false;
+  let fenceMarker = null; // the open fence's character, or null outside a fence
+  let fenceLen = 0;
   let found = false;
   const rows = [];
 
   for (const line of lines) {
-    if (FENCE_RE.test(line)) {
-      inFence = !inFence;
+    const run = _fenceRun(line);
+    if (run !== null) {
+      // Paired by marker and length, as the validator pairs them: a ``` line inside a ~~~ block
+      // does not close it, and toggling on any fence line counted the fenced example as a row.
+      if (fenceMarker === null) {
+        fenceMarker = run[0];
+        fenceLen = run.length;
+      } else if (run[0] === fenceMarker && run.length >= fenceLen) {
+        fenceMarker = null;
+        fenceLen = 0;
+      }
       continue;
     }
-    if (inFence) continue;
+    if (fenceMarker !== null) continue;
 
     if (HEADING_RE.test(line)) {
       inSection = true;
@@ -479,47 +903,173 @@ function countOpenWork(fragments) {
  * Pure: no IO, no clock, no env read (the floor is passed in). Every arm below is a fixture case.
  *
  * ORDER IS LOAD-BEARING. UNKNOWN precedes QUIET, because a count that was never taken must never
- * render as a clear board; and the dispatchable gate precedes both firing arms, because a clean
- * converged hand-back is COMPLETE and this detector must never become pressure to invent work.
+ * render as a clear board; the instrument RECONCILIATION precedes every verdict arm, because a
+ * contradiction between the two occupancy signals is not a number to average; and the dispatchable
+ * gate precedes both firing arms, because a clean converged hand-back is COMPLETE and this detector
+ * must never become pressure to invent work.
  *
- * @param {{lanes:object, work:object}} readings
+ * THE FLEET EPOCH IS CARRIED, NOT DROPPED. `launched` and `terminated` are threaded through from
+ * INSTRUMENT A onto the verdict for one reason: `signatureOf` needs them (see there). They are
+ * MONOTONIC counters over the session's ledger, so they are what distinguishes a drain that merely
+ * PERSISTS from a genuinely NEW one. Every arm carries whatever half of the pair was measurable —
+ * including the UNKNOWN arms, so a session that never reaches a verdict still records a non-null
+ * epoch wherever INSTRUMENT A produced one.
+ *
+ * THE RECONCILIATION IS ASYMMETRIC, AND THE ASYMMETRY IS THE INSTRUMENTS' MEASURED SCOPE, not a
+ * preference (`instrument-discipline.md` MUST-4 — see the header's § RECONCILIATION). A BOUNDED
+ * ledger asserts idleness, so it can contradict the harness in either direction. An UNBOUNDED
+ * ledger (unnamed launches present) only ever under-reports busy, so its idle reading cannot
+ * contradict a busy harness — but its BUSY reading still contradicts an idle harness.
+ *
+ * THE EPOCH AND THE RECONCILIATION ARE INDEPENDENT AXES. The epoch answers "is this drain NEW";
+ * the reconciliation answers "is this fleet ACTUALLY idle". A verdict needs both: the reconciliation
+ * decides whether ADVISE is reachable at all, and the epoch decides whether a reachable ADVISE is
+ * suppressed as a duplicate. Dropping either one restores a measured silence.
+ *
+ * @param {{lanes:object, work:object, tasks:object}} readings
  * @param {{laneFloor?:number}} [cfg]
  * @returns {{state:string, arm:string|null, running:number|null, runningNames:string[]|null,
- *            dispatchable:number|null, humanBlocked:number|null, laneFloor:number, reason:string|null}}
+ *            harnessLanes:number|null, harnessShells:number|null, ledgerLanes:number|null,
+ *            ledgerBounded:boolean|null, dispatchable:number|null, humanBlocked:number|null,
+ *            launched:number|null, terminated:number|null, laneFloor:number, reason:string|null}}
  */
 function assessFleetDrain(readings, cfg) {
+  // THE FAILS-OPEN CONTRACT, HELD RATHER THAN ASSERTED (`cc-artifacts.md` Rule 7). Every field read
+  // below is a potential throw site on a hostile reading (a getter that throws, a Proxy trap), and
+  // the header's "NOTHING throws" was, before this wrapper, a claim about inputs the module's own
+  // producers happen to make rather than about the function. Production reachability is nil — the
+  // payload is `JSON.parse` output and `fleet-drain-guard.js::main` catches everything — but a
+  // contract that holds only because nobody exercises it is not a contract.
+  try {
+    return _assessFleetDrain(readings, cfg);
+  } catch (e) {
+    return {
+      state: "UNKNOWN",
+      arm: "assess-threw",
+      running: null,
+      runningNames: null,
+      harnessLanes: null,
+      harnessShells: null,
+      ledgerLanes: null,
+      ledgerBounded: null,
+      dispatchable: null,
+      humanBlocked: null,
+      // NULL, not a salvaged epoch: the throw means no reading here can be trusted, and
+      // `signatureOf` renders a null epoch as EMPTY rather than dropping the field, so the tuple
+      // keeps its arity on this path too.
+      launched: null,
+      terminated: null,
+      laneFloor: DEFAULT_LANE_FLOOR,
+      reason: `assessing the fleet threw (${_safeErrMessage(e)}); occupancy is UNKNOWN.`,
+    };
+  }
+}
+
+function _assessFleetDrain(readings, cfg) {
   const laneFloor = cfg && Number.isInteger(cfg.laneFloor) && cfg.laneFloor >= 0 ? cfg.laneFloor : DEFAULT_LANE_FLOOR;
   const lanes = (readings && readings.lanes) || null;
   const work = (readings && readings.work) || null;
+  const tasks = (readings && readings.tasks) || null;
 
   const base = {
     state: "UNKNOWN",
     arm: null,
     running: null,
     runningNames: null,
+    harnessLanes: null,
+    harnessShells: null,
+    ledgerLanes: null,
+    ledgerBounded: null,
     dispatchable: null,
     humanBlocked: null,
+    launched: null,
+    terminated: null,
     laneFloor,
     reason: null,
   };
 
-  if (!lanes || !lanes.ok) {
-    return { ...base, reason: (lanes && lanes.reason) || "the running-lane count is UNKNOWN." };
-  }
-  if (!work || !work.ok) {
+  // The epoch counters survive an UNKNOWN lane reading whenever the reader produced them — an
+  // unreadable ledger nulls them, but a ledger that WAS read and merely could not be bounded above
+  // still carries both counts. Guarded with `Number.isInteger` rather than read straight off the
+  // reading, because this function's fails-open contract covers a hostile `lanes` object too.
+  const epoch = {
+    launched: lanes && Number.isInteger(lanes.launched) ? lanes.launched : null,
+    terminated: lanes && Number.isInteger(lanes.terminated) ? lanes.terminated : null,
+  };
+
+  // `!Array.isArray(running)` is not defensive noise: it is the FAILS-OPEN contract
+  // (`cc-artifacts.md` Rule 7) held at the one place a malformed reading would otherwise throw out
+  // of a pure function that promises never to.
+  if (!lanes || !lanes.ok || !Array.isArray(lanes.running)) {
     return {
       ...base,
-      running: lanes.running.length,
-      runningNames: lanes.running,
+      ...epoch,
+      arm: "ledger-unreadable",
+      reason: (lanes && lanes.reason) || "the running-lane count is UNKNOWN.",
+    };
+  }
+
+  const ledgerLanes = lanes.running.length;
+  const ledgerBounded = lanes.boundedAbove === true;
+  const withLedger = { ...base, ...epoch, ledgerLanes, ledgerBounded, runningNames: lanes.running };
+
+  // INSTRUMENT C is the PRIMARY occupancy signal, so its absence is not something the ledger can
+  // paper over: without it there is no upper bound from anywhere, which is the exact condition
+  // under which a drain verdict is a confident wrong answer.
+  if (!tasks || !tasks.ok) {
+    return {
+      ...withLedger,
+      arm: "harness-unreadable",
+      reason: (tasks && tasks.reason) || "the harness `background_tasks` signal is UNKNOWN.",
+    };
+  }
+
+  // `< 0` and not merely `!Number.isInteger`: a NEGATIVE lane count is not producible by
+  // `readBackgroundTasks` (it is an array length), and it reached the ADVISE arm — `-1 === 0` is
+  // false, so the drained test passes it through to `running = max(...)` and out the firing side.
+  // Refusing it costs nothing and removes an unguarded path INTO the one verdict that speaks.
+  if (!Number.isInteger(tasks.lanes) || tasks.lanes < 0) {
+    return { ...withLedger, arm: "harness-unreadable", reason: "the harness lane count was not a count; UNKNOWN." };
+  }
+  const harnessLanes = tasks.lanes;
+  const withBoth = { ...withLedger, harnessLanes, harnessShells: tasks.shells };
+
+  // THE RECONCILIATION. On the one proposition both instruments answer — is anything running.
+  const ledgerBusy = ledgerLanes > 0;
+  const harnessBusy = harnessLanes > 0;
+  const contradiction =
+    ledgerBusy !== harnessBusy && (ledgerBounded || ledgerBusy); // unbounded-idle-vs-busy is expected, not a contradiction
+  if (contradiction) {
+    return {
+      ...withBoth,
+      arm: "instrument-disagreement",
+      reason:
+        `the two occupancy instruments disagree: the dispatch ledger reads ${ledgerLanes} running lane(s)` +
+        `${ledgerBounded ? "" : " (lower bound only)"} while the harness \`background_tasks\` reads ` +
+        `${harnessLanes}. One of them is wrong about whether this fleet is idle, and this detector does ` +
+        "not pick a winner — occupancy is UNKNOWN for this turn.",
+    };
+  }
+
+  // `!Number.isFinite(work.dispatchable)` is the M-3 sibling of the lane-count guard above: a NaN
+  // dispatchable slips the clean-stop gate silently, because `NaN < DISPATCHABLE_FLOOR` is FALSE,
+  // and lands in the firing arms. An unmeasurable board must be UNKNOWN, never a reason to speak.
+  if (!work || !work.ok || !Number.isFinite(work.dispatchable)) {
+    return {
+      ...withBoth,
+      arm: "work-unreadable",
+      running: Math.max(ledgerLanes, harnessLanes),
       reason: (work && work.reason) || "the open-work count is UNKNOWN.",
     };
   }
 
-  const running = lanes.running.length;
+  // THE OCCUPANCY NUMBER. The MAX of the two agreeing readings — the direction that is conservative
+  // against FIRING, since both firing arms trigger on running being LOW. When both read zero it is
+  // zero, which is the only value the ADVISE arm acts on.
+  const running = Math.max(ledgerLanes, harnessLanes);
   const known = {
-    ...base,
+    ...withBoth,
     running,
-    runningNames: lanes.running,
     dispatchable: work.dispatchable,
     humanBlocked: work.humanBlocked,
   };
@@ -546,7 +1096,10 @@ function assessFleetDrain(readings, cfg) {
       ...known,
       state: "ADVISE",
       arm: "drained",
-      reason: `0 lanes running with ${work.dispatchable} dispatchable open row(s).`,
+      reason:
+        `0 lanes running with ${work.dispatchable} dispatchable open row(s) — BOTH instruments agree ` +
+        `(harness \`background_tasks\`: 0 subagent task(s)${known.harnessShells ? `, ${known.harnessShells} background shell(s), which are not lanes` : ""}; ` +
+        `dispatch ledger: 0 named running lane(s)${ledgerBounded ? "" : ", lower bound only"}).`,
     };
   }
 
@@ -597,6 +1150,10 @@ function formatFleetDrainAdvisory(verdict) {
     `[fleet-drain] ${head}`,
     `  running lanes: ${verdict.running}${names}   dispatchable open rows: ${verdict.dispatchable}` +
       (verdict.humanBlocked ? ` (+${verdict.humanBlocked} blocked-on-human, not counted)` : ""),
+    `  instruments: harness background_tasks ${verdict.harnessLanes == null ? "?" : verdict.harnessLanes} subagent(s)` +
+      `${verdict.harnessShells ? ` + ${verdict.harnessShells} shell(s)` : ""}; dispatch ledger ` +
+      `${verdict.ledgerLanes == null ? "?" : verdict.ledgerLanes} named lane(s)` +
+      `${verdict.ledgerBounded === false ? " (lower bound only)" : ""}.`,
     `  ${verdict.reason}`,
   ];
 
@@ -615,7 +1172,7 @@ function formatFleetDrainAdvisory(verdict) {
   }
 
   lines.push(
-    "  ADVISORY. `Stop` cannot block at any severity (measured: the STOP_LIKE branch of",
+    "  ADVISORY. `Stop` cannot block via any SEVERITY value (measured: the STOP_LIKE branch of",
     "  instruct-and-wait.js returns {continue:true}/exit 0 even for `block`), and the judgment of",
     "  whether the remaining rows are INDEPENDENT is not one this counter can make.",
   );
@@ -624,45 +1181,223 @@ function formatFleetDrainAdvisory(verdict) {
 }
 
 /**
- * The dedupe signature — the MEASURED PAIR plus the arm, never the session.
+ * The dedupe signature — the MEASURED PAIR, the arm, and the FLEET EPOCH. Never the session.
  *
- * Keying on the pair is what makes a persisting state surface ONCE while a CHANGING fleet surfaces
- * again: refill a lane and the pair moves, so the next drain is reported. Keying on the session
- * instead would report the first drain of a session and stay silent through every later one.
+ * ## The measured defect this shape exists to fix
+ *
+ * The original signature was `state:arm:running:dispatchable`, and the header's contract has two
+ * halves: "a persisting drain is surfaced once per state rather than once per assistant turn,
+ * while a fleet that CHANGES is reported again". Only the first half held. NOTHING in that tuple
+ * MOVES when a lane completes: `running` was already 0 in the drained arm and returns to 0, and
+ * `dispatchable` is a property of the board, not of the fleet. So a genuinely NEW drain — the
+ * orchestrator's LAST lane just finished, which is exactly the refill trigger `wave-loop.md`
+ * MUST-6 names — produced a signature IDENTICAL to a drain already surfaced earlier in the session
+ * and was suppressed.
+ *
+ * MEASURED, session c90a644a, 2026-08-20: a fleet of 5 lanes drained to zero with 25 dispatchable
+ * forest rows open; the verdict was `ADVISE`/`drained` and the advisory was rendered — and the
+ * marker file already held `ADVISE:drained:0:25` from an earlier drain, so `alreadySurfaced`
+ * returned true and the hook went silent. The operator had to notice by hand. FALSIFYING RESULT
+ * had the old tuple been sufficient: the two drains would have differed in `running` or
+ * `dispatchable`; they differed in neither.
+ *
+ * ## The discriminator, and why it is these two counters
+ *
+ * `launched` and `terminated` are ROW COUNTS over the session's append-only ledger — `terminated`
+ * increments on every reconcile row (one per `SubagentStop`), `launched` on every named
+ * main-agent launch row. They are therefore MONOTONIC, and they are a FLEET EPOCH: the pair is
+ * unchanged exactly when neither a lane completed nor a dispatch was made, and moves exactly when
+ * one did. In the measured incident `launched` stayed 0 (those lanes were dispatched in a PRIOR
+ * session, so no `MAIN_GENERATION` launch rows exist in this one) while `terminated` reached 24 and
+ * rose with each returning lane — so `terminated` alone would have re-surfaced it, and `launched`
+ * is carried because a fresh dispatch is the symmetric change on the other side.
+ *
+ *   same drain, nothing moved      → same tuple → SUPPRESSED  (the noise control, preserved)
+ *   drain after a lane completed   → `terminated` moved → RE-SURFACED (the refill trigger)
+ *   drain after a new dispatch     → `launched` moved   → RE-SURFACED
+ *
+ * ROW COUNTS, NOT SET CARDINALITIES, AND THE DIFFERENCE IS THE WHOLE CONTRACT. This block once read
+ * "`terminated` increments on every `SubagentStop`" while the code held a `Set` of names, so the
+ * sentence was FALSE for a repeated name and the CRIT it papered over was real: refill a drained
+ * fleet using only names already present, let it drain again, and neither cardinality moved — the
+ * new drain collided with the marked one and the detector went silent for the rest of the session.
+ * `countRunningLanes` now counts rows, so the sentence above is true as written.
+ *
+ * THE EPOCH IS SCOPED TO THE `ADVISE` ARM, and that scoping is a noise bound, not an oversight.
+ * A reconcile row is NOT generation-filtered (it cannot be — see `countRunningLanes`), so a nested
+ * subagent's stop moves the epoch even though the main fleet did not change. On the `ADVISE` arm
+ * that is CORRECT and is exactly the MUST-6 refill trigger: `running === 0` means no main lane is
+ * in flight, so a returning lane IS news. On the `OBSERVE` arm it is not: a parent lane is running,
+ * its nested lanes churn, and an arm that by construction GIVES NO ADVICE would `halt-and-report`
+ * every single turn — breaking the header's "once per state, not once per turn" for a line that
+ * carries no recommendation. So `OBSERVE` dedupes on the measured pair alone.
+ *
+ * THE RESIDUAL NOISE ON THE `ADVISE` ARM IS NAMED AND NOT BOUNDED FURTHER, deliberately. Reconcile
+ * rows are neither generation-filtered nor deduped, so in the c90a644a shape — zero main-generation
+ * launch rows, N inherited lanes returning one at a time — EVERY returning lane moves `terminated`
+ * and mints a fresh signature. That weakens the header's "surfaced once per state, not once per
+ * turn" on this arm specifically, and it is a cost of the c90a644a fix, not of the occupancy model:
+ * last-write-wins does not touch it, because those names have no main launch row, so `running`
+ * stays 0 either way.
+ *
+ * IT IS NOT UNBOUNDED. The ceiling is the EVENT: this detector runs at `Stop`, which fires once per
+ * assistant turn, so the worst case is ONE `halt-and-report` line per turn, and only while the main
+ * fleet reads drained AND the board carries dispatchable rows — the exact state MUST-6 names. N
+ * lanes returning between two turn boundaries produce ONE line, not N.
+ *
+ * NO FURTHER BOUND IS ADDED, and refusing one is the measured disposition rather than the lazy one.
+ * The obvious remedy — name-scoping `terminated` to the main fleet — is MEASURED BLOCKED (see the
+ * next paragraph: it reds the entire c90a644a set). Every remaining option (bucketing `terminated`,
+ * a per-turn rate cap, a minimum delta) introduces a TUNED NUMBER, and this module's calibration
+ * note refuses to invent thresholds the data does not support; a per-turn line on the drained arm
+ * is also the one place the advisory carries a recommendation the operator can act on. Recorded as
+ * a known cost with a named ceiling, not as a solved problem.
+ *
+ * THE ALTERNATIVE REMEDY IS BLOCKED, and it is worth recording which one: scoping `terminated` to
+ * names the MAIN agent launched would also silence the nested churn — and would REINTRODUCE the
+ * measured c90a644a defect verbatim, because that session had ZERO main-generation launch rows (its
+ * lanes came from a prior session), so every reconcile row would be filtered out and the epoch
+ * would freeze at `0:0`. Cases 46/49/51 red under it. Arm-scoping costs nothing that arm was
+ * delivering; name-scoping costs the incident this whole mechanism was built for.
+ *
+ * TOTAL for a null or partially-measured verdict, deliberately: a missing field renders empty
+ * rather than `undefined`, and a null verdict yields a well-defined all-empty tuple of the SAME
+ * arity as every other path. That constant is built from the tuple itself rather than written out
+ * as a colon literal, because a hand-counted literal is exactly what goes stale when a component is
+ * added — as one did here twice in one day. The signature is never thrown from and never returns a
+ * non-string, because its only caller uses it as a marker key and a throw there would cost the
+ * finding.
+ *
+ * BOTH INSTRUMENT READINGS JOIN THE KEY (2026-08-20) for the same reason the pair was chosen over
+ * the session: they are components of the measured state, so a fleet whose harness occupancy moves
+ * while the ledger's does not is a DIFFERENT state and must be able to surface again.
+ *
+ * `ledgerLanes` AND `ledgerBounded` ARE BOTH IN THE KEY, and that is a measured fix rather than
+ * completeness for its own sake. With `running` (the MAX) alone, an unbounded-ledger-0 + harness-1
+ * state and a ledger-1 + harness-1 state both keyed `OBSERVE:under-capacity:1:5:1` — while their
+ * RENDERED text differs ("dispatch ledger 0 named lane(s) (lower bound only)" vs "1 named
+ * lane(s) (alpha)"), so the second advisory was deduped away by a key that could not see the
+ * difference it was reporting. A dedupe key must discriminate everything the message says.
+ *
+ * WIDENING IS ALWAYS THE SAFE DIRECTION HERE. A key with more components can only ever fail to
+ * suppress — costing at most one extra advisory line — whereas a key with fewer can suppress a
+ * finding. That asymmetry is also why an OLD-format marker cannot wrongly suppress a NEW-format
+ * signature: `alreadySurfaced` compares with `===`, never a prefix or substring test.
+ *
+ * ## The two additions are ORTHOGONAL and BOTH are in the key
+ *
+ * The EPOCH (`launched`/`terminated`, ADVISE-scoped) answers "is this drain NEW". The INSTRUMENT
+ * READINGS (`harnessLanes`, `ledgerLanes`, `ledgerBounded`) answer "which measured state is this".
+ * They fix different suppressions and neither implies the other:
+ *
+ *   refill the SAME lane names, drain again      → epoch moves; both readings identical → without
+ *                                                  the epoch this is SUPPRESSED (the c90a644a CRIT)
+ *   unbounded-ledger-0 + harness-1 vs ledger-1
+ *     + harness-1, same turn, same epoch          → epoch identical; readings differ → without the
+ *                                                  readings this is SUPPRESSED while the two render
+ *                                                  DIFFERENT advisory text
+ *
+ * So the key carries NINE components, not the four it shipped with. Widening remains the safe
+ * direction (above): a wider key can only fail to suppress.
  *
  * @param {object} verdict
  * @returns {string}
  */
 function signatureOf(verdict) {
-  if (!verdict) return "UNKNOWN::";
-  return `${verdict.state}:${verdict.arm || ""}:${verdict.running == null ? "" : verdict.running}:${
-    verdict.dispatchable == null ? "" : verdict.dispatchable
-  }`;
+  const f = (v) => (v == null ? "" : String(v));
+  // NINE fields. `SIG_ARITY` is derived from the tuple's own length rather than restated, so the
+  // null-verdict constant below cannot drift out of step with the tuple it is supposed to match —
+  // the two-doors defect this module records elsewhere, in miniature.
+  if (!verdict) return ["UNKNOWN", "", "", "", "", "", "", "", ""].join(":");
+  // Arm-scoped: only ADVISE carries the epoch (see the block above). Every other state renders the
+  // two fields EMPTY rather than dropping them, so the tuple keeps one arity on every path and a
+  // marker written under one state can never collide with another.
+  const epoch = verdict.state === "ADVISE" ? [f(verdict.launched), f(verdict.terminated)] : ["", ""];
+  return [
+    verdict.state,
+    verdict.arm || "",
+    f(verdict.running),
+    f(verdict.dispatchable),
+    f(verdict.harnessLanes),
+    f(verdict.ledgerLanes),
+    verdict.ledgerBounded == null ? "" : verdict.ledgerBounded ? "b" : "u",
+    ...epoch,
+  ].join(":");
 }
 
+/**
+ * Per-session marker file. INJECTIVE `session_id` → filename, the same shape
+ * `dispatch-ledger.js::_sinkPath` documents as load-bearing: a sanitized token PLUS an 8-char
+ * sha256 of the RAW id.
+ *
+ * The suffix is not decoration. The charclass collapses every non-`[A-Za-z0-9._-]` byte to `_`, so
+ * `sess:a` and `sess/a` sanitize to the SAME token — and this file is a SUPPRESSION store, so a
+ * collision means one session's marker silences a genuine drain in a different session. That is the
+ * one direction the whole module is built to avoid (a lost marker costs a repeated line; a wrong
+ * one costs the finding). Its sibling had the disambiguator from the start; this reader shipped
+ * without it.
+ */
 function _markerPath(repoDir, sessionId) {
   const raw = _isNonEmptyString(sessionId) ? sessionId : "unknown-session";
   const safe = raw.replace(/[^A-Za-z0-9._-]/g, "_");
-  return path.join(repoDir, ".claude", "learning", "fleet-drain", `${safe}.jsonl`);
+  const suffix = crypto.createHash("sha256").update(raw, "utf8").digest("hex").slice(0, 8);
+  return path.join(repoDir, ".claude", "learning", "fleet-drain", `${safe}-${suffix}.jsonl`);
 }
 
 /**
  * Has this exact signature already been surfaced for this session?
  * FAIL-OPEN: any read failure returns false, so a lost marker costs a repeated line — never a
- * suppressed finding. The direction of that default is the whole safety argument.
+ * suppressed finding. The direction of that default is the whole safety argument, and it is
+ * PRESERVED below: every refusal `readSinkFile` can return lands on `return false`, which EMITS.
+ *
+ * ## A WITHDRAWN CLAIM, recorded rather than deleted, because believing it is why this survived
+ *
+ * This function used to `lstatSync` and then `readFileSync`, with the byte cap gated on the lstat,
+ * and its comment asserted that refusing a symlink here was "the symmetric refusal" to
+ * `appendSinkLine`'s write-side refusal. THAT CLAIM WAS FALSE. `lstat` declines to follow only the
+ * FINAL component of the path it is handed, so it guarded the marker FILE and nothing above it:
+ * replacing the sink DIRECTORY with a symlink walked straight out of the repository, and the read
+ * that followed answered a question about this repo with a file the attacker owned. It also
+ * resolved no ancestor, checked no hard link, pinned no directory identity, and — as
+ * `readSinkFile`'s own header records — a cap checked at stat time is decorative, because the file
+ * may grow between the stat and a `readFileSync` that runs to EOF.
+ *
+ * MEASURED, one probe, four arms, with controls that fire and discriminate:
+ *
+ *     fleet-drain, in-tree marker WITH the signature     -> true    (the matcher fires)
+ *     fleet-drain, in-tree marker WITHOUT it             -> false   (the matcher discriminates)
+ *     fleet-drain, OUT-OF-TREE sink-directory symlink    -> true    <-- SUPPRESSED a real finding
+ *     delegation-default, byte-identical shape           -> false   (its fixed reader refuses)
+ *
+ * The fourth arm is what makes the third readable: the sibling detector, already routed through
+ * the shared primitive, refuses the same attack, so the difference is THIS reader and not the
+ * platform. Symmetry with the write half is therefore achieved by CALLING THE SAME CODE, which is
+ * the only form of it that cannot drift — a second containment implementation here would be the
+ * exact class `security.md` § Path Containment forbids and this corpus keeps re-finding.
+ *
+ * ## What this does NOT close
+ *
+ * Containment stops the marker read from LEAVING the repository. It does not stop an attacker who
+ * WRITES the predictable in-tree marker path with enumerated signatures — that file resolves
+ * inside the root and passes every check. Closing that needs an unpredictable session-scoped key
+ * and is a DESIGN change, not attempted here. Same open residual as `delegation-default.js`.
+ *
  * @returns {boolean}
  */
 function alreadySurfaced(repoDir, sessionId, signature) {
   try {
     const p = _markerPath(repoDir, sessionId);
-    const st = fs.statSync(p);
-    if (!st.isFile() || st.size > MAX_MARKER_BYTES) return false;
-    const text = fs.readFileSync(p, "utf8");
-    for (const line of text.split("\n")) {
+    const r = readSinkFile({ repoDir, sinkPath: p, maxBytes: MAX_MARKER_BYTES });
+    // EVERY refusal — absent, symlinked file, symlinked ancestor, dangling sink directory,
+    // hard-linked, over-cap, swapped directory — lands here and returns false, which EMITS the
+    // finding. That is the same direction the old bare `catch { return false }` took; what changed
+    // is WHICH shapes reach it instead of being read and honoured.
+    if (!r.ok) return false;
+    for (const line of r.text.split("\n")) {
       if (line.trim() === "") continue;
       try {
-        const r = JSON.parse(line);
-        if (r && r.signature === signature) return true;
+        const rec = JSON.parse(line);
+        if (rec && rec.signature === signature) return true;
       } catch {
         /* a torn row is not a reason to suppress */
       }
@@ -686,7 +1421,17 @@ function markSurfaced(repoDir, sessionId, signature, nowIso) {
       signature,
       ts: _isNonEmptyString(nowIso) ? nowIso : new Date().toISOString(),
     });
-    const w = appendSinkLine({ repoDir, sinkPath, line });
+    // Declared even though this sink is repoDir-contained today: measured in a real
+    // worktree, containment passes either way, while OMITTING it fails closed the
+    // moment an entry point resolves the shared learning tree to the main checkout.
+    // Uniform declaration is what keeps the boundary one derivation instead of a
+    // per-caller judgement that drifted six times already.
+    const w = appendSinkLine({
+      repoDir,
+      additionalRoots: mainCheckoutBoundaryRoots(repoDir),
+      sinkPath,
+      line,
+    });
     return w && w.ok ? { ok: true } : { ok: false, error: (w && `${w.error} — ${w.reason}`) || "append failed" };
   } catch (e) {
     return { ok: false, error: e && e.message ? e.message : String(e) };
@@ -719,6 +1464,35 @@ function collectNotesSurfaces(baseDir) {
         const g = guarded(p);
         return g && g.ok ? g.content : null;
       }
+      // THE BARE FORM HERE IS DELIBERATE. It has the shape CRITICAL-1 was filed
+      // against (`lstatSync` + `readFileSync` rather than `readSinkFile`), and it is
+      // NOT routed through the hardened reader. Assessed 2026-09-01; recorded so the
+      // next reviewer does not re-litigate it from the shape alone.
+      //
+      //  1. NOT REACHABLE in production. This branch runs only when the require at
+      //     the top of `collectNotesSurfaces` throws or yields a non-function.
+      //     MEASURED on this tree: `session-notes-layout.js::readNotesFileGuarded`
+      //     resolves and `typeof === "function"`, so `guarded` wins every time. The
+      //     fallback exists so a deployment MISSING that module degrades to a
+      //     bounded read instead of turning every session's count UNKNOWN.
+      //  2. NOTHING IT READS REACHES AGENT-FACING OUTPUT. Its ONE production caller
+      //     is `fleet-drain-guard.js:264`, which passes the result INLINE to
+      //     `countOpenWork` and never binds it. `countOpenWork` reduces the text to
+      //     integers — `total++`, and a boolean `HUMAN_BLOCKED_RE.test(row)` — and
+      //     returns `{ok,total,dispatchable,humanBlocked,sources,reason}` where
+      //     `reason` is a STRING LITERAL, never derived from file bytes. Downstream,
+      //     `_assessFleetDrain` dereferences ONLY `ok`/`total`/`dispatchable`/
+      //     `humanBlocked`/`reason`. `sources` (filenames) is collected and NEVER
+      //     read anywhere in this module. So no byte of notes content, and not even
+      //     a notes FILENAME, can reach the advisory, a `systemMessage`, or stdout.
+      //
+      // Its trust class therefore differs from the marker readers `readSinkFile` now
+      // guards: a poisoned read there silences a DETECTOR, whereas the worst case
+      // here is a miscounted integer on a branch that does not execute. The residual
+      // TOCTOU window between this `lstat` and the `readFileSync` is real but has no
+      // sink to reach. Route it if either fact changes — if this content ever starts
+      // being QUOTED into a report or an advisory, it becomes a live injection
+      // surface and the bounded read is no longer sufficient.
       const st = fs.lstatSync(p);
       if (st.isSymbolicLink() || !st.isFile() || st.size > FALLBACK_NOTES_CAP_BYTES) return null;
       return fs.readFileSync(p, "utf8");
@@ -779,14 +1553,26 @@ module.exports = {
   DISPATCHABLE_FLOOR,
   HUMAN_BLOCKED_RE,
   MAX_NAMED,
+  // Exported so the marker-bound fixture drives the REAL cap instead of restating the literal.
+  // A fixture that hard-codes `256 * 1024` stays green while the constant moves underneath it,
+  // which is the same "two readers of one signal silently disagree" shape the DECLARED_FLOOR
+  // coupling assertion exists to prevent one module over.
+  MAX_MARKER_BYTES,
+  TASK_TYPE_LANE,
+  TASK_TYPE_SHELL,
   resolveLaneFloor,
   resolveEnabled,
   countRunningLanes,
+  readBackgroundTasks,
   parseForestLedger,
   countOpenWork,
   assessFleetDrain,
   formatFleetDrainAdvisory,
   signatureOf,
+  // Exported so fixtures resolve the marker through the PRODUCER'S OWN derivation rather than
+  // restating it — the two-doors defect `dispatch-ledger.js::_sinkPath` records (a read through one
+  // door and a write through the other silently missing each other).
+  _markerPath,
   alreadySurfaced,
   markSurfaced,
   collectNotesSurfaces,

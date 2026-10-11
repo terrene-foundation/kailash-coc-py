@@ -10,7 +10,7 @@ Zero-config database framework built on Core SDK with automatic node generation 
 > **Skill Metadata**
 > Category: `dataflow`
 > Priority: `CRITICAL`
-> Related Skills: [`workflow-quickstart`](../../01-core-sdk/workflow-quickstart.md), [`dataflow-models`](dataflow-models.md), [`dataflow-queries`](dataflow-queries.md)
+> Related Skills: [`workflow-quickstart`](../../01-core-sdk/workflow-quickstart.md), [`dataflow-models`](../../../.claude/skills/02-dataflow/dataflow-models.md), [`dataflow-queries`](../../../.claude/skills/02-dataflow/dataflow-queries.md)
 > Related Subagents: `dataflow-specialist` (enterprise features, migrations), `nexus-specialist` (DataFlow+Nexus integration)
 
 ## Quick Reference
@@ -384,11 +384,11 @@ app.start()
 
 ## Related Patterns
 
-- **Model definition**: [`dataflow-models`](dataflow-models.md)
-- **Query patterns**: [`dataflow-queries`](dataflow-queries.md)
-- **Bulk operations**: [`dataflow-bulk-operations`](dataflow-bulk-operations.md)
-- **Nexus integration**: [`dataflow-nexus-integration`](dataflow-nexus-integration.md)
-- **Migration guide**: [`dataflow-migrations-quick`](dataflow-migrations-quick.md)
+- **Model definition**: [`dataflow-models`](../../../.claude/skills/02-dataflow/dataflow-models.md)
+- **Query patterns**: [`dataflow-queries`](../../../.claude/skills/02-dataflow/dataflow-queries.md)
+- **Bulk operations**: [`dataflow-bulk-operations`](../../../.claude/skills/02-dataflow/dataflow-bulk-operations.md)
+- **Nexus integration**: [`dataflow-nexus-integration`](../../../.claude/skills/02-dataflow/dataflow-nexus-integration.md)
+- **Migration guide**: [`dataflow-migrations-quick`](../../../.claude/skills/02-dataflow/dataflow-migrations-quick.md)
 
 ## When to Escalate to Subagent
 

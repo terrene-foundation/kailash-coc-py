@@ -29,6 +29,7 @@
  * NO NETWORK, NO REAL DELIVERY, NO REPO BUT loom. The `gh` boundary is injected as a
  * function; nothing here spawns `gh`, and no case names a target repo.
  */
+import "../_lib/no-ambient-git.cjs";
 import { spawnSync } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";

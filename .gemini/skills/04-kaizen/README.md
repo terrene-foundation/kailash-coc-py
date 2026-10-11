@@ -8,12 +8,12 @@
 
 Essential patterns for building Kaizen agents:
 
-1. **[kaizen-baseagent-quick.md](kaizen-baseagent-quick.md)** - BaseAgent implementation, signature, config (3-step pattern)
-2. **[kaizen-signatures.md](kaizen-signatures.md)** - InputField, OutputField, type-safe I/O, validation
-3. **[kaizen-config-patterns.md](kaizen-config-patterns.md)** - Domain config vs BaseAgentConfig, auto-extraction
-4. **[kaizen-ux-helpers.md](kaizen-ux-helpers.md)** - extract_list/dict/float/str(), write_to_memory()
-5. **[kaizen-agent-execution.md](kaizen-agent-execution.md)** - agent.run(), result handling, async execution
-6. **[kaizen-quickstart-template.md](kaizen-quickstart-template.md)** - Complete agent template (copy-paste ready)
+1. **[kaizen-baseagent-quick.md](../../../.claude/skills/04-kaizen/kaizen-baseagent-quick.md)** - BaseAgent implementation, signature, config (3-step pattern)
+2. **[kaizen-signatures.md](../../../.claude/skills/04-kaizen/kaizen-signatures.md)** - InputField, OutputField, type-safe I/O, validation
+3. **[kaizen-config-patterns.md](../../../.claude/skills/04-kaizen/kaizen-config-patterns.md)** - Domain config vs BaseAgentConfig, auto-extraction
+4. **[kaizen-ux-helpers.md](../../../.claude/skills/04-kaizen/kaizen-ux-helpers.md)** - extract_list/dict/float/str(), write_to_memory()
+5. **[kaizen-agent-execution.md](../../../.claude/skills/04-kaizen/kaizen-agent-execution.md)** - agent.run(), result handling, async execution
+6. **[kaizen-quickstart-template.md](../../../.claude/skills/04-kaizen/kaizen-quickstart-template.md)** - Complete agent template (copy-paste ready)
 
 **Quick Start**: Begin with `kaizen-baseagent-quick.md` → `kaizen-signatures.md` → `kaizen-quickstart-template.md`
 
@@ -23,11 +23,11 @@ Essential patterns for building Kaizen agents:
 
 Multi-agent coordination and Google A2A protocol:
 
-7. **[kaizen-multi-agent-setup.md](kaizen-multi-agent-setup.md)** - SharedMemoryPool, agent coordination infrastructure
-8. **[kaizen-shared-memory.md](kaizen-shared-memory.md)** - write_to_memory(), read_relevant(), patterns
-9. **[kaizen-a2a-protocol.md](kaizen-a2a-protocol.md)** - Automatic capability cards, semantic matching (100% Google A2A)
-10. **[kaizen-supervisor-worker.md](kaizen-supervisor-worker.md)** - Supervisor-worker pattern, task delegation
-11. **[kaizen-agent-patterns.md](kaizen-agent-patterns.md)** - Consensus, debate, specialists, producer-consumer
+7. **[kaizen-multi-agent-setup.md](../../../.claude/skills/04-kaizen/kaizen-multi-agent-setup.md)** - SharedMemoryPool, agent coordination infrastructure
+8. **[kaizen-shared-memory.md](../../../.claude/skills/04-kaizen/kaizen-shared-memory.md)** - write_to_memory(), read_relevant(), patterns
+9. **[kaizen-a2a-protocol.md](../../../.claude/skills/04-kaizen/kaizen-a2a-protocol.md)** - Automatic capability cards, semantic matching (100% Google A2A)
+10. **[kaizen-supervisor-worker.md](../../../.claude/skills/04-kaizen/kaizen-supervisor-worker.md)** - Supervisor-worker pattern, task delegation
+11. **[kaizen-agent-patterns.md](../../../.claude/skills/04-kaizen/kaizen-agent-patterns.md)** - Consensus, debate, specialists, producer-consumer
 
 ---
 
@@ -35,10 +35,10 @@ Multi-agent coordination and Google A2A protocol:
 
 Vision, audio, and multi-modal processing:
 
-12. **[kaizen-vision-processing.md](kaizen-vision-processing.md)** - VisionAgent, OllamaVisionProvider, image analysis
-13. **[kaizen-audio-processing.md](kaizen-audio-processing.md)** - Whisper, audio transcription
-14. **[kaizen-multimodal-orchestration.md](kaizen-multimodal-orchestration.md)** - MultiModalAgent, vision+audio+text
-15. **[kaizen-multimodal-pitfalls.md](kaizen-multimodal-pitfalls.md)** - **CRITICAL**: Common mistakes (kaizen-specialist:301-373)
+12. **[kaizen-vision-processing.md](../../../.claude/skills/04-kaizen/kaizen-vision-processing.md)** - VisionAgent, OllamaVisionProvider, image analysis
+13. **[kaizen-audio-processing.md](../../../.claude/skills/04-kaizen/kaizen-audio-processing.md)** - Whisper, audio transcription
+14. **[kaizen-multimodal-orchestration.md](../../../.claude/skills/04-kaizen/kaizen-multimodal-orchestration.md)** - MultiModalAgent, vision+audio+text
+15. **[kaizen-multimodal-pitfalls.md](../../../.claude/skills/04-kaizen/kaizen-multimodal-pitfalls.md)** - **CRITICAL**: Common mistakes (kaizen-specialist:301-373)
 
 **IMPORTANT**: Read `kaizen-multimodal-pitfalls.md` FIRST to avoid common API mistakes
 
@@ -48,7 +48,7 @@ Vision, audio, and multi-modal processing:
 
 User journey management with declarative pathways and intent-driven transitions:
 
-16. **[kaizen-journey-orchestration.md](kaizen-journey-orchestration.md)** - Journey, Pathway, Transitions, Context Accumulation, Nexus deployment
+16. **[kaizen-journey-orchestration.md](../../../.claude/skills/04-kaizen/kaizen-journey-orchestration.md)** - Journey, Pathway, Transitions, Context Accumulation, Nexus deployment
 
 **Key Features**: Multi-pathway flows, intent detection (LLM-powered), ReturnToPrevious behavior, context accumulation with merge strategies, Nexus deployment
 
@@ -58,17 +58,17 @@ User journey management with declarative pathways and intent-driven transitions:
 
 Production patterns, enterprise features, tool calling, observability, memory systems, and specialized techniques:
 
-17. **[kaizen-control-protocol.md](kaizen-control-protocol.md)** - Bidirectional agent ↔ client communication
-18. **[kaizen-tool-calling.md](kaizen-tool-calling.md)** - Autonomous tool execution with approval workflows
-19. **[kaizen-observability.md](kaizen-observability.md)** - Complete observability stack (tracing, metrics, logging, audit)
-20. **[kaizen-memory-system.md](kaizen-memory-system.md)** - Persistent memory, learning, and preference adaptation
-21. **[kaizen-checkpoint-resume.md](kaizen-checkpoint-resume.md)** - Automatic checkpointing and resume for long-running agents
-22. **[kaizen-chain-of-thought.md](kaizen-chain-of-thought.md)** - CoT pattern, step-by-step reasoning
-23. **[kaizen-rag-agent.md](kaizen-rag-agent.md)** - RAG implementation with Kaizen
-24. **[kaizen-react-pattern.md](kaizen-react-pattern.md)** - ReAct (reasoning + acting)
-25. **[kaizen-cost-tracking.md](kaizen-cost-tracking.md)** - Token usage, budget management
-26. **[kaizen-streaming.md](kaizen-streaming.md)** - Streaming responses, real-time output
-27. **[kaizen-testing-patterns.md](kaizen-testing-patterns.md)** - 3-tier testing, fixtures, standardized tests
+17. **[kaizen-control-protocol.md](../../../.claude/skills/04-kaizen/kaizen-control-protocol.md)** - Bidirectional agent ↔ client communication
+18. **[kaizen-tool-calling.md](../../../.claude/skills/04-kaizen/kaizen-tool-calling.md)** - Autonomous tool execution with approval workflows
+19. **[kaizen-observability.md](../../../.claude/skills/04-kaizen/kaizen-observability.md)** - Complete observability stack (tracing, metrics, logging, audit)
+20. **[kaizen-memory-system.md](../../../.claude/skills/04-kaizen/kaizen-memory-system.md)** - Persistent memory, learning, and preference adaptation
+21. **[kaizen-checkpoint-resume.md](../../../.claude/skills/04-kaizen/kaizen-checkpoint-resume.md)** - Automatic checkpointing and resume for long-running agents
+22. **[kaizen-chain-of-thought.md](../../../.claude/skills/04-kaizen/kaizen-chain-of-thought.md)** - CoT pattern, step-by-step reasoning
+23. **[kaizen-rag-agent.md](../../../.claude/skills/04-kaizen/kaizen-rag-agent.md)** - RAG implementation with Kaizen
+24. **[kaizen-react-pattern.md](../../../.claude/skills/04-kaizen/kaizen-react-pattern.md)** - ReAct (reasoning + acting)
+25. **[kaizen-cost-tracking.md](../../../.claude/skills/04-kaizen/kaizen-cost-tracking.md)** - Token usage, budget management
+26. **[kaizen-streaming.md](../../../.claude/skills/04-kaizen/kaizen-streaming.md)** - Streaming responses, real-time output
+27. **[kaizen-testing-patterns.md](../../../.claude/skills/04-kaizen/kaizen-testing-patterns.md)** - 3-tier testing, fixtures, standardized tests
 
 **Testing**: All patterns use 3-tier strategy (Unit → Ollama → OpenAI), Real infrastructure recommended in Tiers 2-3
 

@@ -458,8 +458,8 @@ answer = await self.ask_user_question(
 
 ## Related
 
-- **[kaizen-tool-calling.md](kaizen-tool-calling.md)** - Autonomous tool execution
-- **[kaizen-baseagent-quick.md](kaizen-baseagent-quick.md)** - BaseAgent fundamentals
+- **[kaizen-tool-calling.md](../../../.claude/skills/04-kaizen/kaizen-tool-calling.md)** - Autonomous tool execution
+- **[kaizen-baseagent-quick.md](../../../.claude/skills/04-kaizen/kaizen-baseagent-quick.md)** - BaseAgent fundamentals
 
 ---
 

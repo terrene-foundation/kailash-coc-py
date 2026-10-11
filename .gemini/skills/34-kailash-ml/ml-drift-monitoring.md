@@ -192,7 +192,7 @@ for check in history:
 
 ## Integration with InferenceServer
 
-DriftMonitor integrates at the serving layer for real-time drift detection on incoming prediction data. See [ml-inference-server](ml-inference-server.md) for the integration pattern.
+DriftMonitor integrates at the serving layer for real-time drift detection on incoming prediction data. See [ml-inference-server](../../../.claude/skills/34-kailash-ml/ml-inference-server.md) for the integration pattern.
 
 ## Critical Rules
 

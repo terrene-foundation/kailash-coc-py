@@ -663,7 +663,7 @@ class DevModel:
 
 ### Primary Sources
 
-- **DataFlow Specialist**: [`.gemini/agents/dataflow-specialist.md`](../../agents/frameworks/dataflow-specialist.md)
+- **DataFlow Specialist**: [`.gemini/agents/dataflow-specialist.md`](../../../.claude/agents/frameworks/dataflow-specialist.md)
 
 ### Related Documentation
 

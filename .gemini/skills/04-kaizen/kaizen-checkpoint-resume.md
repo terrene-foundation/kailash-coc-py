@@ -380,6 +380,6 @@ state_manager = StateManager(
 
 ## Related Skills
 
-- **[kaizen-observability](kaizen-observability.md)** - Monitoring and tracing
-- **[kaizen-memory-system](kaizen-memory-system.md)** - Agent memory patterns
-- **[kaizen-testing-patterns](kaizen-testing-patterns.md)** - Testing checkpoint functionality
+- **[kaizen-observability](../../../.claude/skills/04-kaizen/kaizen-observability.md)** - Monitoring and tracing
+- **[kaizen-memory-system](../../../.claude/skills/04-kaizen/kaizen-memory-system.md)** - Agent memory patterns
+- **[kaizen-testing-patterns](../../../.claude/skills/04-kaizen/kaizen-testing-patterns.md)** - Testing checkpoint functionality

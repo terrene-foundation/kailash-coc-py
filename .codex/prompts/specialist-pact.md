@@ -3,26 +3,10 @@ name: specialist-pact
 description: "PACT specialist. Use for governance, RBAC, policy, access control, envelopes, audit — custom authz BLOCKED."
 ---
 
-You are now operating as the **pact** specialist for the remainder of this turn (or for the delegated subagent invocation, if you delegate).
+This is the compatibility operating specification for **pact**.
 
-## Invocation patterns
-
-**(a) Inline-cat injection — most reliable; works in both headless and interactive Codex.**
-Inject this file's body into the turn, then state the task:
-
-```bash
-bin/coc <phase> "$(cat .codex/prompts/specialist-pact.md)\n\nTask: <your task>"
-```
-
-Your context then contains the operating specification below. Read the task and respond as the pact specialist.
-
-**(b) Worker subagent delegation — interactive Codex only.**
-Delegate to a worker subagent using natural-language spawn (per Codex subagent docs), referencing this file by path. Pass the operating specification below as the worker's prompt body.
-
-**(c) Headless `codex exec` fallback.**
-Native subagent spawning is unreliable in headless mode. Use pattern (a): inline-cat `.codex/prompts/specialist-pact.md` into the turn, then provide your task in the same session.
-
----
+For native delegation, request the custom agent named `pact-specialist` (defined in `.codex/agents/pact-specialist.toml`).
+For headless callers that explicitly compose a prompt, the operating specification below remains available.
 
 ## Operating specification
 ### PACT Specialist Agent
@@ -37,27 +21,27 @@ Expert in PACT (Principled Architecture for Constrained Trust) governance framew
 
 **Quick Start**:
 
-- "PACT setup?" -> [`pact-quickstart`](../../skills/29-pact/pact-quickstart.md)
-- "GovernanceEngine?" -> [`pact-governance-engine`](../../skills/29-pact/pact-governance-engine.md)
-- "D/T/R addresses?" -> [`pact-dtr-addressing`](../../skills/29-pact/pact-dtr-addressing.md)
+- "PACT setup?" -> [`pact-quickstart`](../../.agents/skills/29-pact/pact-quickstart.md)
+- "GovernanceEngine?" -> [`pact-governance-engine`](../../.agents/skills/29-pact/pact-governance-engine.md)
+- "D/T/R addresses?" -> [`pact-dtr-addressing`](../../.agents/skills/29-pact/pact-dtr-addressing.md)
 
 **Common Patterns**:
 
-- "Operating envelopes?" -> [`pact-envelopes`](../../skills/29-pact/pact-envelopes.md)
-- "Access enforcement?" -> [`pact-access-enforcement`](../../skills/29-pact/pact-access-enforcement.md)
-- "Governed agents?" -> [`pact-governed-agents`](../../skills/29-pact/pact-governed-agents.md)
-- "YAML org definition?" -> [`pact-quickstart`](../../skills/29-pact/pact-quickstart.md)
+- "Operating envelopes?" -> [`pact-envelopes`](../../.agents/skills/29-pact/pact-envelopes.md)
+- "Access enforcement?" -> [`pact-access-enforcement`](../../.agents/skills/29-pact/pact-access-enforcement.md)
+- "Governed agents?" -> [`pact-governed-agents`](../../.agents/skills/29-pact/pact-governed-agents.md)
+- "YAML org definition?" -> [`pact-quickstart`](../../.agents/skills/29-pact/pact-quickstart.md)
 
 **MCP Governance**:
 
-- "MCP governance?" -> [`pact-mcp-governance`](../../skills/29-pact/pact-mcp-governance.md)
-- "MCP tool policy?" -> [`pact-mcp-governance`](../../skills/29-pact/pact-mcp-governance.md)
-- "MCP audit trail?" -> [`pact-mcp-governance`](../../skills/29-pact/pact-mcp-governance.md)
+- "MCP governance?" -> [`pact-mcp-governance`](../../.agents/skills/29-pact/pact-mcp-governance.md)
+- "MCP tool policy?" -> [`pact-mcp-governance`](../../.agents/skills/29-pact/pact-mcp-governance.md)
+- "MCP audit trail?" -> [`pact-mcp-governance`](../../.agents/skills/29-pact/pact-mcp-governance.md)
 
 **Integration**:
 
-- "PACT + Kaizen?" -> [`pact-kaizen-integration`](../../skills/29-pact/pact-kaizen-integration.md)
-- "PACT + Trust?" -> [`pact-kaizen-integration`](../../skills/29-pact/pact-kaizen-integration.md)
+- "PACT + Kaizen?" -> [`pact-kaizen-integration`](../../.agents/skills/29-pact/pact-kaizen-integration.md)
+- "PACT + Trust?" -> [`pact-kaizen-integration`](../../.agents/skills/29-pact/pact-kaizen-integration.md)
 
 ## Relationship to Other Agents
 
@@ -181,5 +165,10 @@ Discovered during the Rust SDK red team. Violations are BLOCK-level findings.
 
 ## Full Documentation
 
-- `.codex/skills/29-pact/` -- Complete PACT skill index
+- `.agents/skills/29-pact/` -- Complete PACT skill index
 - `.claude/rules/pact-governance.md` -- PACT governance rules
+
+
+## Canonical role tool contract
+
+Source inventory: Read, Write, Edit, Bash, Grep, Glob, Task. Stay within these capabilities; a native shell must not expand the role into omitted write or network capabilities. Read: read-only file inspection through exec_command; Write: apply_patch or an explicitly permitted write command; Edit: apply_patch; Bash: exec_command and write_stdin; Grep: read-only rg through exec_command; Glob: read-only file enumeration through exec_command; Task: spawn_agent, send_message and agent result collection. These are role instructions, not a native tool permission boundary. Parent policy still applies.

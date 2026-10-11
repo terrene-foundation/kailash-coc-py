@@ -228,4 +228,4 @@ Never use blocking calls inside AsyncPythonCodeNode. `time.sleep(5)` blocks the 
 
 ## Related Skills
 
-- [pythoncode-best-practices](pythoncode-best-practices.md), [async-workflow-patterns](async-workflow-patterns.md), [runtime-execution](runtime-execution.md)
+- [pythoncode-best-practices](../../../.claude/skills/01-core-sdk/pythoncode-best-practices.md), [async-workflow-patterns](../../../.claude/skills/01-core-sdk/async-workflow-patterns.md), [runtime-execution](../../../.claude/skills/01-core-sdk/runtime-execution.md)

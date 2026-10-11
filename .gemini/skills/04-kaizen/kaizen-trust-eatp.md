@@ -625,10 +625,10 @@ await audit_logger.log(SecurityEvent(
 
 ## Related Skills
 
-- **[kaizen-agent-registry](kaizen-agent-registry.md)** - Distributed agent coordination (non-trust)
-- **[kaizen-a2a-protocol](kaizen-a2a-protocol.md)** - Basic A2A capability cards
-- **[kaizen-supervisor-worker](kaizen-supervisor-worker.md)** - Supervisor-worker patterns
-- **[kaizen-observability-audit](kaizen-observability-audit.md)** - Compliance audit trails
+- **[kaizen-agent-registry](../../../.claude/skills/04-kaizen/kaizen-agent-registry.md)** - Distributed agent coordination (non-trust)
+- **[kaizen-a2a-protocol](../../../.claude/skills/04-kaizen/kaizen-a2a-protocol.md)** - Basic A2A capability cards
+- **[kaizen-supervisor-worker](../../../.claude/skills/04-kaizen/kaizen-supervisor-worker.md)** - Supervisor-worker patterns
+- **[kaizen-observability-audit](../../../.claude/skills/04-kaizen/kaizen-observability-audit.md)** - Compliance audit trails
 
 ## Security Testing
 

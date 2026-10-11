@@ -209,6 +209,6 @@ async def test_tool_execution():
 
 ## Related
 
-- [kaizen-control-protocol.md](kaizen-control-protocol.md) -- Approval workflows
-- [kaizen-baseagent-quick.md](kaizen-baseagent-quick.md) -- BaseAgent fundamentals
-- [kaizen-react-pattern.md](kaizen-react-pattern.md) -- Autonomous reasoning + action
+- [kaizen-control-protocol.md](../../../.claude/skills/04-kaizen/kaizen-control-protocol.md) -- Approval workflows
+- [kaizen-baseagent-quick.md](../../../.claude/skills/04-kaizen/kaizen-baseagent-quick.md) -- BaseAgent fundamentals
+- [kaizen-react-pattern.md](../../../.claude/skills/04-kaizen/kaizen-react-pattern.md) -- Autonomous reasoning + action

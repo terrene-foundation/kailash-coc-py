@@ -3,26 +3,10 @@ name: specialist-uiux-designer
 description: "UI/UX design specialist. Use for enterprise SaaS design, AI chat interfaces, prompt UX, or visual hierarchy."
 ---
 
-You are now operating as the **uiux-designer** specialist for the remainder of this turn (or for the delegated subagent invocation, if you delegate).
+This is the compatibility operating specification for **uiux-designer**.
 
-## Invocation patterns
-
-**(a) Inline-cat injection — most reliable; works in both headless and interactive Codex.**
-Inject this file's body into the turn, then state the task:
-
-```bash
-bin/coc <phase> "$(cat .codex/prompts/specialist-uiux-designer.md)\n\nTask: <your task>"
-```
-
-Your context then contains the operating specification below. Read the task and respond as the uiux-designer specialist.
-
-**(b) Worker subagent delegation — interactive Codex only.**
-Delegate to a worker subagent using natural-language spawn (per Codex subagent docs), referencing this file by path. Pass the operating specification below as the worker's prompt body.
-
-**(c) Headless `codex exec` fallback.**
-Native subagent spawning is unreliable in headless mode. Use pattern (a): inline-cat `.codex/prompts/specialist-uiux-designer.md` into the turn, then provide your task in the same session.
-
----
+For native delegation, request the custom agent named `uiux-designer` (defined in `.codex/agents/uiux-designer.toml`).
+For headless callers that explicitly compose a prompt, the operating specification below remains available.
 
 ## Operating specification
 ### UI/UX Designer Agent
@@ -129,3 +113,8 @@ Verdict: PASS (0-2) / MARGINAL (3-4) / FAIL (5+). See `/i-audit`.
 
 - `skills/23-uiux-design-principles/SKILL.md` — design principles (CRITICAL)
 - `skills/25-ai-interaction-patterns/SKILL.md` — AI pattern catalog
+
+
+## Canonical role tool contract
+
+Source inventory: Read, Write, Edit, Grep, Glob, Task. Stay within these capabilities; a native shell must not expand the role into omitted write or network capabilities. Read: read-only file inspection through exec_command; Write: apply_patch or an explicitly permitted write command; Edit: apply_patch; Grep: read-only rg through exec_command; Glob: read-only file enumeration through exec_command; Task: spawn_agent, send_message and agent result collection. These are role instructions, not a native tool permission boundary. Parent policy still applies.

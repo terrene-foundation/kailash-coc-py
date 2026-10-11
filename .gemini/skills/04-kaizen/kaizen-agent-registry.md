@@ -503,10 +503,10 @@ Don't use AgentRegistry when:
 
 ## Related Skills
 
-- **[kaizen-supervisor-worker](kaizen-supervisor-worker.md)** - Supervisor-worker coordination
-- **[kaizen-multi-agent-setup](kaizen-multi-agent-setup.md)** - Multi-agent system setup
-- **[kaizen-a2a-protocol](kaizen-a2a-protocol.md)** - Agent-to-agent communication
-- **[kaizen-observability-hooks](kaizen-observability-hooks.md)** - Event-driven observability
+- **[kaizen-supervisor-worker](../../../.claude/skills/04-kaizen/kaizen-supervisor-worker.md)** - Supervisor-worker coordination
+- **[kaizen-multi-agent-setup](../../../.claude/skills/04-kaizen/kaizen-multi-agent-setup.md)** - Multi-agent system setup
+- **[kaizen-a2a-protocol](../../../.claude/skills/04-kaizen/kaizen-a2a-protocol.md)** - Agent-to-agent communication
+- **[kaizen-observability-hooks](../../../.claude/skills/04-kaizen/kaizen-observability-hooks.md)** - Event-driven observability
 
 ## Support
 

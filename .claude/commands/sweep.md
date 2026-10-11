@@ -1,6 +1,6 @@
 ---
 name: sweep
-description: "Comprehensive outstanding-work audit for the current project — workspaces, GH issues, redteam-vs-specs gaps, and process hygiene. End-of-cycle gate before /wrapup."
+description: "Audit outstanding work, issues, spec gaps, and process hygiene before /wrapup."
 ---
 
 ## Purpose
@@ -17,7 +17,7 @@ Autonomous — runs every sweep sequentially, accumulates findings into a single
 
 ## Workflow
 
-Run all 10 sweeps (Sweep 9 self-skips to N/A off the orchestration root). Aggregate findings into the management decision report (§ Output) — each finding carries CATEGORY (BUG / INVEST-NOW / INCREMENTAL per `rules/product-completion-first.md`), severity (CRIT / HIGH / MED / LOW — ranks only), disposition, and pointer (file:line, PR#, issue#).
+Run all 11 sweeps (Sweeps 9 and 11 self-skip to N/A off the orchestration root). Aggregate findings into the management decision report (§ Output) — each finding carries CATEGORY (BUG / INVEST-NOW / INCREMENTAL per `rules/product-completion-first.md`), severity (CRIT / HIGH / MED / LOW — ranks only), disposition, and pointer (file:line, PR#, issue#).
 
 ### Sweep 1: Active todos across all workspaces
 
@@ -43,7 +43,14 @@ gh issue list --repo "$REPO" --state open --limit 50 \
   --json number,title,labels,createdAt,updatedAt,comments
 ```
 
-Categorize: **`deferred` label** (verify Rule 1b 4-condition body per `rules/zero-tolerance.md`), **Closeable** (delivered code per `rules/git.md` § Issue Closure Discipline), **Genuinely actionable**. Per `rules/value-prioritization.md` MUST-4, `Stale` is NOT a closure category — auto-closing stale issues as `not_planned` because of age is BLOCKED. Stale issues route through the same three-disposition classification as Sweep 1 (still-wanted re-validate / abandon-with-user-gate / queued-with-value-rank).
+Then run the **issue-closure reconciliation**, which makes the **Closeable** determination mechanical rather than a judgment call: walk this repo's changelog-fragment / release-note surface, extract every `issue:` tag, and resolve each against live issue state. Where the repo ships a tool for this (e.g. an `issue-closure --sweep` entry point under its `scripts/ci/`), drive it; where it does not, do the walk by hand — the two finding classes are the deliverable either way, and MUST be reported separately, never collapsed:
+
+- **tagged-but-open** — the work landed, the issue never closed. This is the phantom-work generator: a later wave reads the open issue and re-dispatches work that already shipped.
+- **tag-resolves-to-nothing** — the tag names no issue at all (e.g. a PR number cited where an issue number belongs). **No other gate catches this class.**
+
+**Fail-closed (`rules/evidence-first-claims.md` MUST-3):** a non-zero exit, an unreadable issue state, or an absent changelog surface MUST be recorded as **UNKNOWN**, never as an empty or clean section — an unrun reconciliation is zero evidence, not an all-clear. Rows contribute to the report like any other sweep finding; this does NOT gate `/sweep`.
+
+Categorize: **`deferred` label** (verify Rule 1b 4-condition body per `rules/zero-tolerance.md`), **Closeable** (delivered code per `rules/git.md` § Issue Closure Discipline — evidenced by the reconciliation rows above rather than asserted), **Genuinely actionable**. Per `rules/value-prioritization.md` MUST-4, `Stale` is NOT a closure category — auto-closing stale issues as `not_planned` because of age is BLOCKED. Stale issues route through the same three-disposition classification as Sweep 1 (still-wanted re-validate / abandon-with-user-gate / queued-with-value-rank).
 
 ### Sweep 4: Open PRs and stale feature branches
 
@@ -70,15 +77,7 @@ Surface: drafts >7d, PRs with red CI (never merge red — fix in same branch per
 
 When BOTH conditions hold (BUILD repos: kailash-py, kailash-rs), Sweep 5 MUST invoke `tools/sweep-redteam.py` (or the equivalent at `tools/` for the consumer project's language) and embed its sentinel comment + findings into the sweep report. Substituting `tools/spec-cite-check.py` or any other proxy for the mandated per-spec symbol + Tier 2 coverage verification is BLOCKED — see `rules/sweep-completeness.md` for the human-gate requirement when proxy substitution is genuinely warranted. The TOOL is BUILD-local (each repo owns `tools/`); the SKILL text mandates the invocation pattern.
 
-```bash
-# Pre-condition probe — three signals select one of three modes (full branching
-# gate + BUILD-mode invocation loop: `.claude/skills/sweep/` § 6)
-spec_count=$(find workspaces/*/specs -type d -mindepth 1 2>/dev/null | wc -l | tr -d ' ')
-tool_present=$([ -f tools/sweep-redteam.py ] && echo true || echo false)
-repo_specs=$(for d in docs/specs specs; do [ -d "$d" ] && echo "$d"; done | head -1)
-# specs+tool -> BUILD mode (per-spec run, embed the tool's OK sentinel);
-# spec_count=0 + repo_specs -> REPO-LEVEL mode; neither -> orchestration-mode N/A.
-```
+**Run the pre-condition probe from `.claude/skills/sweep/` § 6** — three signals (`spec_count`, `tool_present`, `repo_specs`) select one of the three modes above; that section carries the runnable probe AND the branching gate + BUILD-mode invocation loop, and is the single source for both.
 
 Categorize each finding **Orphan** / **Drift** / **Coverage gap** / **Stub** (definitions + owning rules: `.claude/skills/sweep/` § 6). **Option (b) is an honest label, NOT a standing exemption** — on the 3rd consecutive run carrying it, `rules/sweep-completeness.md` MUST-4 BLOCKS a 4th emission and the row becomes a Decision Point (Closure step 2).
 
@@ -89,6 +88,7 @@ Roll up: per workspace, count findings by category. Workspaces with ≥3 unresol
 ```bash
 find workspaces/*/.session-notes -mtime +30 2>/dev/null            # stale session notes
 node .claude/bin/worktree-reap.mjs --json                           # forest reap audit + size (report-only)
+node .claude/bin/remote-ref-reap.mjs --json                         # remote refs already on origin/main (report-only; --apply archives then deletes)
 find workspaces/*/journal/.pending/*.md -mtime +14 2>/dev/null     # stale .pending
 node .claude/bin/validate-forest-ledger.mjs --aggregate            # forest rollup, workspace→root (#669)
 ```
@@ -141,7 +141,7 @@ Roll every finding into the report BY KEY + pointer, each carrying a value-ancho
 
 ### Sweep 10: Deferred-quality product-visibility revisit (the anti-forgetting teeth)
 
-The `deferred-quality` backlog is net-negative WITHOUT this revisit (`rules/value-prioritization.md` Origin: 7-of-7 deferred items decayed). Full procedure: `.claude/skills/sweep/` § 2. In brief:
+The `deferred-quality` backlog is net-negative WITHOUT this revisit (`skills/32-trust-posture/wiring/value-prioritization.md` Origin: 7-of-7 deferred items decayed). Full procedure: `.claude/skills/sweep/` § 2. In brief:
 
 ```bash
 gh issue list --label deferred-quality --state open \
@@ -149,6 +149,16 @@ gh issue list --label deferred-quality --state open \
 ```
 
 Group by revisit trigger (`after-milestone:<name>` | `on-demand`). Surface a `value-prioritization.md` MUST-3 "still wanted?" gate for any item deferred ≥2 sweeps/sessions ago. At a product-visibility milestone (terminal wave converges / release tag), re-surface EVERY item whose `after-milestone:<name>` matches, re-value-rank, re-validate the value-anchor, and present the user-gated disposition per item — **implement / re-defer-with-fresh-anchor / close-with-gate** (`value-prioritization.md` MUST-4: no auto-close as `not_planned`, no OR-escape). The agent recommends; the human decides.
+
+### Sweep 11: USE-template delivery freshness (loom orchestration-root ONLY)
+
+The seven-week rs/py delivery gap (2026-08-19 → 2026-10-07) was invisible because NOTHING measured delivery RECENCY: `check-sync-freshness` compares a template to its OWN remote (perfectly self-consistent while starved) and `fleet-freshness` measures artifact content without time. This sweep is that missing measurement — how far behind loom main each USE template is, derived from the templates' OWN receipts at their remote tips.
+
+```bash
+if [ -f .claude/bin/template-freshness.mjs ]; then node .claude/bin/template-freshness.mjs --json; else echo "<!-- sweep-template-freshness:v1:N/A reason=tool-absent -->"; fi
+```
+
+The `[ -f ]` gate carries the N/A sentinel for consumers, where the tool does not ship and no USE template exists to be measured (`rules/sweep-completeness.md`: a structural N/A, no proxy run). At the orchestration root, read the JSON: `verdict` per template, `behind_days`, and the `definition` string the tool prints so the metric is never re-derived by hand. **Exit 1 means at least one live USE template is more than 7 days behind loom main** — a `FAIL` row is a `[BUG]`-category finding under the Output contract's row rules (its Disposition cites the sync that closes it, or the accepted gap with its reason); `WARN` rows (>3 days) and any `UNKNOWN` row (a template whose receipts could not be read — never green, per the fail-closed rule in Sweep 3) are findings in the same table, not a clean section. Record by logical KEY (never a resolved absolute path) and embed the tool's `<!-- template-freshness:v1:… -->` sentinel.
 
 ## Output
 
@@ -158,7 +168,7 @@ Write the report to `workspaces/<project>/04-validate/sweep-<date>.md` (workspac
 
 Before reporting `/sweep` complete:
 
-1. ALL Sweep 1-10 outputs accumulated (Sweep 9 = the cross-ecosystem roll-up at the orchestration root, or its N/A sentinel elsewhere; Sweep 10 = the deferred-quality product-visibility revisit)
+1. ALL Sweep 1-11 outputs accumulated (Sweep 9 = the cross-ecosystem roll-up at the orchestration root, or its N/A sentinel elsewhere; Sweep 10 = the deferred-quality product-visibility revisit; Sweep 11 = USE-template delivery freshness at the orchestration root, or its N/A sentinel elsewhere)
 2. **Unadjudicated-verdict escalation (`rules/sweep-completeness.md` MUST-4).** Run `node .claude/bin/unadjudicated-escalation.mjs` (exit 0 = nothing owed, 1 = ESCALATION OWED) and embed its sentinel. It measures, from the COMMITTED reports, how many consecutive runs carried each unadjudicated verdict — there is no stored counter to reset. **Exit 1 is not a failure to route around:** every escalated key MUST appear in § Decision Points (report section 5) with a recommended disposition — author the missing check, OR record `<!-- unadjudicated-disposition:v1 key="Sweep 5/manual-supplement-required" issue=<N> owner=<handle> until=YYYY-MM-DD -->` in this report. All four fields required; a disposition SUPPRESSES until `until` passes and never resets the count, so expiry re-escalates. A 4th identical emission with neither an escalation nor a live disposition is BLOCKED. Capture the exit code (`cmd | tail` reports TAIL's). Depth: `.claude/skills/sweep/` § 6d.
 3. Trivial fixes applied inline (`rules/zero-tolerance.md` Rule 1); reclassified `FIXED` with commit SHA — **the SHA goes in the row's Disposition column, not only in git log.** A bare `FIXED inline` row is incomplete and MUST be revised before the report ships:
 
@@ -168,6 +178,7 @@ Before reporting `/sweep` complete:
    ```
 
    **Why:** the SHA is the grep-able link from finding to fix; without it `/redteam` cannot verify closure parity in a later round, which is the audit trail the reclassification exists to create.
+
 4. Non-trivial fixes filed as workspace todos OR GH issues with delivered-code references
 5. Report committed (`git add` + `git commit`)
 6. Optional: human authorization for the recommended next-session scope

@@ -11,7 +11,7 @@ Fix template syntax errors in DataFlow - using wrong `{{}}` syntax instead of co
 > Category: `cross-cutting` (error-resolution)
 > Priority: `HIGH`
 > SDK Version: `0.5.0+`
-> Related Skills: [`dataflow-quickstart`](../02-dataflow/dataflow-quickstart.md), [`connection-patterns`](../01-core-sdk/connection-patterns.md)
+> Related Skills: [`dataflow-quickstart`](../../../.claude/skills/02-dataflow/dataflow-quickstart.md), [`connection-patterns`](../../../.claude/skills/01-core-sdk/connection-patterns.md)
 > Related Subagents: `dataflow-specialist` (DataFlow patterns)
 
 ## The Error
@@ -163,9 +163,9 @@ results, run_id = runtime.execute(workflow.build())
 
 ## Related Patterns
 
-- **DataFlow basics**: [`dataflow-quickstart`](../02-dataflow/dataflow-quickstart.md)
-- **Connection patterns**: [`connection-patterns`](../01-core-sdk/connection-patterns.md)
-- **DataFlow models**: [`dataflow-models`](../02-dataflow/dataflow-models.md)
+- **DataFlow basics**: [`dataflow-quickstart`](../../../.claude/skills/02-dataflow/dataflow-quickstart.md)
+- **Connection patterns**: [`connection-patterns`](../../../.claude/skills/01-core-sdk/connection-patterns.md)
+- **DataFlow models**: [`dataflow-models`](../../../.claude/skills/02-dataflow/dataflow-models.md)
 
 ## When to Escalate to Subagent
 

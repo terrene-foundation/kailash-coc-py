@@ -303,7 +303,7 @@ pip install kaizen-agents  # v0.1.0
 
 ## Related Skills
 
-- **[kaizen-l3-overview](kaizen-l3-overview.md)** — L3 SDK primitives (deterministic layer)
-- **[kaizen-l3-envelope](kaizen-l3-envelope.md)** — EnvelopeTracker, Splitter, Enforcer
-- **[kaizen-l3-plan-dag](kaizen-l3-plan-dag.md)** — PlanExecutor, gradient rules
-- **[kaizen-agents-security](kaizen-agents-security.md)** — Security patterns for governance
+- **[kaizen-l3-overview](../../../.claude/skills/04-kaizen/kaizen-l3-overview.md)** — L3 SDK primitives (deterministic layer)
+- **[kaizen-l3-envelope](../../../.claude/skills/04-kaizen/kaizen-l3-envelope.md)** — EnvelopeTracker, Splitter, Enforcer
+- **[kaizen-l3-plan-dag](../../../.claude/skills/04-kaizen/kaizen-l3-plan-dag.md)** — PlanExecutor, gradient rules
+- **[kaizen-agents-security](../../../.claude/skills/04-kaizen/kaizen-agents-security.md)** — Security patterns for governance

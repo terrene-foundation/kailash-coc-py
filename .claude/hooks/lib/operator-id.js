@@ -20,11 +20,14 @@
  *      "/whoami --register".
  *      No signing key   → posture: L2_SUPERVISED, blocked_into:
  *      "configure signing key, then run /whoami --register".
- *   3. Cache layer at .claude/operator-id is HINT-ONLY:
- *      - present + valid + verified_id matches current fingerprint → use it
- *      - absent / corrupt / mismatched verified_id → re-derive AND rewrite
- *      Cache tampering is harmless because every call re-validates against
- *      the live signing-key fingerprint.
+ *   3. NO cache layer. `.claude/operator-id` is neither READ nor WRITTEN:
+ *      the read fast-path was removed by M9.1 R1 Sec-ID-1 (the roster is
+ *      always re-walked for authority), and the write-back was removed by the
+ *      dead-write sweep (2026-10-09) once the reader's removal left every
+ *      resolveIdentity call writing a file nothing reads. Re-introducing
+ *      either half MUST carry explicit forensic review and a fresh
+ *      authority-binding contract — never a silent re-wire (see the note
+ *      below `_soloDisplayId`).
  *
  * Style: CommonJS to match sibling .claude/hooks/lib/* modules. No external
  * deps. Spawns ssh-keygen / git as subprocesses (the OS tools are the
@@ -36,10 +39,59 @@
 const fs = require("fs");
 const path = require("path");
 const { spawnSync } = require("child_process");
+const { askOnce: askGitOnce, eventGitKey } = require("./event-git.js");
 const { isCoordinationEnabled } = require("./coordination-mode.js");
+const { fingerprintFromPubFile } = require("./ssh-pubkey-fingerprint.js");
+// The hardened reader, for the same reason `roster-write.js` and `coc-roster-register.mjs`
+// take it: `_readJsonSafe` below reads the ROSTER (`:472` -> `:498`), which lives in
+// `.claude/` — the directory the module threat model treats as plantable. One open(2) flag
+// set, shared (`security.md` § "Multi-Site Kwarg Plumbing").
+const { readFileHardened } = require("./state-io.js");
+// loom#1471 shard F1 — the CONFIG profile. This module is the reason that
+// profile exists: it asks git CONFIG questions (`user.signingkey`, `user.name`),
+// so `gitEnv()` would break it rather than harden it (that helper nulls global +
+// system config), and passing NO env leaves it fully steerable. See
+// git-subprocess-env.js § "the CONFIG profile".
+const {
+  resolveGitBinary,
+  gitConfigInvocation,
+} = require("./git-subprocess-env.js");
+
+/**
+ * Run a git CONFIG query through the steering-closed, config-PRESERVING profile.
+ *
+ * FAILS CLOSED, LOUDLY-BY-RANKING, NEVER AMBIENT. When git cannot be resolved to
+ * an absolute binary the answer is `null` — an INDETERMINATE, which every caller
+ * below ranks TIGHTEST (no key ⇒ L2_SUPERVISED / solo) exactly as
+ * `git-subprocess-env.js` requires. It does NOT fall back to a PATH-resolved
+ * `git` or to the ambient environment, because either would reinstate the whole
+ * class this routing closes (`rules/zero-tolerance.md` Rule 3).
+ *
+ * @param {string[]} args — WITHOUT the binary, e.g. ["-C", dir, "config", …]
+ * @returns {string|null} trimmed stdout on exit 0, else null
+ */
+function _gitConfigRead(args) {
+  const gitBin = resolveGitBinary();
+  if (!gitBin) return null;
+  const inv = gitConfigInvocation(args);
+  // ONE answer per distinct question per hook event (lib/event-git.js): the
+  // heartbeat, provenance and signing guards all resolve the same identity on one
+  // call. A failed read (non-zero exit) is recorded as null and stays null for
+  // every later asker in the event.
+  const r = askGitOnce(eventGitKey({ gitBin, cwd: process.cwd(), args: inv.args, envelope: "gitConfigInvocation" }), () => {
+    const x = spawnSync(gitBin, inv.args, {
+      stdio: ["ignore", "pipe", "pipe"],
+      encoding: "utf8",
+      env: inv.env,
+      timeout: 2000,
+    });
+    return { status: x.status, stdout: x.stdout || "" };
+  });
+  if (r.status !== 0) return null;
+  return (r.stdout || "").trim();
+}
 
 const ROSTER_REL = path.join(".claude", "operators.roster.json");
-const CACHE_REL = path.join(".claude", "operator-id");
 const L2_SUPERVISED = "L2_SUPERVISED";
 const UNROSTERED_BLOCKED_INTO = "/whoami --register";
 const NO_KEY_BLOCKED_INTO =
@@ -51,15 +103,21 @@ let _deriveCount = 0;
 // ---- helpers ----------------------------------------------------------------
 
 function _readJsonSafe(filePath) {
-  if (!fs.existsSync(filePath)) return { ok: false, reason: "absent" };
-  let raw;
-  try {
-    raw = fs.readFileSync(filePath, "utf8");
-  } catch (err) {
-    return { ok: false, reason: `read failed: ${err.message}` };
+  // Through `state-io.js::readFileHardened` (implemented by `state-io.js::_readFileHardened`). The `existsSync`
+  // guard this replaces was NOT a substitute for it: `existsSync` returns TRUE for a
+  // planted FIFO, and the plain `readFileSync` it guarded then BLOCKED FOREVER in
+  // open(2) — a hang the `catch` beside it could not reach. The read below is the ROSTER
+  // (`:472` -> `:498`), i.e. the same asset `roster-write.js::readRosterBytes` and
+  // `coc-roster-register.mjs` both already route through this helper.
+  const r = readFileHardened(filePath);
+  // ABSENT keeps its own reason string. The sole caller collapses absent and unreadable
+  // alike (`roster` stays null -> un-rostered -> safe L2), but the two are different
+  // facts and a refusal must never be reported IN THE GRAMMAR of an absence.
+  if (!r.ok) {
+    return { ok: false, reason: r.code === "ENOENT" ? "absent" : `read failed: ${r.reason}` };
   }
   try {
-    return { ok: true, value: JSON.parse(raw) };
+    return { ok: true, value: JSON.parse(r.value.toString("utf8")) };
   } catch (err) {
     return { ok: false, reason: `parse failed: ${err.message}` };
   }
@@ -160,6 +218,13 @@ function _fingerprintFromKey(keyPath, keyType, resolver) {
   }
   for (const candidate of candidates) {
     if (!fs.existsSync(candidate)) continue;
+    // perf/hook-cost: the SHA256 fingerprint of an ed25519/RSA PUBLIC key file
+    // is a pure function of its bytes; compute it in-process when the shape is
+    // provably one ssh-keygen would load (ssh-pubkey-fingerprint.js § EXACTNESS
+    // CONTRACT). Any other shape — a private key, ECDSA, a certificate — falls
+    // through to the ssh-keygen spawn below, unchanged.
+    const inProc = fingerprintFromPubFile(candidate);
+    if (inProc) return inProc;
     const r = spawnSync("ssh-keygen", ["-lf", candidate], {
       stdio: ["ignore", "pipe", "pipe"],
       timeout: 2000,
@@ -198,20 +263,21 @@ function _discoverSigningKey(repoDir, opts) {
   ) {
     return { keyPath: null };
   }
-  // git -C <repoDir> config user.signingkey
-  const r = spawnSync(
-    "git",
-    ["-C", repoDir, "config", "--get", "user.signingkey"],
-    { stdio: ["ignore", "pipe", "pipe"], timeout: 2000 },
-  );
-  if (r.status === 0) {
-    const val = r.stdout.toString().trim();
-    if (val) {
-      // git's user.signingkey can be an SSH key path OR a GPG key id.
-      // Heuristic: existence as a file → SSH; otherwise GPG.
-      const exists = fs.existsSync(val) || fs.existsSync(`${val}.pub`);
-      return { keyPath: val, keyType: exists ? "ssh" : "gpg" };
-    }
+  // git -C <repoDir> config user.signingkey, through the CONFIG profile: the
+  // GLOBAL scope is where a signing key actually lives, and an ambient GIT_DIR /
+  // GIT_CONFIG_GLOBAL / GIT_CONFIG_COUNT / HOME must not be able to choose which
+  // key answers. MEASURED before the routing landed, on a decoy fixture: with no
+  // env, an ambient GIT_CONFIG_COUNT=1 / GIT_CONFIG_KEY_0=user.signingkey moved
+  // verified_id to the attacker's value and display_id to the DECOY repo's
+  // user.name (`name-evil`) — i.e. the attribution primitive
+  // `multi-operator-coordination.md` §1 designates was fully steerable. See
+  // .claude/test-harness/tests/git-env-config-profile-f1-1471.test.mjs F1-S6.
+  const val = _gitConfigRead(["-C", repoDir, "config", "--get", "user.signingkey"]);
+  if (val) {
+    // git's user.signingkey can be an SSH key path OR a GPG key id.
+    // Heuristic: existence as a file → SSH; otherwise GPG.
+    const exists = fs.existsSync(val) || fs.existsSync(`${val}.pub`);
+    return { keyPath: val, keyType: exists ? "ssh" : "gpg" };
   }
   return { keyPath: null };
 }
@@ -300,41 +366,28 @@ function _makeRosterGpgResolver(roster) {
   };
 }
 
-/**
- * Write the cache file. Best-effort; cache write failures NEVER fail the
- * resolver (the cache is hint-only).
- */
-function _writeCache(cachePath, identity) {
-  try {
-    // M9.1 R3 Sec-R3-S-05 — cache writeback reduced to `verified_id` only.
-    // Per the M9.1 R1 Sec-ID-1 reframe, authority fields (person_id /
-    // role / host_role / display_id) are ALWAYS re-derived from the live
-    // roster on read; storing them in the cache is dead-data on disk and
-    // a non-zero forensic surface (a reader could be misled into thinking
-    // authority WAS cached). The cache's sole purpose is the ssh-keygen
-    // trust-anchor short-circuit, which only needs `verified_id`.
-    const payload =
-      JSON.stringify({
-        verified_id: identity.verified_id,
-      }) + "\n";
-    // MED-2 (M0 security review): cache contains the verified_id
-    // (signing-key fingerprint) — sensitive identity material. Restrict
-    // to the file owner only.
-    fs.writeFileSync(cachePath, payload, { mode: 0o600 });
-  } catch {
-    // best-effort
-  }
-}
-
-// M9.1 R4 Sec-R4-S-03 — `_readCache` was removed as dead code. The M9.1
-// R1 Sec-ID-1 reframe removed the cache fast-path (roster is ALWAYS
-// re-walked for authority); no caller invokes `_readCache` post-fix.
-// Dead authentication-adjacent functions invite future caller wiring
-// that re-introduces the cache-poisoning class M5 iter-6's
-// `readCache identity-guard` (per `journal/0131`) was designed to close.
-// If a future fingerprint-only short-circuit becomes necessary, it MUST
-// be re-introduced with explicit forensic review and a fresh
-// authority-binding contract — never as a silent re-wire of dead code.
+// The `.claude/operator-id` cache is GONE — BOTH halves, recorded here because
+// a half-cache is exactly the state this sweep found.
+//
+// The READ half was removed earlier: M9.1 R4 Sec-R4-S-03 deleted `_readCache`
+// as dead code after the M9.1 R1 Sec-ID-1 reframe removed the cache fast-path
+// (the roster is ALWAYS re-walked for authority). The rationale stands recorded
+// in history: dead authentication-adjacent functions invite future caller
+// wiring that re-introduces the cache-poisoning class M5 iter-6's `readCache
+// identity-guard` (per `journal/0131`) was designed to close.
+//
+// The WRITE half — `_writeCache`, invoked at the end of EVERY resolveIdentity —
+// survived that removal with no reader anywhere in the repo (2026-10-09
+// dead-write sweep, measured: no in-repo consumer; the hooks' @hook-contract
+// blocks were its only remaining mentions apart from tests that pinned the
+// write itself). It was removed for the same reason the read half was plus
+// two of its own: it ran a filesystem write on every hook event that resolved
+// identity (resolveIdentity is called per Stop, per guard), and it persisted
+// key-fingerprint material for a value nothing consumed.
+//
+// If a future fingerprint-only short-circuit becomes necessary, it MUST be
+// re-introduced with explicit forensic review and a fresh authority-binding
+// contract — never as a silent re-wire of either half.
 
 /**
  * MO-OPT W1-d (workspaces/multi-operator-optional, journal/0330) — derive a
@@ -344,14 +397,20 @@ function _writeCache(cachePath, identity) {
  * is well-formed.
  */
 function _soloDisplayId(repoDir) {
+  // Through the CONFIG profile for the same reason as the signingkey read
+  // above, and with a sharper consequence: this value BECOMES the codify branch
+  // name (`codify/<display_id>-<date>`), so an ambient GIT_DIR pointing at a
+  // decoy repo re-names the operator. MEASURED pre-fix on the decoy fixture:
+  // display_id resolved to `name-evil`, the DECOY's own user.name.
+  //
+  // The try/catch stays: `_gitConfigRead` can THROW (`GitConfigProfileError`)
+  // if this argument vector is ever edited outside the profile's scope, and a
+  // display-id derivation must not take a session down. It is NOT a silent
+  // fallback to ambient — the catch lands on the literal "solo", which is the
+  // tight ranking, not a looser env.
   let name = "";
   try {
-    const r = spawnSync(
-      "git",
-      ["-C", repoDir, "config", "--get", "user.name"],
-      { stdio: ["ignore", "pipe", "ignore"], encoding: "utf8", timeout: 2000 },
-    );
-    if (r.status === 0) name = (r.stdout || "").trim();
+    name = _gitConfigRead(["-C", repoDir, "config", "--get", "user.name"]) || "";
   } catch {
     // fall through to "solo"
   }
@@ -409,7 +468,6 @@ function _soloIdentity(repoDir, fingerprint) {
  */
 function resolveIdentity(repoDir, opts) {
   const o = opts || {};
-  const cachePath = path.join(repoDir, CACHE_REL);
   const rosterPath = path.join(repoDir, ROSTER_REL);
 
   // ---- Tier 1: signing-key fingerprint discovery --------------------------
@@ -511,9 +569,6 @@ function resolveIdentity(repoDir, opts) {
       blocked_into: UNROSTERED_BLOCKED_INTO,
     };
   }
-
-  // ---- Cache write-back (best-effort; failure does NOT fail the resolve) -
-  _writeCache(cachePath, identity);
 
   return identity;
 }

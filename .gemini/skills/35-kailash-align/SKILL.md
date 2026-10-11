@@ -144,10 +144,10 @@ config = AlignmentConfig(
 
 ## Skill Files
 
-- [align-training](align-training.md) — AlignmentConfig, AlignmentPipeline, method selection, QLoRA, dataset formats
-- [align-evaluation](align-evaluation.md) — Evaluation workflow, ROUGE, win-rate, safety checks, eval-before-serve
-- [align-serving](align-serving.md) — GGUF export, Ollama deployment, vLLM, KaizenModelBridge
-- [align-adapter-registry](align-adapter-registry.md) — AdapterRegistry, adapter chaining, version tracking
+- [align-training](../../../.claude/skills/35-kailash-align/align-training.md) — AlignmentConfig, AlignmentPipeline, method selection, QLoRA, dataset formats
+- [align-evaluation](../../../.claude/skills/35-kailash-align/align-evaluation.md) — Evaluation workflow, ROUGE, win-rate, safety checks, eval-before-serve
+- [align-serving](../../../.claude/skills/35-kailash-align/align-serving.md) — GGUF export, Ollama deployment, vLLM, KaizenModelBridge
+- [align-adapter-registry](../../../.claude/skills/35-kailash-align/align-adapter-registry.md) — AdapterRegistry, adapter chaining, version tracking
 
 ## Critical Rules
 
@@ -160,6 +160,6 @@ config = AlignmentConfig(
 
 ## Related Skills
 
-- [34-kailash-ml](../34-kailash-ml/SKILL.md) — Classical ML lifecycle (FeatureStore, ModelRegistry)
-- [04-kaizen](../04-kaizen/SKILL.md) — AI agent framework (KaizenModelBridge target)
-- [03-nexus](../03-nexus/SKILL.md) — Multi-channel deployment
+- [34-kailash-ml](../../../.claude/skills/34-kailash-ml/SKILL.md) — Classical ML lifecycle (FeatureStore, ModelRegistry)
+- [04-kaizen](../../../.claude/skills/04-kaizen/SKILL.md) — AI agent framework (KaizenModelBridge target)
+- [03-nexus](../../../.claude/skills/03-nexus/SKILL.md) — Multi-channel deployment

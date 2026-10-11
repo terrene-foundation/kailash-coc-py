@@ -11,7 +11,7 @@ The kailash-mcp platform server uses a 4-tier security model that controls which
 > Category: `mcp`
 > Priority: `HIGH`
 > SDK Version: `0.9.25+`
-> Related Skills: [`mcp-platform-overview`](mcp-platform-overview.md), [`mcp-tool-catalog`](mcp-tool-catalog.md), [`mcp-contributor-pattern`](mcp-contributor-pattern.md)
+> Related Skills: [`mcp-platform-overview`](../../../.claude/skills/05-kailash-mcp/mcp-platform-overview.md), [`mcp-tool-catalog`](../../../.claude/skills/05-kailash-mcp/mcp-tool-catalog.md), [`mcp-contributor-pattern`](../../../.claude/skills/05-kailash-mcp/mcp-contributor-pattern.md)
 > Related Subagents: `mcp-platform-specialist` (security configuration, tier escalation)
 
 ## Tier Overview

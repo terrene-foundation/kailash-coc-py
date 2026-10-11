@@ -257,7 +257,7 @@ workflow.add_node("OrderListNode", "revenue_by_status", {
 })
 ```
 
-> **For direct SQL aggregation queries** (COUNT/SUM/AVG/MIN/MAX with GROUP BY, parameterized SQL, operator suffixes), see [`dataflow-aggregation`](dataflow-aggregation.md).
+> **For direct SQL aggregation queries** (COUNT/SUM/AVG/MIN/MAX with GROUP BY, parameterized SQL, operator suffixes), see [`dataflow-aggregation`](../../../.claude/skills/02-dataflow/dataflow-aggregation.md).
 > The `dataflow.query` module provides `count_by()`, `sum_by()`, and `aggregate()` async functions that work directly on database connections.
 
 ## Common Mistakes
@@ -328,7 +328,7 @@ workflow.add_node("ProductListNode", "query", {
 ## Related Patterns
 
 - **For CRUD operations**: See [`dataflow-crud-operations`](#)
-- **For SQL aggregation (GROUP BY)**: See [`dataflow-aggregation`](dataflow-aggregation.md)
+- **For SQL aggregation (GROUP BY)**: See [`dataflow-aggregation`](../../../.claude/skills/02-dataflow/dataflow-aggregation.md)
 - **For bulk operations**: See [`dataflow-bulk-operations`](#)
 - **For performance**: See [`dataflow-performance`](#)
 - **For result access**: See [`dataflow-result-access`](#)

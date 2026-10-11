@@ -25,7 +25,7 @@ This skill provides:
 
 ### Core Principles
 
-- **[design-principles](design-principles.md)** - Complete UI/UX design principles and guidelines
+- **[design-principles](../../../.claude/skills/23-uiux-design-principles/design-principles.md)** - Complete UI/UX design principles and guidelines
   - Top-down design methodology
   - Layout & information architecture
   - Visual hierarchy principles
@@ -38,7 +38,7 @@ This skill provides:
 
 ### Motion Design
 
-- **[motion-design](motion-design.md)** - Animation timing, easing curves, and motion patterns
+- **[motion-design](../../../.claude/skills/23-uiux-design-principles/motion-design.md)** - Animation timing, easing curves, and motion patterns
   - Timing reference (50ms-800ms+ by interaction type)
   - Modern easing curves (CSS + Flutter)
   - Animation categories (entrance, micro-interaction, state, loading, page)
@@ -48,7 +48,7 @@ This skill provides:
 
 ### Production Hardening
 
-- **[production-hardening](production-hardening.md)** - Frontend production hardening checklist
+- **[production-hardening](../../../.claude/skills/23-uiux-design-principles/production-hardening.md)** - Frontend production hardening checklist
   - Text & content resilience (overflow, length extremes, dynamic content)
   - Internationalization (text expansion, formatting, encoding)
   - Error states & recovery (network, HTTP status, form errors)
@@ -58,7 +58,7 @@ This skill provides:
 
 ### UX Writing & Microcopy
 
-- **[ux-writing](ux-writing.md)** - Interface text patterns for enterprise applications
+- **[ux-writing](../../../.claude/skills/23-uiux-design-principles/ux-writing.md)** - Interface text patterns for enterprise applications
   - Button & action label patterns (verb + noun)
   - Error message structure (what + why + fix)
   - Empty state copy (what goes here + why empty + how to fill)
@@ -130,7 +130,7 @@ Use this skill **PROACTIVELY** when:
 
 ## Related Skills
 
-- **[25-ai-interaction-patterns](../25-ai-interaction-patterns/SKILL.md)** - AI UX patterns
+- **[25-ai-interaction-patterns](../../../.claude/skills/25-ai-interaction-patterns/SKILL.md)** - AI UX patterns
 
 ## Support
 

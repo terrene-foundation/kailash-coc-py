@@ -10,7 +10,7 @@ Application-layer materialized views that compute derived data from source model
 > **Skill Metadata**
 > Category: `dataflow`
 > Priority: `MEDIUM`
-> Related Skills: [`dataflow-events`](dataflow-events.md), [`dataflow-express`](dataflow-express.md)
+> Related Skills: [`dataflow-events`](../../../.claude/skills/02-dataflow/dataflow-events.md), [`dataflow-express`](../../../.claude/skills/02-dataflow/dataflow-express.md)
 > Related Subagents: `dataflow-specialist`
 
 ## Quick Reference

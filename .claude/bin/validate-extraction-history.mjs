@@ -69,7 +69,8 @@
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { join, resolve, relative, basename, dirname } from "node:path";
 import { execFileSync } from "node:child_process";
-import { fileURLToPath } from "node:url";
+import { isMainModule } from "./lib/entry-point.mjs";
+import { stripFencedContent } from "./lib/markdown-fences.mjs";
 
 // --- Constants ----------------------------------------------------------
 
@@ -299,8 +300,19 @@ function listJournalEntries(journalDir) {
   let entries;
   try {
     entries = readdirSync(journalDir);
-  } catch {
-    return [];
+  } catch (e) {
+    // FAIL CLOSED, do not return []. Absence is ALREADY handled by the
+    // `existsSync` guard at the call site, which exits 2 — so reaching this catch
+    // means the dir EXISTS and could not be listed (a permission fault, an I/O
+    // error). Returning [] made that report "scanned 0 journal entries; 0
+    // Rule-11-mandated" and EXIT 0: a clean Rule-11 verdict over a corpus the
+    // validator never read. "No mandated extraction" and "could not look" are
+    // opposite conclusions and were the same output.
+    console.error(
+      `error: journal dir exists but could not be listed: ${journalDir} (${e.code || e.message})\n` +
+        `       This validator cannot speak for a corpus it did not read; refusing to report clean.`,
+    );
+    process.exit(2);
   }
   // Filter: NNNN-*.md, exclude .pending/ subdir contents (we don't recurse).
   return entries
@@ -313,11 +325,21 @@ function listJournalEntries(journalDir) {
 // Returns { mandated, reason, details } where mandated is true iff this
 // entry counts as a Rule-11-input (Rule-10-MANDATED invocation on the
 // target rule lane).
+//
+// A FENCED block is illustration, not structure (loom sweep finding C4,
+// 2026-09-06): both anchor + citation detection run over the entry with
+// fenced content stripped first, so a worked example quoting "Rule-10
+// disposition: ..." purely for illustration inside a ```text fence is not
+// misread as a real disposition assertion on the target rule. CONFIRMED by a
+// two-pole control before this fix: an entry whose ONLY anchor occurrence was
+// inside a fence classified `mandated: true` identically to one with the
+// same text unfenced.
 function classifyEntry(entryPath, body, fm, targetRule, repoRoot) {
-  if (!hasRule10Anchor(body)) {
+  const scannable = stripFencedContent(body);
+  if (!hasRule10Anchor(scannable)) {
     return { mandated: false, reason: "no-rule10-anchor" };
   }
-  if (!citesRule(body, targetRule)) {
+  if (!citesRule(scannable, targetRule)) {
     return { mandated: false, reason: "rule-not-cited" };
   }
   const entryDate = fm.get("date");
@@ -597,9 +619,8 @@ function main() {
 }
 
 // Export internals for audit-fixture harness
-const __filename = fileURLToPath(import.meta.url);
-const isMain =
-  process.argv[1] && resolve(process.argv[1]) === resolve(__filename);
+// Entry-point check: .claude/bin/lib/entry-point.mjs (symlink-safe; a lexical compare exits 0 silently).
+const isMain = isMainModule(import.meta.url);
 
 export {
   parseDateUTC,

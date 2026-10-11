@@ -391,9 +391,9 @@ workflow.add_node("OrderCountNode", "count", {
 
 ## Related Resources
 
-- **[dataflow-queries](dataflow-queries.md)** - Query patterns and filtering
-- **[dataflow-performance](dataflow-performance.md)** - Performance optimization
-- **[dataflow-crud-operations](dataflow-crud-operations.md)** - CRUD operation patterns
+- **[dataflow-queries](../../../.claude/skills/02-dataflow/dataflow-queries.md)** - Query patterns and filtering
+- **[dataflow-performance](../../../.claude/skills/02-dataflow/dataflow-performance.md)** - Performance optimization
+- **[dataflow-crud-operations](../../../.claude/skills/02-dataflow/dataflow-crud-operations.md)** - CRUD operation patterns
 
 ## When to Use This Skill
 

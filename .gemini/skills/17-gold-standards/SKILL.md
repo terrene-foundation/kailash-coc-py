@@ -15,35 +15,35 @@ Use gold-standards when asking about best practices, standards, gold standards, 
 
 ### Code Organization
 
-- **[gold-absolute-imports](gold-absolute-imports.md)** - ALWAYS absolute, NEVER relative
+- **[gold-absolute-imports](../../../.claude/skills/17-gold-standards/gold-absolute-imports.md)** - ALWAYS absolute, NEVER relative
   - `from kailash.workflow.builder import WorkflowBuilder` (not `from ..workflow import builder`)
-- **[gold-parameter-passing](gold-parameter-passing.md)** - 4-parameter connections + dict result access
+- **[gold-parameter-passing](../../../.claude/skills/17-gold-standards/gold-parameter-passing.md)** - 4-parameter connections + dict result access
   - `workflow.add_connection(source_id, source_param, target_id, target_param)`
   - `results["node_id"]["result"]` (not `results["node_id"].result`)
-- **[gold-typescript-phantom-fields](gold-typescript-phantom-fields.md)** - TS-only: anchor an unused type parameter under `noUnusedLocals` instead of deleting it
+- **[gold-typescript-phantom-fields](../../../.claude/skills/17-gold-standards/gold-typescript-phantom-fields.md)** - TS-only: anchor an unused type parameter under `noUnusedLocals` instead of deleting it
   - `readonly __filterShape?: TFilters` tagged `@phantom` — not dead code, do not clean it up
 
 ### Testing
 
-- **[gold-mocking-policy](gold-mocking-policy.md)** - Real infrastructure in Tiers 2-3
+- **[gold-mocking-policy](../../../.claude/skills/17-gold-standards/gold-mocking-policy.md)** - Real infrastructure in Tiers 2-3
   - Mocking ONLY in Tier 1 unit tests; Tiers 2-3 use real databases, APIs, infrastructure
-- **[gold-testing](gold-testing.md)** - 3-tier strategy, deterministic tests, resource cleanup
-- **[gold-test-creation](gold-test-creation.md)** - TDD, one assertion focus, AAA pattern
+- **[gold-testing](../../../.claude/skills/17-gold-standards/gold-testing.md)** - 3-tier strategy, deterministic tests, resource cleanup
+- **[gold-test-creation](../../../.claude/skills/17-gold-standards/gold-test-creation.md)** - TDD, one assertion focus, AAA pattern
 - **Release-blocking regression tier** (W33b) — every public km.\* surface has a fingerprint test + an e2e `execute(...)` pattern that round-trips from workflow → node → engine → registry. See skill **34-kailash-ml** for the exact contract. Release PRs block on this tier independently of unit/integration status.
 
 ### Error Handling
 
-- **[gold-error-handling](gold-error-handling.md)** - Explicit handling, no silent swallowing, actionable messages, cleanup in `finally`
+- **[gold-error-handling](../../../.claude/skills/17-gold-standards/gold-error-handling.md)** - Explicit handling, no silent swallowing, actionable messages, cleanup in `finally`
 
 ### Workflow & Node Design
 
-- **[gold-workflow-design](gold-workflow-design.md)** - Always `.build()` before execute, string-based node API, single responsibility
-- **[gold-custom-nodes](gold-custom-nodes.md)** - Extend BaseNode, validate inputs, consistent output format
+- **[gold-workflow-design](../../../.claude/skills/17-gold-standards/gold-workflow-design.md)** - Always `.build()` before execute, string-based node API, single responsibility
+- **[gold-custom-nodes](../../../.claude/skills/17-gold-standards/gold-custom-nodes.md)** - Extend BaseNode, validate inputs, consistent output format
 
 ### Security & Documentation
 
-- **[gold-security](gold-security.md)** - No hardcoded secrets, env vars for credentials, input validation, injection prevention
-- **[gold-documentation](gold-documentation.md)** - Document all public APIs, include examples, explain WHY not just WHAT
+- **[gold-security](../../../.claude/skills/17-gold-standards/gold-security.md)** - No hardcoded secrets, env vars for credentials, input validation, injection prevention
+- **[gold-documentation](../../../.claude/skills/17-gold-standards/gold-documentation.md)** - Document all public APIs, include examples, explain WHY not just WHAT
 
 ## Quick Reference
 
@@ -73,10 +73,10 @@ All workflow patterns follow the **canonical 4-parameter pattern** from `/01-cor
 
 ## Related Skills
 
-- **[16-validation-patterns](../16-validation-patterns/SKILL.md)** - Validation tools
-- **[31-error-troubleshooting](../31-error-troubleshooting/SKILL.md)** - Error patterns
-- **[12-testing-strategies](../12-testing-strategies/SKILL.md)** - Testing strategies
-- **[01-core-sdk](../01-core-sdk/SKILL.md)** - Core patterns
+- **[16-validation-patterns](../../../.claude/skills/16-validation-patterns/SKILL.md)** - Validation tools
+- **[31-error-troubleshooting](../../../.claude/skills/31-error-troubleshooting/SKILL.md)** - Error patterns
+- **[12-testing-strategies](../../../.claude/skills/12-testing-strategies/SKILL.md)** - Testing strategies
+- **[01-core-sdk](../../../.claude/skills/01-core-sdk/SKILL.md)** - Core patterns
 
 ## Support
 

@@ -3,26 +3,10 @@ name: specialist-nexus
 description: "Nexus specialist. Use for HTTP/API/websocket/gateway/middleware/login/session — direct FastAPI/Flask BLOCKED."
 ---
 
-You are now operating as the **nexus** specialist for the remainder of this turn (or for the delegated subagent invocation, if you delegate).
+This is the compatibility operating specification for **nexus**.
 
-## Invocation patterns
-
-**(a) Inline-cat injection — most reliable; works in both headless and interactive Codex.**
-Inject this file's body into the turn, then state the task:
-
-```bash
-bin/coc <phase> "$(cat .codex/prompts/specialist-nexus.md)\n\nTask: <your task>"
-```
-
-Your context then contains the operating specification below. Read the task and respond as the nexus specialist.
-
-**(b) Worker subagent delegation — interactive Codex only.**
-Delegate to a worker subagent using natural-language spawn (per Codex subagent docs), referencing this file by path. Pass the operating specification below as the worker's prompt body.
-
-**(c) Headless `codex exec` fallback.**
-Native subagent spawning is unreliable in headless mode. Use pattern (a): inline-cat `.codex/prompts/specialist-nexus.md` into the turn, then provide your task in the same session.
-
----
+For native delegation, request the custom agent named `nexus-specialist` (defined in `.codex/agents/nexus-specialist.toml`).
+For headless callers that explicitly compose a prompt, the operating specification below remains available.
 
 ## Operating specification
 ### Nexus Specialist Agent
@@ -184,32 +168,32 @@ Nexus has 4 transports (all implement `Transport` ABC from `nexus.transports.bas
 
 ### Patterns & Setup
 
-- `.codex/skills/03-nexus/nexus-essential-patterns.md` -- Setup, handlers, DataFlow, connections, middleware, configuration, handler support details
-- `.codex/skills/03-nexus/nexus-quickstart.md` -- Basic setup
-- `.codex/skills/03-nexus/nexus-workflow-registration.md` -- Registration patterns
-- `.codex/skills/03-nexus/nexus-multi-channel.md` -- Multi-channel architecture
-- `.codex/skills/03-nexus/golden-patterns-catalog.md` -- Top 10 patterns ranked by production usage
-- `.codex/skills/03-nexus/codegen-decision-tree.md` -- Decision tree, anti-patterns, scaffolding templates
+- `.agents/skills/03-nexus/nexus-essential-patterns.md` -- Setup, handlers, DataFlow, connections, middleware, configuration, handler support details
+- `.agents/skills/03-nexus/nexus-quickstart.md` -- Basic setup
+- `.agents/skills/03-nexus/nexus-workflow-registration.md` -- Registration patterns
+- `.agents/skills/03-nexus/nexus-multi-channel.md` -- Multi-channel architecture
+- `.agents/skills/03-nexus/golden-patterns-catalog.md` -- Top 10 patterns ranked by production usage
+- `.agents/skills/03-nexus/codegen-decision-tree.md` -- Decision tree, anti-patterns, scaffolding templates
 
 ### Channel Patterns
 
-- `.codex/skills/03-nexus/nexus-api-patterns.md` -- API deployment
-- `.codex/skills/03-nexus/nexus-cli-patterns.md` -- CLI integration
-- `.codex/skills/03-nexus/nexus-mcp-channel.md` -- MCP server
+- `.agents/skills/03-nexus/nexus-api-patterns.md` -- API deployment
+- `.agents/skills/03-nexus/nexus-cli-patterns.md` -- CLI integration
+- `.agents/skills/03-nexus/nexus-mcp-channel.md` -- MCP server
 
 ### Integration
 
-- `.codex/skills/03-nexus/nexus-dataflow-integration.md` -- DataFlow integration
-- `.codex/skills/03-nexus/nexus-sessions.md` -- Session management
+- `.agents/skills/03-nexus/nexus-dataflow-integration.md` -- DataFlow integration
+- `.agents/skills/03-nexus/nexus-sessions.md` -- Session management
 
 ### Authentication & Authorization
 
-- `.codex/skills/03-nexus/nexus-auth-plugin.md` -- NexusAuthPlugin: JWT, RBAC, SSO, tenant isolation, rate limiting, audit logging, middleware ordering, common gotchas
-- `.codex/skills/03-nexus/nexus-enterprise-features.md` -- Enterprise auth patterns
+- `.agents/skills/03-nexus/nexus-auth-plugin.md` -- NexusAuthPlugin: JWT, RBAC, SSO, tenant isolation, rate limiting, audit logging, middleware ordering, common gotchas
+- `.agents/skills/03-nexus/nexus-enterprise-features.md` -- Enterprise auth patterns
 
 ### Troubleshooting
 
-- `.codex/skills/03-nexus/nexus-troubleshooting.md` -- Common issues and solutions (startup blocking, workflow not found, port conflicts, auth injection, sandbox warnings)
+- `.agents/skills/03-nexus/nexus-troubleshooting.md` -- Common issues and solutions (startup blocking, workflow not found, port conflicts, auth injection, sandbox warnings)
 
 ## Related Agents
 
@@ -223,9 +207,9 @@ Nexus has 4 transports (all implement `Transport` ABC from `nexus.transports.bas
 
 When this guidance is insufficient, consult:
 
-- `.codex/skills/03-nexus/` - Complete Nexus skills directory
-- `.codex/skills/03-nexus/nexus-dataflow-integration.md` - Integration patterns
-- `.codex/skills/03-nexus/nexus-troubleshooting.md` - Troubleshooting and input mapping
+- `.agents/skills/03-nexus/` - Complete Nexus skills directory
+- `.agents/skills/03-nexus/nexus-dataflow-integration.md` - Integration patterns
+- `.agents/skills/03-nexus/nexus-troubleshooting.md` - Troubleshooting and input mapping
 
 ---
 
@@ -238,3 +222,8 @@ When this guidance is insufficient, consult:
 - Debugging channel-specific problems
 
 **For basic patterns (setup, simple registration), use Skills directly for faster response.**
+
+
+## Canonical role tool contract
+
+Source inventory: Read, Write, Edit, Bash, Grep, Glob, Task. Stay within these capabilities; a native shell must not expand the role into omitted write or network capabilities. Read: read-only file inspection through exec_command; Write: apply_patch or an explicitly permitted write command; Edit: apply_patch; Bash: exec_command and write_stdin; Grep: read-only rg through exec_command; Glob: read-only file enumeration through exec_command; Task: spawn_agent, send_message and agent result collection. These are role instructions, not a native tool permission boundary. Parent policy still applies.

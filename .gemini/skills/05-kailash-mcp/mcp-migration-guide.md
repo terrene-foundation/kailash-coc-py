@@ -11,7 +11,7 @@ How to migrate from older MCP server implementations to the unified kailash-mcp 
 > Category: `mcp`
 > Priority: `MEDIUM`
 > SDK Version: `0.9.25+`
-> Related Skills: [`mcp-platform-overview`](mcp-platform-overview.md), [`mcp-contributor-pattern`](mcp-contributor-pattern.md), [`mcp-claude-code-config`](mcp-claude-code-config.md)
+> Related Skills: [`mcp-platform-overview`](../../../.claude/skills/05-kailash-mcp/mcp-platform-overview.md), [`mcp-contributor-pattern`](../../../.claude/skills/05-kailash-mcp/mcp-contributor-pattern.md), [`mcp-claude-code-config`](../../../.claude/skills/05-kailash-mcp/mcp-claude-code-config.md)
 > Related Subagents: `mcp-specialist` (migration planning, complex server conversions)
 
 ## Why Migrate?

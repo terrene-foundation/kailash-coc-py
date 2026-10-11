@@ -11,7 +11,7 @@ Complete reference for control flow and logic nodes.
 > Category: `nodes`
 > Priority: `MEDIUM`
 > SDK Version: `0.9.25+`
-> Related Skills: [`switchnode-patterns`](../../01-core-sdk/switchnode-patterns.md), [`nodes-quick-index`](nodes-quick-index.md)
+> Related Skills: [`switchnode-patterns`](../../01-core-sdk/switchnode-patterns.md), [`nodes-quick-index`](../../../.claude/skills/08-nodes-reference/nodes-quick-index.md)
 > Related Subagents: `pattern-expert` (control flow patterns)
 
 ## Quick Reference
@@ -107,7 +107,7 @@ workflow.add_node("LoopNode", "loop", {
 ## Related Skills
 
 - **SwitchNode Patterns**: [`switchnode-patterns`](../../01-core-sdk/switchnode-patterns.md)
-- **Node Index**: [`nodes-quick-index`](nodes-quick-index.md)
+- **Node Index**: [`nodes-quick-index`](../../../.claude/skills/08-nodes-reference/nodes-quick-index.md)
 
 ## Documentation
 

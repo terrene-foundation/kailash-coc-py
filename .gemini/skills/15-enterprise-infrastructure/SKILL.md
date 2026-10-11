@@ -73,16 +73,16 @@ The user's workflow code is identical at all levels.
 
 ### Core Patterns
 
-- **[progressive-infrastructure](progressive-infrastructure.md)** - Level 0/1/2 model, StoreFactory, env vars, schema versioning
-- **[dialect-portable-sql](dialect-portable-sql.md)** - QueryDialect strategy, `?` placeholders, `_validate_identifier()`
-- **[connection-manager-patterns](connection-manager-patterns.md)** - ConnectionManager lifecycle, transactions, driver behavior
+- **[progressive-infrastructure](../../../.claude/skills/15-enterprise-infrastructure/progressive-infrastructure.md)** - Level 0/1/2 model, StoreFactory, env vars, schema versioning
+- **[dialect-portable-sql](../../../.claude/skills/15-enterprise-infrastructure/dialect-portable-sql.md)** - QueryDialect strategy, `?` placeholders, `_validate_identifier()`
+- **[connection-manager-patterns](../../../.claude/skills/15-enterprise-infrastructure/connection-manager-patterns.md)** - ConnectionManager lifecycle, transactions, driver behavior
 
 ### Operations
 
-- **[task-queue-patterns](task-queue-patterns.md)** - SQL task queue, SKIP LOCKED, Redis vs SQL, worker registry
-- **[idempotency-patterns](idempotency-patterns.md)** - IdempotentExecutor, claim-execute-store, TTL expiry
-- **[scheduler-patterns](scheduler-patterns.md)** - `WorkflowScheduler` (cron + interval + one-shot), `FabricScheduler` (DataFlow product refresh), multi-instance hazards
-- **[durability-patterns](durability-patterns.md)** - `ExecutionTracker` per-node checkpoints, `CheckpointManager` + `DBCheckpointStore`, `DurableWorkflowServer`, resume-from-checkpoint contract
+- **[task-queue-patterns](../../../.claude/skills/15-enterprise-infrastructure/task-queue-patterns.md)** - SQL task queue, SKIP LOCKED, Redis vs SQL, worker registry
+- **[idempotency-patterns](../../../.claude/skills/15-enterprise-infrastructure/idempotency-patterns.md)** - IdempotentExecutor, claim-execute-store, TTL expiry
+- **[scheduler-patterns](../../../.claude/skills/15-enterprise-infrastructure/scheduler-patterns.md)** - `WorkflowScheduler` (cron + interval + one-shot), `FabricScheduler` (DataFlow product refresh), multi-instance hazards
+- **[durability-patterns](../../../.claude/skills/15-enterprise-infrastructure/durability-patterns.md)** - `ExecutionTracker` per-node checkpoints, `CheckpointManager` + `DBCheckpointStore`, `DurableWorkflowServer`, resume-from-checkpoint contract
 
 ## Key Concepts
 
@@ -137,9 +137,9 @@ Use this skill when you need to:
 
 ## Related Skills
 
-- **[01-core-sdk](../01-core-sdk/SKILL.md)** - Core SDK workflow patterns (infrastructure backs execution)
-- **[02-dataflow](../02-dataflow/SKILL.md)** - DataFlow for user data (infrastructure for runtime stores)
-- **[03-nexus](../03-nexus/SKILL.md)** - Multi-channel platform deployment
+- **[01-core-sdk](../../../.claude/skills/01-core-sdk/SKILL.md)** - Core SDK workflow patterns (infrastructure backs execution)
+- **[02-dataflow](../../../.claude/skills/02-dataflow/SKILL.md)** - DataFlow for user data (infrastructure for runtime stores)
+- **[03-nexus](../../../.claude/skills/03-nexus/SKILL.md)** - Multi-channel platform deployment
 
 ## Support
 

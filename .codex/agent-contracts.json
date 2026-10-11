@@ -1,0 +1,1507 @@
+{
+  "schema_version": 1,
+  "agents": [
+    {
+      "name": "analyst",
+      "source": ".claude/agents/analysis/analyst.md",
+      "source_sha256": "43baf88d89d4dfbc9bb634ebc4da96204b0398422cbe121c8773db0fb31647b8",
+      "effective_sha256": "43baf88d89d4dfbc9bb634ebc4da96204b0398422cbe121c8773db0fb31647b8",
+      "declarations": {
+        "model": "opus",
+        "tools": [
+          "Read",
+          "Grep",
+          "Glob"
+        ],
+        "hooks": "  PreToolUse:\n    - matcher: \"*\"\n      hooks:\n        - type: command\n          command: 'node \"$CLAUDE_PROJECT_DIR/.claude/hooks/provenance-capture-tool.js\"'\n          timeout: 5"
+      },
+      "model": {
+        "disposition": "inherit-parent",
+        "reason": "Claude model aliases have no asserted provider-equivalent Codex mapping"
+      },
+      "tools": {
+        "disposition": "instruction-only",
+        "native_boundary": false,
+        "mappings": [
+          {
+            "source": "Read",
+            "adapter": "read-only file inspection through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Grep",
+            "adapter": "read-only rg through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Glob",
+            "adapter": "read-only file enumeration through exec_command",
+            "disposition": "instruction-only"
+          }
+        ]
+      },
+      "hooks": {
+        "disposition": "shared-global-registration",
+        "handler": "provenance-capture-tool.js",
+        "native_agent_hook_field": false,
+        "live_child_execution_verified": false
+      },
+      "sandbox": {
+        "disposition": "role default may be overridden by parent runtime policy",
+        "effective_child_isolation_verified": false
+      }
+    },
+    {
+      "name": "align-specialist",
+      "source": ".claude/agents/frameworks/align-specialist.md",
+      "source_sha256": "0fc076f1fee1b0d52adf6a95b317f0d0d66f9e0175ad5778518fd22efa3151ed",
+      "effective_sha256": "43e5bc282e6d716f9b74d8761e97622e119fa0662a1a47373824de941daabe08",
+      "declarations": {
+        "model": "opus",
+        "tools": [
+          "Read",
+          "Write",
+          "Edit",
+          "Bash",
+          "Grep",
+          "Glob",
+          "Task"
+        ],
+        "hooks": null
+      },
+      "model": {
+        "disposition": "inherit-parent",
+        "reason": "Claude model aliases have no asserted provider-equivalent Codex mapping"
+      },
+      "tools": {
+        "disposition": "instruction-only",
+        "native_boundary": false,
+        "mappings": [
+          {
+            "source": "Read",
+            "adapter": "read-only file inspection through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Write",
+            "adapter": "apply_patch or an explicitly permitted write command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Edit",
+            "adapter": "apply_patch",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Bash",
+            "adapter": "exec_command and write_stdin",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Grep",
+            "adapter": "read-only rg through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Glob",
+            "adapter": "read-only file enumeration through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Task",
+            "adapter": "spawn_agent, send_message and agent result collection",
+            "disposition": "instruction-only"
+          }
+        ]
+      },
+      "hooks": {
+        "disposition": "none-declared",
+        "handler": null,
+        "native_agent_hook_field": false,
+        "live_child_execution_verified": false
+      },
+      "sandbox": {
+        "disposition": "role default may be overridden by parent runtime policy",
+        "effective_child_isolation_verified": false
+      }
+    },
+    {
+      "name": "dataflow-specialist",
+      "source": ".claude/agents/frameworks/dataflow-specialist.md",
+      "source_sha256": "58486ed1140631efe847fd06f4357e5d6d445d6d8630115c76619de20771d497",
+      "effective_sha256": "4d9eeafa989bc16fdd2f3813280e988766437602bf879ae961a00fd650fbd731",
+      "declarations": {
+        "model": "opus",
+        "tools": [
+          "Read",
+          "Write",
+          "Edit",
+          "Bash",
+          "Grep",
+          "Glob",
+          "Task"
+        ],
+        "hooks": null
+      },
+      "model": {
+        "disposition": "inherit-parent",
+        "reason": "Claude model aliases have no asserted provider-equivalent Codex mapping"
+      },
+      "tools": {
+        "disposition": "instruction-only",
+        "native_boundary": false,
+        "mappings": [
+          {
+            "source": "Read",
+            "adapter": "read-only file inspection through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Write",
+            "adapter": "apply_patch or an explicitly permitted write command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Edit",
+            "adapter": "apply_patch",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Bash",
+            "adapter": "exec_command and write_stdin",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Grep",
+            "adapter": "read-only rg through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Glob",
+            "adapter": "read-only file enumeration through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Task",
+            "adapter": "spawn_agent, send_message and agent result collection",
+            "disposition": "instruction-only"
+          }
+        ]
+      },
+      "hooks": {
+        "disposition": "none-declared",
+        "handler": null,
+        "native_agent_hook_field": false,
+        "live_child_execution_verified": false
+      },
+      "sandbox": {
+        "disposition": "role default may be overridden by parent runtime policy",
+        "effective_child_isolation_verified": false
+      }
+    },
+    {
+      "name": "kaizen-specialist",
+      "source": ".claude/agents/frameworks/kaizen-specialist.md",
+      "source_sha256": "b8a184ab31666aefc8c1b0ec1672dabdb3874940f8a1888dc55a6a6ec7adc8a1",
+      "effective_sha256": "a3914399082eb934483502d8570bc3eeb795c9509181dcf62f71b8ddb6623d81",
+      "declarations": {
+        "model": "opus",
+        "tools": [
+          "Read",
+          "Write",
+          "Edit",
+          "Bash",
+          "Grep",
+          "Glob",
+          "Task"
+        ],
+        "hooks": null
+      },
+      "model": {
+        "disposition": "inherit-parent",
+        "reason": "Claude model aliases have no asserted provider-equivalent Codex mapping"
+      },
+      "tools": {
+        "disposition": "instruction-only",
+        "native_boundary": false,
+        "mappings": [
+          {
+            "source": "Read",
+            "adapter": "read-only file inspection through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Write",
+            "adapter": "apply_patch or an explicitly permitted write command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Edit",
+            "adapter": "apply_patch",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Bash",
+            "adapter": "exec_command and write_stdin",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Grep",
+            "adapter": "read-only rg through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Glob",
+            "adapter": "read-only file enumeration through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Task",
+            "adapter": "spawn_agent, send_message and agent result collection",
+            "disposition": "instruction-only"
+          }
+        ]
+      },
+      "hooks": {
+        "disposition": "none-declared",
+        "handler": null,
+        "native_agent_hook_field": false,
+        "live_child_execution_verified": false
+      },
+      "sandbox": {
+        "disposition": "role default may be overridden by parent runtime policy",
+        "effective_child_isolation_verified": false
+      }
+    },
+    {
+      "name": "mcp-platform-specialist",
+      "source": ".claude/agents/frameworks/mcp-platform-specialist.md",
+      "source_sha256": "5e2314a90aeb7690f98448ea2591e7ff833002ae6fa964327fcfcc1246ad7b5a",
+      "effective_sha256": "5e2314a90aeb7690f98448ea2591e7ff833002ae6fa964327fcfcc1246ad7b5a",
+      "declarations": {
+        "model": "opus",
+        "tools": [
+          "Read",
+          "Write",
+          "Edit",
+          "Bash",
+          "Grep",
+          "Glob",
+          "Task"
+        ],
+        "hooks": "  PreToolUse:\n    - matcher: \"*\"\n      hooks:\n        - type: command\n          command: 'node \"$CLAUDE_PROJECT_DIR/.claude/hooks/provenance-capture-tool.js\"'\n          timeout: 5"
+      },
+      "model": {
+        "disposition": "inherit-parent",
+        "reason": "Claude model aliases have no asserted provider-equivalent Codex mapping"
+      },
+      "tools": {
+        "disposition": "instruction-only",
+        "native_boundary": false,
+        "mappings": [
+          {
+            "source": "Read",
+            "adapter": "read-only file inspection through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Write",
+            "adapter": "apply_patch or an explicitly permitted write command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Edit",
+            "adapter": "apply_patch",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Bash",
+            "adapter": "exec_command and write_stdin",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Grep",
+            "adapter": "read-only rg through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Glob",
+            "adapter": "read-only file enumeration through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Task",
+            "adapter": "spawn_agent, send_message and agent result collection",
+            "disposition": "instruction-only"
+          }
+        ]
+      },
+      "hooks": {
+        "disposition": "shared-global-registration",
+        "handler": "provenance-capture-tool.js",
+        "native_agent_hook_field": false,
+        "live_child_execution_verified": false
+      },
+      "sandbox": {
+        "disposition": "role default may be overridden by parent runtime policy",
+        "effective_child_isolation_verified": false
+      }
+    },
+    {
+      "name": "mcp-specialist",
+      "source": ".claude/agents/frameworks/mcp-specialist.md",
+      "source_sha256": "1c498aa86a0dc123169cb1d217afd8f17b98b06da1771febda91e080e1e47c4c",
+      "effective_sha256": "1c498aa86a0dc123169cb1d217afd8f17b98b06da1771febda91e080e1e47c4c",
+      "declarations": {
+        "model": "opus",
+        "tools": [
+          "Read",
+          "Write",
+          "Edit",
+          "Bash",
+          "Grep",
+          "Glob",
+          "Task"
+        ],
+        "hooks": "  PreToolUse:\n    - matcher: \"*\"\n      hooks:\n        - type: command\n          command: 'node \"$CLAUDE_PROJECT_DIR/.claude/hooks/provenance-capture-tool.js\"'\n          timeout: 5"
+      },
+      "model": {
+        "disposition": "inherit-parent",
+        "reason": "Claude model aliases have no asserted provider-equivalent Codex mapping"
+      },
+      "tools": {
+        "disposition": "instruction-only",
+        "native_boundary": false,
+        "mappings": [
+          {
+            "source": "Read",
+            "adapter": "read-only file inspection through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Write",
+            "adapter": "apply_patch or an explicitly permitted write command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Edit",
+            "adapter": "apply_patch",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Bash",
+            "adapter": "exec_command and write_stdin",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Grep",
+            "adapter": "read-only rg through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Glob",
+            "adapter": "read-only file enumeration through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Task",
+            "adapter": "spawn_agent, send_message and agent result collection",
+            "disposition": "instruction-only"
+          }
+        ]
+      },
+      "hooks": {
+        "disposition": "shared-global-registration",
+        "handler": "provenance-capture-tool.js",
+        "native_agent_hook_field": false,
+        "live_child_execution_verified": false
+      },
+      "sandbox": {
+        "disposition": "role default may be overridden by parent runtime policy",
+        "effective_child_isolation_verified": false
+      }
+    },
+    {
+      "name": "ml-specialist",
+      "source": ".claude/agents/frameworks/ml-specialist.md",
+      "source_sha256": "2f95682e5a208adef4e5969057aac0f416fcae4558eeb0d915a4ed2d22bfb213",
+      "effective_sha256": "5fc1e10c282a760d6b4ef7455e2fc391e3d900cf7680f574e93a07da09085d49",
+      "declarations": {
+        "model": "opus",
+        "tools": [
+          "Read",
+          "Write",
+          "Edit",
+          "Bash",
+          "Grep",
+          "Glob",
+          "Task"
+        ],
+        "hooks": null
+      },
+      "model": {
+        "disposition": "inherit-parent",
+        "reason": "Claude model aliases have no asserted provider-equivalent Codex mapping"
+      },
+      "tools": {
+        "disposition": "instruction-only",
+        "native_boundary": false,
+        "mappings": [
+          {
+            "source": "Read",
+            "adapter": "read-only file inspection through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Write",
+            "adapter": "apply_patch or an explicitly permitted write command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Edit",
+            "adapter": "apply_patch",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Bash",
+            "adapter": "exec_command and write_stdin",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Grep",
+            "adapter": "read-only rg through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Glob",
+            "adapter": "read-only file enumeration through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Task",
+            "adapter": "spawn_agent, send_message and agent result collection",
+            "disposition": "instruction-only"
+          }
+        ]
+      },
+      "hooks": {
+        "disposition": "none-declared",
+        "handler": null,
+        "native_agent_hook_field": false,
+        "live_child_execution_verified": false
+      },
+      "sandbox": {
+        "disposition": "role default may be overridden by parent runtime policy",
+        "effective_child_isolation_verified": false
+      }
+    },
+    {
+      "name": "nexus-specialist",
+      "source": ".claude/agents/frameworks/nexus-specialist.md",
+      "source_sha256": "1190cdf87869f351cc76142171ee7d33fba1c39cc9535be216ddeff12fb34e85",
+      "effective_sha256": "ffa2b54e441718d99ce040e137d96e2422a2b03afd783c2c6a76eb7f735365a2",
+      "declarations": {
+        "model": "opus",
+        "tools": [
+          "Read",
+          "Write",
+          "Edit",
+          "Bash",
+          "Grep",
+          "Glob",
+          "Task"
+        ],
+        "hooks": null
+      },
+      "model": {
+        "disposition": "inherit-parent",
+        "reason": "Claude model aliases have no asserted provider-equivalent Codex mapping"
+      },
+      "tools": {
+        "disposition": "instruction-only",
+        "native_boundary": false,
+        "mappings": [
+          {
+            "source": "Read",
+            "adapter": "read-only file inspection through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Write",
+            "adapter": "apply_patch or an explicitly permitted write command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Edit",
+            "adapter": "apply_patch",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Bash",
+            "adapter": "exec_command and write_stdin",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Grep",
+            "adapter": "read-only rg through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Glob",
+            "adapter": "read-only file enumeration through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Task",
+            "adapter": "spawn_agent, send_message and agent result collection",
+            "disposition": "instruction-only"
+          }
+        ]
+      },
+      "hooks": {
+        "disposition": "none-declared",
+        "handler": null,
+        "native_agent_hook_field": false,
+        "live_child_execution_verified": false
+      },
+      "sandbox": {
+        "disposition": "role default may be overridden by parent runtime policy",
+        "effective_child_isolation_verified": false
+      }
+    },
+    {
+      "name": "pact-specialist",
+      "source": ".claude/agents/frameworks/pact-specialist.md",
+      "source_sha256": "d9ebe5ad3b0d5ca2234c9f27dbee0cc3aeb7f977626d5a73074ca1636244523a",
+      "effective_sha256": "cb4d3736d30d137d88041b4e11c965676f236a2efc3c2d7ef3804a7b9b5ed3b1",
+      "declarations": {
+        "model": "opus",
+        "tools": [
+          "Read",
+          "Write",
+          "Edit",
+          "Bash",
+          "Grep",
+          "Glob",
+          "Task"
+        ],
+        "hooks": null
+      },
+      "model": {
+        "disposition": "inherit-parent",
+        "reason": "Claude model aliases have no asserted provider-equivalent Codex mapping"
+      },
+      "tools": {
+        "disposition": "instruction-only",
+        "native_boundary": false,
+        "mappings": [
+          {
+            "source": "Read",
+            "adapter": "read-only file inspection through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Write",
+            "adapter": "apply_patch or an explicitly permitted write command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Edit",
+            "adapter": "apply_patch",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Bash",
+            "adapter": "exec_command and write_stdin",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Grep",
+            "adapter": "read-only rg through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Glob",
+            "adapter": "read-only file enumeration through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Task",
+            "adapter": "spawn_agent, send_message and agent result collection",
+            "disposition": "instruction-only"
+          }
+        ]
+      },
+      "hooks": {
+        "disposition": "none-declared",
+        "handler": null,
+        "native_agent_hook_field": false,
+        "live_child_execution_verified": false
+      },
+      "sandbox": {
+        "disposition": "role default may be overridden by parent runtime policy",
+        "effective_child_isolation_verified": false
+      }
+    },
+    {
+      "name": "flutter-specialist",
+      "source": ".claude/agents/frontend/flutter-specialist.md",
+      "source_sha256": "8b12305726098457c34562207e64649e2d6bc9eaf4a6d88917704012d62cf15b",
+      "effective_sha256": "8b12305726098457c34562207e64649e2d6bc9eaf4a6d88917704012d62cf15b",
+      "declarations": {
+        "model": "opus",
+        "tools": [
+          "Read",
+          "Write",
+          "Edit",
+          "Bash",
+          "Grep",
+          "Glob",
+          "Task"
+        ],
+        "hooks": "  PreToolUse:\n    - matcher: \"*\"\n      hooks:\n        - type: command\n          command: 'node \"$CLAUDE_PROJECT_DIR/.claude/hooks/provenance-capture-tool.js\"'\n          timeout: 5"
+      },
+      "model": {
+        "disposition": "inherit-parent",
+        "reason": "Claude model aliases have no asserted provider-equivalent Codex mapping"
+      },
+      "tools": {
+        "disposition": "instruction-only",
+        "native_boundary": false,
+        "mappings": [
+          {
+            "source": "Read",
+            "adapter": "read-only file inspection through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Write",
+            "adapter": "apply_patch or an explicitly permitted write command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Edit",
+            "adapter": "apply_patch",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Bash",
+            "adapter": "exec_command and write_stdin",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Grep",
+            "adapter": "read-only rg through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Glob",
+            "adapter": "read-only file enumeration through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Task",
+            "adapter": "spawn_agent, send_message and agent result collection",
+            "disposition": "instruction-only"
+          }
+        ]
+      },
+      "hooks": {
+        "disposition": "shared-global-registration",
+        "handler": "provenance-capture-tool.js",
+        "native_agent_hook_field": false,
+        "live_child_execution_verified": false
+      },
+      "sandbox": {
+        "disposition": "role default may be overridden by parent runtime policy",
+        "effective_child_isolation_verified": false
+      }
+    },
+    {
+      "name": "react-specialist",
+      "source": ".claude/agents/frontend/react-specialist.md",
+      "source_sha256": "850167443186c399e65ea07b9efbe90b34e025c6b30f1b018e403145c8ac71cc",
+      "effective_sha256": "850167443186c399e65ea07b9efbe90b34e025c6b30f1b018e403145c8ac71cc",
+      "declarations": {
+        "model": "opus",
+        "tools": [
+          "Read",
+          "Write",
+          "Edit",
+          "Bash",
+          "Grep",
+          "Glob",
+          "Task"
+        ],
+        "hooks": "  PreToolUse:\n    - matcher: \"*\"\n      hooks:\n        - type: command\n          command: 'node \"$CLAUDE_PROJECT_DIR/.claude/hooks/provenance-capture-tool.js\"'\n          timeout: 5"
+      },
+      "model": {
+        "disposition": "inherit-parent",
+        "reason": "Claude model aliases have no asserted provider-equivalent Codex mapping"
+      },
+      "tools": {
+        "disposition": "instruction-only",
+        "native_boundary": false,
+        "mappings": [
+          {
+            "source": "Read",
+            "adapter": "read-only file inspection through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Write",
+            "adapter": "apply_patch or an explicitly permitted write command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Edit",
+            "adapter": "apply_patch",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Bash",
+            "adapter": "exec_command and write_stdin",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Grep",
+            "adapter": "read-only rg through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Glob",
+            "adapter": "read-only file enumeration through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Task",
+            "adapter": "spawn_agent, send_message and agent result collection",
+            "disposition": "instruction-only"
+          }
+        ]
+      },
+      "hooks": {
+        "disposition": "shared-global-registration",
+        "handler": "provenance-capture-tool.js",
+        "native_agent_hook_field": false,
+        "live_child_execution_verified": false
+      },
+      "sandbox": {
+        "disposition": "role default may be overridden by parent runtime policy",
+        "effective_child_isolation_verified": false
+      }
+    },
+    {
+      "name": "uiux-designer",
+      "source": ".claude/agents/frontend/uiux-designer.md",
+      "source_sha256": "1ffd6c3777e12adc92f3041c3a82538625a63f89ce95caf29eabb9910a9f24d2",
+      "effective_sha256": "1ffd6c3777e12adc92f3041c3a82538625a63f89ce95caf29eabb9910a9f24d2",
+      "declarations": {
+        "model": "opus",
+        "tools": [
+          "Read",
+          "Write",
+          "Edit",
+          "Grep",
+          "Glob",
+          "Task"
+        ],
+        "hooks": "  PreToolUse:\n    - matcher: \"*\"\n      hooks:\n        - type: command\n          command: 'node \"$CLAUDE_PROJECT_DIR/.claude/hooks/provenance-capture-tool.js\"'\n          timeout: 5"
+      },
+      "model": {
+        "disposition": "inherit-parent",
+        "reason": "Claude model aliases have no asserted provider-equivalent Codex mapping"
+      },
+      "tools": {
+        "disposition": "instruction-only",
+        "native_boundary": false,
+        "mappings": [
+          {
+            "source": "Read",
+            "adapter": "read-only file inspection through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Write",
+            "adapter": "apply_patch or an explicitly permitted write command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Edit",
+            "adapter": "apply_patch",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Grep",
+            "adapter": "read-only rg through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Glob",
+            "adapter": "read-only file enumeration through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Task",
+            "adapter": "spawn_agent, send_message and agent result collection",
+            "disposition": "instruction-only"
+          }
+        ]
+      },
+      "hooks": {
+        "disposition": "shared-global-registration",
+        "handler": "provenance-capture-tool.js",
+        "native_agent_hook_field": false,
+        "live_child_execution_verified": false
+      },
+      "sandbox": {
+        "disposition": "role default may be overridden by parent runtime policy",
+        "effective_child_isolation_verified": false
+      }
+    },
+    {
+      "name": "build-fix",
+      "source": ".claude/agents/implementation/build-fix.md",
+      "source_sha256": "4c328e4e76b99e9000f8d6f31507452e6afaff64c2fc21a45de8c29217f64d75",
+      "effective_sha256": "4c328e4e76b99e9000f8d6f31507452e6afaff64c2fc21a45de8c29217f64d75",
+      "declarations": {
+        "model": "sonnet",
+        "tools": [
+          "Read",
+          "Write",
+          "Edit",
+          "Bash",
+          "Grep",
+          "Glob"
+        ],
+        "hooks": "  PreToolUse:\n    - matcher: \"*\"\n      hooks:\n        - type: command\n          command: 'node \"$CLAUDE_PROJECT_DIR/.claude/hooks/provenance-capture-tool.js\"'\n          timeout: 5"
+      },
+      "model": {
+        "disposition": "inherit-parent",
+        "reason": "Claude model aliases have no asserted provider-equivalent Codex mapping"
+      },
+      "tools": {
+        "disposition": "instruction-only",
+        "native_boundary": false,
+        "mappings": [
+          {
+            "source": "Read",
+            "adapter": "read-only file inspection through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Write",
+            "adapter": "apply_patch or an explicitly permitted write command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Edit",
+            "adapter": "apply_patch",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Bash",
+            "adapter": "exec_command and write_stdin",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Grep",
+            "adapter": "read-only rg through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Glob",
+            "adapter": "read-only file enumeration through exec_command",
+            "disposition": "instruction-only"
+          }
+        ]
+      },
+      "hooks": {
+        "disposition": "shared-global-registration",
+        "handler": "provenance-capture-tool.js",
+        "native_agent_hook_field": false,
+        "live_child_execution_verified": false
+      },
+      "sandbox": {
+        "disposition": "role default may be overridden by parent runtime policy",
+        "effective_child_isolation_verified": false
+      }
+    },
+    {
+      "name": "pattern-expert",
+      "source": ".claude/agents/implementation/pattern-expert.md",
+      "source_sha256": "07edc66c0e189f29c5f5fbdf40162c7e73aac443ca3d632f562bc5f0e379649d",
+      "effective_sha256": "07edc66c0e189f29c5f5fbdf40162c7e73aac443ca3d632f562bc5f0e379649d",
+      "declarations": {
+        "model": "opus",
+        "tools": [
+          "Read",
+          "Write",
+          "Edit",
+          "Bash",
+          "Grep",
+          "Glob",
+          "Task"
+        ],
+        "hooks": "  PreToolUse:\n    - matcher: \"*\"\n      hooks:\n        - type: command\n          command: 'node \"$CLAUDE_PROJECT_DIR/.claude/hooks/provenance-capture-tool.js\"'\n          timeout: 5"
+      },
+      "model": {
+        "disposition": "inherit-parent",
+        "reason": "Claude model aliases have no asserted provider-equivalent Codex mapping"
+      },
+      "tools": {
+        "disposition": "instruction-only",
+        "native_boundary": false,
+        "mappings": [
+          {
+            "source": "Read",
+            "adapter": "read-only file inspection through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Write",
+            "adapter": "apply_patch or an explicitly permitted write command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Edit",
+            "adapter": "apply_patch",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Bash",
+            "adapter": "exec_command and write_stdin",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Grep",
+            "adapter": "read-only rg through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Glob",
+            "adapter": "read-only file enumeration through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Task",
+            "adapter": "spawn_agent, send_message and agent result collection",
+            "disposition": "instruction-only"
+          }
+        ]
+      },
+      "hooks": {
+        "disposition": "shared-global-registration",
+        "handler": "provenance-capture-tool.js",
+        "native_agent_hook_field": false,
+        "live_child_execution_verified": false
+      },
+      "sandbox": {
+        "disposition": "role default may be overridden by parent runtime policy",
+        "effective_child_isolation_verified": false
+      }
+    },
+    {
+      "name": "tdd-implementer",
+      "source": ".claude/agents/implementation/tdd-implementer.md",
+      "source_sha256": "d7355d99bffea0e5e88419e3904142a6816d3e275437194e778237e8bee31088",
+      "effective_sha256": "d7355d99bffea0e5e88419e3904142a6816d3e275437194e778237e8bee31088",
+      "declarations": {
+        "model": "opus",
+        "tools": [
+          "Read",
+          "Write",
+          "Edit",
+          "Bash",
+          "Grep",
+          "Glob",
+          "Task"
+        ],
+        "hooks": "  PreToolUse:\n    - matcher: \"*\"\n      hooks:\n        - type: command\n          command: 'node \"$CLAUDE_PROJECT_DIR/.claude/hooks/provenance-capture-tool.js\"'\n          timeout: 5"
+      },
+      "model": {
+        "disposition": "inherit-parent",
+        "reason": "Claude model aliases have no asserted provider-equivalent Codex mapping"
+      },
+      "tools": {
+        "disposition": "instruction-only",
+        "native_boundary": false,
+        "mappings": [
+          {
+            "source": "Read",
+            "adapter": "read-only file inspection through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Write",
+            "adapter": "apply_patch or an explicitly permitted write command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Edit",
+            "adapter": "apply_patch",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Bash",
+            "adapter": "exec_command and write_stdin",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Grep",
+            "adapter": "read-only rg through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Glob",
+            "adapter": "read-only file enumeration through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Task",
+            "adapter": "spawn_agent, send_message and agent result collection",
+            "disposition": "instruction-only"
+          }
+        ]
+      },
+      "hooks": {
+        "disposition": "shared-global-registration",
+        "handler": "provenance-capture-tool.js",
+        "native_agent_hook_field": false,
+        "live_child_execution_verified": false
+      },
+      "sandbox": {
+        "disposition": "role default may be overridden by parent runtime policy",
+        "effective_child_isolation_verified": false
+      }
+    },
+    {
+      "name": "coc-onboarding-specialist",
+      "source": ".claude/agents/onboarding/coc-onboarding-specialist.md",
+      "source_sha256": "0ccb1c5006b49d02b4d0d7067479617fa2b48c40c35b67033be8937da33b44c1",
+      "effective_sha256": "0ccb1c5006b49d02b4d0d7067479617fa2b48c40c35b67033be8937da33b44c1",
+      "declarations": {
+        "model": "sonnet",
+        "tools": [
+          "Read",
+          "Bash",
+          "Grep",
+          "Glob",
+          "Edit"
+        ],
+        "hooks": "  PreToolUse:\n    - matcher: \"*\"\n      hooks:\n        - type: command\n          command: 'node \"$CLAUDE_PROJECT_DIR/.claude/hooks/provenance-capture-tool.js\"'\n          timeout: 5"
+      },
+      "model": {
+        "disposition": "inherit-parent",
+        "reason": "Claude model aliases have no asserted provider-equivalent Codex mapping"
+      },
+      "tools": {
+        "disposition": "instruction-only",
+        "native_boundary": false,
+        "mappings": [
+          {
+            "source": "Read",
+            "adapter": "read-only file inspection through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Bash",
+            "adapter": "exec_command and write_stdin",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Grep",
+            "adapter": "read-only rg through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Glob",
+            "adapter": "read-only file enumeration through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Edit",
+            "adapter": "apply_patch",
+            "disposition": "instruction-only"
+          }
+        ]
+      },
+      "hooks": {
+        "disposition": "shared-global-registration",
+        "handler": "provenance-capture-tool.js",
+        "native_agent_hook_field": false,
+        "live_child_execution_verified": false
+      },
+      "sandbox": {
+        "disposition": "role default may be overridden by parent runtime policy",
+        "effective_child_isolation_verified": false
+      }
+    },
+    {
+      "name": "gold-standards-validator",
+      "source": ".claude/agents/quality/gold-standards-validator.md",
+      "source_sha256": "fa69600148c2da54a89da8284ce5a9764d84ca9bd44e3ef7eaa5c319b1a6c740",
+      "effective_sha256": "fa69600148c2da54a89da8284ce5a9764d84ca9bd44e3ef7eaa5c319b1a6c740",
+      "declarations": {
+        "model": "opus",
+        "tools": [
+          "Read",
+          "Glob",
+          "Grep"
+        ],
+        "hooks": "  PreToolUse:\n    - matcher: \"*\"\n      hooks:\n        - type: command\n          command: 'node \"$CLAUDE_PROJECT_DIR/.claude/hooks/provenance-capture-tool.js\"'\n          timeout: 5"
+      },
+      "model": {
+        "disposition": "inherit-parent",
+        "reason": "Claude model aliases have no asserted provider-equivalent Codex mapping"
+      },
+      "tools": {
+        "disposition": "instruction-only",
+        "native_boundary": false,
+        "mappings": [
+          {
+            "source": "Read",
+            "adapter": "read-only file inspection through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Glob",
+            "adapter": "read-only file enumeration through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Grep",
+            "adapter": "read-only rg through exec_command",
+            "disposition": "instruction-only"
+          }
+        ]
+      },
+      "hooks": {
+        "disposition": "shared-global-registration",
+        "handler": "provenance-capture-tool.js",
+        "native_agent_hook_field": false,
+        "live_child_execution_verified": false
+      },
+      "sandbox": {
+        "disposition": "role default may be overridden by parent runtime policy",
+        "effective_child_isolation_verified": false
+      }
+    },
+    {
+      "name": "reviewer",
+      "source": ".claude/agents/quality/reviewer.md",
+      "source_sha256": "cc6198d18b212dc630795c18b8fe3341c49a7b04aacf03e14aded9abf5628b76",
+      "effective_sha256": "cc6198d18b212dc630795c18b8fe3341c49a7b04aacf03e14aded9abf5628b76",
+      "declarations": {
+        "model": "opus",
+        "tools": [
+          "Read",
+          "Bash",
+          "Grep",
+          "Glob",
+          "Task"
+        ],
+        "hooks": "  PreToolUse:\n    - matcher: \"*\"\n      hooks:\n        - type: command\n          command: 'node \"$CLAUDE_PROJECT_DIR/.claude/hooks/provenance-capture-tool.js\"'\n          timeout: 5"
+      },
+      "model": {
+        "disposition": "inherit-parent",
+        "reason": "Claude model aliases have no asserted provider-equivalent Codex mapping"
+      },
+      "tools": {
+        "disposition": "instruction-only",
+        "native_boundary": false,
+        "mappings": [
+          {
+            "source": "Read",
+            "adapter": "read-only file inspection through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Bash",
+            "adapter": "exec_command and write_stdin",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Grep",
+            "adapter": "read-only rg through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Glob",
+            "adapter": "read-only file enumeration through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Task",
+            "adapter": "spawn_agent, send_message and agent result collection",
+            "disposition": "instruction-only"
+          }
+        ]
+      },
+      "hooks": {
+        "disposition": "shared-global-registration",
+        "handler": "provenance-capture-tool.js",
+        "native_agent_hook_field": false,
+        "live_child_execution_verified": false
+      },
+      "sandbox": {
+        "disposition": "role default may be overridden by parent runtime policy",
+        "effective_child_isolation_verified": false
+      }
+    },
+    {
+      "name": "security-reviewer",
+      "source": ".claude/agents/quality/security-reviewer.md",
+      "source_sha256": "a2c8876b9feb8b70ddd1f4674650700a36f2f0fc42d3efd2eb5fafc04e1898f3",
+      "effective_sha256": "a2c8876b9feb8b70ddd1f4674650700a36f2f0fc42d3efd2eb5fafc04e1898f3",
+      "declarations": {
+        "model": "opus",
+        "tools": [
+          "Read",
+          "Grep",
+          "Glob"
+        ],
+        "hooks": "  PreToolUse:\n    - matcher: \"*\"\n      hooks:\n        - type: command\n          command: 'node \"$CLAUDE_PROJECT_DIR/.claude/hooks/provenance-capture-tool.js\"'\n          timeout: 5"
+      },
+      "model": {
+        "disposition": "inherit-parent",
+        "reason": "Claude model aliases have no asserted provider-equivalent Codex mapping"
+      },
+      "tools": {
+        "disposition": "instruction-only",
+        "native_boundary": false,
+        "mappings": [
+          {
+            "source": "Read",
+            "adapter": "read-only file inspection through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Grep",
+            "adapter": "read-only rg through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Glob",
+            "adapter": "read-only file enumeration through exec_command",
+            "disposition": "instruction-only"
+          }
+        ]
+      },
+      "hooks": {
+        "disposition": "shared-global-registration",
+        "handler": "provenance-capture-tool.js",
+        "native_agent_hook_field": false,
+        "live_child_execution_verified": false
+      },
+      "sandbox": {
+        "disposition": "role default may be overridden by parent runtime policy",
+        "effective_child_isolation_verified": false
+      }
+    },
+    {
+      "name": "release-specialist",
+      "source": ".claude/agents/release/release-specialist.md",
+      "source_sha256": "9642d7fc5ffbf86997fcc3dff2eab4f85007d6a81c300a82f3ddbf36abe5a299",
+      "effective_sha256": "9642d7fc5ffbf86997fcc3dff2eab4f85007d6a81c300a82f3ddbf36abe5a299",
+      "declarations": {
+        "model": "sonnet",
+        "tools": [
+          "Read",
+          "Write",
+          "Edit",
+          "Bash",
+          "Grep",
+          "Glob",
+          "Task"
+        ],
+        "hooks": "  PreToolUse:\n    - matcher: \"*\"\n      hooks:\n        - type: command\n          command: 'node \"$CLAUDE_PROJECT_DIR/.claude/hooks/provenance-capture-tool.js\"'\n          timeout: 5"
+      },
+      "model": {
+        "disposition": "inherit-parent",
+        "reason": "Claude model aliases have no asserted provider-equivalent Codex mapping"
+      },
+      "tools": {
+        "disposition": "instruction-only",
+        "native_boundary": false,
+        "mappings": [
+          {
+            "source": "Read",
+            "adapter": "read-only file inspection through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Write",
+            "adapter": "apply_patch or an explicitly permitted write command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Edit",
+            "adapter": "apply_patch",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Bash",
+            "adapter": "exec_command and write_stdin",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Grep",
+            "adapter": "read-only rg through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Glob",
+            "adapter": "read-only file enumeration through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Task",
+            "adapter": "spawn_agent, send_message and agent result collection",
+            "disposition": "instruction-only"
+          }
+        ]
+      },
+      "hooks": {
+        "disposition": "shared-global-registration",
+        "handler": "provenance-capture-tool.js",
+        "native_agent_hook_field": false,
+        "live_child_execution_verified": false
+      },
+      "sandbox": {
+        "disposition": "role default may be overridden by parent runtime policy",
+        "effective_child_isolation_verified": false
+      }
+    },
+    {
+      "name": "testing-specialist",
+      "source": ".claude/agents/testing/testing-specialist.md",
+      "source_sha256": "d1b7a25bb0668fe7138112ce4e6c828ce403208e734a6dc117411e505d4c914f",
+      "effective_sha256": "d1b7a25bb0668fe7138112ce4e6c828ce403208e734a6dc117411e505d4c914f",
+      "declarations": {
+        "model": "opus",
+        "tools": [
+          "Read",
+          "Write",
+          "Edit",
+          "Bash",
+          "Grep",
+          "Glob",
+          "Task"
+        ],
+        "hooks": "  PreToolUse:\n    - matcher: \"*\"\n      hooks:\n        - type: command\n          command: 'node \"$CLAUDE_PROJECT_DIR/.claude/hooks/provenance-capture-tool.js\"'\n          timeout: 5"
+      },
+      "model": {
+        "disposition": "inherit-parent",
+        "reason": "Claude model aliases have no asserted provider-equivalent Codex mapping"
+      },
+      "tools": {
+        "disposition": "instruction-only",
+        "native_boundary": false,
+        "mappings": [
+          {
+            "source": "Read",
+            "adapter": "read-only file inspection through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Write",
+            "adapter": "apply_patch or an explicitly permitted write command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Edit",
+            "adapter": "apply_patch",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Bash",
+            "adapter": "exec_command and write_stdin",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Grep",
+            "adapter": "read-only rg through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Glob",
+            "adapter": "read-only file enumeration through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Task",
+            "adapter": "spawn_agent, send_message and agent result collection",
+            "disposition": "instruction-only"
+          }
+        ]
+      },
+      "hooks": {
+        "disposition": "shared-global-registration",
+        "handler": "provenance-capture-tool.js",
+        "native_agent_hook_field": false,
+        "live_child_execution_verified": false
+      },
+      "sandbox": {
+        "disposition": "role default may be overridden by parent runtime policy",
+        "effective_child_isolation_verified": false
+      }
+    },
+    {
+      "name": "value-auditor",
+      "source": ".claude/agents/value-auditor.md",
+      "source_sha256": "402e782acb13c15071a0276fde9115a92774330a1450f19cbc18122c66a790ea",
+      "effective_sha256": "402e782acb13c15071a0276fde9115a92774330a1450f19cbc18122c66a790ea",
+      "declarations": {
+        "model": "opus",
+        "tools": [
+          "Read",
+          "Bash",
+          "Grep",
+          "Glob"
+        ],
+        "hooks": "  PreToolUse:\n    - matcher: \"*\"\n      hooks:\n        - type: command\n          command: 'node \"$CLAUDE_PROJECT_DIR/.claude/hooks/provenance-capture-tool.js\"'\n          timeout: 5"
+      },
+      "model": {
+        "disposition": "inherit-parent",
+        "reason": "Claude model aliases have no asserted provider-equivalent Codex mapping"
+      },
+      "tools": {
+        "disposition": "instruction-only",
+        "native_boundary": false,
+        "mappings": [
+          {
+            "source": "Read",
+            "adapter": "read-only file inspection through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Bash",
+            "adapter": "exec_command and write_stdin",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Grep",
+            "adapter": "read-only rg through exec_command",
+            "disposition": "instruction-only"
+          },
+          {
+            "source": "Glob",
+            "adapter": "read-only file enumeration through exec_command",
+            "disposition": "instruction-only"
+          }
+        ]
+      },
+      "hooks": {
+        "disposition": "shared-global-registration",
+        "handler": "provenance-capture-tool.js",
+        "native_agent_hook_field": false,
+        "live_child_execution_verified": false
+      },
+      "sandbox": {
+        "disposition": "role default may be overridden by parent runtime policy",
+        "effective_child_isolation_verified": false
+      }
+    }
+  ]
+}

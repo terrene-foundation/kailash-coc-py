@@ -12,9 +12,13 @@ paths:
   - ".github/workflows/publish-*.yml"
   - ".github/workflows/release*.yml"
   - "deploy/deployment-config.md"
+  - "Cargo.toml"
+  - "**/Cargo.toml"
 ---
 
 # BUILD Repo Release Discipline
+
+Full examples: `.claude/guides/rule-extracts/build-repo-release-discipline.md`. The numbered clauses remain the governing contract.
 
 <!-- slot:neutral-body -->
 
@@ -39,21 +43,7 @@ When any PR merges to BUILD-main in the current session, the session MUST run `/
 1. **The package directly modified** by the merged PR.
 2. **Every sibling package whose main version is ahead of PyPI by ≥1 bump.** Rationale: if a prior session merged but did not release a sibling, the current session inherits the obligation — there is no external release cadence that will sweep it up.
 
-```bash
-# DO — enumerate packages whose main > pypi, include all in the release scope
-for pkg in kailash kailash-dataflow kailash-nexus kailash-kaizen kailash-mcp \
-           kailash-ml kailash-align kailash-pact; do
-  main_version=$(grep '^version' packages/$pkg/pyproject.toml 2>/dev/null | head -1 | cut -d'"' -f2)
-  [ -z "$main_version" ] && main_version=$(grep '^version' pyproject.toml | head -1 | cut -d'"' -f2)
-  pypi_version=$(curl -s https://pypi.org/pypi/$pkg/json | python -c 'import sys, json; print(json.load(sys.stdin)["info"]["version"])')
-  if [ "$main_version" != "$pypi_version" ]; then
-    echo "RELEASE NEEDED: $pkg main=$main_version pypi=$pypi_version"
-  fi
-done
-
-# DO NOT — only release the package you touched
-/release kailash-kaizen  # but kailash-ml main 0.17.0 > pypi 0.15.2 is left stale
-```
+**DO:** enumerate every package whose main version exceeds PyPI and include all stale packages in the release scope. **DO NOT:** release only the package touched by the current PR.
 
 **Why:** Sibling packages drift over time — each session addresses its own PR's package and leaves siblings behind. The downstream consumer experiences a compounding gap. Closing siblings opportunistically (every session that releases anything sweeps every stale package) is the only way the gap converges to zero.
 
@@ -134,23 +124,7 @@ print(AgentDiagnostics, TraceExporter)
 
 At the start of a session that will merge code, the agent MUST enumerate every BUILD-repo package and cache (main_version, pypi_version) per package. The enumeration lives in the session's working memory for the rest of the session so release-scope decisions are not re-derived per-PR.
 
-```markdown
-# DO — enumerate once, reference throughout
-
-Release scope for this session (at session start, before first merge):
-| Package | main | PyPI | Release needed? |
-|-----------------|-------|-------|-----------------|
-| kailash | 2.8.25| 2.8.11| YES (14 patches)|
-| kailash-dataflow| 2.0.12| 2.0.12| NO |
-| kailash-kaizen | 2.9.0 | 2.7.5 | YES (minor) |
-| kailash-ml | 0.17.0| 0.15.2| YES (2 minors) |
-| kailash-align | 0.4.0 | 0.3.2 | YES (minor) |
-| kailash-pact | 0.9.0 | 0.8.2 | YES (minor) |
-
-Release cycle at end of session: kailash + kaizen + ml + align + pact.
-
-# DO NOT — derive release scope only for the PR's package at merge time
-```
+**DO:** cache `(package, main_version, pypi_version, release_needed)` for every package before the first merge, then release every stale package in the authorized scope. **DO NOT:** derive scope only for the current PR’s package at merge time.
 
 **Why:** Without session-level scope enumeration, each merge independently asks "should I release this?" and the answer is always "only this one" — missing the sibling drift. Enumerating up-front locks in the "sweep all stale" obligation.
 
@@ -176,25 +150,7 @@ Per `rules/autonomous-execution.md` § "Structural vs Execution Gates", release 
 
 Every PR-review gate (per `rules/agents.md` § Quality Gates row "Implementation done") MUST mechanically check: for each sub-package whose `packages/<pkg>/src/**/*.py` has changes in the diff, the SAME PR MUST also modify `packages/<pkg>/pyproject.toml::version` AND `packages/<pkg>/src/<pkg>/__init__.py::__version__`. A PR that ships sub-package src changes without a same-PR version bump is BLOCKED at PR-review time, NOT discovered later at `/release` time.
 
-```bash
-# DO — pre-merge mechanical sweep, run on every PR review
-for pkg_dir in packages/*/; do
-  pkg=$(basename "$pkg_dir")
-  src_changed=$(git diff origin/main...HEAD -- "$pkg_dir/src/" --name-only | wc -l)
-  ver_changed=$(git diff origin/main...HEAD -- "$pkg_dir/pyproject.toml" "$pkg_dir/src/*/__init__.py" \
-    | grep -cE '^\+\s*(version|__version__)\s*=' )
-  if [ "$src_changed" -gt 0 ] && [ "$ver_changed" -lt 2 ]; then
-    echo "BLOCKED: $pkg src changed but version bump missing in same PR"
-    exit 1
-  fi
-done
-
-# DO NOT — defer the check to /release
-# (Wave 4 PR #632 modified the mcp package directory src/.../auth/{providers,oauth}.py
-#  but mcp pyproject stayed at 0.2.9. Caught only at /release-time enumeration,
-#  required a separate fix-PR #634 to bump mcp 0.2.9 → 0.2.10. Net cost:
-#  one extra PR, one extra CI cycle, one extra admin merge, ~15min of pacing.)
-```
+**DO:** for every changed `packages/<pkg>/src/`, verify the diff changes both `pyproject.toml::version` and `__init__.py::__version__`; block the PR when either is absent. **DO NOT:** defer this sweep or either version bump to `/release`.
 
 **BLOCKED rationalizations:**
 

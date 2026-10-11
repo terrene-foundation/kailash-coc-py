@@ -68,28 +68,28 @@ files that exist nowhere in the corpus, so every lookup dead-ended.
 
 ### Credentials & Secrets
 
-- **[credential-decode-helpers](credential-decode-helpers.md)** - One shared userinfo decoder; null-byte rejection after percent-decoding
+- **[credential-decode-helpers](../../../.claude/skills/18-security-patterns/credential-decode-helpers.md)** - One shared userinfo decoder; null-byte rejection after percent-decoding
 - **[credential-url-handling](credential-url-handling.md)** - Canonical connection-string credential pipeline (py)
 
 ### Input Handling & Injection
 
-- **[sanitizer-contract](sanitizer-contract.md)** - Display hygiene: token-replace sentinels, type-confusion raises
-- **[path-containment](path-containment.md)** - Resolve and normalize both candidate and root before the trust decision
+- **[sanitizer-contract](../../../.claude/skills/18-security-patterns/sanitizer-contract.md)** - Display hygiene: token-replace sentinels, type-confusion raises
+- **[path-containment](../../../.claude/skills/18-security-patterns/path-containment.md)** - Resolve and normalize both candidate and root before the trust decision
 
 ### Authorization & Defaults
 
-- **[secure-defaults-and-approver-identity](secure-defaults-and-approver-identity.md)** - Fail-closed defaults; server-derived, immutably-pinned approver identity
-- **[multi-site-kwarg-plumbing](multi-site-kwarg-plumbing.md)** - Every call site learns a security-relevant kwarg in the same PR
-- **[frontmatter-directive-trust-surface](frontmatter-directive-trust-surface.md)** - Frontmatter is the directive trust surface, never a body scan
+- **[secure-defaults-and-approver-identity](../../../.claude/skills/18-security-patterns/secure-defaults-and-approver-identity.md)** - Fail-closed defaults; server-derived, immutably-pinned approver identity
+- **[multi-site-kwarg-plumbing](../../../.claude/skills/18-security-patterns/multi-site-kwarg-plumbing.md)** - Every call site learns a security-relevant kwarg in the same PR
+- **[frontmatter-directive-trust-surface](../../../.claude/skills/18-security-patterns/frontmatter-directive-trust-surface.md)** - Frontmatter is the directive trust surface, never a body scan
 
 ### Database (DataFlow / RLS)
 
-- **[dataflow-rls-posture](dataflow-rls-posture.md)** - RLS as a runtime predicate, not DDL
-- **[rls-security-definer-preauth-carveout](rls-security-definer-preauth-carveout.md)** - The SECURITY DEFINER pre-auth carveout
+- **[dataflow-rls-posture](../../../.claude/skills/18-security-patterns/dataflow-rls-posture.md)** - RLS as a runtime predicate, not DDL
+- **[rls-security-definer-preauth-carveout](../../../.claude/skills/18-security-patterns/rls-security-definer-preauth-carveout.md)** - The SECURITY DEFINER pre-auth carveout
 
 ### Build & Distribution
 
-- **[docker-disclosure-scrub](docker-disclosure-scrub.md)** - Build-time public-surface disclosure gate
+- **[docker-disclosure-scrub](../../../.claude/skills/18-security-patterns/docker-disclosure-scrub.md)** - Build-time public-surface disclosure gate
 
 ### Chained Exploits (cross-cutting)
 
@@ -147,9 +147,9 @@ Use this skill when:
 
 ## Related Skills
 
-- **[17-gold-standards](../17-gold-standards/SKILL.md)** - Mandatory best practices
-- **[16-validation-patterns](../16-validation-patterns/SKILL.md)** - Validation patterns
-- **[01-core-sdk](../01-core-sdk/SKILL.md)** - Core workflow patterns
+- **[17-gold-standards](../../../.claude/skills/17-gold-standards/SKILL.md)** - Mandatory best practices
+- **[16-validation-patterns](../../../.claude/skills/16-validation-patterns/SKILL.md)** - Validation patterns
+- **[01-core-sdk](../../../.claude/skills/01-core-sdk/SKILL.md)** - Core workflow patterns
 
 ## Support
 

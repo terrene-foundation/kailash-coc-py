@@ -100,12 +100,17 @@ function _defaultLocalAppend(repoDir) {
     // eslint-disable-next-line global-require
     const path = require("path");
     // eslint-disable-next-line global-require
-    const { appendSinkLine } = require("./append-sink.js");
+    const { appendSinkLine, mainCheckoutBoundaryRoots } = require("./append-sink.js");
     // loom#1349 R1 F3 — routed through the shared hardened primitive. Genesis rows anchor the
     // repo's trust root, so a symlinked sink here would land the anchor outside the repo.
     const sinkPath = path.join(repoDir, ".claude", "learning", "coordination-log.jsonl");
     try {
-      const w = appendSinkLine({ repoDir, sinkPath, line: JSON.stringify(record) });
+      const w = appendSinkLine({
+        repoDir,
+        additionalRoots: mainCheckoutBoundaryRoots(repoDir),
+        sinkPath,
+        line: JSON.stringify(record),
+      });
       if (!w.ok)
         return { ok: false, error: "default local append failed", reason: `${w.error} — ${w.reason}` };
       return { ok: true };
@@ -208,7 +213,9 @@ function _resolveGenesisOwner(roster, targetLogin) {
   const matches = [];
   for (const [pid, person] of Object.entries(roster.persons)) {
     if (isUnenrolled(pid)) continue;
-    if (person.role !== "owner") continue;
+    // S61 — `person &&` null-guard, matching the siblings
+    // `_resolveSoleOwner` and `fold-rule-9c` which already carry it.
+    if (!person || person.role !== "owner") continue;
     if (!githubLogin.loginsEqual(person.github_login, targetLogin)) continue;
     matches.push({ person_id: pid, person });
   }
@@ -242,7 +249,9 @@ function _resolveGenesisOwnerByPrincipal(roster, targetPrincipal) {
   const matches = [];
   for (const [pid, person] of Object.entries(roster.persons)) {
     if (isUnenrolled(pid)) continue;
-    if (person.role !== "owner") continue;
+    // S61 — `person &&` null-guard, matching the siblings
+    // `_resolveSoleOwner` and `fold-rule-9c` which already carry it.
+    if (!person || person.role !== "owner") continue;
     if (!azureAdapter.principalsEqual(person.principal, targetPrincipal)) {
       continue;
     }
@@ -271,9 +280,16 @@ function _resolveGenesisOwnerByPrincipal(roster, targetPrincipal) {
  * Find the signing key (by fingerprint) within the genesis-owner's keys.
  */
 function _findSigningKey(person, fingerprint) {
-  const keys = person.keys || [];
+  // S61 — shape-guard: a non-array `keys` yields "no signing key" (refuse),
+  // never a THROW. Callers hand this a person straight off
+  // `Object.entries(roster.persons)`, with no resolver in front of it, and the
+  // ceremony's roster read does not schema-validate — so an on-disk
+  // `keys: {}` / `5` / `true` reached this loop and threw
+  // `TypeError: keys is not iterable`. A typed refusal is the ceremony's
+  // contract; an unhandled throw is not.
+  const keys = Array.isArray(person && person.keys) ? person.keys : [];
   for (const k of keys) {
-    if (k.fingerprint === fingerprint) return k;
+    if (k && k.fingerprint === fingerprint) return k;
   }
   return null;
 }
@@ -1110,11 +1126,31 @@ function _resolveSoleOwner(roster) {
 function _defaultGit({ args, cwd }) {
   // eslint-disable-next-line global-require
   const { execFileSync } = require("child_process");
+  // eslint-disable-next-line global-require
+  const { resolveGitBinary, gitEnv } = require("./git-subprocess-env.js");
+  // loom#1471 (s49). LOCAL profile — the ceremony's only git read is
+  // `rev-list`, against a repository already on disk. `cwd` names a DIRECTORY,
+  // so an ambient `GIT_DIR` decided which repository answered the genesis
+  // ancestry question this module bootstraps a trust root from.
+  const gitBin = resolveGitBinary();
+  if (!gitBin) {
+    // The failure shape this function already contracts for. INDETERMINATE,
+    // never a clean `ok:true`.
+    return {
+      ok: false,
+      stdout: "",
+      stderr:
+        "genesis-ceremony: no git binary resolved; ancestry is INDETERMINATE " +
+        "(security.md § Enforcement-Surface Parity — never read as success)",
+      status: null,
+    };
+  }
   try {
-    const stdout = execFileSync("git", args, {
+    const stdout = execFileSync(gitBin, args, {
       cwd,
       stdio: ["ignore", "pipe", "pipe"],
       encoding: "utf8",
+      env: gitEnv(),
     });
     return { ok: true, stdout: String(stdout).trim(), stderr: "", status: 0 };
   } catch (err) {

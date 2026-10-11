@@ -15,30 +15,30 @@ Use when encountering errors, debugging issues, or asking about error, troublesh
 
 ### Critical Errors
 
-- **[error-nexus-blocking](error-nexus-blocking.md)** - Nexus hangs or blocks
+- **[error-nexus-blocking](../../../.claude/skills/31-error-troubleshooting/error-nexus-blocking.md)** - Nexus hangs or blocks
   - Symptom: API hangs forever | Cause: LocalRuntime in Docker/FastAPI | Fix: Use AsyncLocalRuntime
-- **[error-missing-build](error-missing-build.md)** - Forgot `.build()`
+- **[error-missing-build](../../../.claude/skills/31-error-troubleshooting/error-missing-build.md)** - Forgot `.build()`
   - Symptom: `TypeError: execute() expects Workflow, got WorkflowBuilder` | Fix: `runtime.execute(workflow.build())`
 
 ### Connection & Parameter Errors
 
-- **[error-connection-exhaustion](error-connection-exhaustion.md)** - Database connection exhaustion
+- **[error-connection-exhaustion](../../../.claude/skills/31-error-troubleshooting/error-connection-exhaustion.md)** - Database connection exhaustion
   - Symptom: "too many connections" | Fix: Use `external_pool` parameter, set `max_pool_size = DB max / worker count`
-- **[error-connection-params](error-connection-params.md)** - Invalid connections
+- **[error-connection-params](../../../.claude/skills/31-error-troubleshooting/error-connection-params.md)** - Invalid connections
   - Symptom: Node gets wrong data | Fix: Use 4-param format `(source_id, source_param, target_id, target_param)`
-- **[error-parameter-validation](error-parameter-validation.md)** - Invalid node parameters
+- **[error-parameter-validation](../../../.claude/skills/31-error-troubleshooting/error-parameter-validation.md)** - Invalid node parameters
   - Symptom: `ValidationError: Missing required parameter` | Fix: Check node docs for required params
 
 ### Runtime & Cycle Errors
 
-- **[error-runtime-execution](error-runtime-execution.md)** - Runtime failures
+- **[error-runtime-execution](../../../.claude/skills/31-error-troubleshooting/error-runtime-execution.md)** - Runtime failures
   - Check logs, validate inputs, test nodes individually, add LoggerNode for visibility
-- **[error-cycle-convergence](error-cycle-convergence.md)** - Cycles don't converge
+- **[error-cycle-convergence](../../../.claude/skills/31-error-troubleshooting/error-cycle-convergence.md)** - Cycles don't converge
   - Symptom: Infinite loop / max iterations exceeded | Fix: Add `cycle_complete` convergence check
 
 ### DataFlow Errors
 
-- **[error-dataflow-template-syntax](error-dataflow-template-syntax.md)** - Template string errors
+- **[error-dataflow-template-syntax](../../../.claude/skills/31-error-troubleshooting/error-dataflow-template-syntax.md)** - Template string errors
   - Symptom: `SyntaxError` in template strings | Fix: Use `{{variable}}` syntax
 
 ### Kaizen Provider Errors
@@ -166,11 +166,11 @@ unstaged changes at commit time.
 
 ## Related Skills
 
-- **[16-validation-patterns](../16-validation-patterns/SKILL.md)** - Validation patterns
-- **[17-gold-standards](../17-gold-standards/SKILL.md)** - Best practices to avoid errors
-- **[01-core-sdk](../01-core-sdk/SKILL.md)** - Core patterns
-- **[02-dataflow](../02-dataflow/SKILL.md)** - DataFlow specifics
-- **[03-nexus](../03-nexus/SKILL.md)** - Nexus specifics
+- **[16-validation-patterns](../../../.claude/skills/16-validation-patterns/SKILL.md)** - Validation patterns
+- **[17-gold-standards](../../../.claude/skills/17-gold-standards/SKILL.md)** - Best practices to avoid errors
+- **[01-core-sdk](../../../.claude/skills/01-core-sdk/SKILL.md)** - Core patterns
+- **[02-dataflow](../../../.claude/skills/02-dataflow/SKILL.md)** - DataFlow specifics
+- **[03-nexus](../../../.claude/skills/03-nexus/SKILL.md)** - Nexus specifics
 
 ## Support
 

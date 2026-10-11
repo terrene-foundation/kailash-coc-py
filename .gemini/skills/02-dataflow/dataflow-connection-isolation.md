@@ -11,7 +11,7 @@ description: "DataFlow connection isolation and transaction context patterns. Us
 > Category: `dataflow`
 > Priority: `CRITICAL`
 > SDK Version: `0.9.25+ / DataFlow 0.6.0+`
-> Related Skills: [`dataflow-transactions`](dataflow-transactions.md), [`dataflow-crud-operations`](dataflow-crud-operations.md)
+> Related Skills: [`dataflow-transactions`](../../../.claude/skills/02-dataflow/dataflow-transactions.md), [`dataflow-crud-operations`](../../../.claude/skills/02-dataflow/dataflow-crud-operations.md)
 > Related Subagents: `dataflow-specialist` (transaction design)
 
 ## ⚠️ Critical Pattern: Connection Isolation by Default
@@ -358,8 +358,8 @@ results, run_id = await runtime.execute_workflow_async(workflow.build())
 
 ### Related Documentation
 
-- **DataFlow CRUD**: [`dataflow-crud-operations`](dataflow-crud-operations.md)
-- **DataFlow Transactions**: [`dataflow-transactions`](dataflow-transactions.md)
+- **DataFlow CRUD**: [`dataflow-crud-operations`](../../../.claude/skills/02-dataflow/dataflow-crud-operations.md)
+- **DataFlow Transactions**: [`dataflow-transactions`](../../../.claude/skills/02-dataflow/dataflow-transactions.md)
 
 ## Summary
 

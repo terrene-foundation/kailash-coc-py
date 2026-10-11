@@ -14,7 +14,7 @@
  *
  *  THE REGISTRY ARTIFACT CLASS. A knowledge-product's IDENTITY (not its bytes)
  *  is the mesh-level object. It is authored AT THE PROJECT and UP-pulled to
- *  loom-command; it is INERT AT LOOM (loom writes identities, never resolves
+ *  the UP-pull aggregator; it is INERT AT LOOM (loom writes identities, never resolves
  *  them). This validator checks the 13-field TUPLE SHAPE:
  *    name · version · lineage_id · content_hash · content_commitment ·
  *    classification · owning_level · product_class · cascade_scope ·
@@ -45,6 +45,7 @@
 import fs from "node:fs";
 
 import { DISPOSITIONS, ENUMS, VERSION_GRAMMAR, isOpaqueHandle } from "./mesh-registry-scrub.mjs";
+import { isMainModule } from "./lib/entry-point.mjs";
 
 // The canonical 13 field names — single source (the scrub engine's disposition
 // table). Any drift between the fence and this validator is impossible.
@@ -175,7 +176,7 @@ function main() {
   return r.ok ? 0 : 1;
 }
 
-const isMain = process.argv[1] && import.meta.url === `file://${process.argv[1]}`;
-if (isMain) process.exit(main());
+// Entry-point check: .claude/bin/lib/entry-point.mjs (symlink-safe; a lexical compare exits 0 silently).
+if (isMainModule(import.meta.url)) process.exit(main());
 
 export { REQUIRED_CORE, OPAQUE_FIELDS };

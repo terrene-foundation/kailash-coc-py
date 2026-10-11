@@ -104,7 +104,7 @@ The provider monolith (`kaizen.nodes.ai.ai_providers`) is now split into per-pro
 
 ### SPEC-05 (Delegate Facade)
 
-Delegate is now a composition facade wrapping `AgentLoop -> [L3GovernedAgent] -> [MonitoredAgent]`. See [kaizen-delegate](kaizen-delegate.md) for the updated API surface.
+Delegate is now a composition facade wrapping `AgentLoop -> [L3GovernedAgent] -> [MonitoredAgent]`. See [kaizen-delegate](../../../.claude/skills/04-kaizen/kaizen-delegate.md) for the updated API surface.
 
 - `ConstructorIOError` -- raised on outbound IO in `__init__`
 - `ToolRegistryCollisionError` -- raised on duplicate tool name registration

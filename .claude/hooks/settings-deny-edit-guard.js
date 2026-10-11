@@ -1,7 +1,20 @@
 #!/usr/bin/env node
 /**
+ * @hook-event: PreToolUse:Edit|NotebookEdit|Write (guard) — the proposed settings mutation can be evaluated against the current protection invariant before writing.
+ *
  * Hook: settings-deny-edit-guard
  * Event: PreToolUse (Edit | Write | NotebookEdit)
+ *
+ * @coc-codex-edit-gate — .claude/settings.json self-protection invariant. The
+ *   policy extractor fans its CC edit-matcher registration out to the Codex
+ *   `apply_patch` lane (mcp-guard, FF-AC6-1). The earlier "no apply_patch
+ *   equivalent" reason is WITHDRAWN (2026-10-09): an apply_patch that edits
+ *   the settings file IS the mutation this guard fences, and the native
+ *   bridge projects the patch into the Write (`content`) / Edit
+ *   (`old_string`,`new_string`) shape `applyEdits()` already computes the
+ *   resulting bytes from. On the compatibility-wrapper path, where only the
+ *   target path is projected, the documented fail-open (content absent →
+ *   passthrough) is unchanged.
  * Purpose: #1309 L1 — the WITHIN-SESSION prevention layer for the
  *          .claude/settings.json self-protection contract.
  *
@@ -59,6 +72,20 @@
  *   (a legit settings-manager field loom itself sets) — a cleared residual, not a gap.
  */
 
+/**
+ * @hook-contract
+ * {
+ *   "side_effects": {
+ *     "fs_writes": [],
+ *     "network": false,
+ *     "spawns": []
+ *   },
+ *   "idempotent": true,
+ *   "may_rewrite_input": false,
+ *   "notes": "Read-only over the on-disk settings file(s) (statSync / readFileSync) — the verdict is emitted to stdout via lib/instruct-and-wait.js and nothing is written; lib/tool-classes.js and lib/settings-deny-guard-shape.js are pure predicates."
+ * }
+ */
+
 const fs = require("fs");
 const path = require("path");
 // NB: imported as `osMod` (not `os`) — applyEdits() below uses a local `os` for `old_string`.
@@ -93,6 +120,7 @@ const CANONICAL_DENY_FLOOR = [
   "Edit(.claude/learning/presence-mechanism.json)",
   "Edit(.claude/operators.roster.json)",
   "Edit(.claude/learning/coordination-log.jsonl)",
+  "Edit(.claude/learning/burndown-events.pending.jsonl*)",
   "Edit(.claude/learning/.heartbeat-cache*)",
   "Edit(.claude/learning/.session-end-cache*)",
 ];
@@ -113,11 +141,8 @@ const GUARD_HOOK_SPECS = [
   },
 ];
 
-const TIMEOUT_MS = 5000;
-const _timeout = setTimeout(() => {
-  console.log(JSON.stringify({ continue: true }));
-  process.exit(1);
-}, TIMEOUT_MS);
+const TIMEOUT_MS = 16000;
+let _timeout = null;
 
 function passthrough() {
   clearTimeout(_timeout);
@@ -583,15 +608,47 @@ async function main(payload) {
   return passthrough();
 }
 
-let input = "";
-process.stdin.setEncoding("utf8");
-process.stdin.on("data", (c) => (input += c));
-process.stdin.on("end", () => {
+// hookMain — the ONE entry, run by the CLI guard at the bottom of this file AND
+// in-process by lib/hook-engine.js (dispatch.js). Everything a standalone run
+// did at load time happens here instead, so a require() has no side effects.
+function hookMain() {
+  _timeout = setTimeout(() => {
+    console.log(JSON.stringify({ continue: true }));
+    process.exit(1);
+  }, TIMEOUT_MS);
+  return new Promise((resolve, reject) => {
+    let input = "";
+    process.stdin.setEncoding("utf8");
+    process.stdin.on("data", (c) => (input += c));
+    process.stdin.on("end", () => {
+      let r;
+      try {
+        r = onStdinEnd(input);
+      } catch (e) {
+        return reject(e);
+      }
+      Promise.resolve(r).then(resolve, reject);
+    });
+  });
+}
+
+function onStdinEnd(input) {
   let payload;
   try {
     payload = JSON.parse(input || "{}");
   } catch {
     return passthrough();
   }
-  main(payload).catch(() => passthrough());
-});
+  return main(payload).catch(() => passthrough());
+}
+
+module.exports = { hookMain };
+
+// CLI entry. The default path is exactly hookMain() — no engine dependency, so a
+// tree that copies this hook without lib/hook-engine.js runs it unchanged. The
+// selftest path replays the run through the in-process engine (hook-engine.js::runCli).
+if (require.main === module) {
+  if (process.env.COC_HOOK_ENGINE_SELFTEST === "1")
+    require("./lib/hook-engine.js").runCli(hookMain, __filename);
+  else hookMain();
+}

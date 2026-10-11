@@ -374,8 +374,8 @@ workflow.add_node("OrderItemUpsertNode", "upsert", {
 
 ## Related Resources
 
-- **[dataflow-crud-operations](dataflow-crud-operations.md)** - CRUD operation patterns
-- **[dataflow-bulk-operations](dataflow-bulk-operations.md)** - BulkUpsertNode patterns
+- **[dataflow-crud-operations](../../../.claude/skills/02-dataflow/dataflow-crud-operations.md)** - CRUD operation patterns
+- **[dataflow-bulk-operations](../../../.claude/skills/02-dataflow/dataflow-bulk-operations.md)** - BulkUpsertNode patterns
 
 ## When to Use This Skill
 

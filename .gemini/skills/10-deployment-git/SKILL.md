@@ -22,19 +22,19 @@ SDK release and development infrastructure patterns for:
 
 ### Deployment Lifecycle
 
-- **[deployment-onboarding](deployment-onboarding.md)** - SDK release onboarding process
+- **[deployment-onboarding](../../../.claude/skills/10-deployment-git/deployment-onboarding.md)** - SDK release onboarding process
   - Codebase analysis (packages, build system, CI, docs)
   - Structured questions for human architect
   - Research current PyPI/CI best practices
   - Create deployment-config.md
 
-- **[release-runbook](release-runbook.md)** - SDK release runbook (detailed procedures)
+- **[release-runbook](../../../.claude/skills/10-deployment-git/release-runbook.md)** - SDK release runbook (detailed procedures)
   - Version locations for all packages (pyproject.toml + **init**.py)
   - SDK dependency pin rules
   - Version consistency verification commands
   - Pre-release, build, publish, post-release step-by-step procedures
 
-- **[deployment-packages](deployment-packages.md)** - Package release workflow
+- **[deployment-packages](../../../.claude/skills/10-deployment-git/deployment-packages.md)** - Package release workflow
   - PyPI and GitHub release process
   - Multi-package coordination and publish order
   - Version bumping and changelog
@@ -42,7 +42,7 @@ SDK release and development infrastructure patterns for:
   - TestPyPI validation
   - Rollback procedures
 
-- **[deployment-ci](deployment-ci.md)** - CI/CD infrastructure
+- **[deployment-ci](../../../.claude/skills/10-deployment-git/deployment-ci.md)** - CI/CD infrastructure
   - GitHub Actions workflows for Python packages
   - Multi-platform wheel building
   - Test matrix (Python versions x OS)
@@ -50,14 +50,14 @@ SDK release and development infrastructure patterns for:
   - Documentation deployment (ReadTheDocs, GitHub Pages)
   - Self-hosted runner management
 
-- **[python-version-bump](python-version-bump.md)** - Python minor-version bump playbook
+- **[python-version-bump](../../../.claude/skills/10-deployment-git/python-version-bump.md)** - Python minor-version bump playbook
   - When to declare a new CPython release (3.X stable + ≥1 patch)
   - 3-step recipe: pyproject classifiers → CI matrices → `uv pip install --dry-run --python 3.X` verification
   - Concrete file list for all 10 packages and 4 CI matrix files
   - Common gotcha: stale literal version assertions in test fixtures (durable cross-surface contract pattern)
   - ML stack wheel-lag guidance (torch / transformers / accelerate)
 
-- **[multi-package-release-wave](multi-package-release-wave.md)** - Atomic 7-package release coordination
+- **[multi-package-release-wave](../../../.claude/skills/10-deployment-git/multi-package-release-wave.md)** - Atomic 7-package release coordination
   - Reverse dep-graph publish order (`kailash → dataflow → nexus → kaizen → pact → align → ml`)
   - Per-package version owner + sole CHANGELOG owner rules (parallel-worktree safe)
   - Pre-flight build + twine + TestPyPI dry-run for every package in the wave
@@ -67,7 +67,7 @@ SDK release and development infrastructure patterns for:
 
 ### Docker
 
-- **[deployment-docker-quick](deployment-docker-quick.md)** - Docker deployment patterns
+- **[deployment-docker-quick](../../../.claude/skills/10-deployment-git/deployment-docker-quick.md)** - Docker deployment patterns
   - Dockerfile setup for Kailash apps
   - Docker Compose configurations
   - Multi-stage builds
@@ -75,14 +75,14 @@ SDK release and development infrastructure patterns for:
 
 ### Kubernetes
 
-- **[deployment-kubernetes-quick](deployment-kubernetes-quick.md)** - Kubernetes deployment patterns
+- **[deployment-kubernetes-quick](../../../.claude/skills/10-deployment-git/deployment-kubernetes-quick.md)** - Kubernetes deployment patterns
   - Deployment manifests
   - Service configuration
   - Scaling strategies
 
 ### Git Workflow
 
-- **[git-workflow-quick](git-workflow-quick.md)** - Git workflow best practices
+- **[git-workflow-quick](../../../.claude/skills/10-deployment-git/git-workflow-quick.md)** - Git workflow best practices
   - Branching strategies
   - Commit conventions
   - Pull request workflow
@@ -92,7 +92,7 @@ SDK release and development infrastructure patterns for:
 
 ### GitHub Management
 
-- **[github-management-patterns](github-management-patterns.md)** - GitHub project and issue management
+- **[github-management-patterns](../../../.claude/skills/10-deployment-git/github-management-patterns.md)** - GitHub project and issue management
   - Issue templates (User Story, Bug, Technical Task)
   - Story points and estimation
   - Project board organization
@@ -100,13 +100,13 @@ SDK release and development infrastructure patterns for:
 
 ### Project Management
 
-- **[project-management](project-management.md)** - Project management architecture
+- **[project-management](../../../.claude/skills/10-deployment-git/project-management.md)** - Project management architecture
   - Dual-tracking system overview
   - GitHub Issues vs Local Todos
   - Agent coordination flow
   - Sprint management
 
-- **[todo-github-sync](todo-github-sync.md)** - Todo ↔ GitHub issues sync patterns
+- **[todo-github-sync](../../../.claude/skills/10-deployment-git/todo-github-sync.md)** - Todo ↔ GitHub issues sync patterns
   - Naming conventions (Story X format)
   - Workflow for creating, starting, completing stories
   - Sub-issue management
@@ -202,10 +202,10 @@ Use this skill when you need to:
 
 ## Related Skills
 
-- **[03-nexus](../03-nexus/SKILL.md)** - Application deployment (end-user)
-- **[02-dataflow](../02-dataflow/SKILL.md)** - Database operations
-- **[01-core-sdk](../01-core-sdk/SKILL.md)** - Runtime selection
-- **[17-gold-standards](../17-gold-standards/SKILL.md)** - Release best practices
+- **[03-nexus](../../../.claude/skills/03-nexus/SKILL.md)** - Application deployment (end-user)
+- **[02-dataflow](../../../.claude/skills/02-dataflow/SKILL.md)** - Database operations
+- **[01-core-sdk](../../../.claude/skills/01-core-sdk/SKILL.md)** - Runtime selection
+- **[17-gold-standards](../../../.claude/skills/17-gold-standards/SKILL.md)** - Release best practices
 
 ## Support
 

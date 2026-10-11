@@ -43,45 +43,45 @@ app.start()
 
 ### Getting Started
 
-- **[nexus-quickstart](nexus-quickstart.md)** - Quick start guide
-- **[nexus-installation](nexus-installation.md)** - Installation and setup
-- **[nexus-architecture](nexus-architecture.md)** - Architecture overview
-- **[README](README.md)** - Framework overview
-- **[nexus-comparison](nexus-comparison.md)** - Nexus vs traditional frameworks
+- **[nexus-quickstart](../../../.claude/skills/03-nexus/nexus-quickstart.md)** - Quick start guide
+- **[nexus-installation](../../../.claude/skills/03-nexus/nexus-installation.md)** - Installation and setup
+- **[nexus-architecture](../../../.claude/skills/03-nexus/nexus-architecture.md)** - Architecture overview
+- **[README](../../../.claude/skills/03-nexus/README.md)** - Framework overview
+- **[nexus-comparison](../../../.claude/skills/03-nexus/nexus-comparison.md)** - Nexus vs traditional frameworks
 
 ### Core Concepts
 
-- **[nexus-workflow-registration](nexus-workflow-registration.md)** - Registering workflows
-- **[nexus-multi-channel](nexus-multi-channel.md)** - Multi-channel architecture
-- **[nexus-sessions](nexus-sessions.md)** - Session management
-- **[nexus-config-options](nexus-config-options.md)** - Configuration options
+- **[nexus-workflow-registration](../../../.claude/skills/03-nexus/nexus-workflow-registration.md)** - Registering workflows
+- **[nexus-multi-channel](../../../.claude/skills/03-nexus/nexus-multi-channel.md)** - Multi-channel architecture
+- **[nexus-sessions](../../../.claude/skills/03-nexus/nexus-sessions.md)** - Session management
+- **[nexus-config-options](../../../.claude/skills/03-nexus/nexus-config-options.md)** - Configuration options
 
 ### Channel-Specific Patterns
 
-- **[nexus-api-patterns](nexus-api-patterns.md)** - HTTP API patterns
-- **[nexus-api-input-mapping](nexus-api-input-mapping.md)** - API input handling
-- **[nexus-cli-patterns](nexus-cli-patterns.md)** - CLI usage patterns
-- **[nexus-mcp-channel](nexus-mcp-channel.md)** - MCP channel configuration
+- **[nexus-api-patterns](../../../.claude/skills/03-nexus/nexus-api-patterns.md)** - HTTP API patterns
+- **[nexus-api-input-mapping](../../../.claude/skills/03-nexus/nexus-api-input-mapping.md)** - API input handling
+- **[nexus-cli-patterns](../../../.claude/skills/03-nexus/nexus-cli-patterns.md)** - CLI usage patterns
+- **[nexus-mcp-channel](../../../.claude/skills/03-nexus/nexus-mcp-channel.md)** - MCP channel configuration
 
 ### Integration
 
-- **[nexus-dataflow-integration](nexus-dataflow-integration.md)** - DataFlow + Nexus patterns
-- **[nexus-plugins](nexus-plugins.md)** - Plugin system
-- **[nexus-event-system](nexus-event-system.md)** - Event-driven architecture
+- **[nexus-dataflow-integration](../../../.claude/skills/03-nexus/nexus-dataflow-integration.md)** - DataFlow + Nexus patterns
+- **[nexus-plugins](../../../.claude/skills/03-nexus/nexus-plugins.md)** - Plugin system
+- **[nexus-event-system](../../../.claude/skills/03-nexus/nexus-event-system.md)** - Event-driven architecture
 
 ### Production & Operations
 
-- **[nexus-production-deployment](nexus-production-deployment.md)** - Production deployment
-- **[nexus-health-monitoring](nexus-health-monitoring.md)** - Health checks and monitoring
-- **[nexus-enterprise-features](nexus-enterprise-features.md)** - Enterprise capabilities
-- **[nexus-troubleshooting](nexus-troubleshooting.md)** - Common issues and solutions
+- **[nexus-production-deployment](../../../.claude/skills/03-nexus/nexus-production-deployment.md)** - Production deployment
+- **[nexus-health-monitoring](../../../.claude/skills/03-nexus/nexus-health-monitoring.md)** - Health checks and monitoring
+- **[nexus-enterprise-features](../../../.claude/skills/03-nexus/nexus-enterprise-features.md)** - Enterprise capabilities
+- **[nexus-troubleshooting](../../../.claude/skills/03-nexus/nexus-troubleshooting.md)** - Common issues and solutions
 
 ### v1.3.0 Additions
 
-- **[nexus-handler-support](nexus-handler-support.md)** - `@app.handler()` decorator for direct function registration
-- **[nexus-auth-plugin](nexus-auth-plugin.md)** - NexusAuthPlugin unified auth (JWT, RBAC, SSO, rate limiting, tenant, audit)
-- **[golden-patterns-catalog](golden-patterns-catalog.md)** - Top 7 production-validated codegen patterns
-- **[codegen-decision-tree](codegen-decision-tree.md)** - Decision tree, anti-patterns, scaffolding templates
+- **[nexus-handler-support](../../../.claude/skills/03-nexus/nexus-handler-support.md)** - `@app.handler()` decorator for direct function registration
+- **[nexus-auth-plugin](../../../.claude/skills/03-nexus/nexus-auth-plugin.md)** - NexusAuthPlugin unified auth (JWT, RBAC, SSO, rate limiting, tenant, audit)
+- **[golden-patterns-catalog](../../../.claude/skills/03-nexus/golden-patterns-catalog.md)** - Top 7 production-validated codegen patterns
+- **[codegen-decision-tree](../../../.claude/skills/03-nexus/codegen-decision-tree.md)** - Decision tree, anti-patterns, scaffolding templates
 
 ## Key Concepts
 
@@ -258,7 +258,7 @@ docker-compose up --scale nexus=3
 - **[01-core-sdk](../../01-core-sdk/SKILL.md)** - Core workflow patterns
 - **[02-dataflow](../dataflow/SKILL.md)** - Auto CRUD API generation
 - **[04-kaizen](../kaizen/SKILL.md)** - AI agent deployment
-- **[05-kailash-mcp](../05-kailash-mcp/SKILL.md)** - MCP channel details
+- **[05-kailash-mcp](../../../.claude/skills/05-kailash-mcp/SKILL.md)** - MCP channel details
 - **[17-gold-standards](../../17-gold-standards/SKILL.md)** - Best practices
 
 ## Support

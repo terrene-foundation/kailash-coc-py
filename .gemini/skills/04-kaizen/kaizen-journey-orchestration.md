@@ -390,9 +390,9 @@ class BookingPath(Pathway):
 
 ## Related Skills
 
-- **[kaizen-signatures.md](kaizen-signatures.md)** - Layer 2 Signatures with **intent**, **guidelines**
-- **[kaizen-supervisor-worker.md](kaizen-supervisor-worker.md)** - Layer 4 multi-agent patterns
-- **[kaizen-baseagent-quick.md](kaizen-baseagent-quick.md)** - Layer 3 BaseAgent
+- **[kaizen-signatures.md](../../../.claude/skills/04-kaizen/kaizen-signatures.md)** - Layer 2 Signatures with **intent**, **guidelines**
+- **[kaizen-supervisor-worker.md](../../../.claude/skills/04-kaizen/kaizen-supervisor-worker.md)** - Layer 4 multi-agent patterns
+- **[kaizen-baseagent-quick.md](../../../.claude/skills/04-kaizen/kaizen-baseagent-quick.md)** - Layer 3 BaseAgent
 
 ## Files Reference
 

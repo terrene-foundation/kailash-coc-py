@@ -132,7 +132,7 @@ def db():
 
 ### Related Documentation
 
-- **DataFlow Specialist**: [`.gemini/agents/dataflow-specialist.md`](../../agents/frameworks/dataflow-specialist.md)
+- **DataFlow Specialist**: [`.gemini/agents/dataflow-specialist.md`](../../../.claude/agents/frameworks/dataflow-specialist.md)
 - **Test Strategy**: [`test-3tier-strategy`](#)
 
 ## Quick Tips

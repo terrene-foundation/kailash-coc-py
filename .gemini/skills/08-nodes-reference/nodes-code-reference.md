@@ -11,7 +11,7 @@ Complete reference for code execution nodes.
 > Category: `nodes`
 > Priority: `HIGH`
 > SDK Version: `0.9.25+`
-> Related Skills: [`pythoncode-best-practices`](../../01-core-sdk/pythoncode-best-practices.md), [`nodes-quick-index`](nodes-quick-index.md)
+> Related Skills: [`pythoncode-best-practices`](../../01-core-sdk/pythoncode-best-practices.md), [`nodes-quick-index`](../../../.claude/skills/08-nodes-reference/nodes-quick-index.md)
 > Related Subagents: `pattern-expert` (code patterns)
 
 ## Quick Reference
@@ -81,7 +81,7 @@ workflow.add_node("MCPToolNode", "mcp_tool", {
 ## Related Skills
 
 - **PythonCode Best Practices**: [`pythoncode-best-practices`](../../01-core-sdk/pythoncode-best-practices.md)
-- **Node Index**: [`nodes-quick-index`](nodes-quick-index.md)
+- **Node Index**: [`nodes-quick-index`](../../../.claude/skills/08-nodes-reference/nodes-quick-index.md)
 
 ## Documentation
 

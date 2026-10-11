@@ -11,7 +11,7 @@ Configure MCP server connections using STDIO, HTTP, or WebSocket transports.
 > Category: `mcp`
 > Priority: `HIGH`
 > SDK Version: `0.9.25+`
-> Related Skills: [`mcp-integration-guide`](../../01-core-sdk/mcp-integration-guide.md), [`mcp-authentication`](mcp-authentication.md)
+> Related Skills: [`mcp-integration-guide`](../../01-core-sdk/mcp-integration-guide.md), [`mcp-authentication`](../../../.claude/skills/05-kailash-mcp/mcp-authentication.md)
 > Related Subagents: `mcp-specialist` (server implementation, troubleshooting)
 
 ## Quick Reference
@@ -330,8 +330,8 @@ workflow.add_node("PythonCodeNode", "agent", {
 ## Related Patterns
 
 - **MCP Integration**: [`mcp-integration-guide`](../../01-core-sdk/mcp-integration-guide.md)
-- **Authentication**: [`mcp-authentication`](mcp-authentication.md)
-- **Testing**: [`mcp-testing-patterns`](mcp-testing-patterns.md)
+- **Authentication**: [`mcp-authentication`](../../../.claude/skills/05-kailash-mcp/mcp-authentication.md)
+- **Testing**: [`mcp-testing-patterns`](../../../.claude/skills/05-kailash-mcp/mcp-testing-patterns.md)
 
 ## When to Escalate to Subagent
 

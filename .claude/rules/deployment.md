@@ -160,7 +160,7 @@ Every package published via PyPI OIDC trusted-publishing MUST be registered as a
 #
 # Required field values MUST match exactly:
 #   PyPI Project Name:  kailash-ml
-#   Owner:              <org>
+#   Owner:              terrene-foundation
 #   Repository:         kailash-py
 #   Workflow filename:  publish-pypi.yml
 #   Environment name:   testpypi
@@ -253,5 +253,58 @@ The rule above covers the one-way case (sub-package imports from root core). At 
 **Why:** Bridge modules are by definition dual-import — each side's tests exercise paths that import the other package's modules. A one-way editable install surfaces only one direction's `ModuleNotFoundError`; the other direction surfaces in the NEXT PR that runs the opposite test suite, cascading fixes across two release cycles. Pre-declaring BOTH reciprocal installs in BOTH CI workflows catches it at the FIRST collection pass. Evidence: PR #611 release cycle — align→ml reciprocal install landed at commit `e7c5a33b`; the ml→align direction surfaced as the next collection failure at commit `c59c30da`. Both directions needed identical discipline.
 
 Origin: kailash-py PR #611 release cycle (2026-04-23) — ML↔Align bridge CI cascade.
+
+## MUST: Two Trunks, Asymmetric By Design — `dev` Carries Throughput, `main` Carries Quality
+
+A repo running the two-trunk model MUST keep the two trunks ASYMMETRIC. The asymmetry is the point; collapsing them into "two branches with the same rules" forfeits the whole benefit. Four obligations, all four binding:
+
+1. **`dev` is the THROUGHPUT trunk.** Lane work merges into `dev` CONTINUOUSLY and UN-GATED — no PR-gate matrix, no review wait, no cost. A push to `dev` MUST fire ZERO gate workflow runs; verify against the runs API for that SHA, where a non-empty run set is the falsifying result and means the workflow triggers are misconfigured, not that the model is in force.
+2. **The DEV-SERVER deploy runs off a PINNED `dev` commit — never `main`, never a moving ref.** The deploy names an immutable SHA. Deploying the `dev` branch tip by name, or promoting `main` onto the dev server, is BLOCKED.
+3. **`main` is the QUALITY trunk and the ONLY source of PRODUCTION.** `dev` → `main` is ONE PR carrying the accumulated lane work, ONE full gate run, on a deliberate cadence. A production deploy's ref MUST be reachable from `main`; deploying to production from `dev`, from a lane branch, or from an un-promoted SHA is BLOCKED.
+4. **A standing PROMOTION CADENCE MUST be declared and honored.** Declare it in `deploy/deployment-config.md` (§ Release Config). Letting `dev` → `main` drift with no cadence is BLOCKED.
+
+**Scope note — "never deploy from `main`" is the DEV-SERVER rule, not a production rule.** Obligations 2 and 3 name different TARGETS and do not conflict: the DEV server is never fed from `main`, and PRODUCTION is fed from `main` and nowhere else. Reading obligation 2 as "production must never come from `main`" inverts the model.
+
+**A deploy to a namespace serving real client traffic still requires an explicit human yes** — unchanged by this clause, and not softened by `main` being the pre-agreed production source. The topology decides WHERE production may come from; it never decides WHETHER this promotion happens.
+
+```bash
+# DO — free landing on dev; pinned dev-server ref; one deliberate promotion; production off main
+git switch dev && git merge --no-ff lane/x && git push        # fires no gate run
+deploy --env dev  --ref 9f3c1a2                               # PINNED immutable SHA
+gh pr create --base main --head dev --title "promote: dev → main (weekly cadence)"
+git merge-base --is-ancestor "$REF" main && deploy --env prod --ref "$REF"   # + human yes
+
+# DO NOT — flatten the asymmetry, float the ref, or let the cadence lapse
+gh pr create --base dev --head lane/x   # gating dev re-imposes the bottleneck dev removes
+deploy --env dev  --ref dev             # moving ref: what shipped is unknowable after the next push
+deploy --env prod --ref dev             # production off the un-gated trunk
+# ...six weeks with no promotion PR → the next one is an unreviewable megamerge
+```
+
+**BLOCKED rationalizations:**
+
+- "Both trunks should have the same checks — consistency is good hygiene"
+- "Gating `dev` too is safer, and it costs nothing"
+- "Deploying the `dev` branch tip is close enough to a pinned commit"
+- "The directive says never deploy from `main`, so production can't come from `main` either"
+- "`main` is already gated, so the production deploy needs no human yes"
+- "We'll promote to `main` when there's something worth promoting"
+- "A promotion cadence is process overhead — we promote when we're ready"
+- "One big promotion PR is more efficient than several small ones"
+- "`dev` and `main` have the same content right now, so it doesn't matter which we deploy"
+- "The lane branch is green, ship it to prod from there"
+
+**Why:** The asymmetry IS the mechanism — `dev` buys throughput precisely by being un-gated and `main` buys quality precisely by being gated once — so anything that makes the two alike (gating `dev`, or shipping production from `dev`) relocates the bottleneck instead of removing it. Without a standing promotion cadence `main` rots and the first promotion after a long gap is a large, hard-to-review merge: the same bottleneck arriving late and all at once.
+
+**Trust Posture Wiring:**
+
+- **Severity:** `halt-and-report` at the `/deploy` + `/release` gate (release-specialist confirms the production ref is reachable from `main`, the dev-server ref is an immutable SHA, and the declared promotion cadence has been honored); `advisory` at any hook layer per `hook-output-discipline.md` MUST-2 — which environment a deploy invocation targets is read from its arguments, and a mis-read would block work the operator was instructed to perform.
+- **Grace period:** 7 days from clause landing (2026-09-10 → 2026-09-17).
+- **Cumulative posture impact:** same-class violations (a production deploy from a ref not reachable from `main`; a dev-server deploy naming a moving ref; a gate matrix fired on a `dev` push; a promotion cadence undeclared or lapsed) contribute to `trust-posture.md` MUST-4 cumulative-window math (3× same-rule in 30d → drop 1 posture; 5× total in 30d → drop 1 posture).
+- **Regression-within-grace:** GENERIC `regression_within_grace` per `trust-posture.md` MUST-4 (1× = drop 1 posture) — NO dedicated per-clause trigger key. Named deviation from the canonical key-per-clause shape, recorded here per `trust-posture.md` Rule 8: the `/deploy` + `/release` gate already holds the stop for this class, so an instant-drop key would double-count it. Same disposition this file's § Pre-Pledge clause took.
+- **Receipt requirement:** SessionStart soft-gate `[ack: deployment-two-trunks]` IFF `posture.json::pending_verification` includes this rule_id.
+- **Detection mechanism:** Phase 1 (manual, gate-review) — release-specialist at `/release` + reviewer at `/implement` confirm (a) `git merge-base --is-ancestor <prod-ref> main` succeeds, (b) the dev-server deploy names a SHA rather than a branch name, (c) the most recent `dev` push carries no gate workflow run, and (d) `deploy/deployment-config.md` declares a promotion cadence whose last honored promotion falls inside it. Those four signals are STRUCTURAL — a git-object fact, an argv token, a runs-API read, a parsed-document field — so a mechanical gate is BUILDABLE here and this clause does not pretend otherwise; none ships with it, and gate-review is the enforcement layer until one is separately accepted. **Probes: REGISTERED — `.claude/test-harness/probes/deployment.probes.json`** is AUTHORED and manifest-registered (`eval-manifest.json:1089`). An earlier revision of this line read "NOT YET AUTHORED, declared in `phase2-deferrals.json::probe_authorship_deferrals`"; that was FALSE on three counts and is withdrawn rather than quietly overwritten — the suite file EXISTS, it IS registered in the manifest, and `probe_authorship_deferrals` carries NO row for it (measured: that section holds exactly one key, `_README`, and zero live rows). The claim survived because canon `.claude/rules/deployment.md` was corrected to "Probes: REGISTERED" in a graduation wave and this overlay was not swept with it — a Wiring block claiming an ABSENT tier is the absence-reads-as-clean shape this corpus governs everywhere else, and it is strictly worse than silence because it reads as a declared gap. Registration buys DISPATCHABILITY, never automatic execution: no workflow invokes `coc-probe-dispatch.mjs`, so a green CI run is NEVER evidence these probes passed — they execute only when an orchestrator dispatches `/test-harness-probe --artifacts` at gate-review.
+- **Violation scope:** this clause (two-trunk asymmetry) ONLY — its four obligations plus the dev-server-vs-production scoping; every other clause in this file keeps its own wiring.
+- **Origin:** 2026-09-10 — co-owner directive, verbatim: _"main -> production server, dev -> dev server."_ and _"The latter is always speed and throughput, the former is stellar quality."_ Extends the same day's parent directive that lane work merges into `dev` continuously and for free (a `dev` push fires zero workflow runs, verified through the runs API against a `main` control) while `dev` → `main` is one PR, one gate run, on a deliberate cadence, with the dev-server deploy off a pinned `dev` commit. The parent's "never from `main`" is scoped to the DEV-SERVER deploy by the scope note above.
 
 <!-- /slot:neutral-body -->

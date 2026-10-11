@@ -11,7 +11,7 @@ Manage MCP resources with templates, subscriptions, and URI-based access.
 > Category: `mcp`
 > Priority: `MEDIUM`
 > SDK Version: `0.9.25+`
-> Related Skills: [`mcp-structured-tools`](mcp-structured-tools.md), [`mcp-integration-guide`](../../01-core-sdk/mcp-integration-guide.md)
+> Related Skills: [`mcp-structured-tools`](../../../.claude/skills/05-kailash-mcp/mcp-structured-tools.md), [`mcp-integration-guide`](../../01-core-sdk/mcp-integration-guide.md)
 > Related Subagents: `mcp-specialist` (resource lifecycles, subscriptions)
 
 ## Quick Reference
@@ -107,7 +107,7 @@ workflow.add_node("PythonCodeNode", "agent", {
 
 ## Related Patterns
 
-- **Structured Tools**: [`mcp-structured-tools`](mcp-structured-tools.md)
+- **Structured Tools**: [`mcp-structured-tools`](../../../.claude/skills/05-kailash-mcp/mcp-structured-tools.md)
 - **MCP Integration**: [`mcp-integration-guide`](../../01-core-sdk/mcp-integration-guide.md)
 
 ## When to Escalate

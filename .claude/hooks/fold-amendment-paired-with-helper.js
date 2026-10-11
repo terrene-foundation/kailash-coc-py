@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 /**
+ * @hook-event: PostToolUse:Bash (verification) — after a commit command, the committed diff exists for checking paired fold and helper changes.
+ *
  * Hook: fold-amendment-paired-with-helper
  * Event: PostToolUse(Bash) — fires after every `git commit` (and other
  *        Bash invocations the validator filters out below).
@@ -69,8 +71,25 @@
 
 "use strict";
 
+/**
+ * @hook-contract
+ * {
+ *   "side_effects": {
+ *     "fs_writes": [],
+ *     "network": false,
+ *     "spawns": ["git"]
+ *   },
+ *   "idempotent": true,
+ *   "may_rewrite_input": false,
+ *   "notes": "spawns: `git rev-parse` and `git diff` via execFileSync, aimed at the parsed `-C <dir>` target or the session cwd (lib/git-subprocess-env.js, lib/git-command-parse.js). Every read is repo-local and the halt renders to stdout only — no durable write."
+ * }
+ */
+
 const path = require("path");
 const { execFileSync } = require("child_process");
+const { resolveGitBinary, gitEnv } = require(
+  path.join(__dirname, "lib", "git-subprocess-env.js"),
+);
 const { emit } = require(path.join(__dirname, "lib", "instruct-and-wait.js"));
 const { readStdinBounded } = require(
   path.join(__dirname, "lib", "read-stdin-bounded.js"),
@@ -87,11 +106,8 @@ const TIMEOUT_MS = 5000;
 
 // Hard timeout fallback per cc-artifacts.md Rule 7. The hook MUST exit
 // within TIMEOUT_MS even when a subprocess hangs (gh hung, git lock).
-const _timeoutHandle = setTimeout(() => {
-  process.stdout.write(JSON.stringify({ continue: true }) + "\n");
-  process.exit(1);
-}, TIMEOUT_MS);
-_timeoutHandle.unref?.();
+// Armed by hookMain() (below), not at load time, so require() has no side effects.
+let _timeoutHandle = null;
 
 // Surface paths the hook gates on. Repo-relative — the hook resolves
 // them against process.cwd() (the main checkout per
@@ -145,16 +161,30 @@ const FOLD_F86_SYMBOLS = [
 // made, which `git -C <dir> commit` puts in ANOTHER repository. This helper
 // used to spawn with neither `-C` nor `cwd`, so it always diffed the SESSION
 // repo: a pairing violation committed into a `-C` target went unseen, and the
-// session repo's own unrelated HEAD~1 was inspected in its place. `repoDir` is
-// the parsed invocation's effective work tree (null = session cwd).
-let repoDir = null;
+// session repo's own unrelated HEAD~1 was inspected in its place.
+let repoContext = null;
+const { resolveGitTargetContext, gitProbeArgs } = require("./lib/git-target-context.js");
 
+// loom#1471 (s49). LOCAL profile: every subcommand this wrapper serves
+// (`rev-parse`, `diff`, `commit`) reads or writes a repository already on disk,
+// so it inherits nothing — `gitEnv()`, not `gitConfigInvocation()`, which would
+// ADMIT the operator's global config for no need this file has. An ambient `GIT_DIR`
+// previously outranked the selected directory, so
+// the amendment/helper pairing was decided by whatever repo the environment
+// named. Absolute binary, arg array, env built from constants.
 function git(args) {
+  const gitBin = resolveGitBinary();
+  // INDETERMINATE, never a clean negative: `null` is already this wrapper's
+  // "could not answer" and every caller treats it that way.
+  if (!gitBin) return null;
   try {
-    return execFileSync("git", repoDir ? ["-C", repoDir, ...args] : args, {
+    if (!repoContext || !repoContext.known) return null;
+    return execFileSync(gitBin, gitProbeArgs(repoContext, args), {
+      cwd: repoContext.cwd,
       encoding: "utf8",
       stdio: ["ignore", "pipe", "pipe"],
       timeout: 2000,
+      env: gitEnv(),
     });
   } catch (err) {
     return null;
@@ -310,15 +340,12 @@ async function main() {
   // (advisory hooks must never block legitimate workflows on a tooling edge
   // case)". Guessing a repo would be worse: it would diff the WRONG tree and
   // report a pairing verdict about a commit that is not the one that landed.
-  if (invocation.unresolvable) {
+  repoContext = resolveGitTargetContext(invocation, payload.cwd || process.cwd());
+  if (!repoContext.known) {
     process.stdout.write(JSON.stringify({ continue: true }) + "\n");
     clearTimeout(_timeoutHandle);
     process.exit(0);
   }
-  // Point every subsequent git call at the tree the commit was actually made
-  // in. `dir` is null for an ordinary `git commit`, which leaves the spawns on
-  // the session cwd exactly as before.
-  repoDir = invocation.dir || null;
   if (!commitHasParent()) {
     // Root commit — no diff to inspect. Pass.
     process.stdout.write(JSON.stringify({ continue: true }) + "\n");
@@ -373,21 +400,23 @@ async function main() {
   process.exit(0);
 }
 
-// Run main only when invoked directly as a hook (require.main === module).
-// When required by a test, skip main and expose the pure detection helpers +
-// symbol sets so the F88 dispatch-contract refinement is regression-locked
-// per cc-artifacts.md Rule 9 + hook-output-discipline.md MUST-4.
-if (require.main === module) {
-  // main() is async since loom#1368 (event-driven stdin read). Any rejection
-  // MUST fail OPEN — an advisory hook never blocks a legitimate commit on a
-  // tooling edge case (cc-artifacts.md Rule 7 / hook-output-discipline MUST-1).
-  main().catch(() => {
+// hookMain — the ONE entry, run by the CLI guard at the bottom of this file AND
+// in-process by lib/hook-engine.js (dispatch.js). It arms the fallback timer the
+// file used to arm at load time, then runs main() with the SAME catch handler.
+// main() is async since loom#1368 (event-driven stdin read). Any rejection
+// MUST fail OPEN — an advisory hook never blocks a legitimate commit on a
+// tooling edge case (cc-artifacts.md Rule 7 / hook-output-discipline MUST-1).
+function hookMain() {
+  _timeoutHandle = setTimeout(() => {
+    process.stdout.write(JSON.stringify({ continue: true }) + "\n");
+    process.exit(1);
+  }, TIMEOUT_MS);
+  _timeoutHandle.unref?.();
+  return main().catch(() => {
     process.stdout.write(JSON.stringify({ continue: true }) + "\n");
     clearTimeout(_timeoutHandle);
     process.exit(0);
   });
-} else {
-  clearTimeout(_timeoutHandle);
 }
 
 module.exports = {
@@ -398,4 +427,16 @@ module.exports = {
   diffContainsAddedOrRemovedSymbol,
   anySymbolMatches,
   isGitCommit,
+  hookMain,
 };
+
+// CLI entry. The default path is exactly hookMain() — no engine dependency, so a
+// tree that copies this hook without lib/hook-engine.js runs it unchanged. The
+// selftest path replays the run through the in-process engine (hook-engine.js::runCli).
+// When required by a test, nothing runs: the pure detection helpers + symbol
+// sets are exposed so the F88 dispatch-contract refinement is regression-locked
+// per cc-artifacts.md Rule 9 + hook-output-discipline.md MUST-4.
+if (require.main === module) {
+  if (process.env.COC_HOOK_ENGINE_SELFTEST === "1") require("./lib/hook-engine.js").runCli(hookMain, __filename);
+  else hookMain();
+}

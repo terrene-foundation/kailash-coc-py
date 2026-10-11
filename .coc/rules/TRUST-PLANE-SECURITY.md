@@ -1,6 +1,6 @@
 ---
 id: "TRUST-PLANE-SECURITY"
-paths: ["**/trust/**"]
+paths: ["**/trust/**", "**/*trust*/**", "**/eatp/**"]
 ---
 
 # Trust-Plane Security Rules
@@ -174,18 +174,10 @@ norm = os.path.normpath(user_path)  # Platform-dependent, Windows backslashes
 Every serialization that produces a SIGNING, HMAC, integrity-hash, or cross-SDK-conformance pre-image MUST reject non-finite floats (`NaN` / `Infinity` / `-Infinity`) at serialize time — in Python, `json.dumps(..., allow_nan=False, ensure_ascii=True)` to match the wire-format common config. A free-form `metadata` / open `dict[str, Any]` field that reaches the pre-image is the un-guarded ingress; financial / constraint numerics are guarded by a finiteness check (MUST-NOT-5) but free-form metadata is NOT. This is distinct from MUST-NOT-5, which guards the VALUE-COMPARISON axis (a `NaN` cost silently passing `> limit`); this clause guards the SERIALIZATION axis (a `NaN`/`Infinity` literal in the signed bytes).
 
 ```python
-# DO (py-illustrative) — every signing/hash pre-image rejects non-finite floats
-def to_canonical_json(self) -> str:
-    return json.dumps(self._hashable_dict(), sort_keys=True,
-                      default=str, allow_nan=False, ensure_ascii=True)
-    # NaN/Inf in metadata → raises at sign time (fail-closed)
-
-# DO NOT — permissive serializer over a signed pre-image
-def to_canonical_json(self) -> str:
-    return json.dumps(self._hashable_dict(), sort_keys=True, default=str)
-    # NaN/Inf → emits "NaN"/"Infinity" literals; signs them, but a
-    # strict cross-SDK parser (e.g. Rust serde_json) REJECTS them → the
-    # signed artifact cannot be HMAC/signature-re-verified cross-SDK.
+# DO — every signing/hash pre-image rejects NaN/Inf, including metadata
+json.dumps(preimage, sort_keys=True, default=str, allow_nan=False, ensure_ascii=True)
+# DO NOT — signs invalid JSON that strict cross-SDK verifiers reject
+json.dumps(preimage, sort_keys=True, default=str)
 ```
 
 **Why:** `NaN`/`Infinity` are RFC-8259-invalid JSON; a permissive serializer emits and signs them, but a strict cross-SDK verifier rejects them on parse — so an envelope/witness/audit-anchor carrying a non-finite float in free-form metadata can never be re-verified by the sibling SDK, the exact cross-SDK parity hazard the trust plane exists to close. The fix is byte-neutral on every finite input (it changes zero currently-emitted bytes for valid data), so it ships without a cross-SDK lockstep — unlike a byte-CHANGING canonical-encoder migration, which is cross-SDK lockstep (see `cross-sdk-inspection.md`). A module-granularity AST/source sweep over every signing/hash root is the durable guard; per-function spot-checks miss sibling pre-images (a 2026-06-21 sweep found 4 deliberately-excluded forensic/memoization sites and 0 missed signing sites only after the per-function pass was widened to module-granularity).
@@ -195,8 +187,8 @@ def to_canonical_json(self) -> str:
 - **Severity:** `halt-and-report` at gate-review (security-reviewer at `/implement` + `/release` confirms every signing/hash pre-image serializer in the diff rejects non-finite floats); `advisory` at any hook layer (a lexical serializer-without-finiteness-guard scan cannot carry `block` per `hook-output-discipline.md` MUST-2).
 - **Grace period:** 7 days from rule landing.
 - **Cumulative posture impact:** same-class violations (a signing/hash pre-image shipped without a non-finite-float guard) contribute per `trust-posture.md` MUST-4 (3× same-rule / 5× total in 30d → drop 1 posture).
-- **Regression-within-grace:** trigger key `nan_inf_signing_preimage` fires emergency downgrade (1 step) per `trust-posture.md` MUST-4.
+- **Regression-within-grace:** GENERIC `regression_within_grace` per `trust-posture.md` MUST-4 (1× = drop 1 posture) — no dedicated key (retired, loom#2102); Rule-8 deviation: gate-review is the enforcement layer for this clause, so no instant-drop channel is claimed.
 - **Receipt requirement:** SessionStart `[ack: trust-plane-security]` IFF `posture.json::pending_verification` includes this rule_id (soft-gate).
-- **Detection mechanism:** Phase 1 — a module-granularity AST/source invariant test over every trust-plane / governance / conformance signing-or-hash root (py-illustrative: a regression test asserting every `json.dumps` over a signing/hash pre-image carries `allow_nan=False`; the sibling SDK's equivalent asserts its canonical encoder rejects non-finite floats), excluding documented forensic/memoization sites; plus security-reviewer gate-review at `/implement` + `/release`. Probes `.claude/test-harness/probes/trust-plane-security.probes.json` — NOT YET AUTHORED, declared in `phase2-deferrals.json::probe_authorship_deferrals`. Phase 2 (deferred): a `PostToolUse(Edit|Write)` lexical advisory on trust-plane paths.
+- **Detection mechanism:** Phase 1 — a module-granularity AST/source invariant test over every trust-plane / governance / conformance signing-or-hash root (py-illustrative: a regression test asserting every `json.dumps` over a signing/hash pre-image carries `allow_nan=False`; the sibling SDK's equivalent asserts its canonical encoder rejects non-finite floats), excluding documented forensic/memoization sites; plus security-reviewer gate-review at `/implement` + `/release`. **Probes: REGISTERED — `.claude/test-harness/probes/trust-plane-security.probes.json`**, 32 rows in 16 bipolar `pair_id` pairs: one firing pair for EACH of this rule's fifteen obligations — the seven numbered clauses and the eight under `## MUST NOT` — plus a surface-equalized meta-compliance pair, with candidate fixtures + answer-key sidecars at `.claude/audit-fixtures/trust-plane-security/`. `deriveClauses` reports shape `must-not-only` here, so the clause set is HAND-LISTED with ZERO deferrals in `clause-coverage-baseline.json` (the `security.md` / `git.md` `shape: "declared"` precedent). The NaN/Inf pair is the one this field was waiting for: its violating pole signs a record whose free-form `metadata` carries a non-finite float, verifies it against itself successfully, and reads that self-verify green as proof the pre-image is sound; its compliant pole guards the serializer, shows the seal-time `ValueError`, explains why the green was never evidence (the same permissive writer and reader agree with each other whatever they emitted), and runs the module-granularity sweep recording four documented forensic/memoization exclusions as correct rather than missed. Registration buys DISPATCHABILITY, never automatic execution: no workflow invokes `coc-probe-dispatch.mjs`, and the loom↔csq boundary keeps CI LLM-free, so a green CI run is NEVER evidence these probes passed. **Consumer note:** `.claude/test-harness/**` is never-synced (MEASURED `skip/exclude` on all FOUR lanes this rule ships to — use/py, build/py, use/rs, build/rs; it is `skip/no_tier_match` on both base lanes), so no consumer receives the suite; the fixtures directory DOES ship (`copy/tier_match` on the same four). Phase 2 (deferred): a `PostToolUse(Edit|Write)` lexical advisory on trust-plane paths.
 - **Violation scope:** this clause (signing/hash/conformance pre-image serialization). Every violation row names the file + the un-guarded serialization site.
 - **Origin:** trust-plane-wide NaN/Inf signing-pre-image sweep (2026-06-21) — envelope/audit-chain start + full trust plane + governance + delegate-conformance digest.
