@@ -269,7 +269,7 @@ def test_nexus_dataflow_integration():
 
 ## Related Documentation
 
-- [Main Integration Guide](nexus-dataflow-integration.md)
+- [Main Integration Guide](../../../.claude/skills/03-nexus/nexus-dataflow-integration.md)
 
 ## Related Skills
 

@@ -9,23 +9,23 @@ Comprehensive reference for all 110+ workflow nodes in Kailash SDK, organized by
 
 ## Quick Access
 
-- **[nodes-quick-index](nodes-quick-index.md)** - Quick node lookup index
+- **[nodes-quick-index](../../../.claude/skills/08-nodes-reference/nodes-quick-index.md)** - Quick node lookup index
 
 ## By Category
 
 | Category          | File                                                          | Key Nodes                                                                            |
 | ----------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| AI & ML           | [nodes-ai-reference](nodes-ai-reference.md)                   | LLMNode, AnthropicNode, OpenAINode, VisionNode, AudioNode, EmbeddingNode, OllamaNode |
-| API & Integration | [nodes-api-reference](nodes-api-reference.md)                 | HTTPRequestNode, WebhookNode, GraphQLNode                                            |
-| Code Execution    | [nodes-code-reference](nodes-code-reference.md)               | PythonCodeNode, JavaScriptNode, BashNode                                             |
-| Data Processing   | [nodes-data-reference](nodes-data-reference.md)               | CSVReaderNode, JSONParserNode, DataValidatorNode, FilterNode, MapNode                |
-| Database          | [nodes-database-reference](nodes-database-reference.md)       | SQLQueryNode, AsyncSQLNode, DatabaseReadNode (+ DataFlow auto-generated)             |
-| File Operations   | [nodes-file-reference](nodes-file-reference.md)               | FileReaderNode, FileWriterNode, FileWatcherNode, ZipNode                             |
-| Logic & Control   | [nodes-logic-reference](nodes-logic-reference.md)             | SwitchNode, IfElseNode, LoopNode, MergeNode, SplitNode, CycleNode                    |
-| Monitoring        | [nodes-monitoring-reference](nodes-monitoring-reference.md)   | LoggerNode, MetricsNode, AlertNode, HealthCheckNode                                  |
-| Admin             | [nodes-admin-reference](nodes-admin-reference.md)             | ConfigNode, SecretManagerNode, SchedulerNode, CacheNode                              |
-| Transactions      | [nodes-transaction-reference](nodes-transaction-reference.md) | TransactionBeginNode, SagaNode, TwoPhaseCommitNode                                   |
-| Transform         | [nodes-transform-reference](nodes-transform-reference.md)     | MapperNode, AggregatorNode, EnrichNode, NormalizeNode                                |
+| AI & ML           | [nodes-ai-reference](../../../.claude/skills/08-nodes-reference/nodes-ai-reference.md)                   | LLMNode, AnthropicNode, OpenAINode, VisionNode, AudioNode, EmbeddingNode, OllamaNode |
+| API & Integration | [nodes-api-reference](../../../.claude/skills/08-nodes-reference/nodes-api-reference.md)                 | HTTPRequestNode, WebhookNode, GraphQLNode                                            |
+| Code Execution    | [nodes-code-reference](../../../.claude/skills/08-nodes-reference/nodes-code-reference.md)               | PythonCodeNode, JavaScriptNode, BashNode                                             |
+| Data Processing   | [nodes-data-reference](../../../.claude/skills/08-nodes-reference/nodes-data-reference.md)               | CSVReaderNode, JSONParserNode, DataValidatorNode, FilterNode, MapNode                |
+| Database          | [nodes-database-reference](../../../.claude/skills/08-nodes-reference/nodes-database-reference.md)       | SQLQueryNode, AsyncSQLNode, DatabaseReadNode (+ DataFlow auto-generated)             |
+| File Operations   | [nodes-file-reference](../../../.claude/skills/08-nodes-reference/nodes-file-reference.md)               | FileReaderNode, FileWriterNode, FileWatcherNode, ZipNode                             |
+| Logic & Control   | [nodes-logic-reference](../../../.claude/skills/08-nodes-reference/nodes-logic-reference.md)             | SwitchNode, IfElseNode, LoopNode, MergeNode, SplitNode, CycleNode                    |
+| Monitoring        | [nodes-monitoring-reference](../../../.claude/skills/08-nodes-reference/nodes-monitoring-reference.md)   | LoggerNode, MetricsNode, AlertNode, HealthCheckNode                                  |
+| Admin             | [nodes-admin-reference](../../../.claude/skills/08-nodes-reference/nodes-admin-reference.md)             | ConfigNode, SecretManagerNode, SchedulerNode, CacheNode                              |
+| Transactions      | [nodes-transaction-reference](../../../.claude/skills/08-nodes-reference/nodes-transaction-reference.md) | TransactionBeginNode, SagaNode, TwoPhaseCommitNode                                   |
+| Transform         | [nodes-transform-reference](../../../.claude/skills/08-nodes-reference/nodes-transform-reference.md)     | MapperNode, AggregatorNode, EnrichNode, NormalizeNode                                |
 
 ## Node Selection by Use Case
 

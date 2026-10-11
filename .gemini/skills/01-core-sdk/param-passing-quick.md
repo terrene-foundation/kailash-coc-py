@@ -11,7 +11,7 @@ Three methods to pass parameters to nodes in Kailash SDK workflows.
 > Category: `core-sdk`
 > Priority: `CRITICAL`
 > SDK Version: `0.9.31+`
-> Related Skills: [`workflow-quickstart`](workflow-quickstart.md), [`connection-patterns`](connection-patterns.md), [`error-parameter-validation`](../ 31-error-troubleshooting/error-parameter-validation.md)
+> Related Skills: [`workflow-quickstart`](../../../.claude/skills/01-core-sdk/workflow-quickstart.md), [`connection-patterns`](../../../.claude/skills/01-core-sdk/connection-patterns.md), [`error-parameter-validation`](../../../.claude/skills 31-error-troubleshooting/error-parameter-validation.md)
 > Related Subagents: `pattern-expert` (complex parameter patterns)
 
 ## Quick Reference
@@ -161,10 +161,10 @@ runtime.execute(workflow.build(), parameters={
 
 ## Related Patterns
 
-- **For connections**: [`connection-patterns`](connection-patterns.md)
-- **For workflow creation**: [`workflow-quickstart`](workflow-quickstart.md)
-- **For parameter errors**: [`error-parameter-validation`](../31-error-troubleshooting/error-parameter-validation.md)
-- **Gold standard**: [`gold-parameter-passing`](../17-gold-standards/gold-parameter-passing.md)
+- **For connections**: [`connection-patterns`](../../../.claude/skills/01-core-sdk/connection-patterns.md)
+- **For workflow creation**: [`workflow-quickstart`](../../../.claude/skills/01-core-sdk/workflow-quickstart.md)
+- **For parameter errors**: [`error-parameter-validation`](../../../.claude/skills/31-error-troubleshooting/error-parameter-validation.md)
+- **Gold standard**: [`gold-parameter-passing`](../../../.claude/skills/17-gold-standards/gold-parameter-passing.md)
 
 ## When to Escalate to Subagent
 

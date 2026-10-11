@@ -13,8 +13,10 @@ Use when asking about testing, test strategy, 3-tier testing, unit tests, integr
 
 ## Sub-File Index
 
-- **[test-3tier-strategy](test-3tier-strategy.md)** - Complete 3-tier guide: tier definitions, fixture patterns, CI/CD integration
-- **[probe-driven-verification](probe-driven-verification.md)** - Probe-driven verification runbook (regex/keyword for semantic claims is BLOCKED). Per `rules/probe-driven-verification.md`.
+- **[test-3tier-strategy](../../../.claude/skills/12-testing-strategies/test-3tier-strategy.md)** - Complete 3-tier guide: tier definitions, fixture patterns, CI/CD integration
+- **[probe-driven-verification](../../../.claude/skills/12-testing-strategies/probe-driven-verification.md)** - Probe-driven verification runbook (regex/keyword for semantic claims is BLOCKED). Per `rules/probe-driven-verification.md`.
+- **[test-time-discipline](../../../.claude/skills/12-testing-strategies/test-time-discipline.md)** - Never assert an UPPER bound on real elapsed time: paused/virtual clock, injected clock, poll-to-ceiling, the sweep's calibration trap. Per `rules/testing.md`.
+- **[gate-runner-economics](../../../.claude/skills/12-testing-strategies/gate-runner-economics.md)** - Parallelism-first gate ordering (measured ~5x), the `-n auto` trap, the coverage correction, and the Rust `cargo test` vs `nextest` trade. Per `rules/testing.md`.
 
 ## 3-Tier Strategy
 
@@ -136,17 +138,19 @@ class-level setup already depends on the import.
 ## Running Tests
 
 ```bash
-pytest tests/tier1_unit/        # Fast CI
-pytest tests/tier2_integration/ # With real infra
-pytest tests/tier3_e2e/         # Full system
+pytest tests/tier1_unit/        --dist loadfile -n 8   # Fast CI
+pytest tests/tier2_integration/ --dist loadfile -n 8   # With real infra
+pytest tests/tier3_e2e/         --dist loadfile -n 8   # Full system
+# Parallelism FIRST (measured ~5x, one flag), diff-scoping SECOND. Never `-n auto` — it measured
+# SLOWER than `-n 8`. Depth: gate-runner-economics.md
 pytest --cov=app --cov-report=html  # Coverage
 ```
 
 ## Related Skills
 
-- **[17-gold-standards](../17-gold-standards/SKILL.md)** - Testing best practices
-- **[02-dataflow](../02-dataflow/SKILL.md)** - DataFlow testing
-- **[03-nexus](../03-nexus/SKILL.md)** - API testing
+- **[17-gold-standards](../../../.claude/skills/17-gold-standards/SKILL.md)** - Testing best practices
+- **[02-dataflow](../../../.claude/skills/02-dataflow/SKILL.md)** - DataFlow testing
+- **[03-nexus](../../../.claude/skills/03-nexus/SKILL.md)** - API testing
 
 ## Support
 

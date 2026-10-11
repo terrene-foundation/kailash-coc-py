@@ -43,15 +43,15 @@ server.run()
 
 ### Getting Started
 
-- **[mcp-transports-quick](mcp-transports-quick.md)** - Transport configuration (stdio, SSE, HTTP)
-- **[mcp-structured-tools](mcp-structured-tools.md)** - Defining MCP tools
-- **[mcp-resources](mcp-resources.md)** - Exposing resources to agents
+- **[mcp-transports-quick](../../../.claude/skills/05-kailash-mcp/mcp-transports-quick.md)** - Transport configuration (stdio, SSE, HTTP)
+- **[mcp-structured-tools](../../../.claude/skills/05-kailash-mcp/mcp-structured-tools.md)** - Defining MCP tools
+- **[mcp-resources](../../../.claude/skills/05-kailash-mcp/mcp-resources.md)** - Exposing resources to agents
 
 ### Security & Operations
 
-- **[mcp-authentication](mcp-authentication.md)** - Authentication and authorization
-- **[mcp-progress-reporting](mcp-progress-reporting.md)** - Progress updates for long operations
-- **[mcp-testing-patterns](mcp-testing-patterns.md)** - Testing MCP servers and tools
+- **[mcp-authentication](../../../.claude/skills/05-kailash-mcp/mcp-authentication.md)** - Authentication and authorization
+- **[mcp-progress-reporting](../../../.claude/skills/05-kailash-mcp/mcp-progress-reporting.md)** - Progress updates for long operations
+- **[mcp-testing-patterns](../../../.claude/skills/05-kailash-mcp/mcp-testing-patterns.md)** - Testing MCP servers and tools
 
 ## Key Concepts
 

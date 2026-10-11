@@ -1,6 +1,6 @@
 ---
 name: enroll
-description: "Enroll an operator into an existing ecosystem (once per operator) — roster registration via /whoami --register + per-operator local-links. Writes roster (PR) + gitignored links."
+description: "Enroll an operator via a roster registration PR and private local-links in an existing ecosystem."
 ---
 
 # /enroll — Onboard an Operator (once per operator/ecosystem)
@@ -14,7 +14,7 @@ fork) and `/onboard` (read-only, every session); see (loom-internal reference).
 `/enroll` does TWO writes — the roster registration (shared, PR-gated) and the per-operator local-links
 (gitignored, machine-local) — then hands off to `/onboard`. It does NOT re-implement either write: B1
 delegates to the existing `/whoami --register` path (the ONLY roster-write path), B2 writes the existing
-per-operator gitignored layer. Procedure detail lives in `.codex/skills/44-enroll/SKILL.md` per
+per-operator gitignored layer. Procedure detail lives in `.agents/skills/44-enroll/SKILL.md` per
 `cc-artifacts.md` Rule 3; this command is the entry point.
 
 ## The three invariants (load-bearing — the redteam surface)
@@ -98,4 +98,4 @@ B2's local-links layer is `.claude/bin/lib/loom-links.mjs` (resolver) + `.claude
 inline at B2 above; its loom/BUILD-side statement (`rules/cross-repo.md` § "Canonical Sublayout
 (Recommended — F61)") is NOT distributed to USE. Full enrollment procedure — the
 `/whoami --register` input prompts, the local-links seeding shape, the `business_roles` advisory field —
-lives in `.codex/skills/44-enroll/SKILL.md`.
+lives in `.agents/skills/44-enroll/SKILL.md`.

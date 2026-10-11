@@ -11,7 +11,7 @@ Fix common runtime execution errors including wrong runtime usage, execution fai
 > Category: `cross-cutting` (error-resolution)
 > Priority: `HIGH`
 > SDK Version: `0.9.0+`
-> Related Skills: [`workflow-quickstart`](../01-core-sdk/workflow-quickstart.md), [`runtime-execution`](../01-core-sdk/runtime-execution.md), `decide-runtime`
+> Related Skills: [`workflow-quickstart`](../../../.claude/skills/01-core-sdk/workflow-quickstart.md), [`runtime-execution`](../../../.claude/skills/01-core-sdk/runtime-execution.md), `decide-runtime`
 > Related Subagents: `pattern-expert` (complex debugging)
 
 ## Common Errors
@@ -108,8 +108,8 @@ async def execute():
 
 ## Related Patterns
 
-- **Execution guide**: [`runtime-execution`](../01-core-sdk/runtime-execution.md)
-- **Parameter errors**: [`error-parameter-validation`](error-parameter-validation.md)
+- **Execution guide**: [`runtime-execution`](../../../.claude/skills/01-core-sdk/runtime-execution.md)
+- **Parameter errors**: [`error-parameter-validation`](../../../.claude/skills/31-error-troubleshooting/error-parameter-validation.md)
 
 ## When to Escalate to Subagent
 

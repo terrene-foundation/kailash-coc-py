@@ -133,15 +133,15 @@ async def greet(name: str, greeting: str = "Hello") -> dict:
 app.start()
 ```
 
-See [nexus-handler-support](nexus-handler-support.md) for full details.
+See [nexus-handler-support](../../../.claude/skills/03-nexus/nexus-handler-support.md) for full details.
 
 ## Next Steps
 
-- **Use handlers** (recommended): See [nexus-handler-support](nexus-handler-support.md)
-- Add parameters: See [nexus-workflow-registration](nexus-workflow-registration.md)
-- Use multiple channels: See [nexus-multi-channel](nexus-multi-channel.md)
-- Integrate DataFlow: See [nexus-dataflow-integration](nexus-dataflow-integration.md)
-- Add authentication: See [nexus-auth-plugin](nexus-auth-plugin.md)
+- **Use handlers** (recommended): See [nexus-handler-support](../../../.claude/skills/03-nexus/nexus-handler-support.md)
+- Add parameters: See [nexus-workflow-registration](../../../.claude/skills/03-nexus/nexus-workflow-registration.md)
+- Use multiple channels: See [nexus-multi-channel](../../../.claude/skills/03-nexus/nexus-multi-channel.md)
+- Integrate DataFlow: See [nexus-dataflow-integration](../../../.claude/skills/03-nexus/nexus-dataflow-integration.md)
+- Add authentication: See [nexus-auth-plugin](../../../.claude/skills/03-nexus/nexus-auth-plugin.md)
 
 ## Key Takeaways
 

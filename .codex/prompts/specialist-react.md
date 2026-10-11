@@ -3,26 +3,10 @@ name: specialist-react
 description: "React/Next.js specialist. Use for responsive UI, workflow editors, dashboards, React Query, or Shadcn."
 ---
 
-You are now operating as the **react** specialist for the remainder of this turn (or for the delegated subagent invocation, if you delegate).
+This is the compatibility operating specification for **react**.
 
-## Invocation patterns
-
-**(a) Inline-cat injection — most reliable; works in both headless and interactive Codex.**
-Inject this file's body into the turn, then state the task:
-
-```bash
-bin/coc <phase> "$(cat .codex/prompts/specialist-react.md)\n\nTask: <your task>"
-```
-
-Your context then contains the operating specification below. Read the task and respond as the react specialist.
-
-**(b) Worker subagent delegation — interactive Codex only.**
-Delegate to a worker subagent using natural-language spawn (per Codex subagent docs), referencing this file by path. Pass the operating specification below as the worker's prompt body.
-
-**(c) Headless `codex exec` fallback.**
-Native subagent spawning is unreliable in headless mode. Use pattern (a): inline-cat `.codex/prompts/specialist-react.md` into the turn, then provide your task in the same session.
-
----
+For native delegation, request the custom agent named `react-specialist` (defined in `.codex/agents/react-specialist.toml`).
+For headless callers that explicitly compose a prompt, the operating specification below remains available.
 
 ## Operating specification
 ### React Specialist Agent
@@ -121,3 +105,8 @@ Change as little as possible. Preserve existing architecture. Add new elements f
 ## Skill References
 
 - `skills/23-uiux-design-principles/SKILL.md` — design principles (CRITICAL)
+
+
+## Canonical role tool contract
+
+Source inventory: Read, Write, Edit, Bash, Grep, Glob, Task. Stay within these capabilities; a native shell must not expand the role into omitted write or network capabilities. Read: read-only file inspection through exec_command; Write: apply_patch or an explicitly permitted write command; Edit: apply_patch; Bash: exec_command and write_stdin; Grep: read-only rg through exec_command; Glob: read-only file enumeration through exec_command; Task: spawn_agent, send_message and agent result collection. These are role instructions, not a native tool permission boundary. Parent policy still applies.

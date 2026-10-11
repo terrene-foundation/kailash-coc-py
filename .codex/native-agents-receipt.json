@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "generator": "coc-native-agent-delivery.mjs",
+  "source_commit": "17d9af5d1e9bfbbf26a7c3cf0d115fe54b2be47d",
+  "files": {
+    ".codex/agents/align-specialist.toml": "755cf341a652deed24fc3bf71ba6b5e4e45a57c813b5082aed9e398e82d4f4d8",
+    ".codex/agents/analyst.toml": "133ff7dc6331a262201bdc4908b2b5e8707ccf7467a6e5a0a046d13a8374088a",
+    ".codex/agents/build-fix.toml": "8c04bef10c7ec741799ccca07b2bb7273f85165bb937e12002eebac0254a7487",
+    ".codex/agents/coc-onboarding-specialist.toml": "ba5035a57a7ace1044ce712cd6418782f41c882873badf7316b247f8932e71fd",
+    ".codex/agents/dataflow-specialist.toml": "249acdd87d76086d31278b5cb194ef1f7496a6151940b5416ef99521a2a78380",
+    ".codex/agents/flutter-specialist.toml": "f05780010288c90d6f14634149e267e30565e979a4288806a8754ae2a345efb9",
+    ".codex/agents/gold-standards-validator.toml": "15b1b3581bdad503ac075526864e05fb04a44f57dafdb604b5037144ee26df98",
+    ".codex/agents/kaizen-specialist.toml": "013f1e125f9b00732e720b360c204cf455ea398631a7a8e71f252816c7f98c78",
+    ".codex/agents/mcp-platform-specialist.toml": "b89f5ace60c0b5c9edc7a60a9113b391cedd918635c196ec7fc83de1422d8412",
+    ".codex/agents/mcp-specialist.toml": "71429862ec65bccb910139b4196d7fc75ab9edfce6b053ebda2ca9c7c355d3fb",
+    ".codex/agents/ml-specialist.toml": "e17d8cd799f7e958e2c2f5cbe6b2aa7c8d701df8dd6aadcfc797ca625d535c94",
+    ".codex/agents/nexus-specialist.toml": "92d58900b6d2573b296584ababb4f58a4c81cefef11c00f07474c3379ccb48c5",
+    ".codex/agents/pact-specialist.toml": "73b01a31ade2ce86d6aba83acc8aebbe02605da8dfea8bfef2faeab1f0b2f5c0",
+    ".codex/agents/pattern-expert.toml": "59b1e14f4025f29decb84b77dc6f3164bc9a54b7ebdaf0e4fb1255af7449d6dd",
+    ".codex/agents/react-specialist.toml": "63b38ebbff2f59a30213f3ef6ff3d40c9c9fd1182d7bad080a2d171b5f546d26",
+    ".codex/agents/release-specialist.toml": "a78d51a58118c4b9f245b5a442b4c0d15366bcc057f36d68614276d2c1b283e4",
+    ".codex/agents/reviewer.toml": "694ad52c4698b4b3b474afe48b24cb9cca3473025486f45b8404f90c27e2d240",
+    ".codex/agents/security-reviewer.toml": "218d4dd0897e4ab2facbc6369ad0ddf152601f855aa93f5004a87184e784f93b",
+    ".codex/agents/tdd-implementer.toml": "70ab4b5350dd824434713493714385feb7a3afe2b3524234e2e4c6fa7f0d7f03",
+    ".codex/agents/testing-specialist.toml": "a5f6084bd4ae2a224440eeec2c1becec08e2228904d61297bc3b62c481faba82",
+    ".codex/agents/uiux-designer.toml": "0af76b86206c154ee5cfaa779085be455cbd33d523b6f13fa600001eb2c0a23b",
+    ".codex/agents/value-auditor.toml": "ce5b0271ee5d4b22a0f7ee5c8132bea80a4196acf4d977f74914a98313e78aa7"
+  }
+}

@@ -11,7 +11,7 @@ The `kailash-mcp` platform server is a unified FastMCP server that gives MCP cli
 > Category: `mcp`
 > Priority: `HIGH`
 > SDK Version: `0.9.25+`
-> Related Skills: [`mcp-contributor-pattern`](mcp-contributor-pattern.md), [`mcp-tool-catalog`](mcp-tool-catalog.md), [`mcp-security-tiers`](mcp-security-tiers.md)
+> Related Skills: [`mcp-contributor-pattern`](../../../.claude/skills/05-kailash-mcp/mcp-contributor-pattern.md), [`mcp-tool-catalog`](../../../.claude/skills/05-kailash-mcp/mcp-tool-catalog.md), [`mcp-security-tiers`](../../../.claude/skills/05-kailash-mcp/mcp-security-tiers.md)
 > Related Subagents: `mcp-platform-specialist` (platform server implementation, troubleshooting)
 
 ## How It Works
@@ -158,11 +158,11 @@ Connections are detected via deterministic naming conventions (e.g., a handler r
 
 ## Related Files
 
-- **[mcp-contributor-pattern](mcp-contributor-pattern.md)** -- How to write a new contributor
-- **[mcp-tool-catalog](mcp-tool-catalog.md)** -- Complete list of all registered tools
-- **[mcp-security-tiers](mcp-security-tiers.md)** -- Security tier system
-- **[mcp-claude-code-config](mcp-claude-code-config.md)** -- Claude Code setup
-- **[mcp-platform-map](mcp-platform-map.md)** -- platform_map() deep dive
+- **[mcp-contributor-pattern](../../../.claude/skills/05-kailash-mcp/mcp-contributor-pattern.md)** -- How to write a new contributor
+- **[mcp-tool-catalog](../../../.claude/skills/05-kailash-mcp/mcp-tool-catalog.md)** -- Complete list of all registered tools
+- **[mcp-security-tiers](../../../.claude/skills/05-kailash-mcp/mcp-security-tiers.md)** -- Security tier system
+- **[mcp-claude-code-config](../../../.claude/skills/05-kailash-mcp/mcp-claude-code-config.md)** -- Claude Code setup
+- **[mcp-platform-map](../../../.claude/skills/05-kailash-mcp/mcp-platform-map.md)** -- platform_map() deep dive
 
 ## When to Escalate to Subagent
 

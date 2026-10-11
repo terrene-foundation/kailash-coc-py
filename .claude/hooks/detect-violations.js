@@ -1,5 +1,22 @@
 #!/usr/bin/env node
 /**
+ * @hook-event: PreToolUse:Read (guard) — the requested notes or journal path and its existing provenance can be inspected before the read.
+ * @hook-event: PostToolUse:Bash (verification) — the completed command and resulting repository state are available for violation checks.
+ * @hook-event: PostToolUse:Edit|NotebookEdit|Write (verification) — the written file and mutation context exist for worktree and code violation checks.
+ * @hook-event: UserPromptSubmit (lifecycle) — the submitted prompt exists at the turn boundary for regression and acknowledgment signals.
+ * @hook-event: Stop (lifecycle) — the completed assistant response is available at the turn boundary for report-discipline signals.
+ *
+ * Codex read-lane status — MEASURED 2026-10-09, codex-cli 0.161.0: NO hookable
+ * file-read tool event exists to bind the Read matcher. The tool-call enums carry
+ * exec_command / apply_patch / view_image / web / image_generation / collab /
+ * sleep and no read item; `read_file` appears only as the app-server `fs/readFile`
+ * RPC (FsReadFileParams) and the exec-server remote-FS RPCs; `codex debug
+ * prompt-input` renders no read tool; a live `codex exec` probe was UNRUNNABLE
+ * (ChatGPT usage limit, no data). Reads execute inside `functions.exec` via the
+ * shell lane (mirrored where a hookable command runs). The Read-matcher arm has
+ * no Codex surface to bind to; the CC arms remain the enforcement surface and
+ * the rule-layer discipline reaches Codex via the rules-reference skill channel.
+ *
  * detect-violations — POC hook for the trust-posture system.
  *
  * Wired to multiple events; reads tool_event from stdin payload's hookEventName field.
@@ -11,11 +28,22 @@
  * Mitigates cc-artifacts.md Rule 7 (timeout fallback).
  */
 
+/**
+ * @hook-contract
+ * {
+ *   "side_effects": {
+ *     "fs_writes": [".claude/learning/violations.jsonl"],
+ *     "network": false,
+ *     "spawns": ["git","gpg","ssh-keygen"]
+ *   },
+ *   "idempotent": false,
+ *   "may_rewrite_input": false,
+ *   "notes": "One violations.jsonl row is appended per finding, per event, with no payload dedupe (only the Stop ack arm consults existing rows), so a repeat appends again. The sink routes through lib/state-io.js::appendViolation or lib/coc-append.js::appendStamped; lib/state-resolver.js::ensureStateDir mkdirs `.claude/learning/` (or $CLAUDE_TRUST_STATE_DIR / a per-process quarantine) first. Spawns: git probes in lib/state-resolver.js and lib/state-io.js, plus git/ssh-keygen in lib/operator-id.js."
+ * }
+ */
+
 const TIMEOUT_MS = 5000;
-const fallback = setTimeout(() => {
-  process.stdout.write(JSON.stringify({ continue: true }) + "\n");
-  process.exit(1);
-}, TIMEOUT_MS);
+let fallback = null;
 
 const path = require("path");
 const { emit } = require(path.join(__dirname, "lib", "instruct-and-wait.js"));
@@ -24,6 +52,7 @@ const {
   readPosture,
   readRecentViolations,
   isPendingWithinGrace,
+  resolveViolationSessionId,
 } = require(path.join(__dirname, "lib", "state-io.js"));
 const { appendStamped } = require(path.join(__dirname, "lib", "coc-append.js"));
 // M9.1 R7 Sec-R7-S-01 — route stamped-path file construction through the
@@ -56,7 +85,7 @@ const { isMutationTool } = require(
 // The rationale for every guard in that reader (the single-resolution open, the
 // O_NOFOLLOW/O_NONBLOCK pair, the fail-soft-but-never-silent WARN, and the
 // measurements the two constants come from) moved WITH the code.
-const { readFinalAssistantText, warnTranscriptRecovery } = require(
+const { readAssistantTextFromPayload, warnTranscriptRecovery } = require(
   path.join(__dirname, "lib", "transcript-read.js"),
 );
 
@@ -307,7 +336,18 @@ function logAllAndEmit(payload, event, entries) {
   });
 }
 
-(async () => {
+// hookMain — the ONE entry, run by the CLI guard at the bottom of this file AND
+// in-process by lib/hook-engine.js (dispatch.js). Everything a standalone run
+// did at load time happens here instead, so a require() has no side effects.
+function hookMain() {
+  fallback = setTimeout(() => {
+    process.stdout.write(JSON.stringify({ continue: true }) + "\n");
+    process.exit(1);
+  }, TIMEOUT_MS);
+  return main();
+}
+
+async function main() {
   const payload = await readStdin();
   const event = payload.hook_event_name || payload.hookEventName || "Unknown";
 
@@ -396,6 +436,20 @@ function logAllAndEmit(payload, event, entries) {
         // the row above — that one asks whether a NOT-completed disposition was
         // justified, this one whether a completed one carries any evidence.
         { finding: P.detectGhIssueCloseWithoutEvidence(cmd), what },
+        // instrument-discipline/MUST-1: `<verdict-cmd> | <status-opaque-sink>`
+        // reports the SINK's exit status, so `$?` is 0 whether the verdict
+        // command passed or failed. Three false greens in one session
+        // (2026-09-06), two in the same lane; widened 2026-09-11 after the
+        // recogniser was measured SILENT on `gh pr checks | head`,
+        // `pytest | tail` and `cargo test | head` — see
+        // `violation-patterns.js::isGateInvocation` for the closed verdict table
+        // and `LAUNDER_SINKS` for the sink family. Dispatched HERE rather than at PreToolUse because this is
+        // where the Bash detector family already lives and no settings.json
+        // change (protected trust-posture state) is required; PostToolUse is
+        // adequate for this class because the harm is not the command running
+        // but the agent BANKING its status in the following turn, which this
+        // still precedes.
+        { finding: P.detectExitCodeLaundering(cmd), what },
       ];
       if (bashEntries.some((e) => e.finding))
         return logAllAndEmit(payload, event, bashEntries);
@@ -471,23 +525,9 @@ function logAllAndEmit(payload, event, entries) {
   }
 
   if (event === "Stop") {
-    // Prefer the payload's inline text when present; otherwise recover it from
-    // the transcript. This ordering is correct under BOTH payload shapes, so it
-    // needs no knowledge of which one the CLI actually emits.
-    let finalText =
-      (typeof payload.last_assistant_text === "string" &&
-        payload.last_assistant_text) ||
-      "";
-    if (!finalText) {
-      const recovered = readFinalAssistantText(payload.transcript_path);
-      finalText = recovered.text;
-      // Only warn when a transcript was actually OFFERED and yielded nothing —
-      // a Stop payload carrying neither shape is the ordinary no-op, not a
-      // detector blind spot.
-      if (!recovered.text && recovered.reason) {
-        warnTranscriptRecovery(recovered.reason);
-      }
-    }
+    const recovered = readAssistantTextFromPayload(payload);
+    const finalText = recovered.text;
+    if (recovered.reason) warnTranscriptRecovery(recovered.reason);
 
     // Receipt token validation (Phase 2): if pending_verification non-empty
     // AND finalText lacks [ack: <rule_id>] for each pending rule
@@ -495,8 +535,11 @@ function logAllAndEmit(payload, event, entries) {
     // log ack_failure (one per session per rule).
     const ackFindings = [];
     try {
-      const sid =
-        payload.session_id || process.env.CLAUDE_SESSION_ID || "unknown";
+      // The SAME derivation the writer stamps rows with — never the payload's id.
+      // Keyed on `payload.session_id` while the writer stamped an env value the host
+      // never set, no stored row ever matched and a row was logged on EVERY Stop
+      // (measured: 3 Stops ⇒ 3 rows). See `state-io.js::resolveViolationSessionId`.
+      const sid = resolveViolationSessionId();
       const posture = readPosture(payload.cwd);
       // loom#875 — only entries still WITHIN grace drive the ack soft-gate; a
       // grace-EXPIRED entry must NOT keep emitting acknowledgement_failure on
@@ -688,4 +731,14 @@ function logAllAndEmit(payload, event, entries) {
   }
 
   return passthrough();
-})();
+}
+
+module.exports = { hookMain };
+
+// CLI entry. The default path is exactly hookMain() — no engine dependency, so a
+// tree that copies this hook without lib/hook-engine.js runs it unchanged. The
+// selftest path replays the run through the in-process engine (hook-engine.js::runCli).
+if (require.main === module) {
+  if (process.env.COC_HOOK_ENGINE_SELFTEST === "1") require("./lib/hook-engine.js").runCli(hookMain, __filename);
+  else hookMain();
+}

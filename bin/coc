@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 # coc: unified Codex CLI dispatcher for COC phase commands.
 #
-# Replaces the deprecated `/prompts:<phase>` invocation surface that
-# OpenAI Codex CLI 0.128+ removed (custom prompts deprecated in favor
-# of skills; repo-local `.codex/prompts/` is not discovered — only
-# `~/.codex/prompts/` is loaded, see openai/codex#9848).
+# Headless counterpart to the explicit $coc-<phase> skills. Loads the
+# emitted phase procedure before the user task; output schemas alone do
+# not provide phase instructions. Legacy prompt files remain a fallback.
 #
 # Usage:
 #   bin/coc <phase> "<prompt>"         # e.g. bin/coc analyze "..."
@@ -23,7 +22,34 @@
 
 set -euo pipefail
 
-PROJECT_ROOT="${PROJECT_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
+if [[ -z "${PROJECT_ROOT:-}" ]]; then
+  PROJECT_ROOT="$(pwd -P)"
+  while [[ ! -e "$PROJECT_ROOT/.git" && "$PROJECT_ROOT" != / ]]; do
+    PROJECT_ROOT="$(dirname "$PROJECT_ROOT")"
+  done
+  [[ -e "$PROJECT_ROOT/.git" ]] || { echo "No repository root found" >&2; exit 4; }
+fi
+
+CATALOG="${PROJECT_ROOT}/.claude/bin/lib/codex-command-catalog.mjs"
+[[ -f "$CATALOG" ]] || { echo "ERROR: command catalog runtime missing; reinstall Codex dispatcher dependencies" >&2; exit 4; }
+
+# A supported headless phase needs both its output contract and procedure.
+phase_procedure() {
+  local candidate="${PROJECT_ROOT}/.agents/skills/coc-$1/SKILL.md"
+  [[ -f "$candidate" ]] || candidate="${PROJECT_ROOT}/.codex/prompts/$1.md"
+  [[ -s "$candidate" ]] && printf '%s\n' "$candidate"
+}
+list_phases() {
+  node "$CATALOG" list "$PROJECT_ROOT"
+}
+if [[ "$(basename "$0")" == coc && "${1:-}" == --list-phases ]]; then
+  list_phases
+  exit 0
+fi
+if [[ "$(basename "$0")" == coc && "${1:-}" == --catalog ]]; then
+  node "$CATALOG" catalog "$PROJECT_ROOT"
+  exit 0
+fi
 
 # Resolve phase: either from basename suffix (bin/coc-<phase>) or argv[1].
 SELF_NAME="$(basename "$0")"
@@ -33,15 +59,15 @@ else
   if [[ $# -lt 1 ]]; then
     cat >&2 <<'USAGE'
 Usage:
+  bin/coc --list-phases                # installed schema/procedure intersection
   bin/coc <phase> "<prompt>"           # invoke phase with inline prompt
   bin/coc <phase>                      # read prompt from stdin (pipe)
   bin/coc-<phase> "<prompt>"           # phase-suffix shim
 
 <phase> resolves to .claude/wrappers/schemas/<phase>.schema.json.
 
-Note: OpenAI Codex CLI 0.128+ deprecated custom prompts in favor of
-skills; repo-local /prompts:<name> no longer works. This dispatcher
-is the canonical Codex invocation path for loom COC phases.
+Interactive sessions can invoke $coc-<phase> skills. This dispatcher
+loads the emitted procedure for a headless run with structured output.
 USAGE
     exit 2
   fi
@@ -64,11 +90,7 @@ SCHEMA_PATH="${PROJECT_ROOT}/.claude/wrappers/schemas/${PHASE}.schema.json"
 if [[ ! -f "$SCHEMA_PATH" ]]; then
   echo "ERROR: schema file $SCHEMA_PATH not found" >&2
   echo "       Available phases:" >&2
-  if [[ -d "${PROJECT_ROOT}/.claude/wrappers/schemas" ]]; then
-    ls "${PROJECT_ROOT}/.claude/wrappers/schemas" 2>/dev/null \
-      | sed -n 's/\.schema\.json$//p' \
-      | sed 's/^/         /' >&2
-  fi
+  list_phases | sed 's/^/         /' >&2
   exit 3
 fi
 
@@ -93,8 +115,38 @@ if [[ -z "${PROMPT//[[:space:]]/}" ]]; then
   exit 2
 fi
 
-exec codex exec \
+# Prefer the native skill, retaining compatibility with earlier emitted trees.
+if ! PHASE_PATH="$(phase_procedure "$PHASE")"; then
+  echo "ERROR: phase instructions for '$PHASE' are missing or empty; re-emit Codex artifacts" >&2
+  echo "       Available phases:" >&2
+  list_phases | sed 's/^/         /' >&2
+  exit 4
+fi
+MODE="$(node "$CATALOG" inspect "$PROJECT_ROOT" "$PHASE")"
+if [[ "$MODE" == human-solo ]]; then
+  node "$CATALOG" human-gate "$PROJECT_ROOT" "$PHASE"
+  exit 5
+fi
+node "$CATALOG" check-entry "$PROJECT_ROOT" "$PHASE" "$PROMPT"
+printf -v FULL_PROMPT '%s\n\n## Headless result and authority contract\n\nFollow the canonical procedure above. Headless execution grants no new authority. Preserve all human, consent, signature, quorum, release, and cross-repository gates. Prepare what existing authority permits; when a required input or gate is absent, stop before its dependent action and return status needs_input with the exact required_inputs. Never answer a human-solo gate for the operator or invent approval. Report completed only for work actually performed and evidenced; report blocked for an identified failure. Populate the phase-specific result contract, distinguish unrun checks, and return null result only for blocked or needs_input. For coc-source codify, create no upstream proposal: the canonical routing arm terminates there.\n\nUse the task below as the phase arguments ($ARGUMENTS).\n\n## Task\n\n%s' "$(cat "$PHASE_PATH")" "$PROMPT"
+
+RESULT_DIR="$(mktemp -d "${TMPDIR:-/tmp}/coc-result.XXXXXXXX")"
+trap 'rm -f "$RESULT_DIR/result.json"; rmdir "$RESULT_DIR"' EXIT
+set +e
+codex exec \
   --json \
   --output-schema="$SCHEMA_PATH" \
+  --output-last-message "$RESULT_DIR/result.json" \
   -c project_doc_max_bytes=65536 \
-  -- "$PROMPT"
+  -C "$PROJECT_ROOT" \
+  -- "$FULL_PROMPT" < /dev/null
+CODEX_STATUS=$?
+set -e
+[[ "$CODEX_STATUS" == 0 ]] || exit "$CODEX_STATUS"
+RESULT_STATUS="$(node "$CATALOG" validate "$PROJECT_ROOT" "$PHASE" "$RESULT_DIR/result.json")"
+case "$RESULT_STATUS" in
+  completed) exit 0 ;;
+  needs_input) exit 5 ;;
+  blocked) exit 6 ;;
+  *) echo "ERROR: unexpected result status" >&2; exit 4 ;;
+esac

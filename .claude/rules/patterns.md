@@ -12,6 +12,8 @@ paths:
 
 <!-- slot:neutral-body -->
 
+Depth companion — **the extract** below — is `.claude/guides/rule-extracts/patterns.md`: evidence, worked examples, measured narratives, per-section Origins.
+
 ## Runtime Execution
 
 MUST use `runtime.execute(workflow.build())`.
@@ -43,13 +45,11 @@ Use `db.express` for all single-record CRUD. WorkflowBuilder only for multi-step
 
 ```python
 result = await db.express.create("User", {"name": "Alice", "email": "alice@example.com"})
-user = await db.express.read("User", result["id"])  # accepts both str and int IDs
-users = await db.express.list("User", {"active": True})
-await db.express.update("User", result["id"], {"name": "Bob"})
-await db.express.delete("User", result["id"])
 
 # ❌ Don't use WorkflowBuilder for simple CRUD — 23x slower
 ```
+
+`read` / `list` / `update` / `delete`: the extract § "Express CRUD surface".
 
 ## DataFlow Models & Workflows
 
@@ -107,11 +107,11 @@ result = await loop.run_in_executor(pool, node.run, payload)
 # a tenant/trace ContextVar set before execute() reads its DEFAULT inside node.run()
 ```
 
-**Why:** A thread spawned by `run_in_executor` / `ThreadPoolExecutor.submit` / raw `threading.Thread` does NOT inherit the caller's context automatically; a ContextVar set before the dispatch reads its default inside the callable, silently de-scoping tenant/trace. Snapshotting `copy_context()` in the caller frame and running via `ctx.run(...)` matches the `asyncio.to_thread` convention. Evidence: guide § contextvars thread-boundary.
+**Why:** A thread spawned by `run_in_executor` / `ThreadPoolExecutor.submit` / raw `threading.Thread` does NOT inherit the caller's context automatically; a ContextVar set before the dispatch reads its default inside the callable, silently de-scoping tenant/trace. Evidence + the `asyncio.to_thread` convention match: the extract § "contextvars thread-boundary".
 
 ## Paired Public Surface — Consistent Async-ness (MUST)
 
-When two top-level functions form a canonical user pipeline — pairs like `train`/`register`, `fit`/`predict`, `encrypt`/`decrypt`, `publish`/`subscribe`, `login`/`logout` — BOTH MUST be either async OR sync. Mixing (one `async def`, one sync-wrapping-`asyncio.run()`) is BLOCKED. Agents, Nexus handlers, pytest-asyncio tests, and Jupyter kernels all run inside an active event loop; a sync function that internally calls `asyncio.run()` raises `RuntimeError: This event loop is already running` in every async caller.
+When two top-level functions form a canonical user pipeline — pairs like `train`/`register`, `fit`/`predict`, `encrypt`/`decrypt`, `publish`/`subscribe`, `login`/`logout` — BOTH MUST be either async OR sync. Mixing (one `async def`, one sync-wrapping-`asyncio.run()`) is BLOCKED. Running-loop contexts: the extract § "Async-pair evidence".
 
 ```python
 # DO — both async, composable under any event-loop context
@@ -141,13 +141,11 @@ km.register(result, name="demo")  # RuntimeError: This event loop is already run
 - "The async caller is a rare case, the sync path covers 95%"
 - "We'll document the async requirement in the docstring"
 
-**Why:** `asyncio.run()` creates a new event loop and raises if one is already running. Every modern Python async context — `pytest.mark.asyncio`, Nexus's async HTTP handlers, Jupyter's IPKernel, any Kaizen agent loop — has a running loop. A sync-wrapping-`asyncio.run()` surface works only in pure-CLI contexts and crashes everywhere else with an opaque `RuntimeError`. The "both shapes" trap (offering `km.register` sync AND `km.register_async`) doubles the public API surface, forces every caller to remember which variant their context permits, and ships two implementations of the same primitive that drift. Canonical pairs MUST pick one async-ness and commit. Evidence: kailash-ml 1.0.0 W33/W33c — `km.train` was async (W33), `km.register` landed sync (W33c) with internal `asyncio.run()`; the canonical 3-line Quick Start `result = await km.train(...); registered = km.register(result, ...)` crashed in every async context. Fix commit `fdd3040e` converted `km.register` to `async def`, matching `km.train`.
-
-Origin: kailash-ml-audit session 2026-04-23 — W33c async/sync inconsistency caught by end-to-end README regression test.
+**Why:** `asyncio.run()` creates a new event loop and raises if one is already running. A sync-wrapping-`asyncio.run()` surface works only in pure-CLI contexts and crashes everywhere else with an opaque `RuntimeError`. Canonical pairs MUST pick one async-ness and commit. The "both shapes" trap, the kailash-ml W33/W33c evidence + Origin: the extract § "Async-pair evidence".
 
 ## Callable Module + Subpackage Coexistence (MUST — PEP 562)
 
-When a package exports BOTH a top-level callable (`pkg.foo` imported from `_wrappers` or similar) AND contains a subpackage of the same name (`pkg/foo/`), Python's import machinery unconditionally sets `pkg.foo` to the subpackage module the moment ANYTHING runs `from pkg.foo import <X>` — silently shadowing the callable. In test-collection order, this surfaces as `AssertionError: pkg.foo MUST be callable (got module)` after an unrelated test imports the subpackage.
+When a package exports BOTH a top-level callable (`pkg.foo` imported from `_wrappers` or similar) AND contains a subpackage of the same name (`pkg/foo/`), Python's import machinery unconditionally sets `pkg.foo` to the subpackage module the moment ANYTHING runs `from pkg.foo import <X>` — silently shadowing the callable. How it surfaces at collection time: the extract § "Callable-module evidence".
 
 The subpackage's `__init__.py` MUST install a PEP 562 callable-module subclass so both surfaces coexist: `from pkg.foo import Klass` resolves the subpackage; `pkg.foo(...)` still invokes the wrapper callable.
 
@@ -177,9 +175,7 @@ from .views import DashboardView   # first `from pkg.dashboard import …` runs 
 - "We can rename one of the surfaces later"
 - "The `_wrappers` callable is the canonical form; the subpackage is niche"
 
-**Why:** Python binds `pkg.foo` to whichever object was most recently assigned to `sys.modules["pkg"].foo`; the subpackage's `__init__.py` executing is enough to replace the wrapper callable. Test collection order is NOT stable across Python versions (3.13 → 3.14 re-ordered `pytest` discovery) and unrelated modules importing the subpackage counts as a trigger. PEP 562 `__class__` assignment on the subpackage's own module object is the single structural defense — both surfaces coexist without special-casing callers.
-
-Origin: kailash-ml 1.1.0 release cycle (2026-04-23) — `km.dashboard` shadowed by `kailash_ml/dashboard/` subpackage after Python 3.14 test-collection reordering; fix commit `8914de3b` installed `_CallableDashboardModule`.
+**Why:** Python binds `pkg.foo` to whichever object was most recently assigned to `sys.modules["pkg"].foo`; the subpackage's `__init__.py` executing is enough to replace the wrapper callable. PEP 562 `__class__` assignment on the subpackage's own module object is the single structural defense — both surfaces coexist without special-casing callers. Why collection order is no defense (the measured 3.13 → 3.14 reordering) + Origin: the extract § "Callable-module evidence".
 
 ## SQLite Connection Management
 
@@ -200,7 +196,7 @@ Origin: kailash-ml 1.1.0 release cycle (2026-04-23) — `km.dashboard` shadowed 
 - MUST NOT use `asyncio` in `__del__` — async cleanup in finalizers is unreliable
 - MUST NOT call `close()` / `cleanup()` / any method that might emit a log line from `__del__` — emit `ResourceWarning` and return. Real cleanup is the caller's responsibility via `with` / `await obj.close_async()`.
 
-**Why:** Without `__del__` warnings, leaked connections and file handles go undetected until resource exhaustion crashes the process in production. Calling `close()` from `__del__` on an async resource is worse than leaking: the finalizer fires from inside Python's logging machinery during GC, `close()` spawns a new event loop whose selector init calls `logger.debug()`, and that acquires the root logging lock already held by the finalizer thread — deadlocking the process.
+**Why:** Without `__del__` warnings, leaked connections and file handles go undetected until resource exhaustion crashes the process in production. Calling `close()` from `__del__` on an async resource is worse than leaking — it DEADLOCKS the process; the GC → new-event-loop → root-logging-lock chain: the extract § "Async-cleanup evidence".
 
 ```python
 # DO — emit warning, do nothing else
@@ -227,6 +223,8 @@ def __del__(self):
 
 **Why:** Every one of these has been argued before and reintroduced the deadlock. The deadlock is non-deterministic — it fires only when GC happens to finalize the resource while the logging root lock is held, which happens most often under test load. "It works in dev" is exactly the path to a production incident.
 
-Origin: 2026-04-16 plus prior "DataFlow unit suite hangs" reports across multiple sessions. `DataFlow.__del__` called `self.close()` → `async_safe_run()` → `asyncio.new_event_loop()` → selector init → `logger.debug()` → deadlock on root logging lock held by GC finalizer.
+Origin (2026-04-16 `DataFlow.__del__` deadlock): the extract § "Async-cleanup evidence".
+
+**Extraction record** (2026-08-19 structural cleanup, ZERO de-scoping — every MUST, MUST NOT, BLOCKED entry, DO/DO-NOT block and failure-mode `**Why:**` statement stayed here verbatim): evidence, worked examples, measured narratives and the three per-section Origins moved verbatim to the extract §§ cited above. `rule-authoring.md` Rule 10 / Rule 11 do NOT fire — Rule 10 § "Trigger scope" binds `priority: 0` + `scope: baseline` rules ONLY and this rule is `scope: path-scoped`, so this is STRUCTURAL CLEANUP, not Rule-10 paired extraction nor Rule-11 recurrence input (`journal/0148`).
 
 <!-- /slot:neutral-body -->

@@ -11,7 +11,7 @@ Complete reference for data transformation and processing nodes.
 > Category: `nodes`
 > Priority: `MEDIUM`
 > SDK Version: `0.9.25+`
-> Related Skills: [`nodes-data-reference`](nodes-data-reference.md), [`nodes-quick-index`](nodes-quick-index.md)
+> Related Skills: [`nodes-data-reference`](../../../.claude/skills/08-nodes-reference/nodes-data-reference.md), [`nodes-quick-index`](../../../.claude/skills/08-nodes-reference/nodes-quick-index.md)
 > Related Subagents: `pattern-expert` (transformation workflows)
 
 ## Quick Reference
@@ -67,8 +67,8 @@ workflow.add_node("TextSplitterNode", "splitter", {
 
 ## Related Skills
 
-- **Data Nodes**: [`nodes-data-reference`](nodes-data-reference.md)
-- **Node Index**: [`nodes-quick-index`](nodes-quick-index.md)
+- **Data Nodes**: [`nodes-data-reference`](../../../.claude/skills/08-nodes-reference/nodes-data-reference.md)
+- **Node Index**: [`nodes-quick-index`](../../../.claude/skills/08-nodes-reference/nodes-quick-index.md)
 
 ## Documentation
 

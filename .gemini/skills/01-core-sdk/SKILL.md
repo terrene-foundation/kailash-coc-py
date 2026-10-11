@@ -38,37 +38,37 @@ with LocalRuntime() as runtime:
 
 ### Getting Started
 
-- **[workflow-quickstart](workflow-quickstart.md)** - Create basic workflows with WorkflowBuilder
-- **[kailash-installation](kailash-installation.md)** - Installation and setup guide
-- **[kailash-imports](kailash-imports.md)** - Import patterns and module organization
+- **[workflow-quickstart](../../../.claude/skills/01-core-sdk/workflow-quickstart.md)** - Create basic workflows with WorkflowBuilder
+- **[kailash-installation](../../../.claude/skills/01-core-sdk/kailash-installation.md)** - Installation and setup guide
+- **[kailash-imports](../../../.claude/skills/01-core-sdk/kailash-imports.md)** - Import patterns and module organization
 
 ### Core Patterns
 
-- **[node-patterns-common](node-patterns-common.md)** - Common node usage patterns
-- **[connection-patterns](connection-patterns.md)** - Linking nodes and data flow
-- **[param-passing-quick](param-passing-quick.md)** - Parameter passing strategies
-- **[runtime-execution](runtime-execution.md)** - Executing workflows (sync/async)
-- **[runtime-lifecycle](runtime-lifecycle.md)** - Runtime lifecycle, ref counting, acquire/release, context managers
+- **[node-patterns-common](../../../.claude/skills/01-core-sdk/node-patterns-common.md)** - Common node usage patterns
+- **[connection-patterns](../../../.claude/skills/01-core-sdk/connection-patterns.md)** - Linking nodes and data flow
+- **[param-passing-quick](../../../.claude/skills/01-core-sdk/param-passing-quick.md)** - Parameter passing strategies
+- **[runtime-execution](../../../.claude/skills/01-core-sdk/runtime-execution.md)** - Executing workflows (sync/async)
+- **[runtime-lifecycle](../../../.claude/skills/01-core-sdk/runtime-lifecycle.md)** - Runtime lifecycle, ref counting, acquire/release, context managers
 
 ### Advanced Topics
 
-- **[async-workflow-patterns](async-workflow-patterns.md)** - Asynchronous workflow execution
-- **[async-resource-safety](async-resource-safety.md)** - `__del__` hardening, double-check locking, pool lifecycle, static analysis guardrails
-- **[cycle-workflows-basics](cycle-workflows-basics.md)** - Cyclic workflow patterns
-- **[error-handling-patterns](error-handling-patterns.md)** - Error management strategies
-- **[switchnode-patterns](switchnode-patterns.md)** - Conditional routing with SwitchNode
-- **[pythoncode-best-practices](pythoncode-best-practices.md)** - PythonCode node best practices
-- **[mcp-integration-guide](mcp-integration-guide.md)** - Model Context Protocol integration
+- **[async-workflow-patterns](../../../.claude/skills/01-core-sdk/async-workflow-patterns.md)** - Asynchronous workflow execution
+- **[async-resource-safety](../../../.claude/skills/01-core-sdk/async-resource-safety.md)** - `__del__` hardening, double-check locking, pool lifecycle, static analysis guardrails
+- **[cycle-workflows-basics](../../../.claude/skills/01-core-sdk/cycle-workflows-basics.md)** - Cyclic workflow patterns
+- **[error-handling-patterns](../../../.claude/skills/01-core-sdk/error-handling-patterns.md)** - Error management strategies
+- **[switchnode-patterns](../../../.claude/skills/01-core-sdk/switchnode-patterns.md)** - Conditional routing with SwitchNode
+- **[pythoncode-best-practices](../../../.claude/skills/01-core-sdk/pythoncode-best-practices.md)** - PythonCode node best practices
+- **[mcp-integration-guide](../../../.claude/skills/01-core-sdk/mcp-integration-guide.md)** - Model Context Protocol integration
 
 ### Runtime Diagnostics
 
-- **[runtime-progress](runtime-progress.md)** - ProgressRegistry for node progress tracking (contextvars, thread-safe callbacks, bounded deque)
-- **[runtime-watchdog](runtime-watchdog.md)** - EventLoopWatchdog for asyncio stall detection (heartbeat + thread, StallReport, task stack capture)
+- **[runtime-progress](../../../.claude/skills/01-core-sdk/runtime-progress.md)** - ProgressRegistry for node progress tracking (contextvars, thread-safe callbacks, bounded deque)
+- **[runtime-watchdog](../../../.claude/skills/01-core-sdk/runtime-watchdog.md)** - EventLoopWatchdog for asyncio stall detection (heartbeat + thread, StallReport, task stack capture)
 
 ### Recurring + Durable Execution
 
-- **`WorkflowScheduler`** (`kailash.runtime.scheduler`) — cron + interval + one-shot scheduling for recurring workflow execution; APScheduler-backed SQLite jobstore. See **[15-enterprise-infrastructure/scheduler-patterns](../15-enterprise-infrastructure/scheduler-patterns.md)**.
-- **`ExecutionTracker`** (`kailash.runtime.execution_tracker`) — per-node checkpoint primitive consumed by `DurableRequest` for resume-on-restart workflows. See **[15-enterprise-infrastructure/durability-patterns](../15-enterprise-infrastructure/durability-patterns.md)**.
+- **`WorkflowScheduler`** (`kailash.runtime.scheduler`) — cron + interval + one-shot scheduling for recurring workflow execution; APScheduler-backed SQLite jobstore. See **[15-enterprise-infrastructure/scheduler-patterns](../../../.claude/skills/15-enterprise-infrastructure/scheduler-patterns.md)**.
+- **`ExecutionTracker`** (`kailash.runtime.execution_tracker`) — per-node checkpoint primitive consumed by `DurableRequest` for resume-on-restart workflows. See **[15-enterprise-infrastructure/durability-patterns](../../../.claude/skills/15-enterprise-infrastructure/durability-patterns.md)**.
 
 ## Key Concepts
 
@@ -171,12 +171,12 @@ Use this skill when you need to:
 
 ## Related Skills
 
-- **[02-dataflow](../02-dataflow/SKILL.md)** - Database operations framework built on Core SDK
-- **[03-nexus](../03-nexus/SKILL.md)** - Multi-channel platform framework built on Core SDK
-- **[04-kaizen](../04-kaizen/SKILL.md)** - AI agent framework built on Core SDK
-- **[06-cheatsheets](../06-cheatsheets/SKILL.md)** - Quick reference patterns
-- **[08-nodes-reference](../08-nodes-reference/SKILL.md)** - Complete node reference
-- **[17-gold-standards](../17-gold-standards/SKILL.md)** - Mandatory best practices
+- **[02-dataflow](../../../.claude/skills/02-dataflow/SKILL.md)** - Database operations framework built on Core SDK
+- **[03-nexus](../../../.claude/skills/03-nexus/SKILL.md)** - Multi-channel platform framework built on Core SDK
+- **[04-kaizen](../../../.claude/skills/04-kaizen/SKILL.md)** - AI agent framework built on Core SDK
+- **[06-cheatsheets](../../../.claude/skills/06-cheatsheets/SKILL.md)** - Quick reference patterns
+- **[08-nodes-reference](../../../.claude/skills/08-nodes-reference/SKILL.md)** - Complete node reference
+- **[17-gold-standards](../../../.claude/skills/17-gold-standards/SKILL.md)** - Mandatory best practices
 
 ## Support
 

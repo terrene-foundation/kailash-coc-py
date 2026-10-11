@@ -71,4 +71,4 @@ When working with Core SDK, deploy:
 
 ## Skill Reference
 
-This command loads: `.codex/skills/01-core-sdk/SKILL.md`
+This command loads: `.agents/skills/01-core-sdk/SKILL.md`

@@ -26,11 +26,11 @@
 //
 // Requires Node 14+.
 
-import { readdirSync, readFileSync, statSync, realpathSync } from "node:fs";
+import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { homedir } from "node:os";
 import { execFileSync } from "node:child_process";
-import { fileURLToPath } from "node:url";
+import { isMainModule } from "./lib/entry-point.mjs";
 import process from "node:process";
 
 // --since is compared LEXICALLY against ISO-8601 timestamps. It is documented as
@@ -292,10 +292,21 @@ function resolveRepoRoot(cwd, cache) {
   return root;
 }
 
+// Directories this run could NOT list. Every skip silently REDUCES a dollar figure
+// the operator reads as the total, and an under-count is indistinguishable from
+// genuinely-lower usage (`verification-gate-integrity.md` MUST-2 — absence of a
+// result is not a pass). ENOENT is deliberately EXCLUDED: several call sites probe
+// an OPTIONAL directory, so counting absence as "unreadable" reports a hole where
+// there is none — the very conflation this counter exists to expose (the template's
+// measurement: 835 false "unreadable" directories on the first instrumented run,
+// every one absent). Operator-ratified Gate-1 port, 2026-10-06.
+const SKIPPED = { dirs: 0 };
+
 function listDir(p) {
   try {
     return readdirSync(p, { withFileTypes: true });
-  } catch {
+  } catch (e) {
+    if (!e || e.code !== "ENOENT") SKIPPED.dirs++;
     return [];
   }
 }
@@ -327,7 +338,7 @@ function collect(projectsDir, rates, { since = null, fold = true, perSession = f
   const unpriced = new Map();
   const seen = new Set(); // NUL-joined (id, requestId) dedup key
   const repoCache = new Map();
-  const counters = { files: 0, lines: 0, dupes: 0 };
+  const counters = { files: 0, lines: 0, dupes: 0, dirs_skipped: 0 };
 
   const getBucket = (key) => {
     let b = buckets.get(key);
@@ -411,6 +422,9 @@ function collect(projectsDir, rates, { since = null, fold = true, perSession = f
       }
     }
   }
+  // Surfaced rather than counted-and-dropped: a counter nothing reads cannot warn
+  // anyone, and the under-count it exists to expose is invisible in the totals.
+  counters.dirs_skipped = SKIPPED.dirs;
   return { buckets, subBuckets, unpriced, counters };
 }
 
@@ -615,6 +629,12 @@ function main() {
     `source: ${args.projectsDir}   scanned ${counters.files.toLocaleString("en-US")} files, ` +
       `${counters.lines.toLocaleString("en-US")} messages, deduped ${counters.dupes.toLocaleString("en-US")}\n`,
   );
+  if (counters.dirs_skipped) {
+    console.log(
+      `WARN: ${counters.dirs_skipped} director(y/ies) could not be listed — any transcripts under them ` +
+        `are MISSING from every figure below (an under-count, not lower usage).\n`,
+    );
+  }
   printTable(buckets, subBuckets, args.top, args.sessions || args.byModel);
 
   if (unpriced.size) {
@@ -659,19 +679,8 @@ export {
   main,
 };
 
-// Run only when invoked directly (NOT when imported by the test). Compare REAL
-// paths on both sides: import.meta.url is symlink-resolved, and the invocation
-// path (process.argv[1]) may be a symlink on PATH — realpathSync resolves it so
-// a symlinked launcher still runs main() (and Windows file:///C:/… is handled
-// by fileURLToPath). Any resolution error falls back to NOT running main.
-let _runDirect = false;
-try {
-  _runDirect =
-    !!process.argv[1] &&
-    realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url));
-} catch {
-  _runDirect = false;
-}
-if (_runDirect) {
+// Run only when invoked directly (NOT when imported by the test).
+// Entry-point check: .claude/bin/lib/entry-point.mjs (symlink-safe; a lexical compare exits 0 silently).
+if (isMainModule(import.meta.url)) {
   main();
 }

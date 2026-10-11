@@ -240,6 +240,6 @@ The same workflow code works on all databases!
 
 ## Documentation
 
-- **Connection Config**: [dataflow-connection-config.md](dataflow-connection-config.md)
+- **Connection Config**: [dataflow-connection-config.md](../../../.claude/skills/02-dataflow/dataflow-connection-config.md)
 
 <!-- Trigger Keywords: dataflow postgres, dataflow mysql, dataflow sqlite, database dialects, dataflow databases, database selection -->

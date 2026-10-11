@@ -11,7 +11,7 @@ How to add a new framework contributor to the kailash-mcp platform server. Each 
 > Category: `mcp`
 > Priority: `MEDIUM`
 > SDK Version: `0.9.25+`
-> Related Skills: [`mcp-platform-overview`](mcp-platform-overview.md), [`mcp-security-tiers`](mcp-security-tiers.md), [`mcp-tool-catalog`](mcp-tool-catalog.md)
+> Related Skills: [`mcp-platform-overview`](../../../.claude/skills/05-kailash-mcp/mcp-platform-overview.md), [`mcp-security-tiers`](../../../.claude/skills/05-kailash-mcp/mcp-security-tiers.md), [`mcp-tool-catalog`](../../../.claude/skills/05-kailash-mcp/mcp-tool-catalog.md)
 > Related Subagents: `mcp-platform-specialist` (contributor implementation, testing)
 
 ## Contributor Contract

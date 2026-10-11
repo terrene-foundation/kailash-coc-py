@@ -11,7 +11,7 @@ Complete reference for administrative and access control nodes.
 > Category: `nodes`
 > Priority: `LOW`
 > SDK Version: `0.9.25+`
-> Related Skills: [`nodes-quick-index`](nodes-quick-index.md)
+> Related Skills: [`nodes-quick-index`](../../../.claude/skills/08-nodes-reference/nodes-quick-index.md)
 > Related Subagents: `pattern-expert` (admin workflows)
 
 ## Quick Reference
@@ -79,7 +79,7 @@ workflow.add_node("AccessControlNode", "access_control", {
 
 ## Related Skills
 
-- **Node Index**: [`nodes-quick-index`](nodes-quick-index.md)
+- **Node Index**: [`nodes-quick-index`](../../../.claude/skills/08-nodes-reference/nodes-quick-index.md)
 
 ## Documentation
 

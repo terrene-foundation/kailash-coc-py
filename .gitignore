@@ -77,6 +77,8 @@ secrets/
 workspaces/*/.journal-skipped.log
 
 # >>> coc:gitignore_additions — managed by loom /sync; do not edit between markers >>>
+.claude/load-authz/synthetic-load-allow
+.claude/ci-authz/github-hosted-allow
 .claude/operator-id
 .coc-fetch-cache
 .claude/learning/codify-lease.json*
@@ -86,6 +88,7 @@ workspaces/*/.journal-skipped.log
 .claude/learning/observations.jsonl
 .claude/learning/violations.jsonl
 .claude/learning/coordination-log.jsonl*
+.claude/learning/burndown-events.pending.jsonl*
 .claude/learning/provenance/
 .claude/learning/posture.json*
 .claude/learning/.initialized

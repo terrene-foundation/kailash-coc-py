@@ -91,7 +91,7 @@ Authoritative domain truth lives in `specs/`. Read the spec before touching the 
 
 - `kailash 2.9.0` (ml extras alias) + `kailash-pact 0.10.0` (ml_context + ClearanceRequirement) + `kailash-nexus 2.2.0` (ml-endpoints mount) + `kailash-kaizen 2.12.0` (§2.4 Agent Tool Discovery + SQLiteSink) + `kailash-align 0.6.0` (ml-unification + rl_bridge) + `kailash-dataflow 2.1.0` (TrainingContext + lineage_dataset_hash) + `kailash-ml 1.0.0`.
 
-**M1 release-wave patterns** — see [m1-release-wave](m1-release-wave.md) for:
+**M1 release-wave patterns** — see [m1-release-wave](../../../.claude/skills/34-kailash-ml/m1-release-wave.md) for:
 
 - Canonical 48-symbol `__all__` (41 §15.9 + erase_subject + 7 Phase-1 adapters)
 - km.train + km.register canonical async-await pipeline (commit `fdd3040e`)
@@ -374,7 +374,7 @@ Agents require both `agent=True` AND the agents extra installed. All follow LLM-
 | DriftAnalystAgent          | Drift report interpretation    |
 | RetrainingDecisionAgent    | Retrain/rollback decisions     |
 
-See [ml-agent-guardrails](ml-agent-guardrails.md) for the 5 mandatory guardrails.
+See [ml-agent-guardrails](../../../.claude/skills/34-kailash-ml/ml-agent-guardrails.md) for the 5 mandatory guardrails.
 
 ## RL Module (kailash-ml[rl])
 
@@ -409,13 +409,13 @@ When writing or reviewing kailash-ml engine code, verify:
 
 ## Skill Files
 
-- [ml-feature-pipelines](ml-feature-pipelines.md) — FeatureStore, polars-only engineering, schema-driven ingestion
-- [ml-model-registry](ml-model-registry.md) — ModelRegistry CRUD, lifecycle stages, MLflow compatibility
-- [ml-training-pipeline](ml-training-pipeline.md) — TrainingPipeline, hyperparameter search, experiment tracking
-- [ml-inference-server](ml-inference-server.md) — InferenceServer, Nexus exposure, ONNX serving, batch inference
-- [ml-agent-guardrails](ml-agent-guardrails.md) — 5 mandatory guardrails, AutoML, agent integration
-- [ml-onnx-export](ml-onnx-export.md) — PyTorch/sklearn to ONNX, verification, cross-language serving
-- [ml-drift-monitoring](ml-drift-monitoring.md) — DriftMonitor, statistical tests, alert thresholds, retraining triggers
+- [ml-feature-pipelines](../../../.claude/skills/34-kailash-ml/ml-feature-pipelines.md) — FeatureStore, polars-only engineering, schema-driven ingestion
+- [ml-model-registry](../../../.claude/skills/34-kailash-ml/ml-model-registry.md) — ModelRegistry CRUD, lifecycle stages, MLflow compatibility
+- [ml-training-pipeline](../../../.claude/skills/34-kailash-ml/ml-training-pipeline.md) — TrainingPipeline, hyperparameter search, experiment tracking
+- [ml-inference-server](../../../.claude/skills/34-kailash-ml/ml-inference-server.md) — InferenceServer, Nexus exposure, ONNX serving, batch inference
+- [ml-agent-guardrails](../../../.claude/skills/34-kailash-ml/ml-agent-guardrails.md) — 5 mandatory guardrails, AutoML, agent integration
+- [ml-onnx-export](../../../.claude/skills/34-kailash-ml/ml-onnx-export.md) — PyTorch/sklearn to ONNX, verification, cross-language serving
+- [ml-drift-monitoring](../../../.claude/skills/34-kailash-ml/ml-drift-monitoring.md) — DriftMonitor, statistical tests, alert thresholds, retraining triggers
 
 ## Critical Rules
 
@@ -428,10 +428,10 @@ When writing or reviewing kailash-ml engine code, verify:
 
 ## Related Skills
 
-- [01-core-sdk](../01-core-sdk/SKILL.md) — Core workflow patterns
-- [02-dataflow](../02-dataflow/SKILL.md) — Database integration (ConnectionManager)
-- [03-nexus](../03-nexus/SKILL.md) — Multi-channel deployment (InferenceServer)
-- [04-kaizen](../04-kaizen/SKILL.md) — AI agent framework (ML agents)
-- [35-kailash-align](../35-kailash-align/SKILL.md) — LLM fine-tuning and alignment
+- [01-core-sdk](../../../.claude/skills/01-core-sdk/SKILL.md) — Core workflow patterns
+- [02-dataflow](../../../.claude/skills/02-dataflow/SKILL.md) — Database integration (ConnectionManager)
+- [03-nexus](../../../.claude/skills/03-nexus/SKILL.md) — Multi-channel deployment (InferenceServer)
+- [04-kaizen](../../../.claude/skills/04-kaizen/SKILL.md) — AI agent framework (ML agents)
+- [35-kailash-align](../../../.claude/skills/35-kailash-align/SKILL.md) — LLM fine-tuning and alignment
   </content>
   </invoke>

@@ -19,9 +19,15 @@
  */
 
 import fs from "node:fs";
-import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { isMainModule } from "./lib/entry-point.mjs";
 
+import {
+  isWithinRoot,
+  isWithinTrustedTemp,
+  realpathForContainment,
+} from "./lib/path-containment.mjs";
 import { applyOverlay } from "./lib/slot-parser.mjs";
 
 // Symlink-safe read (O_RDONLY|O_NOFOLLOW, leaf-only guard). An artifact-source
@@ -40,78 +46,11 @@ function safeReadFileSync(filePath, encoding) {
   }
 }
 
-// realpath an existing path (resolves the macOS /var → /private/var and
-// /tmp → /private/tmp symlinks); falls back to the lexical path when the
-// target does not yet exist.
-function realpathOrSelf(p) {
-  try {
-    return fs.realpathSync(p);
-  } catch {
-    return p;
-  }
-}
-
-// Canonicalise an absolute path for a CONTAINMENT decision.
-//
-// path.resolve() only normalises "." / ".." lexically — it does NOT follow
-// symlinks, so a symlinked component whose target escapes the boundary is
-// lexically indistinguishable from a real in-tree path. Every component that
-// EXISTS is therefore resolved through fs.realpathSync; a not-yet-existing
-// remainder (a fresh --out target) is re-appended lexically, which is what
-// lets this run before the file is created.
-//
-// Fails CLOSED: any resolution failure other than a genuinely-absent
-// component — EACCES, ELOOP, ENOTDIR — propagates to the caller, as does a
-// DANGLING symlink (the component exists via lstat but will not resolve), so
-// an unresolvable path is refused rather than silently treated as lexical.
-function realpathForContainment(p) {
-  let current = path.resolve(p);
-  const tail = [];
-  for (;;) {
-    try {
-      return tail.length === 0
-        ? fs.realpathSync(current)
-        : path.join(fs.realpathSync(current), ...tail);
-    } catch (e) {
-      if (e.code !== "ENOENT") throw e;
-      // ENOENT on something lstat CAN see is a dangling symlink, not an
-      // absent component — refuse rather than fall back to the lexical form.
-      let componentExists = false;
-      try {
-        fs.lstatSync(current);
-        componentExists = true;
-      } catch {
-        /* genuinely absent — keep walking up */
-      }
-      if (componentExists) throw e;
-      const parent = path.dirname(current);
-      if (parent === current) throw e; // reached the filesystem root
-      tail.unshift(path.basename(current));
-      current = parent;
-    }
-  }
-}
-
-// True when the candidate IS the boundary root or lies beneath it.
-//
-// `canonicalCandidate` MUST already have come from realpathForContainment, and
-// `root` is canonicalised here through that SAME resolver, so the two sides are
-// always compared in one form. A MIXED-form comparison — one side realpath'd,
-// the other merely path.resolve'd — rejects paths genuinely inside the root.
-// Passing a merely path.resolve'd candidate reintroduces the lexical bypass.
-//
-// SCOPE — this closes the LEXICAL-BYPASS class only. It does NOT by itself
-// defeat check-to-use TOCTOU: a symlink swapped in between this check and the
-// open/write sink is not observable here. Defeating that needs fd-based /
-// O_NOFOLLOW enforcement AT the sink (see safeReadFileSync above, which is
-// what carries the leaf guard on the read path).
-function isWithinRoot(canonicalCandidate, root) {
-  const resolvedRoot = realpathForContainment(root);
-  return (
-    canonicalCandidate === resolvedRoot ||
-    canonicalCandidate.startsWith(resolvedRoot + path.sep)
-  );
-}
+// realpathForContainment / isWithinRoot moved to ./lib/path-containment.mjs
+// (loom#1810) when sync-from-canon-objects.mjs became a second consumer of the
+// same containment decision. A second copy would drift, and a drifted
+// containment check is a silent hole. realpathOrSelf went with the env-derived
+// temp allowlist it existed to build — see the --out carve-out below.
 
 function parseArgs(argv) {
   const args = { global: null, overlay: null, out: null, check: false };
@@ -145,7 +84,7 @@ function main() {
   // cannot fully trust argv even though the human operator typed the
   // command. Resolve all three paths and reject anything that escapes
   // the loom REPO root.
-  const REPO = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..", "..");
+  const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
   function assertInRepo(p, flag) {
     const resolved = path.resolve(p);
     let canonical;
@@ -159,50 +98,56 @@ function main() {
       );
       process.exit(2);
     }
-    if (!isWithinRoot(canonical, REPO)) {
+    let within;
+    try {
+      within = isWithinRoot(canonical, REPO);
+    } catch (e) {
+      // isWithinRoot canonicalises the BOUNDARY ROOT through the SAME resolver,
+      // so it throws for an unresolvable ROOT (EACCES on an ancestor, ELOOP, the
+      // root unlinked mid-run) exactly as the block above throws for the
+      // candidate. It needs its OWN catch: left bare, a root that will not
+      // resolve escaped as an uncaught throw and exited 1 — which this file's
+      // header defines as "composition failure (slot not in global, etc.)", so a
+      // caller could not tell "the guard DID NOT RUN" from a content failure.
+      // Fail-closed either way (nothing is written); this makes the SIGNAL
+      // honest. The wording keeps the `path could not be resolved` refusal
+      // phrase that compose.test.mjs::GUARD_REFUSAL pins, because a root that
+      // will not canonicalise IS a guard refusal, not a composition failure.
+      process.stderr.write(
+        `error: repo root path could not be resolved (${e.code ?? e.message}): ${REPO}\n`,
+      );
+      process.exit(2);
+    }
+    if (!within) {
       // Permit ephemeral temp-dir write targets for emission outputs, since
       // --out is legitimately ephemeral. Reads must stay in repo.
       //
-      // macOS portability: the OS temp dir is /var/folders/<…>/T (the Darwin
-      // user temp dir), which realpath-resolves to /private/var/folders/… —
-      // and BSD `mktemp` with no -p returns it regardless of $TMPDIR (the
-      // #F89 false-positive class that made verify-overlays.sh report every
-      // slot overlay as compose-failed on macOS). Normalise BOTH the
-      // candidate temp roots AND the resolved out-path (via its existing
-      // parent) through realpath so the /var→/private/var (and /tmp→
-      // /private/tmp) symlinks and the os.tmpdir() / $TMPDIR / bare-/tmp trio
-      // all match — without widening the path-traversal surface beyond
-      // ephemeral temp.
-      if (flag === "--out") {
-        // `/var/folders` is the Darwin user-temp tree root that BSD `mktemp`
-        // returns regardless of $TMPDIR (os.tmpdir() honours the $TMPDIR
-        // override, so it alone misses the mktemp-produced path). On Linux
-        // this root simply never matches a real out-path.
-        const tempRoots = [os.tmpdir(), process.env.TMPDIR, "/tmp", "/var/folders"]
-          .filter(Boolean)
-          .map((r) => realpathOrSelf(path.resolve(r)));
-        // Compare the SAME canonical form used for the repo-root decision.
-        // The former `realpathOrSelf(path.dirname(resolved))` resolved only
-        // the parent and fell back to the LEXICAL path whenever that parent
-        // did not exist yet, so a legitimate `--out <tmp>/sub/new.md` compared
-        // a lexical `/tmp/…` against a realpath'd `/private/tmp` root and was
-        // refused. realpathForContainment resolves every EXISTING component
-        // and re-appends only the not-yet-created remainder, which fixes that
-        // and additionally rejects a symlinked FINAL component whose target
-        // escapes temp. Residual (bounded-trust, F53-class — see
-        // multi-operator-coordination.md § Origin F53): a symlink planted
-        // between this check and fs.writeFileSync (no O_NOFOLLOW) is still
-        // followed — that is check-to-use TOCTOU, not a lexical bypass, and
-        // closing it needs enforcement AT the sink.
-        const resolvedReal = canonical;
-        if (
-          tempRoots.some(
-            (root) =>
-              resolvedReal === root || resolvedReal.startsWith(root + path.sep),
-          )
-        ) {
-          return resolved;
-        }
+      // The temp roots come from lib/path-containment.mjs and are STATIC
+      // system temp roots — the environment contributes NOTHING to them
+      // (loom#1810). The former list was
+      // `[os.tmpdir(), process.env.TMPDIR, "/tmp", "/var/folders"]`, and since
+      // the environment is attacker-controlled anywhere argv is, `TMPDIR=/Users`
+      // made every file under /Users a legal write target: measured exit 0 with
+      // a victim outside both repo and temp overwritten, where the identical
+      // command under a clean TMPDIR exited 2. Dropping `process.env.TMPDIR`
+      // alone would not have closed it — os.tmpdir() reads $TMPDIR itself.
+      //
+      // The comparison uses the SAME canonical form as the repo-root decision.
+      // The former `realpathOrSelf(path.dirname(resolved))` resolved only the
+      // parent and fell back to the LEXICAL path whenever that parent did not
+      // exist yet, so a legitimate `--out <tmp>/sub/new.md` compared a lexical
+      // `/tmp/…` against a realpath'd `/private/tmp` root and was refused.
+      // realpathForContainment resolves every EXISTING component and re-appends
+      // only the not-yet-created remainder, which fixes that and additionally
+      // rejects a symlinked FINAL component whose target escapes temp.
+      //
+      // Residual (bounded-trust, F53-class — see
+      // skills/30-claude-code-patterns/multi-operator-coordination-substrate.md § Origin F53): a symlink planted between
+      // this check and fs.writeFileSync (no O_NOFOLLOW) is still followed —
+      // that is check-to-use TOCTOU, not a lexical bypass or an env widening,
+      // and closing it needs enforcement AT the sink.
+      if (flag === "--out" && isWithinTrustedTemp(canonical)) {
+        return resolved;
       }
       process.stderr.write(`error: ${flag} path escapes loom repo: ${resolved}\n`);
       process.exit(2);
@@ -246,6 +191,9 @@ function main() {
   process.exit(0);
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Entry-point check: .claude/bin/lib/entry-point.mjs (symlink-safe; a lexical compare exits 0 silently).
+// Under --preserve-symlinks-main both sides stay lexical and still realpath equal,
+// so the polarity pinned by compose.test.mjs still reaches main().
+if (isMainModule(import.meta.url)) {
   main();
 }

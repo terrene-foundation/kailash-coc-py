@@ -11,7 +11,7 @@ Signatures define type-safe interfaces for agents:
 - **Validation**: Automatic type checking and validation
 - **Optimization**: Framework can optimize prompts automatically
 
-See [kaizen-signatures](kaizen-signatures.md) for authoring patterns.
+See [kaizen-signatures](../../../.claude/skills/04-kaizen/kaizen-signatures.md) for authoring patterns.
 
 ## BaseAgent Architecture
 
@@ -24,7 +24,7 @@ Foundation for all Kaizen agents:
 - **Memory**: State management across invocations
 - **Hooks System**: Zero-code-change observability and lifecycle management
 
-See [kaizen-baseagent-quick](kaizen-baseagent-quick.md) for initialization patterns.
+See [kaizen-baseagent-quick](../../../.claude/skills/04-kaizen/kaizen-baseagent-quick.md) for initialization patterns.
 
 ## Autonomy Infrastructure (6 Subsystems)
 
@@ -37,7 +37,7 @@ Event-driven observability framework:
 - Production security: RBAC, Ed25519 signatures, process isolation, rate limiting
 - Performance: <0.01ms overhead (625x better than 10ms target)
 
-See [kaizen-observability-hooks](kaizen-observability-hooks.md).
+See [kaizen-observability-hooks](../../../.claude/skills/04-kaizen/kaizen-observability-hooks.md).
 
 ### 2. Checkpoint System
 
@@ -48,7 +48,7 @@ Persistent state management:
 - Automatic compression and incremental checkpoints
 - State manager with deduplication and versioning
 
-See [kaizen-checkpoint-resume](kaizen-checkpoint-resume.md).
+See [kaizen-checkpoint-resume](../../../.claude/skills/04-kaizen/kaizen-checkpoint-resume.md).
 
 ### 3. Interrupt Mechanism
 
@@ -58,7 +58,7 @@ Graceful shutdown and execution control:
 - 2 shutdown modes: GRACEFUL (finish cycle + checkpoint) vs IMMEDIATE (stop now)
 - Signal propagation across multi-agent hierarchies
 
-See [kaizen-interrupt-mechanism](kaizen-interrupt-mechanism.md).
+See [kaizen-interrupt-mechanism](../../../.claude/skills/04-kaizen/kaizen-interrupt-mechanism.md).
 
 ### 4. Memory System
 
@@ -69,7 +69,7 @@ See [kaizen-interrupt-mechanism](kaizen-interrupt-mechanism.md).
 - Cold tier: Object storage (100ms+, long-term archival with S3/MinIO)
 - DataFlow-backed with auto-persist and cross-session continuity
 
-See [kaizen-memory-system](kaizen-memory-system.md) and [kaizen-persistent-memory](kaizen-persistent-memory.md).
+See [kaizen-memory-system](../../../.claude/skills/04-kaizen/kaizen-memory-system.md) and [kaizen-persistent-memory](../../../.claude/skills/04-kaizen/kaizen-persistent-memory.md).
 
 ### 5. Planning Agents
 
@@ -99,7 +99,7 @@ For 100+ agent distributed systems:
 - Status management (ACTIVE, UNHEALTHY, DEGRADED, OFFLINE)
 - Multi-runtime coordination across processes/machines
 
-See [kaizen-agent-registry](kaizen-agent-registry.md).
+See [kaizen-agent-registry](../../../.claude/skills/04-kaizen/kaizen-agent-registry.md).
 
 ## Pipeline Patterns (9 Composable Patterns)
 
@@ -121,4 +121,4 @@ See [kaizen-agent-registry](kaizen-agent-registry.md).
 - **Parallel**: Bulk processing or voting-based consensus
 - **Sequential**: Linear workflows with dependency chains
 
-See [kaizen-orchestration](kaizen-orchestration.md).
+See [kaizen-orchestration](../../../.claude/skills/04-kaizen/kaizen-orchestration.md).

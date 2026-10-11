@@ -1,11 +1,23 @@
 #!/usr/bin/env node
 /**
+ * @hook-event: PreToolUse:Edit|NotebookEdit|Write (guard) — the pending write can declare its target ecosystem before disclosure; ordinary writes without that declaration pass through.
+ *
  * Hook: cross-ecosystem-disclosure-guard
  * Event: PreToolUse on Edit | Write (mutation tools)
  *
  * The STANDALONE canon<->fork disclosure-isolation pre-write guard ENTRY POINT
  * (issue #584 AC-1). It wires lib/cross-ecosystem-disclosure-guard.js into the
  * canonical instruct-and-wait emit shape (hook-output-discipline.md MUST-1).
+ *
+ * @coc-codex-edit-gate — canon↔fork disclosure-isolation pre-write guard. The
+ *   policy extractor fans its CC edit-matcher registration out to the Codex
+ *   `apply_patch` lane (mcp-guard, FF-AC6-1). Activation is unchanged and
+ *   CLI-identical: absent a declared target the entry point passes through
+ *   before any ecosystem-config load, and a declared target is read from the
+ *   SAME `COC_XECO_TARGET_ECOSYSTEM` env channel on both CLIs (the env is
+ *   inherited by the Codex policy subprocess exactly as by the CC hook). The
+ *   scannable surface travels on `COC_XECO_SCAN_CONTENT`, likewise env-carried
+ *   and therefore CLI-independent.
  *
  * REGISTERED (F3 Level-1, 2026-06-25, journal/0335) — ITS BLOCK BRANCH DORMANT:
  *   This file IS registered in settings.json on the Edit|Write|NotebookEdit
@@ -51,13 +63,18 @@
  *   UNBUILT)). Absent that declaration
  *   the hook is a no-op, so it never blocks ordinary in-fork edits.
  *
- * SEVERITY (once activated): `block`. The boundary is computed STRUCTURALLY from
- *   the SHIPPED ecosystem.json upstream_canon pointer + the declared target
- *   ecosystem — a deterministic process-local fact the agent cannot rationalize
- *   away — so it qualifies as a block-grade structural primitive per
- *   hook-output-discipline.md MUST-2. (The disclosure scan half is structural
- *   too: a finding-count from the SHIPPED scanner, not a lexical match on agent
- *   prose.)
+ * SEVERITY (once activated): `block`, under the DISCLOSURE-ISOLATION EXCEPTION in
+ *   hook-output-discipline.md MUST-2 — NOT because the whole decision is structural.
+ *   Two halves, and only one of them is: the BOUNDARY is computed structurally from
+ *   the SHIPPED ecosystem.json upstream_canon pointer + the declared target ecosystem
+ *   (a deterministic process-local fact), and that structural gate is what makes the
+ *   block branch REACHABLE AT ALL — absent a declared target this hook passes through,
+ *   so its false-positive surface is bounded to writes already declared as crossing
+ *   the boundary. But the boundary alone does not BLOCK: a clean fork->canon write
+ *   passes. The DISCRIMINATOR is the disclosure scan's findings, and a content scan is
+ *   exactly what MUST-2's general rule bars from carrying `block`. An earlier revision
+ *   of this header called the scan half "structural too"; that was FALSE and is
+ *   retracted here. The exception, not a structurality claim, is the licence.
  *
  * ≤5s budget per cc-artifacts.md Rule 7; setTimeout fallback returns
  * {continue: true} (fail-OPEN on hook-internal hang — the fail-CLOSED behavior
@@ -74,14 +91,27 @@
  *   COC_XECO_FINDINGS_JSON     — JSON array of injected disclosure findings.
  */
 
+/**
+ * @hook-contract
+ * {
+ *   "side_effects": {
+ *     "fs_writes": ["<os.tmpdir()>/xeco-scan-<rand>/"],
+ *     "network": false,
+ *     "spawns": ["node"]
+ *   },
+ *   "idempotent": true,
+ *   "may_rewrite_input": false,
+ *   "notes": "Both effects come from the lib's DEFAULT scanFn (lib/cross-ecosystem-disclosure-scanfn.js), reached only when COC_XECO_SCAN_CONTENT supplies a surface: it mkdtemp's a root under os.tmpdir(), stages the raw/normalized surfaces and a copied tenant denylist under it, runs the scanner through `--check --root <tmp>` via execFileSync, then removes it. The write target is OUTSIDE the repo root, hence the non-relative entry. This hook's own process opens no socket."
+ * }
+ */
+
 "use strict";
 
-const TIMEOUT_MS = 5000;
+// Raised 5000 -> 20000 (2026-10-08) with the registered budget (5s -> 20s): internal
+// and harness bind must move together or the guard self-kills mid-scan under load.
+const TIMEOUT_MS = 20000;
 
-const fallback = setTimeout(() => {
-  process.stdout.write(JSON.stringify({ continue: true }) + "\n");
-  process.exit(1);
-}, TIMEOUT_MS);
+let fallback = null;
 
 const path = require("path");
 
@@ -114,7 +144,18 @@ function parseMaybeJson(raw) {
   return t;
 }
 
-(async function main() {
+// hookMain — the ONE entry, run by the CLI guard at the bottom of this file AND
+// in-process by lib/hook-engine.js (dispatch.js). Everything a standalone run
+// did at load time happens here instead, so a require() has no side effects.
+function hookMain() {
+  fallback = setTimeout(() => {
+    process.stdout.write(JSON.stringify({ continue: true }) + "\n");
+    process.exit(1);
+  }, TIMEOUT_MS);
+  return main();
+}
+
+async function main() {
   try {
     // `fallback: null` distinctly signals a FAILED/EMPTY read. readStdinBounded
     // NEVER throws (it resolves the fallback on empty/parse-error/timeout), so
@@ -220,7 +261,32 @@ function parseMaybeJson(raw) {
 
     if (result.ok) passthrough();
 
-    // BLOCK — structural boundary primitive (hook-output-discipline.md MUST-2).
+    // BLOCK — under the DISCLOSURE-ISOLATION exception in `hook-output-discipline.md`
+    // MUST-2, NOT as a structural signal. An earlier revision of this comment claimed
+    // "structural boundary primitive", and that claim was FALSE: the fork->canon
+    // BOUNDARY is structural, but the boundary alone does not block — a clean
+    // fork->canon write passes. The DISCRIMINATOR is the content scan, and a content
+    // scan is exactly what MUST-2's general rule bars from carrying `block`.
+    //
+    // The exception's conditions, each with the code that satisfies it (cited per
+    // `zero-tolerance.md` Rule 3e, which binds code COMMENTS asserting guard
+    // predicates):
+    //   (a) STRUCTURAL PRECONDITION — the block branch is reachable only behind a
+    //       declared cross-ecosystem target: `cross-ecosystem-disclosure-guard.js:172`
+    //       (`if (!targetEcosystem) passthrough();`). This is what keeps a false
+    //       positive off ordinary in-repo work, which is MUST-2's whole stated harm.
+    //   (b) CONFIDENTIALITY across a tenancy boundary — canon is the shared upstream
+    //       every fork pulls from (`rules/artifact-flow.md` § Ecosystem Forks).
+    //   (c) IRREVERSIBLE — a leak onto canon is correlatable across every other client
+    //       and cannot be recalled.
+    //   (d) FAILS CLOSED WHENEVER A SCAN IS REQUIRED — an unverified scan refuses:
+    //       `lib/cross-ecosystem-disclosure-guard.js:569-575` maps an unverified
+    //       verdict to `reason: "disclosure-unverified"` on the `ok:false` path.
+    //       NOT a claim that the guard never allows an unscanned write: the
+    //       public-authority-O1 carve-out at `lib/cross-ecosystem-disclosure-guard.js:554-561`
+    //       establishes neutrality by AUTHORITY rather than by scan. It is
+    //       allowlist-gated and ANY finding overrides it, which is what keeps it
+    //       inside condition (d) rather than an exception to it.
     clearTimeout(fallback);
     emit({
       hookEvent,
@@ -307,4 +373,15 @@ function parseMaybeJson(raw) {
     }
     process.exit(0);
   }
-})();
+}
+
+module.exports = { hookMain };
+
+// CLI entry. The default path is exactly hookMain() — no engine dependency, so a
+// tree that copies this hook without lib/hook-engine.js runs it unchanged. The
+// selftest path replays the run through the in-process engine (hook-engine.js::runCli).
+if (require.main === module) {
+  if (process.env.COC_HOOK_ENGINE_SELFTEST === "1")
+    require("./lib/hook-engine.js").runCli(hookMain, __filename);
+  else hookMain();
+}

@@ -1,7 +1,7 @@
 # `burndown-integrity` fixtures
 
 Backs `.claude/rules/burndown-integrity.md` and its generator `.claude/bin/burndown-build.mjs`.
-Registered in `.claude/test-harness/ci-audit-fixtures.json` (`mode: run`, `min_cases: 64`).
+Registered in `.claude/test-harness/ci-audit-fixtures.json` (`mode: run`, `min_cases: 261`).
 
 Run: `node .claude/audit-fixtures/burndown-integrity/run.mjs`
 

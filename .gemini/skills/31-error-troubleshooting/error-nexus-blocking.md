@@ -11,7 +11,7 @@ Fix Nexus blocking and 5-30 second startup delays when integrating with DataFlow
 > Category: `cross-cutting` (error-resolution)
 > Priority: `HIGH` (Critical integration issue)
 > SDK Version: `0.9.0+` (Nexus + DataFlow)
-> Related Skills: [`dataflow-quickstart`](../02-dataflow/dataflow-quickstart.md), [`nexus-quickstart`](../03-nexus/nexus-quickstart.md)
+> Related Skills: [`dataflow-quickstart`](../../../.claude/skills/02-dataflow/dataflow-quickstart.md), [`nexus-quickstart`](../../../.claude/skills/03-nexus/nexus-quickstart.md)
 > Related Subagents: `nexus-specialist` (integration debugging), `dataflow-specialist`
 
 ## The Problem
@@ -106,9 +106,9 @@ With `auto_discovery=False`:
 
 ## Related Patterns
 
-- **Nexus basics**: [`nexus-quickstart`](../03-nexus/nexus-quickstart.md)
-- **DataFlow basics**: [`dataflow-quickstart`](../02-dataflow/dataflow-quickstart.md)
-- **Integration guide**: [`dataflow-nexus-integration`](../02-dataflow/dataflow-nexus-integration.md)
+- **Nexus basics**: [`nexus-quickstart`](../../../.claude/skills/03-nexus/nexus-quickstart.md)
+- **DataFlow basics**: [`dataflow-quickstart`](../../../.claude/skills/02-dataflow/dataflow-quickstart.md)
+- **Integration guide**: [`dataflow-nexus-integration`](../../../.claude/skills/02-dataflow/dataflow-nexus-integration.md)
 
 ## When to Escalate to Subagent
 
@@ -125,7 +125,7 @@ Use `nexus-specialist` subagent when:
 
 - **Nexus Specialist**: [`.gemini/agents/nexus-specialist.md`](../../../.claude/agents/frameworks/nexus-specialist.md)
 - **DataFlow Specialist**: [`.gemini/agents/dataflow-specialist.md`](../../../.claude/agents/frameworks/dataflow-specialist.md)
-- **Integration Guide**: [`.gemini/skills/03-nexus/nexus-dataflow-integration.md`](../../skills/03-nexus/nexus-dataflow-integration.md)
+- **Integration Guide**: [`.gemini/skills/03-nexus/nexus-dataflow-integration.md`](../../../.claude/skills/03-nexus/nexus-dataflow-integration.md)
 
 ### Related Documentation
 

@@ -62,5 +62,5 @@ Legacy vars emit `DeprecationWarning`. Use `resolve_azure_env()` from `kaizen.no
 
 ## See Also
 
-- [kaizen-config-patterns](kaizen-config-patterns.md) — Domain configs, auto-extraction, provider-specific patterns
-- [kaizen-structured-outputs](kaizen-structured-outputs.md) — Full structured output guide with migration examples
+- [kaizen-config-patterns](../../../.claude/skills/04-kaizen/kaizen-config-patterns.md) — Domain configs, auto-extraction, provider-specific patterns
+- [kaizen-structured-outputs](../../../.claude/skills/04-kaizen/kaizen-structured-outputs.md) — Full structured output guide with migration examples

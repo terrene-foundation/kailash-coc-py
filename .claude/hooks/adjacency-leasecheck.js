@@ -1,6 +1,18 @@
 #!/usr/bin/env node
 /**
+ * @hook-event: PreToolUse:Edit|NotebookEdit|Write (guard) — the pending target path and existing sibling claims are available before a file mutation.
+ *
  * adjacency-leasecheck.js — §4.3 pre-tool-use hook for Edit|Write.
+ *
+ * @coc-codex-edit-gate — multi-operator claim-adjacency surface. The policy
+ *   extractor fans its CC edit-matcher registration out to the Codex
+ *   `apply_patch` lane (mcp-guard, FF-AC6-1). The predicate consumes the
+ *   projected target path plus the repo-local claims fold; it carries NO
+ *   block branch (SAME / ADJACENT are halt-and-report / advisory — see the
+ *   severity table below), and where coordination is OFF it is already a
+ *   passthrough (see `isCoordinationEnabled` below). Wired 2026-10-09 under
+ *   the orchestrator ruling that every guard runs natively on every CLI
+ *   unless its predicate cannot be computed — this one's can.
  *
  * The first user-visible behavior in F14: every Edit/Write in a
  * multi-operator session now surfaces sibling activity per §4.1's
@@ -26,7 +38,12 @@
  *
  *   NO branch of this hook carries severity: block.
  *
- *   Budget:   ≤5s; setTimeout fallback per cc-artifacts.md Rule 7.
+ *   Budget:   ≤16s internal, 20s registered (raised 2026-10-09 when this
+ *             hook entered the Codex `apply_patch` policy table): the Codex
+ *             runtime fails every policy CLOSED, so the budget must clear the
+ *             enrolled-path fold + signature verification under load, not
+ *             only the unenrolled passthrough. setTimeout fallback per
+ *             cc-artifacts.md Rule 7.
  *
  * Flow:
  *   1. Resolve operator identity via operator-id.js (Tier 1: explicit key
@@ -65,16 +82,29 @@
  * invoke `/claim`.
  */
 
+/**
+ * @hook-contract
+ * {
+ *   "side_effects": {
+ *     "fs_writes": [
+ *       ".claude/learning/coordination-log.jsonl"
+ *     ],
+ *     "network": false,
+ *     "spawns": ["git","gpg","ssh-keygen"]
+ *   },
+ *   "idempotent": false,
+ *   "may_rewrite_input": false,
+ *   "notes": "The auto-claim append goes through lib/transport-filesystem.js -> lib/append-sink.js, which may mkdir .claude/learning/. Spawns: git (state-resolver / sibling-porcelain) and ssh-keygen (lib/coc-sign.js signing). Each invocation appends a fresh signed claim (claim_id embeds nowMs), so a repeat is not a no-op."
+ * }
+ */
+
 "use strict";
 
-const TIMEOUT_MS = 5000;
+const TIMEOUT_MS = 16000;
 
 // setTimeout fallback per cc-artifacts.md Rule 7. Hook-internal hang
 // MUST NOT block the agent forever. {continue: true} surfaces no halt.
-const fallback = setTimeout(() => {
-  process.stdout.write(JSON.stringify({ continue: true }) + "\n");
-  process.exit(1);
-}, TIMEOUT_MS);
+let fallback = null;
 
 const fs = require("fs");
 const path = require("path");
@@ -106,6 +136,9 @@ const { isCoordinationEnabled } = require(
 const { requireMainCheckout } = require(
   path.join(__dirname, "lib", "state-resolver.js"),
 );
+const { resolveRepoDirBound } = require(
+  path.join(__dirname, "lib", "repo-dir-override.js"),
+);
 
 function passthrough() {
   clearTimeout(fallback);
@@ -124,12 +157,13 @@ const { readStdinBounded } = require("./lib/read-stdin-bounded.js");
  *   3. process.cwd() as the last resort.
  */
 function resolveRepoDir(payload) {
-  const envDir = process.env.COC_OPERATOR_REPO_DIR;
-  if (envDir && fs.existsSync(envDir)) return envDir;
-  if (payload && typeof payload.cwd === "string" && payload.cwd.length > 0) {
-    return payload.cwd;
-  }
-  return process.cwd();
+  // loom#1871 HIGH-1 — the override is now bound to the SESSION REPOSITORY.
+  // It was honoured on the sole evidence that the directory EXISTED, so a
+  // `settings.json` env: line plus a `git init` moved this guard to an
+  // unrelated repo and it passed everything through. See lib/repo-dir-override.js
+  // for the 8-of-8 two-pole measurement, the three arms, and why
+  // `provenCheckoutRoot` does not close it.
+  return resolveRepoDirBound(payload, { hookName: "adjacency-leasecheck" }).repoDir;
 }
 
 /**
@@ -385,7 +419,18 @@ function discoverKeyPath() {
 
 // ---- main -------------------------------------------------------------------
 
-(async function main() {
+// hookMain — the ONE entry, run by the CLI guard at the bottom of this file AND
+// in-process by lib/hook-engine.js (dispatch.js). Everything a standalone run
+// did at load time happens here instead, so a require() has no side effects.
+function hookMain() {
+  fallback = setTimeout(() => {
+    process.stdout.write(JSON.stringify({ continue: true }) + "\n");
+    process.exit(1);
+  }, TIMEOUT_MS);
+  return main();
+}
+
+async function main() {
   try {
     const payload = await readStdinBounded();
     const hookEvent = payload.hook_event_name || "PreToolUse";
@@ -673,4 +718,20 @@ function discoverKeyPath() {
     }
     process.exit(0);
   }
-})();
+}
+
+module.exports = { hookMain };
+
+// CLI entry. The default path is exactly hookMain() — no engine dependency, so a
+// tree that copies this hook without lib/hook-engine.js runs it unchanged. The
+// selftest path replays the run through the in-process engine (hook-engine.js::runCli).
+if (require.main === module) {
+  if (process.env.COC_HOOK_ENGINE_SELFTEST === "1") require("./lib/hook-engine.js").runCli(hookMain, __filename);
+  else {
+    // FW-TIER2 — a STANDALONE invocation is one hook event, so it opens the same
+    // one-answer-per-question scope the dispatch worker opens. Without it every
+    // asker in this process pays its own `git rev-parse --git-common-dir`.
+    require("./lib/event-git.js").installStandaloneEventScope();
+    hookMain();
+  }
+}

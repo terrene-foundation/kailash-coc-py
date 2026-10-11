@@ -107,4 +107,4 @@ All provider exceptions pass through `sanitize_provider_error()` which strips AP
 
 ## Cross-References
 
-- ADR-001: `workspaces/byok-hardening/02-plans/01-adr-credential-flow.md`
+- ADR-001: (loom-internal reference)

@@ -1,6 +1,6 @@
 ---
 name: autonomize
-description: "Autonomous execution under user's permission envelope. Recommend the optimal, root-cause, long-term fix with evidence — proceed without question-spam; still confirm destructive or hard-to-reverse actions."
+description: "Execute autonomously within the user’s permission envelope; confirm destructive or hard-to-reverse actions."
 ---
 
 The user invoked `/autonomize`. This is a directive, not a task. Adopt the following posture for the rest of this turn AND every subsequent turn until the session ends:
@@ -56,7 +56,7 @@ Confirmation here is NOT hedging. It is the user's pre-declared safety check on 
 
 Autonomous execution does NOT mean reckless. Before declaring a pick optimal:
 
-- Run mechanical sweeps that VERIFY the claim (grep, AST scan, type check, file existence) — not only LLM judgment (per `rules/agents.md` § "Reviewer Prompts Include Mechanical AST/Grep Sweep").
+- Run mechanical sweeps that VERIFY the claim (grep, AST scan, type check, file existence) — not only LLM judgment (per `rules/agents.md` § "Reviewer Prompts Include Mechanical Sweeps").
 - Cite specific file paths, line numbers, or commit SHAs when recommending a change — never gesture at "the auth module" without naming `src/auth/middleware.py:142`.
 - Distinguish what you OBSERVED from what you ASSUMED. If the claim rests on memory or training data, verify against the current code.
 - For risky technical choices (security, data integrity, irreversible operations), state your confidence level and the evidence behind it.

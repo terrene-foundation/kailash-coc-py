@@ -10,6 +10,8 @@ paths:
 
 # DataFlow Identifier Safety Rules
 
+Full examples: `.claude/guides/rule-extracts/dataflow-identifier-safety.md`. The numbered clauses remain the governing contract.
+
 
 <!-- slot:neutral-body -->
 
@@ -52,33 +54,7 @@ Every dialect's `quote_identifier(name: str)` helper MUST:
 4. **Quote** the validated input with the dialect's quote character (`"` for PostgreSQL/SQLite, `` ` `` for MySQL).
 5. **Not** attempt to "escape" embedded quote characters — that's the bug. Invalid inputs are rejected, not escaped.
 
-```python
-# DO — validate, reject, quote
-class PostgresDialect:
-    _IDENTIFIER_REGEX = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
-    _MAX_LENGTH = 63
-
-    def quote_identifier(self, name: str) -> str:
-        if not isinstance(name, str):
-            raise IdentifierError("identifier must be a string")
-        if len(name) > self._MAX_LENGTH:
-            raise IdentifierError(
-                f"identifier exceeds {self._MAX_LENGTH}-char limit "
-                f"(len={len(name)}, fingerprint={hash(name) & 0xFFFF:04x})"
-            )
-        if not self._IDENTIFIER_REGEX.match(name):
-            raise IdentifierError(
-                f"identifier failed validation "
-                f"(fingerprint={hash(name) & 0xFFFF:04x})"
-            )
-        return f'"{name}"'
-
-# DO NOT — escape embedded quotes
-def quote_identifier(self, name: str) -> str:
-    escaped = name.replace('"', '""')  # trying to "clean" the input
-    return f'"{escaped}"'
-# ↑ accepts identifiers that should be rejected, widening the attack surface
-```
+**DO:** validate type, allowlist and dialect length, raise a typed error using length/fingerprint instead of raw input, then quote with the dialect character. **DO NOT:** escape embedded quotes with `name.replace('"', '""')` and accept the result.
 
 **Why:** The "reject, don't escape" rule eliminates a whole class of bypass attempts (`name", name2 := '...'`). The error-message fingerprint prevents leaking the attack payload into logs.
 

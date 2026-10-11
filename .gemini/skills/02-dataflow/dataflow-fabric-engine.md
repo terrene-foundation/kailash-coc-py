@@ -10,7 +10,7 @@ Extends DataFlow from "zero-config database operations" to "zero-config data ope
 > **Skill Metadata**
 > Category: `dataflow`
 > Priority: `HIGH`
-> Related Skills: [`dataflow-express`](dataflow-express.md), [`dataflow-events`](dataflow-events.md), [`dataflow-quickstart`](dataflow-quickstart.md)
+> Related Skills: [`dataflow-express`](../../../.claude/skills/02-dataflow/dataflow-express.md), [`dataflow-events`](../../../.claude/skills/02-dataflow/dataflow-events.md), [`dataflow-quickstart`](../../../.claude/skills/02-dataflow/dataflow-quickstart.md)
 > Related Subagents: `dataflow-specialist` (framework guidance)
 
 ## Quick Reference

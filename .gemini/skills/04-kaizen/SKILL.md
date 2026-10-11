@@ -124,31 +124,31 @@ For in-depth documentation, see the kaizen package (`docs/`):
 
 ### Quick Start (Skills)
 
-- **[kaizen-quickstart-template](kaizen-quickstart-template.md)** - Quick start guide with templates
-- **[kaizen-baseagent-quick](kaizen-baseagent-quick.md)** - BaseAgent fundamentals
-- **[kaizen-signatures](kaizen-signatures.md)** - Signature-based programming
-- **[kaizen-agent-execution](kaizen-agent-execution.md)** - Agent execution patterns
-- **[README](README.md)** - Framework overview
+- **[kaizen-quickstart-template](../../../.claude/skills/04-kaizen/kaizen-quickstart-template.md)** - Quick start guide with templates
+- **[kaizen-baseagent-quick](../../../.claude/skills/04-kaizen/kaizen-baseagent-quick.md)** - BaseAgent fundamentals
+- **[kaizen-signatures](../../../.claude/skills/04-kaizen/kaizen-signatures.md)** - Signature-based programming
+- **[kaizen-agent-execution](../../../.claude/skills/04-kaizen/kaizen-agent-execution.md)** - Agent execution patterns
+- **[README](../../../.claude/skills/04-kaizen/README.md)** - Framework overview
 
 ### LLM Wire Layer (Lower-Level)
 
-- **[kaizen-llm-deployment](kaizen-llm-deployment.md)** - `kaizen.llm.LlmClient` + four-axis `LlmDeployment` + 24 presets + `from_env()` precedence + wire-send dispatch. **Load first when touching `LlmDeployment`, `LlmClient.embed()`/`complete()`, `wire_protocols/*`, or adding a new wire-send method.** Spec: `specs/kaizen-llm-deployments.md`.
+- **[kaizen-llm-deployment](../../../.claude/skills/04-kaizen/kaizen-llm-deployment.md)** - `kaizen.llm.LlmClient` + four-axis `LlmDeployment` + 24 presets + `from_env()` precedence + wire-send dispatch. **Load first when touching `LlmDeployment`, `LlmClient.embed()`/`complete()`, `wire_protocols/*`, or adding a new wire-send method.** Spec: `specs/kaizen-llm-deployments.md`.
 
 ### Agent Patterns
 
-- **[kaizen-agent-patterns](kaizen-agent-patterns.md)** - Common agent design patterns
-- **[kaizen-chain-of-thought](kaizen-chain-of-thought.md)** - Chain of thought reasoning
-- **[kaizen-react-pattern](kaizen-react-pattern.md)** - ReAct (Reason + Act) pattern
-- **[kaizen-rag-agent](kaizen-rag-agent.md)** - Retrieval-Augmented Generation agents
-- **[kaizen-config-patterns](kaizen-config-patterns.md)** - Agent configuration strategies
+- **[kaizen-agent-patterns](../../../.claude/skills/04-kaizen/kaizen-agent-patterns.md)** - Common agent design patterns
+- **[kaizen-chain-of-thought](../../../.claude/skills/04-kaizen/kaizen-chain-of-thought.md)** - Chain of thought reasoning
+- **[kaizen-react-pattern](../../../.claude/skills/04-kaizen/kaizen-react-pattern.md)** - ReAct (Reason + Act) pattern
+- **[kaizen-rag-agent](../../../.claude/skills/04-kaizen/kaizen-rag-agent.md)** - Retrieval-Augmented Generation agents
+- **[kaizen-config-patterns](../../../.claude/skills/04-kaizen/kaizen-config-patterns.md)** - Agent configuration strategies
 
 ### Multi-Agent Systems & Orchestration
 
-- **[kaizen-multi-agent-setup](kaizen-multi-agent-setup.md)** - Multi-agent system setup
-- **[kaizen-supervisor-worker](kaizen-supervisor-worker.md)** - Supervisor-worker coordination
-- **[kaizen-a2a-protocol](kaizen-a2a-protocol.md)** - Agent-to-agent communication
-- **[kaizen-shared-memory](kaizen-shared-memory.md)** - Shared memory between agents
-- **[kaizen-agent-registry](kaizen-agent-registry.md)** - Distributed agent coordination for 100+ agent systems
+- **[kaizen-multi-agent-setup](../../../.claude/skills/04-kaizen/kaizen-multi-agent-setup.md)** - Multi-agent system setup
+- **[kaizen-supervisor-worker](../../../.claude/skills/04-kaizen/kaizen-supervisor-worker.md)** - Supervisor-worker coordination
+- **[kaizen-a2a-protocol](../../../.claude/skills/04-kaizen/kaizen-a2a-protocol.md)** - Agent-to-agent communication
+- **[kaizen-shared-memory](../../../.claude/skills/04-kaizen/kaizen-shared-memory.md)** - Shared memory between agents
+- **[kaizen-agent-registry](../../../.claude/skills/04-kaizen/kaizen-agent-registry.md)** - Distributed agent coordination for 100+ agent systems
 
 **Pipeline Patterns** (9 Composable Patterns):
 
@@ -164,34 +164,34 @@ For in-depth documentation, see the kaizen package (`docs/`):
 
 ### Multimodal Processing
 
-- **[kaizen-multimodal-orchestration](kaizen-multimodal-orchestration.md)** - Multimodal coordination
-- **[kaizen-vision-processing](kaizen-vision-processing.md)** - Vision and image processing
-- **[kaizen-audio-processing](kaizen-audio-processing.md)** - Audio processing agents
-- **[kaizen-multimodal-pitfalls](kaizen-multimodal-pitfalls.md)** - Common pitfalls and solutions
+- **[kaizen-multimodal-orchestration](../../../.claude/skills/04-kaizen/kaizen-multimodal-orchestration.md)** - Multimodal coordination
+- **[kaizen-vision-processing](../../../.claude/skills/04-kaizen/kaizen-vision-processing.md)** - Vision and image processing
+- **[kaizen-audio-processing](../../../.claude/skills/04-kaizen/kaizen-audio-processing.md)** - Audio processing agents
+- **[kaizen-multimodal-pitfalls](../../../.claude/skills/04-kaizen/kaizen-multimodal-pitfalls.md)** - Common pitfalls and solutions
 
 ### Advanced Features
 
-- **[kaizen-control-protocol](kaizen-control-protocol.md)** - Bidirectional agent ↔ client communication
-- **[kaizen-tool-calling](kaizen-tool-calling.md)** - Autonomous tool execution with approval workflows
-- **[kaizen-memory-system](kaizen-memory-system.md)** - Persistent memory, learning, FAQ detection
-- **[kaizen-checkpoint-resume](kaizen-checkpoint-resume.md)** - Checkpoint & resume for long-running agents
-- **[kaizen-interrupt-mechanism](kaizen-interrupt-mechanism.md)** - Graceful shutdown, Ctrl+C handling
-- **[kaizen-persistent-memory](kaizen-persistent-memory.md)** - DataFlow-backed conversation persistence
-- **[kaizen-streaming](kaizen-streaming.md)** - Streaming agent responses
-- **[kaizen-cost-tracking](kaizen-cost-tracking.md)** - Cost monitoring and optimization
-- **[kaizen-ux-helpers](kaizen-ux-helpers.md)** - UX enhancement utilities
+- **[kaizen-control-protocol](../../../.claude/skills/04-kaizen/kaizen-control-protocol.md)** - Bidirectional agent ↔ client communication
+- **[kaizen-tool-calling](../../../.claude/skills/04-kaizen/kaizen-tool-calling.md)** - Autonomous tool execution with approval workflows
+- **[kaizen-memory-system](../../../.claude/skills/04-kaizen/kaizen-memory-system.md)** - Persistent memory, learning, FAQ detection
+- **[kaizen-checkpoint-resume](../../../.claude/skills/04-kaizen/kaizen-checkpoint-resume.md)** - Checkpoint & resume for long-running agents
+- **[kaizen-interrupt-mechanism](../../../.claude/skills/04-kaizen/kaizen-interrupt-mechanism.md)** - Graceful shutdown, Ctrl+C handling
+- **[kaizen-persistent-memory](../../../.claude/skills/04-kaizen/kaizen-persistent-memory.md)** - DataFlow-backed conversation persistence
+- **[kaizen-streaming](../../../.claude/skills/04-kaizen/kaizen-streaming.md)** - Streaming agent responses
+- **[kaizen-cost-tracking](../../../.claude/skills/04-kaizen/kaizen-cost-tracking.md)** - Cost monitoring and optimization
+- **[kaizen-ux-helpers](../../../.claude/skills/04-kaizen/kaizen-ux-helpers.md)** - UX enhancement utilities
 
 ### Observability & Monitoring
 
-- **[kaizen-observability-hooks](kaizen-observability-hooks.md)** - Lifecycle event hooks, production security (RBAC)
-- **[kaizen-observability-tracing](kaizen-observability-tracing.md)** - Distributed tracing with OpenTelemetry
-- **[kaizen-observability-metrics](kaizen-observability-metrics.md)** - Prometheus metrics collection
-- **[kaizen-observability-logging](kaizen-observability-logging.md)** - Structured JSON logging
-- **[kaizen-observability-audit](kaizen-observability-audit.md)** - Compliance audit trails
+- **[kaizen-observability-hooks](../../../.claude/skills/04-kaizen/kaizen-observability-hooks.md)** - Lifecycle event hooks, production security (RBAC)
+- **[kaizen-observability-tracing](../../../.claude/skills/04-kaizen/kaizen-observability-tracing.md)** - Distributed tracing with OpenTelemetry
+- **[kaizen-observability-metrics](../../../.claude/skills/04-kaizen/kaizen-observability-metrics.md)** - Prometheus metrics collection
+- **[kaizen-observability-logging](../../../.claude/skills/04-kaizen/kaizen-observability-logging.md)** - Structured JSON logging
+- **[kaizen-observability-audit](../../../.claude/skills/04-kaizen/kaizen-observability-audit.md)** - Compliance audit trails
 
 ### Enterprise Agent Trust Protocol (v0.8.0)
 
-- **[kaizen-trust-eatp](kaizen-trust-eatp.md)** - Complete trust infrastructure for AI agents
+- **[kaizen-trust-eatp](../../../.claude/skills/04-kaizen/kaizen-trust-eatp.md)** - Complete trust infrastructure for AI agents
   - Trust lineage chains with cryptographic verification
   - TrustedAgent and TrustedSupervisorAgent with built-in trust
   - Secure messaging with HMAC authentication and replay protection
@@ -202,7 +202,7 @@ For in-depth documentation, see the kaizen package (`docs/`):
 
 ### Agent Manifest & Deploy (v1.3)
 
-- **[kaizen-agent-manifest](kaizen-agent-manifest.md)** - TOML-based agent declaration, governance metadata, and deployment
+- **[kaizen-agent-manifest](../../../.claude/skills/04-kaizen/kaizen-agent-manifest.md)** - TOML-based agent declaration, governance metadata, and deployment
   - `AgentManifest` with `[agent]` and `[governance]` TOML sections
   - `GovernanceManifest` with risk_level, suggested_posture, budget
   - `introspect_agent()` for runtime metadata extraction (Python API only, NOT MCP)
@@ -211,14 +211,14 @@ For in-depth documentation, see the kaizen package (`docs/`):
 
 ### Composition Validation (v1.3)
 
-- **[kaizen-composition](kaizen-composition.md)** - DAG validation, schema compatibility, cost estimation
+- **[kaizen-composition](../../../.claude/skills/04-kaizen/kaizen-composition.md)** - DAG validation, schema compatibility, cost estimation
   - `validate_dag()` with iterative DFS cycle detection (max_agents=1000)
   - `check_schema_compatibility()` with JSON Schema structural subtyping and type widening
   - `estimate_cost()` with historical data projection and confidence levels
 
 ### MCP Catalog Server (v1.3)
 
-- **[kaizen-catalog-server](kaizen-catalog-server.md)** - Standalone MCP server for agent catalog operations
+- **[kaizen-catalog-server](../../../.claude/skills/04-kaizen/kaizen-catalog-server.md)** - Standalone MCP server for agent catalog operations
   - `CatalogMCPServer` with 11 tools: Discovery (4), Deployment (3), Application (2), Governance (2)
   - Separate from KaizenMCPServer (which handles BaseAgent tools)
   - Pre-seeds 14 built-in agents on startup
@@ -226,36 +226,36 @@ For in-depth documentation, see the kaizen package (`docs/`):
 
 ### Budget Tracking & Posture Integration (v1.3)
 
-- **[kaizen-budget-tracking](kaizen-budget-tracking.md)** - Atomic budget accounting and posture-budget governance
+- **[kaizen-budget-tracking](../../../.claude/skills/04-kaizen/kaizen-budget-tracking.md)** - Atomic budget accounting and posture-budget governance
   - `BudgetTracker` with two-phase reserve/record, threshold callbacks, `on_record()` API
   - `PostureBudgetIntegration` links budget to posture state machine
   - Configurable thresholds: warning (80%), downgrade to SUPERVISED (95%), emergency to PSEUDO_AGENT (100%)
 
 ### L3 Autonomy Primitives
 
-- **[kaizen-l3-overview](kaizen-l3-overview.md)** - L3 primitives overview (5 subsystems)
+- **[kaizen-l3-overview](../../../.claude/skills/04-kaizen/kaizen-l3-overview.md)** - L3 primitives overview (5 subsystems)
   - EnvelopeTracker/Splitter/Enforcer for continuous budget tracking
   - ScopedContext for hierarchical context with access control
   - MessageRouter/Channel for typed inter-agent messaging
   - AgentFactory/Registry for runtime agent spawning
   - PlanValidator/Executor for DAG task graph execution
-- **[kaizen-l3-envelope](kaizen-l3-envelope.md)** - Budget tracking, splitting, and non-bypassable enforcement
+- **[kaizen-l3-envelope](../../../.claude/skills/04-kaizen/kaizen-l3-envelope.md)** - Budget tracking, splitting, and non-bypassable enforcement
   - `EnvelopeTracker` with atomic recording, child allocation, reclamation
   - `EnvelopeSplitter` for stateless ratio-based budget division
   - `EnvelopeEnforcer` middleware with gradient zones (AutoApproved/Flagged/Held/Blocked)
-- **[kaizen-l3-context](kaizen-l3-context.md)** - Hierarchical scoped context with projection-based access control
+- **[kaizen-l3-context](../../../.claude/skills/04-kaizen/kaizen-l3-context.md)** - Hierarchical scoped context with projection-based access control
   - `ContextScope` tree with parent traversal and child merge
   - `ScopeProjection` glob patterns (allow/deny with deny precedence)
   - `DataClassification` 5-level clearance filtering
-- **[kaizen-l3-messaging](kaizen-l3-messaging.md)** - Typed inter-agent communication
+- **[kaizen-l3-messaging](../../../.claude/skills/04-kaizen/kaizen-l3-messaging.md)** - Typed inter-agent communication
   - `MessageRouter` with 8-step validation
   - 6 typed payloads: Delegation, Status, Clarification, Completion, Escalation, System
   - `DeadLetterStore` bounded ring buffer for undeliverable messages
-- **[kaizen-l3-factory](kaizen-l3-factory.md)** - Runtime agent spawning with lifecycle tracking
+- **[kaizen-l3-factory](../../../.claude/skills/04-kaizen/kaizen-l3-factory.md)** - Runtime agent spawning with lifecycle tracking
   - `AgentFactory` with 8-check spawn preconditions
   - 6-state lifecycle machine (Pending/Running/Waiting/Completed/Failed/Terminated)
   - Cascade termination (leaves-first)
-- **[kaizen-l3-plan-dag](kaizen-l3-plan-dag.md)** - Dynamic task graph execution
+- **[kaizen-l3-plan-dag](../../../.claude/skills/04-kaizen/kaizen-l3-plan-dag.md)** - Dynamic task graph execution
   - `PlanValidator` structural + envelope validation
   - `PlanExecutor` with gradient rules (G1-G8)
   - 7 typed modifications with batch-atomic application
@@ -277,7 +277,7 @@ Located in the package source:
 
 ### Testing & Quality
 
-- **[kaizen-testing-patterns](kaizen-testing-patterns.md)** - Testing AI agents
+- **[kaizen-testing-patterns](../../../.claude/skills/04-kaizen/kaizen-testing-patterns.md)** - Testing AI agents
 - **[Performance Benchmarks](../../../the kaizen package directory docs/benchmarks/BENCHMARK_GUIDE.md)** - Measure Kaizen performance
 
 ## Key Concepts
@@ -501,8 +501,8 @@ Legacy vars emit `DeprecationWarning`. Use `resolve_azure_env()` from `kaizen.no
 
 For detailed configuration patterns, see:
 
-- **[kaizen-config-patterns](kaizen-config-patterns.md)** -- Domain configs, auto-extraction, provider-specific patterns
-- **[kaizen-structured-outputs](kaizen-structured-outputs.md)** -- Full structured output guide with migration examples
+- **[kaizen-config-patterns](../../../.claude/skills/04-kaizen/kaizen-config-patterns.md)** -- Domain configs, auto-extraction, provider-specific patterns
+- **[kaizen-structured-outputs](../../../.claude/skills/04-kaizen/kaizen-structured-outputs.md)** -- Full structured output guide with migration examples
 
 ## Critical Rules
 
@@ -522,7 +522,7 @@ For detailed configuration patterns, see:
 
 ### Kaizen-Agents Governance (v0.1.0)
 
-- **[kaizen-agents-governance](kaizen-agents-governance.md)** -- GovernedSupervisor, progressive disclosure (Layer 1/2/3), 7 governance modules
+- **[kaizen-agents-governance](../../../.claude/skills/04-kaizen/kaizen-agents-governance.md)** -- GovernedSupervisor, progressive disclosure (Layer 1/2/3), 7 governance modules
   - `GovernedSupervisor` with 3-layer progressive API (2-param simple -> 8-param configured -> 9 governance subsystems)
   - `AccountabilityTracker` -- D/T/R addressing, policy source chain
   - `BudgetTracker` -- reclamation, predictive warnings, reallocation
@@ -536,12 +536,12 @@ For detailed configuration patterns, see:
 
 ### L3 Integration & Event System
 
-- **[kaizen-l3-overview](kaizen-l3-overview.md)** -- L3 autonomy primitives, L3Runtime integration, EATP event system
+- **[kaizen-l3-overview](../../../.claude/skills/04-kaizen/kaizen-l3-overview.md)** -- L3 autonomy primitives, L3Runtime integration, EATP event system
   - `L3Runtime` convenience class wiring all 5 subsystems (Factory->Enforcer, Factory->Router, Factory->Context, Enforcer->Plan)
   - `L3EventBus` pub/sub for 15 governance event types across all primitives
   - `EatpTranslator` converts L3 events into EATP audit records with severity classification
 
-- **[kaizen-agents-security](kaizen-agents-security.md)** -- Security patterns for governance
+- **[kaizen-agents-security](../../../.claude/skills/04-kaizen/kaizen-agents-security.md)** -- Security patterns for governance
   - Anti-self-modification via `_ReadOnlyView` proxies
   - Pervasive NaN/Inf defense (`math.isfinite()` on all numeric paths)
   - Bounded collections, monotonic invariants, thread safety
@@ -643,7 +643,7 @@ Three convergence SPECs have shipped on the `feat/spec04-baseagent-slim` branch:
 - `kaizen.providers.cost` -- `CostTracker` with thread-safe accumulation
 - Backward-compat shim at `kaizen.nodes.ai.ai_providers` re-exports all public names
 
-**SPEC-05 (Delegate Facade)** -- Delegate is now a composition facade wrapping `AgentLoop -> [L3GovernedAgent] -> [MonitoredAgent]`. See **[kaizen-delegate](kaizen-delegate.md)** for the updated API surface.
+**SPEC-05 (Delegate Facade)** -- Delegate is now a composition facade wrapping `AgentLoop -> [L3GovernedAgent] -> [MonitoredAgent]`. See **[kaizen-delegate](../../../.claude/skills/04-kaizen/kaizen-delegate.md)** for the updated API surface.
 
 - `ConstructorIOError` -- raised on outbound IO in `__init__`
 - `ToolRegistryCollisionError` -- raised on duplicate tool name registration
@@ -658,7 +658,7 @@ Three convergence SPECs have shipped on the `feat/spec04-baseagent-slim` branch:
 - **[01-core-sdk](../../01-core-sdk/SKILL.md)** - Core workflow patterns
 - **[02-dataflow](../dataflow/SKILL.md)** - Database integration
 - **[03-nexus](../nexus/SKILL.md)** - Multi-channel deployment
-- **[05-kailash-mcp](../05-kailash-mcp/SKILL.md)** - MCP server integration
+- **[05-kailash-mcp](../../../.claude/skills/05-kailash-mcp/SKILL.md)** - MCP server integration
 - **[17-gold-standards](../../17-gold-standards/SKILL.md)** - Best practices
 
 ## Support

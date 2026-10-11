@@ -20,10 +20,14 @@ A variant file MUST contain ONLY slot-keyed replacement bodies, never a full alt
 ````markdown
 # DO — variant file contains ONLY divergent slots
 
+<!-- slot:examples -->
+
 ```rust
 // Rust-specific example
 let db = DataFlow::new(...);
 ```
+
+<!-- /slot:examples -->
 
 # DO NOT — variant file is a full copy with 5% diff
 

@@ -93,7 +93,9 @@ const DIGIT = String.raw`\p{Nd}`;
  */
 const UNTOKENED_RX = new RegExp(
   String.raw`\b(${DIGIT}+)(?!⟨)\s*(?:of\s+${DIGIT}+\s+)?(` +
-    [...BUCKET_WORDS, ...BLOCKED_COUNT_LABELS].map((w) => w.replace(/[-\s]/g, "[-\\s]")).join("|") +
+    [...BUCKET_WORDS, ...BLOCKED_COUNT_LABELS]
+      .map((w) => w.replace(/[-\s]/g, "[-\\s]"))
+      .join("|") +
     String.raw`)\b`,
   "giu",
 );
@@ -174,13 +176,17 @@ function verifyText(projectDir, text) {
 
   let r;
   try {
-    r = spawnSync(process.execPath, [path.join(projectDir, GENERATOR_REL), "--verify-quote", "-"], {
-      cwd: projectDir,
-      input: text,
-      encoding: "utf8",
-      timeout: SPAWN_TIMEOUT_MS,
-      maxBuffer: 4 * 1024 * 1024,
-    });
+    r = spawnSync(
+      process.execPath,
+      [path.join(projectDir, GENERATOR_REL), "--verify-quote", "-"],
+      {
+        cwd: projectDir,
+        input: text,
+        encoding: "utf8",
+        timeout: SPAWN_TIMEOUT_MS,
+        maxBuffer: 4 * 1024 * 1024,
+      },
+    );
   } catch (e) {
     out.unknown = `verifier could not be spawned (${e && e.code ? e.code : "unknown error"})`;
     return out;
@@ -194,7 +200,9 @@ function verifyText(projectDir, text) {
   // Mapping that to a silent passthrough switched the whole layer off at exactly
   // the moment counts were changing. It is surfaced now, not swallowed.
   if (r.status === 2) {
-    const first = (r.stderr || "").split("\n").find((l) => l.startsWith("UNRUNNABLE")) || "generator refused";
+    const first =
+      (r.stderr || "").split("\n").find((l) => l.startsWith("UNRUNNABLE")) ||
+      "generator refused";
     out.unknown = `verification did not run — ${first.replace(/^UNRUNNABLE — refusing because /, "")}`;
     return out;
   }
@@ -240,7 +248,8 @@ function detectUntokenedCounts(projectDir, text) {
   // over-cap untokened count was dropped here and reported as clean there. It is
   // true now only because the cap check was moved ABOVE the token gate; do not move
   // it back, or this comment goes back to describing something that does not happen.
-  const capped = text.length > MAX_TEXT_BYTES ? text.slice(0, MAX_TEXT_BYTES) : text;
+  const capped =
+    text.length > MAX_TEXT_BYTES ? text.slice(0, MAX_TEXT_BYTES) : text;
   const body = maskTokenisedSpans(capped);
   let m;
   UNTOKENED_RX.lastIndex = 0;
@@ -266,7 +275,9 @@ function renderFindings({ invalid, untokened, unknown, surface }) {
     );
   }
   if (invalid && invalid.length) {
-    L.push(`⛔ Burndown quote INVALID (burndown-integrity MUST-1) — ${surface}.`);
+    L.push(
+      `⛔ Burndown quote INVALID (burndown-integrity MUST-1) — ${surface}.`,
+    );
     L.push("");
     for (const f of invalid) L.push(`- ${f.raw} — ${f.why}`);
     L.push("");
@@ -278,7 +289,9 @@ function renderFindings({ invalid, untokened, unknown, surface }) {
   }
   if (untokened && untokened.length) {
     if (L.length) L.push("");
-    L.push(`⚠ Count-shaped claim carrying NO provenance token — ${surface}. halt-and-report.`);
+    L.push(
+      `⚠ Count-shaped claim carrying NO provenance token — ${surface}. halt-and-report.`,
+    );
     L.push("");
     for (const h of untokened) L.push(`- "${h.phrase}"`);
     L.push("");
@@ -301,4 +314,10 @@ module.exports = {
   MANIFEST_BASENAME,
   GENERATOR_REL,
   UNTOKENED_RX,
+  // EXPORTED SO THE BUDGET CAN BE TESTED AGAINST ITSELF. A regression test that
+  // hardcoded `3000` would keep passing if this constant were quietly raised to
+  // paper over a slow verifier — which is the one remedy this whole seam exists
+  // to make unnecessary. Binding the test to the live value means the budget and
+  // the thing measured against it cannot drift apart.
+  SPAWN_TIMEOUT_MS,
 };

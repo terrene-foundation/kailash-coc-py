@@ -25,6 +25,20 @@
  * pays nothing and sees nothing.
  */
 
+/**
+ * @hook-contract
+ * {
+ *   "side_effects": {
+ *     "fs_writes": [],
+ *     "network": false,
+ *     "spawns": ["node"]
+ *   },
+ *   "idempotent": true,
+ *   "may_rewrite_input": false,
+ *   "notes": "Reads the written file and, when it carries a token, spawns `node .claude/bin/burndown-build.mjs --verify-quote -` (read-only; writes nothing). Emission goes to stdout; no state retained."
+ * }
+ */
+
 "use strict";
 
 const TIMEOUT_MS = 4000;
@@ -40,15 +54,15 @@ function passthrough(context) {
   try {
     const out = { continue: true };
     if (context) {
-      out.hookSpecificOutput = { hookEventName: "PostToolUse", additionalContext: context };
+      out.hookSpecificOutput = {
+        hookEventName: "PostToolUse",
+        additionalContext: context,
+      };
     }
     process.stdout.write(JSON.stringify(out) + "\n");
   } catch {}
   process.exit(0);
 }
-
-fallback = setTimeout(() => passthrough(null), TIMEOUT_MS);
-if (typeof fallback.unref === "function") fallback.unref();
 
 /**
  * Surfaces where a wrong count does institutional damage.
@@ -67,6 +81,21 @@ if (typeof fallback.unref === "function") fallback.unref();
 function isDurableSurface(rel) {
   if (!rel) return false;
   const p = rel.replace(/\\/g, "/");
+  // TEST CORPORA ARE NOT REPORT SURFACES (fixed 2026-10-03). Every pattern
+  // below is a NAME test, and the BURNDOWN one matched this guard's OWN
+  // fixture: `.claude/audit-fixtures/burndown-quote-hooks/run.mjs` carries a
+  // synthetic N⟨token⟩ pair (deliberately not reproduced here — this file is
+  // itself name-matched by the BURNDOWN pattern, and quoting the invalid form
+  // would re-trip the guard that owns it) as a `verifyText` INPUT, so every edit to the file
+  // that pins this guard was refused as a durable write (MEASURED — the fix
+  // for three stale fixture seeds was blocked by it). A corpus that CONSTRUCTS
+  // an invalid token is asserting the scanner's behaviour, not publishing a
+  // count. MEASURED, the same shape also lives under `.claude/test-harness/`
+  // (the probes file, a budget suite, recovered catalog copies), so the
+  // exclusion states the class rather than the one file: a report under either
+  // test tree is not a report. Pole: `scope/write-guard is SILENT on a
+  // TEST-CORPUS path` in this guard's own fixture, which fires pre-fix.
+  if (/(^|\/)\.claude\/(audit-fixtures|test-harness)\//.test(p)) return false;
   return (
     /(^|\/)journal\//.test(p) ||
     /(^|\/)workspaces\//.test(p) ||
@@ -88,10 +117,14 @@ async function main() {
   }
   const p = payload && typeof payload === "object" ? payload : {};
 
-  const filePath = (p.tool_input && (p.tool_input.file_path || p.tool_input.notebook_path)) || "";
+  const filePath =
+    (p.tool_input && (p.tool_input.file_path || p.tool_input.notebook_path)) ||
+    "";
   if (!filePath) return passthrough(null);
 
-  const rel = path.isAbsolute(filePath) ? path.relative(PROJECT_DIR, filePath) : filePath;
+  const rel = path.isAbsolute(filePath)
+    ? path.relative(PROJECT_DIR, filePath)
+    : filePath;
   if (rel.startsWith("..")) return passthrough(null); // outside the project — not ours
   if (!isDurableSurface(rel)) return passthrough(null);
 
@@ -162,4 +195,22 @@ async function main() {
   }
 }
 
-main().catch(() => passthrough(null));
+// hookMain — the ONE entry, run by the CLI guard at the bottom of this file AND
+// in-process by lib/hook-engine.js (dispatch.js). It arms the fallback timer the
+// file used to arm at load time, then runs main() with the SAME catch handler.
+function hookMain() {
+  fallback = setTimeout(() => passthrough(null), TIMEOUT_MS);
+  if (typeof fallback.unref === "function") fallback.unref();
+  return main().catch(() => passthrough(null));
+}
+
+module.exports = { hookMain };
+
+// CLI entry. The default path is exactly hookMain() — no engine dependency, so a
+// tree that copies this hook without lib/hook-engine.js runs it unchanged. The
+// selftest path replays the run through the in-process engine (hook-engine.js::runCli).
+if (require.main === module) {
+  if (process.env.COC_HOOK_ENGINE_SELFTEST === "1")
+    require("./lib/hook-engine.js").runCli(hookMain, __filename);
+  else hookMain();
+}

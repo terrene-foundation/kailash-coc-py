@@ -4,10 +4,12 @@
   "policies": {
     "shell": [
       {
-        "source_file": "validate-bash-command.js",
+        "source_file": "operator-gate.js",
         "cc_matchers": [
-          "Bash"
+          "Bash",
+          "Edit|Write|NotebookEdit"
         ],
+        "can_deny": true,
         "invocation": "subprocess"
       },
       {
@@ -16,6 +18,31 @@
           "Bash",
           "Edit|Write|NotebookEdit"
         ],
+        "can_deny": true,
+        "invocation": "subprocess"
+      },
+      {
+        "source_file": "validate-bash-command.js",
+        "cc_matchers": [
+          "Bash"
+        ],
+        "can_deny": true,
+        "invocation": "subprocess"
+      },
+      {
+        "source_file": "ci-runner-saturation-guard.js",
+        "cc_matchers": [
+          "Bash"
+        ],
+        "can_deny": true,
+        "invocation": "subprocess"
+      },
+      {
+        "source_file": "synthetic-load-guard.js",
+        "cc_matchers": [
+          "Bash"
+        ],
+        "can_deny": true,
         "invocation": "subprocess"
       },
       {
@@ -23,6 +50,7 @@
         "cc_matchers": [
           "Bash"
         ],
+        "can_deny": true,
         "invocation": "subprocess"
       },
       {
@@ -31,14 +59,7 @@
           "Bash",
           "Edit|Write|NotebookEdit"
         ],
-        "invocation": "subprocess"
-      },
-      {
-        "source_file": "operator-gate.js",
-        "cc_matchers": [
-          "Bash",
-          "Edit|Write|NotebookEdit"
-        ],
+        "can_deny": true,
         "invocation": "subprocess"
       },
       {
@@ -46,15 +67,75 @@
         "cc_matchers": [
           "Bash"
         ],
+        "can_deny": true,
+        "invocation": "subprocess"
+      },
+      {
+        "source_file": "stranded-artifact-guard.js",
+        "cc_matchers": [
+          "Bash"
+        ],
+        "can_deny": true,
+        "invocation": "subprocess"
+      },
+      {
+        "source_file": "rebase-content-loss-guard.js",
+        "cc_matchers": [
+          "Bash"
+        ],
+        "can_deny": true,
+        "invocation": "subprocess"
+      },
+      {
+        "source_file": "wip-discipline-guard.js",
+        "cc_matchers": [
+          "Bash"
+        ],
+        "can_deny": true,
+        "invocation": "subprocess"
+      },
+      {
+        "source_file": "triage-routing-guard.js",
+        "cc_matchers": [
+          "Bash"
+        ],
+        "can_deny": true,
+        "invocation": "subprocess"
+      },
+      {
+        "source_file": "push-preflight-guard.js",
+        "cc_matchers": [
+          "Bash"
+        ],
+        "can_deny": true,
+        "invocation": "subprocess"
+      },
+      {
+        "source_file": "adjacency-heartbeat.js",
+        "cc_matchers": [
+          "*"
+        ],
+        "can_deny": true,
+        "invocation": "subprocess"
+      },
+      {
+        "source_file": "provenance-capture-tool.js",
+        "cc_matchers": [
+          "Bash|Edit|Write|MultiEdit|NotebookEdit|Agent|Task",
+          "*"
+        ],
+        "can_deny": true,
         "invocation": "subprocess"
       }
     ],
     "unified_exec": [
       {
-        "source_file": "validate-bash-command.js",
+        "source_file": "operator-gate.js",
         "cc_matchers": [
-          "Bash"
+          "Bash",
+          "Edit|Write|NotebookEdit"
         ],
+        "can_deny": true,
         "invocation": "subprocess"
       },
       {
@@ -63,6 +144,31 @@
           "Bash",
           "Edit|Write|NotebookEdit"
         ],
+        "can_deny": true,
+        "invocation": "subprocess"
+      },
+      {
+        "source_file": "validate-bash-command.js",
+        "cc_matchers": [
+          "Bash"
+        ],
+        "can_deny": true,
+        "invocation": "subprocess"
+      },
+      {
+        "source_file": "ci-runner-saturation-guard.js",
+        "cc_matchers": [
+          "Bash"
+        ],
+        "can_deny": true,
+        "invocation": "subprocess"
+      },
+      {
+        "source_file": "synthetic-load-guard.js",
+        "cc_matchers": [
+          "Bash"
+        ],
+        "can_deny": true,
         "invocation": "subprocess"
       },
       {
@@ -70,6 +176,7 @@
         "cc_matchers": [
           "Bash"
         ],
+        "can_deny": true,
         "invocation": "subprocess"
       },
       {
@@ -78,14 +185,7 @@
           "Bash",
           "Edit|Write|NotebookEdit"
         ],
-        "invocation": "subprocess"
-      },
-      {
-        "source_file": "operator-gate.js",
-        "cc_matchers": [
-          "Bash",
-          "Edit|Write|NotebookEdit"
-        ],
+        "can_deny": true,
         "invocation": "subprocess"
       },
       {
@@ -93,16 +193,83 @@
         "cc_matchers": [
           "Bash"
         ],
+        "can_deny": true,
+        "invocation": "subprocess"
+      },
+      {
+        "source_file": "stranded-artifact-guard.js",
+        "cc_matchers": [
+          "Bash"
+        ],
+        "can_deny": true,
+        "invocation": "subprocess"
+      },
+      {
+        "source_file": "rebase-content-loss-guard.js",
+        "cc_matchers": [
+          "Bash"
+        ],
+        "can_deny": true,
+        "invocation": "subprocess"
+      },
+      {
+        "source_file": "wip-discipline-guard.js",
+        "cc_matchers": [
+          "Bash"
+        ],
+        "can_deny": true,
+        "invocation": "subprocess"
+      },
+      {
+        "source_file": "triage-routing-guard.js",
+        "cc_matchers": [
+          "Bash"
+        ],
+        "can_deny": true,
+        "invocation": "subprocess"
+      },
+      {
+        "source_file": "push-preflight-guard.js",
+        "cc_matchers": [
+          "Bash"
+        ],
+        "can_deny": true,
+        "invocation": "subprocess"
+      },
+      {
+        "source_file": "adjacency-heartbeat.js",
+        "cc_matchers": [
+          "*"
+        ],
+        "can_deny": true,
+        "invocation": "subprocess"
+      },
+      {
+        "source_file": "provenance-capture-tool.js",
+        "cc_matchers": [
+          "Bash|Edit|Write|MultiEdit|NotebookEdit|Agent|Task",
+          "*"
+        ],
+        "can_deny": true,
         "invocation": "subprocess"
       }
     ],
     "apply_patch": [
+      {
+        "source_file": "settings-deny-edit-guard.js",
+        "cc_matchers": [
+          "Edit|Write|NotebookEdit"
+        ],
+        "can_deny": true,
+        "invocation": "subprocess"
+      },
       {
         "source_file": "posture-gate.js",
         "cc_matchers": [
           "Bash",
           "Edit|Write|NotebookEdit"
         ],
+        "can_deny": true,
         "invocation": "subprocess"
       },
       {
@@ -111,14 +278,47 @@
           "Bash",
           "Edit|Write|NotebookEdit"
         ],
+        "can_deny": true,
         "invocation": "subprocess"
       },
       {
-        "source_file": "operator-gate.js",
+        "source_file": "integrity-guard.js",
         "cc_matchers": [
-          "Bash",
           "Edit|Write|NotebookEdit"
         ],
+        "can_deny": true,
+        "invocation": "subprocess"
+      },
+      {
+        "source_file": "adjacency-leasecheck.js",
+        "cc_matchers": [
+          "Edit|Write|NotebookEdit"
+        ],
+        "can_deny": true,
+        "invocation": "subprocess"
+      },
+      {
+        "source_file": "journal-write-guard.js",
+        "cc_matchers": [
+          "Edit|Write|NotebookEdit"
+        ],
+        "can_deny": true,
+        "invocation": "subprocess"
+      },
+      {
+        "source_file": "cross-ecosystem-disclosure-guard.js",
+        "cc_matchers": [
+          "Edit|Write|NotebookEdit"
+        ],
+        "can_deny": true,
+        "invocation": "subprocess"
+      },
+      {
+        "source_file": "register-regression-guard.js",
+        "cc_matchers": [
+          "Edit|Write|NotebookEdit"
+        ],
+        "can_deny": true,
         "invocation": "subprocess"
       }
     ]

@@ -78,4 +78,4 @@ When working with DataFlow, deploy:
 
 ## Skill Reference
 
-This command loads: `.codex/skills/02-dataflow/SKILL.md`
+This command loads: `.agents/skills/02-dataflow/SKILL.md`

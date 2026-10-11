@@ -10,7 +10,7 @@ High-performance wrapper providing ~23x faster execution by bypassing workflow o
 > **Skill Metadata**
 > Category: `dataflow`
 > Priority: `HIGH`
-> Related Skills: [`dataflow-quickstart`](dataflow-quickstart.md), [`dataflow-crud-operations`](dataflow-crud-operations.md), [`dataflow-bulk-operations`](dataflow-bulk-operations.md)
+> Related Skills: [`dataflow-quickstart`](../../../.claude/skills/02-dataflow/dataflow-quickstart.md), [`dataflow-crud-operations`](../../../.claude/skills/02-dataflow/dataflow-crud-operations.md), [`dataflow-bulk-operations`](../../../.claude/skills/02-dataflow/dataflow-bulk-operations.md)
 > Related Subagents: `dataflow-specialist` (enterprise features)
 
 ## Quick Reference

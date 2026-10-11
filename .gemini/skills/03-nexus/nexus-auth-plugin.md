@@ -356,6 +356,6 @@ jwt = JWTConfig(
 
 ## Related Skills
 
-- [nexus-enterprise-features](nexus-enterprise-features.md) - Enterprise deployment patterns
-- [nexus-security-best-practices](nexus-security-best-practices.md) - Security hardening
-- [nexus-production-deployment](nexus-production-deployment.md) - Production setup
+- [nexus-enterprise-features](../../../.claude/skills/03-nexus/nexus-enterprise-features.md) - Enterprise deployment patterns
+- [nexus-security-best-practices](../../../.claude/skills/03-nexus/nexus-security-best-practices.md) - Security hardening
+- [nexus-production-deployment](../../../.claude/skills/03-nexus/nexus-production-deployment.md) - Production setup

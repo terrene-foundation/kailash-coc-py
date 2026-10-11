@@ -32,6 +32,7 @@
  * Exit 0 = all checks pass. Exit 1 = >=1 check failed.
  */
 
+import "../_lib/no-ambient-git.cjs";
 import { execFileSync } from "node:child_process";
 import {
   writeFileSync,

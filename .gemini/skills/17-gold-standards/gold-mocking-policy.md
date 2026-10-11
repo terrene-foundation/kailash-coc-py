@@ -303,6 +303,6 @@ def test_workflow():
 
 ## Related Patterns
 
-- **Gold testing standard**: [`gold-testing`](gold-testing.md)
+- **Gold testing standard**: [`gold-testing`](../../../.claude/skills/17-gold-standards/gold-testing.md)
 
 <!-- Trigger Keywords: mocking policy, NO mocking in Tiers 2-3, real infrastructure, test policy, mock guidelines, testing standards -->

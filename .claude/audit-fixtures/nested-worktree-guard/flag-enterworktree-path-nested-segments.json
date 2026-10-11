@@ -1,0 +1,7 @@
+{
+  "hook_event_name": "PreToolUse",
+  "tool_name": "EnterWorktree",
+  "tool_input": {
+    "path": "{{FIXTURE_HOME_V1:MAC}}me/repos/build/other-repo/.claude/worktrees/agent-99"
+  }
+}

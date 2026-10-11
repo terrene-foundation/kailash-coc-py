@@ -19,15 +19,15 @@ pip install kailash-kaizen>=2.0.0 # For governed Kaizen agents
 
 | Skill                                                     | Use When                                                                                              |
 | --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| [pact-quickstart](pact-quickstart.md)                     | Getting started, first GovernanceEngine                                                               |
-| [pact-governance-engine](pact-governance-engine.md)       | Engine API, verify_action, compute_envelope                                                           |
-| [pact-dtr-addressing](pact-dtr-addressing.md)             | D/T/R grammar, Address parsing                                                                        |
-| [pact-envelopes](pact-envelopes.md)                       | Three-layer model, monotonic tightening                                                               |
-| [pact-access-enforcement](pact-access-enforcement.md)     | 5-step algorithm, clearance, bridges, KSPs                                                            |
-| [pact-governed-agents](pact-governed-agents.md)           | PactGovernedAgent, @governed_tool                                                                     |
-| [pact-kaizen-integration](pact-kaizen-integration.md)     | Wrapping Kaizen agents with governance                                                                |
-| [pact-mcp-governance](pact-mcp-governance.md)             | MCP tool governance: enforce, audit, middleware                                                       |
-| [pact-conformance-features](pact-conformance-features.md) | N1-N6: KnowledgeFilter, EnvelopeCache, PlanSuspension, AuditTiers, ObservationSink, cross-SDK vectors |
+| [pact-quickstart](../../../.claude/skills/29-pact/pact-quickstart.md)                     | Getting started, first GovernanceEngine                                                               |
+| [pact-governance-engine](../../../.claude/skills/29-pact/pact-governance-engine.md)       | Engine API, verify_action, compute_envelope                                                           |
+| [pact-dtr-addressing](../../../.claude/skills/29-pact/pact-dtr-addressing.md)             | D/T/R grammar, Address parsing                                                                        |
+| [pact-envelopes](../../../.claude/skills/29-pact/pact-envelopes.md)                       | Three-layer model, monotonic tightening                                                               |
+| [pact-access-enforcement](../../../.claude/skills/29-pact/pact-access-enforcement.md)     | 5-step algorithm, clearance, bridges, KSPs                                                            |
+| [pact-governed-agents](../../../.claude/skills/29-pact/pact-governed-agents.md)           | PactGovernedAgent, @governed_tool                                                                     |
+| [pact-kaizen-integration](../../../.claude/skills/29-pact/pact-kaizen-integration.md)     | Wrapping Kaizen agents with governance                                                                |
+| [pact-mcp-governance](../../../.claude/skills/29-pact/pact-mcp-governance.md)             | MCP tool governance: enforce, audit, middleware                                                       |
+| [pact-conformance-features](../../../.claude/skills/29-pact/pact-conformance-features.md) | N1-N6: KnowledgeFilter, EnvelopeCache, PlanSuspension, AuditTiers, ObservationSink, cross-SDK vectors |
 
 ## Key Types
 

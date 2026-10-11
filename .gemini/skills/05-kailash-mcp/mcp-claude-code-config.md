@@ -11,7 +11,7 @@ How to configure Claude Code to connect to the kailash-mcp platform server. Cove
 > Category: `mcp`
 > Priority: `HIGH`
 > SDK Version: `0.9.25+`
-> Related Skills: [`mcp-platform-overview`](mcp-platform-overview.md), [`mcp-security-tiers`](mcp-security-tiers.md)
+> Related Skills: [`mcp-platform-overview`](../../../.claude/skills/05-kailash-mcp/mcp-platform-overview.md), [`mcp-security-tiers`](../../../.claude/skills/05-kailash-mcp/mcp-security-tiers.md)
 > Related Subagents: `mcp-specialist` (connection troubleshooting, advanced configuration)
 
 ## Stdio Configuration (Local Development)

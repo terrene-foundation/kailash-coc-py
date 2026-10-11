@@ -97,74 +97,74 @@ Each `@db.model` class generates:
 
 ### Getting Started
 
-- **[dataflow-quickstart](dataflow-quickstart.md)** - Quick start guide
-- **[dataflow-installation](dataflow-installation.md)** - Installation and setup
-- **[dataflow-models](dataflow-models.md)** - Defining models with @db.model
-- **[dataflow-connection-config](dataflow-connection-config.md)** - Database connection
+- **[dataflow-quickstart](../../../.claude/skills/02-dataflow/dataflow-quickstart.md)** - Quick start guide
+- **[dataflow-installation](../../../.claude/skills/02-dataflow/dataflow-installation.md)** - Installation and setup
+- **[dataflow-models](../../../.claude/skills/02-dataflow/dataflow-models.md)** - Defining models with @db.model
+- **[dataflow-connection-config](../../../.claude/skills/02-dataflow/dataflow-connection-config.md)** - Database connection
 
 ### Core Operations
 
-- **[dataflow-crud-operations](dataflow-crud-operations.md)** - Create, Read, Update, Delete
-- **[dataflow-queries](dataflow-queries.md)** - Query patterns and filtering
-- **[dataflow-aggregation](dataflow-aggregation.md)** - SQL aggregation queries (COUNT/SUM/AVG/MIN/MAX GROUP BY)
-- **[dataflow-bulk-operations](dataflow-bulk-operations.md)** - Batch operations
-- **[dataflow-transactions](dataflow-transactions.md)** - Transaction management
-- **[dataflow-connection-isolation](dataflow-connection-isolation.md)** - ⚠️ CRITICAL: ACID guarantees
+- **[dataflow-crud-operations](../../../.claude/skills/02-dataflow/dataflow-crud-operations.md)** - Create, Read, Update, Delete
+- **[dataflow-queries](../../../.claude/skills/02-dataflow/dataflow-queries.md)** - Query patterns and filtering
+- **[dataflow-aggregation](../../../.claude/skills/02-dataflow/dataflow-aggregation.md)** - SQL aggregation queries (COUNT/SUM/AVG/MIN/MAX GROUP BY)
+- **[dataflow-bulk-operations](../../../.claude/skills/02-dataflow/dataflow-bulk-operations.md)** - Batch operations
+- **[dataflow-transactions](../../../.claude/skills/02-dataflow/dataflow-transactions.md)** - Transaction management
+- **[dataflow-connection-isolation](../../../.claude/skills/02-dataflow/dataflow-connection-isolation.md)** - ⚠️ CRITICAL: ACID guarantees
 
 ### Advanced Features
 
 ### Data Fabric Engine
 
-- **[dataflow-fabric-engine](dataflow-fabric-engine.md)** - External data sources (`db.source()`), derived products (`@db.product()`), fabric runtime (`db.start()`), 5 source adapters, webhooks, SSRF protection, observability
+- **[dataflow-fabric-engine](../../../.claude/skills/02-dataflow/dataflow-fabric-engine.md)** - External data sources (`db.source()`), derived products (`@db.product()`), fabric runtime (`db.start()`), 5 source adapters, webhooks, SSRF protection, observability
 
 ### Enterprise Features
 
-- **[dataflow-derived-models](dataflow-derived-models.md)** - Application-layer materialized views (`@db.derived_model`)
-- **[dataflow-file-import](dataflow-file-import.md)** - File ingestion (CSV/Excel/Parquet/JSON) + `db.express.import_file()`
-- **[dataflow-validation-dsl](dataflow-validation-dsl.md)** - Declarative validation (`__validation__` dict)
-- **[dataflow-express-cache](dataflow-express-cache.md)** - Model-scoped Express caching with TTL
-- **[dataflow-read-replicas](dataflow-read-replicas.md)** - Read/write splitting with `read_url`
-- **[dataflow-retention](dataflow-retention.md)** - Data retention (archive/delete/partition policies)
-- **[dataflow-events](dataflow-events.md)** - Write event emission + Core SDK EventBus integration
+- **[dataflow-derived-models](../../../.claude/skills/02-dataflow/dataflow-derived-models.md)** - Application-layer materialized views (`@db.derived_model`)
+- **[dataflow-file-import](../../../.claude/skills/02-dataflow/dataflow-file-import.md)** - File ingestion (CSV/Excel/Parquet/JSON) + `db.express.import_file()`
+- **[dataflow-validation-dsl](../../../.claude/skills/02-dataflow/dataflow-validation-dsl.md)** - Declarative validation (`__validation__` dict)
+- **[dataflow-express-cache](../../../.claude/skills/02-dataflow/dataflow-express-cache.md)** - Model-scoped Express caching with TTL
+- **[dataflow-read-replicas](../../../.claude/skills/02-dataflow/dataflow-read-replicas.md)** - Read/write splitting with `read_url`
+- **[dataflow-retention](../../../.claude/skills/02-dataflow/dataflow-retention.md)** - Data retention (archive/delete/partition policies)
+- **[dataflow-events](../../../.claude/skills/02-dataflow/dataflow-events.md)** - Write event emission + Core SDK EventBus integration
 
 ### Advanced Features
 
-- **[dataflow-multi-instance](dataflow-multi-instance.md)** - Multiple database instances
-- **[dataflow-multi-tenancy](dataflow-multi-tenancy.md)** - Multi-tenant architectures
-- **[dataflow-existing-database](dataflow-existing-database.md)** - Working with existing databases
-- **[dataflow-migrations-quick](dataflow-migrations-quick.md)** - Database migrations
-- **[dataflow-custom-nodes](dataflow-custom-nodes.md)** - Custom database nodes
-- **[dataflow-sqlite-concurrency](dataflow-sqlite-concurrency.md)** - SQLite connection pooling, WAL mode, read/write splitting, memory DB URI patterns
+- **[dataflow-multi-instance](../../../.claude/skills/02-dataflow/dataflow-multi-instance.md)** - Multiple database instances
+- **[dataflow-multi-tenancy](../../../.claude/skills/02-dataflow/dataflow-multi-tenancy.md)** - Multi-tenant architectures
+- **[dataflow-existing-database](../../../.claude/skills/02-dataflow/dataflow-existing-database.md)** - Working with existing databases
+- **[dataflow-migrations-quick](../../../.claude/skills/02-dataflow/dataflow-migrations-quick.md)** - Database migrations
+- **[dataflow-custom-nodes](../../../.claude/skills/02-dataflow/dataflow-custom-nodes.md)** - Custom database nodes
+- **[dataflow-sqlite-concurrency](../../../.claude/skills/02-dataflow/dataflow-sqlite-concurrency.md)** - SQLite connection pooling, WAL mode, read/write splitting, memory DB URI patterns
 
 ### Developer Experience Tools
 
-- **[dataflow-strict-mode](dataflow-strict-mode.md)** - Build-time validation (4-layer, OFF/WARN/STRICT)
-- **[dataflow-debug-agent](dataflow-debug-agent.md)** - Intelligent error analysis (5-stage pipeline)
+- **[dataflow-strict-mode](../../../.claude/skills/02-dataflow/dataflow-strict-mode.md)** - Build-time validation (4-layer, OFF/WARN/STRICT)
+- **[dataflow-debug-agent](../../../.claude/skills/02-dataflow/dataflow-debug-agent.md)** - Intelligent error analysis (5-stage pipeline)
 - **ErrorEnhancer** - Automatic error enhancement (40+ DF-XXX codes)
 - **Inspector API** - Self-service debugging (18 introspection methods)
 - **CLI Tools** - dataflow-validate, dataflow-analyze, dataflow-debug (5 commands)
 
 ### Connection Pool & Monitoring
 
-- **[dataflow-connection-config](dataflow-connection-config.md)** - Pool auto-scaling, env vars, override scenarios
-- **[dataflow-monitoring](dataflow-monitoring.md)** - Pool utilization, leak detection, health checks, diagnostics
+- **[dataflow-connection-config](../../../.claude/skills/02-dataflow/dataflow-connection-config.md)** - Pool auto-scaling, env vars, override scenarios
+- **[dataflow-monitoring](../../../.claude/skills/02-dataflow/dataflow-monitoring.md)** - Pool utilization, leak detection, health checks, diagnostics
 
 ### ML Integration
 
-- **[dataflow-ml-integration](dataflow-ml-integration.md)** - kailash-ml FeatureStore integration (ConnectionManager, point-in-time queries, polars interop)
+- **[dataflow-ml-integration](../../../.claude/skills/02-dataflow/dataflow-ml-integration.md)** - kailash-ml FeatureStore integration (ConnectionManager, point-in-time queries, polars interop)
 
 ### Provenance & Audit
 
-- **[dataflow-provenance-audit](dataflow-provenance-audit.md)** - Provenance[T] field tracking, audit trail persistence, EventStoreBackend
-- **[dataflow-fabric-cache-consumers](dataflow-fabric-cache-consumers.md)** - Fabric cache control, consumer adapters, MCP tool generation
+- **[dataflow-provenance-audit](../../../.claude/skills/02-dataflow/dataflow-provenance-audit.md)** - Provenance[T] field tracking, audit trail persistence, EventStoreBackend
+- **[dataflow-fabric-cache-consumers](../../../.claude/skills/02-dataflow/dataflow-fabric-cache-consumers.md)** - Fabric cache control, consumer adapters, MCP tool generation
 
 ### Cache Patterns
 
-- **[cache-cas-fail-closed](cache-cas-fail-closed.md)** - CAS (compare-and-swap) fail-closed pattern when primitive can only be satisfied by one backend
+- **[cache-cas-fail-closed](../../../.claude/skills/02-dataflow/cache-cas-fail-closed.md)** - CAS (compare-and-swap) fail-closed pattern when primitive can only be satisfied by one backend
 
 ### Troubleshooting
 
-- **[dataflow-gotchas](dataflow-gotchas.md)** - Common pitfalls
+- **[dataflow-gotchas](../../../.claude/skills/02-dataflow/dataflow-gotchas.md)** - Common pitfalls
 
 ## Database Support Matrix
 
@@ -222,10 +222,10 @@ Use DataFlow when you need to:
 
 ## Related Skills
 
-- **[01-core-sdk](../01-core-sdk/SKILL.md)** - Core workflow patterns (canonical node pattern)
-- **[03-nexus](../03-nexus/SKILL.md)** - Multi-channel deployment
-- **[04-kaizen](../04-kaizen/SKILL.md)** - AI agent integration
-- **[17-gold-standards](../17-gold-standards/SKILL.md)** - Best practices
+- **[01-core-sdk](../../../.claude/skills/01-core-sdk/SKILL.md)** - Core workflow patterns (canonical node pattern)
+- **[03-nexus](../../../.claude/skills/03-nexus/SKILL.md)** - Multi-channel deployment
+- **[04-kaizen](../../../.claude/skills/04-kaizen/SKILL.md)** - AI agent integration
+- **[17-gold-standards](../../../.claude/skills/17-gold-standards/SKILL.md)** - Best practices
 
 ## Support
 

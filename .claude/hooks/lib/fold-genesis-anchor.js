@@ -135,6 +135,10 @@ function _resolveOwnerPerson(roster, record) {
   if (!targetLogin) return null;
   for (const [pid, person] of Object.entries(roster.persons)) {
     if (isUnenrolled(pid)) continue;
+    // S60 — a `null` person entry made `person.role` a null dereference, which
+    // THREW into a caller catch-all that degrades to passthrough (fail-OPEN).
+    // A malformed person is simply not an owner; skip it.
+    if (!person || typeof person !== "object") continue;
     if (person.role !== "owner") continue;
     if (!loginsEqual(person.github_login, targetLogin)) continue;
     return { person_id: pid, person };
@@ -172,6 +176,10 @@ function _resolveOwnerPersonAdo(roster, record) {
   if (!targetPrincipal) return null;
   for (const [pid, person] of Object.entries(roster.persons)) {
     if (isUnenrolled(pid)) continue;
+    // S60 — a `null` person entry made `person.role` a null dereference, which
+    // THREW into a caller catch-all that degrades to passthrough (fail-OPEN).
+    // A malformed person is simply not an owner; skip it.
+    if (!person || typeof person !== "object") continue;
     if (person.role !== "owner") continue;
     if (!principalsEqual(person.principal, targetPrincipal)) continue;
     return { person_id: pid, person };
@@ -254,8 +262,10 @@ function _pinnedFactsMatch(a, b) {
  * does NOT handle that — the engine dispatches to a separate predicate
  * for that record type.
  */
-function foldGenesisAnchor(record, foldState, roster, verifyFn) {
+function foldGenesisAnchor(record, foldState, roster, verifyFn, verifyOpts) {
   const state = foldState || { trustRoot: null };
+  const extraVerifyOpts =
+    verifyOpts && typeof verifyOpts === "object" ? verifyOpts : {};
 
   // --- Invariant 0: structural shape ---
   const shapeErr = _validateRecordShape(record);
@@ -275,9 +285,16 @@ function foldGenesisAnchor(record, foldState, roster, verifyFn) {
   }
 
   // --- Invariant 1b: signer's verified_id MUST be one of the owner's keys ---
-  const ownerKeys = owner.person.keys || [];
+  // S60 — shape-guard the key list. A non-array truthy `keys` made `.find` an
+  // undefined property, and a `null` entry made `k.fingerprint` a null
+  // dereference; either THREW, and every caller of this fold sits under a
+  // catch-all that degrades a throw to passthrough (fail-OPEN). A malformed
+  // roster must yield "no matching key" — a REFUSAL — never an exception.
+  // Same-PR sibling of the identical shape in
+  // `genesis-anchor-guard.js::verifyRecord`.
+  const ownerKeys = Array.isArray(owner.person.keys) ? owner.person.keys : [];
   const matchingKey = ownerKeys.find(
-    (k) => k.fingerprint === record.verified_id,
+    (k) => k && k.fingerprint === record.verified_id,
   );
   if (!matchingKey) {
     return {
@@ -292,7 +309,26 @@ function foldGenesisAnchor(record, foldState, roster, verifyFn) {
   try {
     const bytes = _signedContentBytes(record);
     verifyResult = verifyFn(bytes, record.sig, matchingKey.pubkey, {
+      // Caller-supplied options FIRST (today: only `gpgHome`). The TWO fields
+      // below are spread AFTER it, so neither `keyType` nor `expectedFpr` can be
+      // overridden by a caller — a security review flagged `keyType` as
+      // reachable through the spread while the comment claimed `expectedFpr`
+      // alone was protected; both are now, rather than the comment being
+      // narrowed to match.
+      ...extraVerifyOpts,
       keyType: matchingKey.type,
+      // `expectedFpr` binds the verify to the signer THIS record resolved to.
+      // It is redundant on the per-call ephemeral homedir (a one-key ring
+      // already binds) and LOAD-BEARING when the caller hands in the fold's
+      // shared multi-key homedir: without it, `gpg --verify` would accept a
+      // signature made by any rostered key while this function reported it as
+      // the owner's. Set for EVERY keyType BY DESIGN; on the SSH path the field
+      // is INERT (coc-sign dispatches ssh without reading it). The callee's
+      // identity-bind floor is GPG-gated as of 2026-10-08 — it previously fired
+      // for ssh keyTypes too and refused every SSH verify with "invalid
+      // expected fingerprint" (no signature checked), which broke the
+      // genesis-materializer trust-root fold until the gate moved there.
+      expectedFpr: matchingKey.fingerprint,
     });
   } catch (err) {
     return {

@@ -289,7 +289,7 @@ def test_db():
 
 ## Related Patterns
 
-- **Gold testing standard**: [`gold-testing`](gold-testing.md)
+- **Gold testing standard**: [`gold-testing`](../../../.claude/skills/17-gold-standards/gold-testing.md)
 
 ## When to Escalate
 

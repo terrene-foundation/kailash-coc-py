@@ -11,7 +11,7 @@ Create basic Kailash workflows using WorkflowBuilder pattern with string-based n
 > Category: `core-sdk`
 > Priority: `CRITICAL`
 > SDK Version: `0.9.25+`
-> Related Skills: [`connection-patterns`](connection-patterns.md), [`node-patterns-common`](node-patterns-common.md), [`runtime-execution`](runtime-execution.md), [`param-passing-quick`](param-passing-quick.md)
+> Related Skills: [`connection-patterns`](../../../.claude/skills/01-core-sdk/connection-patterns.md), [`node-patterns-common`](../../../.claude/skills/01-core-sdk/node-patterns-common.md), [`runtime-execution`](../../../.claude/skills/01-core-sdk/runtime-execution.md), [`param-passing-quick`](../../../.claude/skills/01-core-sdk/param-passing-quick.md)
 
 ## Quick Reference
 
@@ -173,11 +173,11 @@ runtime.execute(workflow.build())  # ✓
 
 ## Related Patterns
 
-- **For node connections**: [`connection-patterns`](connection-patterns.md)
-- **For parameter passing**: [`param-passing-quick`](param-passing-quick.md)
-- **For runtime options**: [`runtime-execution`](runtime-execution.md)
-- **For common nodes**: [`node-patterns-common`](node-patterns-common.md)
-- **For cyclic workflows**: [`cycle-workflows-basics`](cycle-workflows-basics.md)
+- **For node connections**: [`connection-patterns`](../../../.claude/skills/01-core-sdk/connection-patterns.md)
+- **For parameter passing**: [`param-passing-quick`](../../../.claude/skills/01-core-sdk/param-passing-quick.md)
+- **For runtime options**: [`runtime-execution`](../../../.claude/skills/01-core-sdk/runtime-execution.md)
+- **For common nodes**: [`node-patterns-common`](../../../.claude/skills/01-core-sdk/node-patterns-common.md)
+- **For cyclic workflows**: [`cycle-workflows-basics`](../../../.claude/skills/01-core-sdk/cycle-workflows-basics.md)
 
 ## When to Escalate to Subagent
 
@@ -317,7 +317,7 @@ results, run_id = runtime.execute(workflow.build())
 
 | Issue                                                                       | Cause                                               | Solution                                                                                                                  |
 | --------------------------------------------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `AttributeError: 'WorkflowBuilder' object has no attribute 'execute'`       | Calling `.execute()` on workflow instead of runtime | Use `runtime.execute(workflow.build())` - see [`error-missing-build`](../31-error-troubleshooting/error-missing-build.md) |
+| `AttributeError: 'WorkflowBuilder' object has no attribute 'execute'`       | Calling `.execute()` on workflow instead of runtime | Use `runtime.execute(workflow.build())` - see [`error-missing-build`](../../../.claude/skills/31-error-troubleshooting/error-missing-build.md) |
 | `Node 'X' not found in workflow`                                            | Node ID mismatch in connections                     | Verify node IDs match exactly between `add_node()` and `add_connection()`                                                 |
 | `TypeError: add_connection() takes 5 positional arguments but 4 were given` | Using old 3-parameter syntax                        | Update to 4 parameters: `(from_node, from_output, to_node, to_input)`                                                     |
 | `ValidationError: Missing required parameter 'X'`                           | Node config missing required fields                 | Check node documentation or use `node-patterns-common` for examples                                                       |

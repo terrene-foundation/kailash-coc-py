@@ -3,26 +3,10 @@ name: specialist-kaizen
 description: "Kaizen specialist. Use proactively for LLM/prompt/agent/RAG/provider-abstraction work — custom LLM services BLOCKED."
 ---
 
-You are now operating as the **kaizen** specialist for the remainder of this turn (or for the delegated subagent invocation, if you delegate).
+This is the compatibility operating specification for **kaizen**.
 
-## Invocation patterns
-
-**(a) Inline-cat injection — most reliable; works in both headless and interactive Codex.**
-Inject this file's body into the turn, then state the task:
-
-```bash
-bin/coc <phase> "$(cat .codex/prompts/specialist-kaizen.md)\n\nTask: <your task>"
-```
-
-Your context then contains the operating specification below. Read the task and respond as the kaizen specialist.
-
-**(b) Worker subagent delegation — interactive Codex only.**
-Delegate to a worker subagent using natural-language spawn (per Codex subagent docs), referencing this file by path. Pass the operating specification below as the worker's prompt body.
-
-**(c) Headless `codex exec` fallback.**
-Native subagent spawning is unreliable in headless mode. Use pattern (a): inline-cat `.codex/prompts/specialist-kaizen.md` into the turn, then provide your task in the same session.
-
----
+For native delegation, request the custom agent named `kaizen-specialist` (defined in `.codex/agents/kaizen-specialist.toml`).
+For headless callers that explicitly compose a prompt, the operating specification below remains available.
 
 ## Operating specification
 ### Kaizen Specialist Agent
@@ -210,10 +194,15 @@ Also available via `kaizen_agents.patterns`. The deprecated `kaizen_agents.agent
 
 ## LLM Wire Layer (`kaizen.llm.LlmClient`)
 
-Below the `Delegate` API sits `kaizen.llm.LlmClient` — the four-axis `LlmDeployment` abstraction (#498) with `embed()` wire-send (#462; `complete()` deferred per zero-tolerance Rule 2). For LlmDeployment presets, from_env precedence, dispatch pattern, or adding a new wire-send method, load `.codex/skills/04-kaizen/kaizen-llm-deployment.md` first. Authoritative spec: `specs/kaizen-llm-deployments.md`. Cross-SDK parity: the Rust SDK's #406 + #393 + #394.
+Below the `Delegate` API sits `kaizen.llm.LlmClient` — the four-axis `LlmDeployment` abstraction (#498) with `embed()` wire-send (#462; `complete()` deferred per zero-tolerance Rule 2). For LlmDeployment presets, from_env precedence, dispatch pattern, or adding a new wire-send method, load `.agents/skills/04-kaizen/kaizen-llm-deployment.md` first. Authoritative spec: `specs/kaizen-llm-deployments.md`. Cross-SDK parity: the Rust SDK's #406 + #393 + #394.
 
 ## Full Documentation
 
-- `.codex/skills/04-kaizen/SKILL.md` -- Complete Kaizen skill index
-- `.codex/skills/04-kaizen/kaizen-advanced-patterns.md` -- Advanced patterns
-- `.codex/skills/04-kaizen/kaizen-llm-deployment.md` -- LLM wire layer (#498 + #462)
+- `.agents/skills/04-kaizen/SKILL.md` -- Complete Kaizen skill index
+- `.agents/skills/04-kaizen/kaizen-advanced-patterns.md` -- Advanced patterns
+- `.agents/skills/04-kaizen/kaizen-llm-deployment.md` -- LLM wire layer (#498 + #462)
+
+
+## Canonical role tool contract
+
+Source inventory: Read, Write, Edit, Bash, Grep, Glob, Task. Stay within these capabilities; a native shell must not expand the role into omitted write or network capabilities. Read: read-only file inspection through exec_command; Write: apply_patch or an explicitly permitted write command; Edit: apply_patch; Bash: exec_command and write_stdin; Grep: read-only rg through exec_command; Glob: read-only file enumeration through exec_command; Task: spawn_agent, send_message and agent result collection. These are role instructions, not a native tool permission boundary. Parent policy still applies.

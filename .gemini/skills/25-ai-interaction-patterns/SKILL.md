@@ -22,7 +22,7 @@ Use these patterns when asking about AI UX, AI interaction, prompt UX, AI trust,
 
 ## Reference Documentation
 
-- **[ai-interaction-patterns](ai-interaction-patterns.md)** - Full reference for all 60+ patterns
+- **[ai-interaction-patterns](../../../.claude/skills/25-ai-interaction-patterns/ai-interaction-patterns.md)** - Full reference for all 60+ patterns
 
 ## Quick Pattern Selection
 
@@ -104,7 +104,7 @@ Avatar, Personality, Name, Color, Iconography
 
 ## Related Skills
 
-- **[23-uiux-design-principles](../23-uiux-design-principles/SKILL.md)** - General design principles
+- **[23-uiux-design-principles](../../../.claude/skills/23-uiux-design-principles/SKILL.md)** - General design principles
 
 ## Support
 

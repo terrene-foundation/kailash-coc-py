@@ -10,7 +10,7 @@ Copy-pasteable starting point for authoring a numbered DataFlow migration that c
 > **Skill Metadata**
 > Category: `dataflow`
 > Priority: `HIGH`
-> Related Skills: [`dataflow-migrations-quick`](dataflow-migrations-quick.md), [`dataflow-enterprise-migrations`](dataflow-enterprise-migrations.md)
+> Related Skills: [`dataflow-migrations-quick`](../../../.claude/skills/02-dataflow/dataflow-migrations-quick.md), [`dataflow-enterprise-migrations`](../../../.claude/skills/02-dataflow/dataflow-enterprise-migrations.md)
 > Related Subagents: `dataflow-specialist` (destructive / high-risk migrations), `testing-specialist` (Tier 2 regression tests)
 > Template: `scripts/migrate.py` (Python starter; the language variant for your SDK supplies the equivalent).
 

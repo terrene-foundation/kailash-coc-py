@@ -88,7 +88,31 @@ Alpha: 2 of 3 `Signed off` — not complete
 }
 ```
 
-`kind` is one of `register` (the frozen original list), `growth` (arrived after the freeze), `status-refresh` (corrects status on EXISTING ids only — introducing a new id here is a refusal, because growth must be counted as growth).
+`kind` is one of five. The first three are STATIC files; the last two RE-DERIVE themselves by running a manifest-declared, committed, reviewed query, and a query that errors, times out or returns fewer members than its declared floor REFUSES the build rather than falling back to its snapshot.
+
+- `register` — the frozen original list. `origin` is `from the original register`.
+- `growth` — arrived after the freeze.
+- `status-refresh` — corrects status on EXISTING ids only; introducing a new id here is a refusal, because growth must be counted as growth.
+- `live-growth` — freezes the ORIGINAL ID SET plus the adjudication attached to those ids, and re-derives CURRENT MEMBERSHIP. An id that left the registry drops out; one that arrived takes the source's `arrival_defaults`. Because the frozen half is a reading someone took, it carries `membership.as_of` + `max_age_days` and goes STALE.
+- `projected` — for a PROJECTION of an external registry (an issue tracker, a deferral file), where the authoritative state lives elsewhere and nobody adjudicates per item at that volume. It freezes NOTHING: membership AND status are both re-derived on every build. Its query emits `id`, a per-member STATE, and a RECORD REFERENCE, tab-separated; the source declares one `page`, a `status_derivation.map` translating the registry's state vocabulary into this block's closed one, and a `record_ref` contract. **`Signed off` is UNREACHABLE for a projected item** — refused as a map target, refused via a `status-refresh` aimed at a projected id, and refused if any other source re-declares the id — because that value means the OWNER accepted the work and no registry state is evidence of that. LINK-1/2/3 are REPLACED by **LINK-S** (the member resolves to its source record: a ref matching the declared pattern, unique across the population, and for `record_ref.kind: "repo-path"` dereferenced to a tracked file carrying the id verbatim). Replaced, never waived — a member resolving to no source record refuses the whole build. An `external` ref is checked for shape and uniqueness and is NOT fetched, so it establishes addressability rather than existence, and `--check-links` prints that bound rather than letting a green imply more. Because it freezes nothing, `membership.as_of` and `max_age_days` are REFUSED on this kind: a bound that bounds nothing reads as freshness discipline while providing none.
+
+## Two populations, three denominators
+
+The `projected` class forced a change the single-`total` table could not survive, and it is worth stating as a defect rather than a design preference. `Open` is DERIVED as `total − Signed off`, and MUST-4 says complete means `Signed off` equals the total. A projected item is structurally barred from `Signed off` — that is the guardrail. So the instant projected items entered `total`, **completion became unreachable by construction**: the register could never again be reported complete, no matter what the owner accepted. That is worse than the staleness the class was built to fix. And every adjudication bucket names a position on an OWNER-ACCEPTANCE journey (`Not started` is "accepted into the register, no work begun"; `Blocked on you` is "waiting on the owner") — a projection occupies none of them, which is why no honest `status_derivation` target existed. The axis was wrong, not the vocabulary.
+
+The fix is SEPARATE DENOMINATORS, and **no new status value**. The closed vocabulary is unchanged. Three denominators, each rendered as its own labelled column so no reader infers which one a figure binds:
+
+- **`adjudicated`** — items a person declared and adjudicated. **THE COMPLETION DENOMINATOR.** The five status buckets and `Open` are fractions of this and of nothing else.
+- **`projected`** — items projected from an external registry. Membership, and nothing else.
+- **`board`** — every item of both classes. A census; NEVER a completion denominator, and no status bucket binds it.
+
+`Open: both populations` (= adjudicated `Open` + `projected`) is what the growth split partitions, because arrival is a fact about WHEN an item reached the board and is orthogonal to which class it is in — so MUST-3's column spans both.
+
+**ABSENT is not ZERO.** On a row whose adjudicated population is empty, the six adjudicated-denominated cells render `—` and emit NO TOKEN. `0 In progress` would be a CLAIM that none of them are in progress; the truth is the question does not apply. `--quote` on such a bucket refuses by NAMING the absence rather than reporting "no such bucket", which would send an operator hunting for a typo in a correct name.
+
+**The token binds the denominator** (`sha256(bucket|denominator|value|source_digest)`), and with two populations that stops being a nicety: without it a figure computed against `projected` could validate a sentence asserting it against `adjudicated` — the completion denominator — so a projected count could certify a completion claim. Measured both directly (same bucket, same value, denominators 26 vs 247 → different tokens) and end-to-end through `--verify-quote` (correct denominator VALIDATES, swapped denominator REJECTED).
+
+**A projected source's `sources_digest` contribution is its MEMBERSHIP only.** Its members' registry states feed no count, and folding them in would rewrite every token and report `--check` STALE against a block whose every figure is unchanged.
 
 Each source file carries its own provenance:
 
@@ -143,6 +167,16 @@ The growth split gets its **own** assertion rather than riding on whole-block in
 - **The partition assertion is a backstop, not independently pinned.** With a validated vocabulary every item increments exactly one bucket, so `sum(buckets) == total` holds by construction and no valid input can red it. Measured: disabling it leaves the suite green. It fires only when a prior guard has already failed — which the vocabulary-mutation case demonstrates it does.
 - **No probe suite.** `burndown-integrity` has no `eval-manifest.json` entry, so the semantic (LLM-judge) tier is UNCOVERED and owed at gate-review via `/test-harness-probe`.
 - **Chat-reply reachability.** See the rule's Origin. A count quoted in conversation touches no file and fires no glob.
+
+## Origin — full narrative
+
+Moved verbatim from the rule body 2026-09-07 (loom budget-residual lane).
+
+**Originating evidence.** Asked the same question once, an agent produced **110**, then **48**, then **14/15/19**, then **2/3/3**. Every figure was arithmetically correct; none reconcilable, because each pass silently chose its own population and none stated which. The defect is a MOVING DENOMINATOR, not a wrong number — so the cure is a generated artifact that reports its own quote, not an instruction to be careful.
+
+**Second instance, one turn before this artifact existed.** Asked how much rule-injection headroom remained, one lane reported **92–93%** and another **99.7%** for the same profile on the same tree — percent-of-tolerance-band-consumed versus percent-of-ceiling. Both correct; neither stated its denominator. It happened to operators who had just read this specification: the failure survives knowing about it.
+
+**The chat-reply residual is RETIRED, and the retirement is measured.** An earlier draft recorded that a count quoted in conversation touches no file, so no `paths:` glob fires and the rule was under-reachable there by construction. That is no longer true: the `Stop` guard runs on EVERY reply regardless of files touched. `paths:` now scopes only where the rule TEXT loads, never where enforcement reaches.
 
 ## A worked block
 

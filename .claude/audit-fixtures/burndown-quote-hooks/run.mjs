@@ -22,6 +22,8 @@
  * REAL temporary git repositories. Nothing is mocked, so a case cannot pass
  * against a hook the harness would not actually run.
  */
+import "../_lib/no-ambient-git.cjs";
+import { copyStaticImportClosure } from "../_lib/static-import-closure.mjs";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -85,13 +87,89 @@ function mkRepo({ withManifest = true } = {}) {
     fs.writeFileSync(path.join(dir, "burndown-manifest.json"), JSON.stringify(MANIFEST, null, 2));
   }
   fs.writeFileSync(path.join(dir, "REGISTER.md"), "# Register\n");
-  fs.copyFileSync(GENERATOR, path.join(dir, ".claude", "bin", "burndown-build.mjs"));
+  // The generator + its STATIC relative-import closure, DERIVED from the tree
+  // (fcecaa28f added `./lib/entry-point.mjs`; a hand-kept copy goes stale the
+  // moment the graph moves). Conditional deps stay absent BY CONSTRUCTION — the
+  // helper copies top-level statements only, which is the zero-relative-imports
+  // property `--quote` demonstrates.
+  copyStaticImportClosure({ fromRoot: REPO_ROOT, toRoot: dir, entries: [GENERATOR] });
+  // THE GENERATOR'S ONE MANDATORY DEPENDENCY, and it has to come along even though
+  // this harness deliberately builds a bin-only tree. Every mode of the generator
+  // spawns git, and since s60 every one of those spawns runs on the resolved binary
+  // with an env built from constants (`hooks/lib/git-subprocess-env.js`) — because
+  // an inherited `GIT_DIR` OUTRANKS repository discovery, so an un-enveloped query
+  // is answered by whatever repository the ENVIRONMENT names. Its absence is a
+  // typed refusal BY DESIGN: a security control that degrades quietly is not one.
+  //
+  // Copying it does NOT weaken what this suite pins. The CONDITIONAL deps
+  // (`burndown-events.js`, `signed-log.js`, `coc-sign.js`) stay absent, which is
+  // the zero-relative-imports property `--quote` is here to demonstrate. And no
+  // real consumer can be in the state this line avoids:
+  // `sync-tier-aware.mjs::ALWAYS_INCLUDE` carries `.claude/hooks/lib/**` and the
+  // generator in the SAME list, so a tree with one and not the other exists only
+  // inside a fixture that constructs it.
+  fs.mkdirSync(path.join(dir, ".claude", "hooks", "lib"), { recursive: true });
+  fs.copyFileSync(
+    path.join(REPO_ROOT, ".claude", "hooks", "lib", "git-subprocess-env.js"),
+    path.join(dir, ".claude", "hooks", "lib", "git-subprocess-env.js"),
+  );
   for (const a of [
     ["init", "-q"],
     ["config", "user.email", "h@x.invalid"],
     ["config", "user.name", "h"],
+    ["config", "commit.gpgsign", "false"],
     ["add", "-A"],
     ["commit", "-q", "-m", "fx"],
+  ]) {
+    execFileSync("git", a, { cwd: dir, stdio: "ignore" });
+  }
+
+  // THE TARGET CARRIES ITS GENERATED BLOCK, because a real burndown repo does and
+  // this tree is only evidence to the extent it resembles one.
+  //
+  // It did not, until 2026-09-15, and the gap was not cosmetic. `--verify-quote`
+  // used to re-derive the board from sources on every call, so the target's
+  // content was irrelevant to verification and `# Register\n` passed for a
+  // burndown target. That is precisely the respect in which this fixture tree
+  // was unlike the repo it stands for — and the same respect in which it was
+  // unlike it on COST: three register items and no projected source build in
+  // milliseconds, while the real board costs ~6.1s and a `gh` network call. So
+  // these fixtures were 39/39 green for weeks while the shipped verifier timed
+  // out on 100% of real invocations and returned its UNKNOWN state for valid and
+  // forged quotes alike. A suite can only fail on a property its fixtures
+  // instantiate (`evidence-first-claims.md` MUST-6).
+  //
+  // Generated AFTER the first commit because `--write` refuses on uncommitted
+  // sources, then committed, so the tree a hook sees is clean.
+  if (withManifest) {
+    const w = spawnSync("node", [path.join(dir, ".claude", "bin", "burndown-build.mjs"), "--write"], {
+      cwd: dir,
+      encoding: "utf8",
+    });
+    if (w.status !== 0) {
+      throw new Error(`fixture setup: --write failed (${w.status}): ${w.stderr || w.stdout}`);
+    }
+    for (const a of [
+      ["add", "-A"],
+      ["commit", "-q", "-m", "block"],
+    ]) {
+      execFileSync("git", a, { cwd: dir, stdio: "ignore" });
+    }
+  }
+  return dir;
+}
+
+/**
+ * A repo that has a manifest and sources but whose target carries NO generated
+ * block — the bootstrap state, and the one state in which verification has no
+ * authority to verify AGAINST.
+ */
+function mkRepoWithoutBlock() {
+  const dir = mkRepo({ withManifest: true });
+  fs.writeFileSync(path.join(dir, "REGISTER.md"), "# Register\n");
+  for (const a of [
+    ["add", "-A"],
+    ["commit", "-q", "-m", "drop block"],
   ]) {
     execFileSync("git", a, { cwd: dir, stdio: "ignore" });
   }
@@ -213,7 +291,9 @@ check("teeth/PostToolUse DOES block on the same structural finding (the asymmetr
   if (res.code !== 2) return `expected exit 2 (block), got ${res.code}`;
   let j;
   try { j = JSON.parse(res.out.trim().split("\n").pop()); } catch { return "no JSON emitted"; }
-  return j.continue === false ? true : `expected continue:false, got ${JSON.stringify(j).slice(0, 160)}`;
+  // The block is exit 2 + deny; it does NOT halt the agent (continue:false ended the turn).
+  const denied = j.hookSpecificOutput && j.hookSpecificOutput.permissionDecision === "deny";
+  return denied && j.continue !== false ? true : `expected a deny without continue:false, got ${JSON.stringify(j).slice(0, 160)}`;
 });
 
 check("arm2/is SILENT when the count already carries its token", () => {
@@ -383,6 +463,24 @@ check("scope/write-guard ignores a NON-durable surface", () => {
   const tampered = validQuote(d).replace(/(\d+)⟨/, (m, n) => `${Number(n) + 5}⟨`);
   const res = runHook(WRITE_GUARD, d, writePayload(d, "src/thing.ts", `// ${tampered}\n`));
   return !fired(res) ? true : "fired on a non-durable surface";
+});
+
+check("scope/write-guard is SILENT on a TEST-CORPUS path (a fixture carries a synthetic token)", () => {
+  // MEASURED regression this pole pins: the BURNDOWN name pattern matched this
+  // guard's OWN fixture tree, so editing `.claude/audit-fixtures/burndown-quote-
+  // hooks/run.mjs` (whose body carries a synthetic token as a verifyText INPUT)
+  // was refused as a durable write — the fix blocked its own fixture. The
+  // same shape lives under .claude/test-harness/, so both trees are pinned.
+  const d = mkRepo();
+  const tampered = validQuote(d).replace(/(\d+)⟨/, (m, n) => `${Number(n) + 5}⟨`);
+  for (const rel of [
+    ".claude/audit-fixtures/burndown-quote-hooks/run.mjs",
+    ".claude/test-harness/tests/burndown-demo.test.mjs",
+  ]) {
+    const res = runHook(WRITE_GUARD, d, writePayload(d, rel, `lib.verifyText("some ${tampered} text");\n`));
+    if (fired(res)) return `fired on a test corpus (${rel}) — a report surface is not a corpus`;
+  }
+  return true;
 });
 
 // ── fail-open: every unknown is silent, and exit 0 ─────────────────────────

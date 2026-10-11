@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 /**
+ * @hook-event: PreCompact (lifecycle) — current workspace and session context remain available immediately before compaction.
+ *
  * Hook: pre-compact
  * Event: PreCompact
  * Purpose: Save critical context before compaction
@@ -8,6 +10,24 @@
  *   0 = success (continue)
  *   2 = blocking error (stop tool execution)
  *   other = non-blocking error (warn and continue)
+ */
+
+/**
+ * @hook-contract
+ * {
+ *   "side_effects": {
+ *     "fs_writes": [
+ *       ".claude/learning/observations.jsonl",
+ *       ".claude/learning/observations.archive/",
+ *       "~/.claude/checkpoints/<session_id>-<timestamp>.json"
+ *     ],
+ *     "network": false,
+ *     "spawns": ["git","gpg","ssh-keygen"]
+ *   },
+ *   "idempotent": false,
+ *   "may_rewrite_input": false,
+ *   "notes": "The checkpoint file is written OUTSIDE the repo under the operator home (~/.claude/checkpoints), one timestamped file per invocation, with rotation (cleanupOldCheckpoints) deleting all but the last 10 per session; it is declared as a HOME shape because it is not repo-relative. The observation row and the observations.archive mkdir come from lib/learning-utils.js (appendStamped -> lib/coc-append.js -> lib/append-sink.js). spawns: identity resolution and record signing on that append path (lib/operator-id.js, lib/coc-sign.js)."
+ * }
  */
 
 const fs = require("fs");
@@ -21,15 +41,34 @@ const { detectActiveWorkspace } = require("./lib/workspace-utils");
 
 // Timeout fallback — prevents hanging the Claude Code session
 const TIMEOUT_MS = 10000;
-const _timeout = setTimeout(() => {
-  console.log(JSON.stringify({ continue: true }));
-  process.exit(1);
-}, TIMEOUT_MS);
+// Armed by hookMain(), not at load: require() of this file has no side effects,
+// so the in-process hook engine can load it once per worker and run it per event.
+let _timeout = null;
 
-let input = "";
-process.stdin.setEncoding("utf8");
-process.stdin.on("data", (chunk) => (input += chunk));
-process.stdin.on("end", () => {
+function hookMain() {
+  _timeout = setTimeout(() => {
+    console.log(JSON.stringify({ continue: true }));
+    process.exit(1);
+  }, TIMEOUT_MS);
+  return new Promise((resolve, reject) => {
+    let input = "";
+    process.stdin.setEncoding("utf8");
+    process.stdin.on("data", (chunk) => (input += chunk));
+    process.stdin.on("end", () => {
+      try {
+        onStdinEnd(input);
+      } catch (e) {
+        return reject(e);
+      }
+      resolve();
+    });
+  });
+}
+
+// In-engine, process.exit() throws a sentinel, so the catch below also runs after
+// the success exit; it only writes (discarded once the detector has ended) and
+// exits (the first recorded code stands) — no state change can happen there.
+function onStdinEnd(input) {
   try {
     const data = JSON.parse(input);
     const result = savePreCompactState(data);
@@ -46,14 +85,22 @@ process.stdin.on("end", () => {
         `[pre-compact] checkpoint FAILED: ${result.error || "unknown"}\n`,
       );
     }
-    console.log(JSON.stringify({ continue: true }));
+    // NOTHING on stdout, deliberately. At PreCompact the RAW trimmed stdout of an
+    // exit-0 hook becomes custom COMPACTION INSTRUCTIONS
+    // (lib/hook-engine.js::mergePreCompactDetectors; see the host-semantics block
+    // there, grounded in the installed CC binary), so the `{"continue": true}`
+    // stub this line used to print was being promoted into the compaction prompt
+    // as an instruction line. An empty stdout is how a hook says "nothing to
+    // instruct" on that channel. The mandated Rule-7 passthrough shape stays on
+    // the TIMEOUT branch below, which exits non-zero and is therefore a failure,
+    // never an instruction.
     process.exit(0);
   } catch (error) {
     process.stderr.write(`[pre-compact] HOOK ERROR: ${error.message}\n`);
     console.log(JSON.stringify({ continue: true }));
     process.exit(1);
   }
-});
+}
 
 function savePreCompactState(data) {
   // Sanitize session_id to prevent path traversal
@@ -265,4 +312,14 @@ function cleanupOldCheckpoints(checkpointDir, sessionId, keepCount) {
       } catch {}
     }
   } catch {}
+}
+
+module.exports = { hookMain };
+
+// CLI entry. The default path is exactly hookMain() — no engine dependency, so a
+// tree that copies this hook without lib/hook-engine.js runs it unchanged. The
+// selftest path replays the run through the in-process engine (hook-engine.js::runCli).
+if (require.main === module) {
+  if (process.env.COC_HOOK_ENGINE_SELFTEST === "1") require("./lib/hook-engine.js").runCli(hookMain, __filename);
+  else hookMain();
 }

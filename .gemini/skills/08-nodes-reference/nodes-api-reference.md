@@ -11,7 +11,7 @@ Complete reference for HTTP, REST, and GraphQL API operations.
 > Category: `nodes`
 > Priority: `HIGH`
 > SDK Version: `0.9.25+`
-> Related Skills: [`nodes-quick-index`](nodes-quick-index.md)
+> Related Skills: [`nodes-quick-index`](../../../.claude/skills/08-nodes-reference/nodes-quick-index.md)
 > Related Subagents: `pattern-expert` (API workflows)
 
 ## Quick Reference
@@ -88,7 +88,7 @@ workflow.add_node("GraphQLClientNode", "graphql", {
 
 ## Related Skills
 
-- **Node Index**: [`nodes-quick-index`](nodes-quick-index.md)
+- **Node Index**: [`nodes-quick-index`](../../../.claude/skills/08-nodes-reference/nodes-quick-index.md)
 
 ## Documentation
 

@@ -11,7 +11,7 @@ Complete reference of all tools registered by the kailash-mcp platform server, o
 > Category: `mcp`
 > Priority: `MEDIUM`
 > SDK Version: `0.9.25+`
-> Related Skills: [`mcp-platform-overview`](mcp-platform-overview.md), [`mcp-security-tiers`](mcp-security-tiers.md)
+> Related Skills: [`mcp-platform-overview`](../../../.claude/skills/05-kailash-mcp/mcp-platform-overview.md), [`mcp-security-tiers`](../../../.claude/skills/05-kailash-mcp/mcp-security-tiers.md)
 > Related Subagents: `mcp-specialist` (tool implementation, custom tools)
 
 ## Tool Summary

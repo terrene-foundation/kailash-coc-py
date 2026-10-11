@@ -237,9 +237,9 @@ from kailash.nodes.code import PythonCodeNode
 
 ### Data Processing
 
-- **CSV**: [`nodes-data-reference`](nodes-data-reference.md)
+- **CSV**: [`nodes-data-reference`](../../../.claude/skills/08-nodes-reference/nodes-data-reference.md)
 - **Database**: `AsyncSQLDatabaseNode`, `WorkflowConnectionPool`, `QueryRouterNode`
-- **API**: [`nodes-api-reference`](nodes-api-reference.md)
+- **API**: [`nodes-api-reference`](../../../.claude/skills/08-nodes-reference/nodes-api-reference.md)
 
 ### AI/ML
 
@@ -249,7 +249,7 @@ from kailash.nodes.code import PythonCodeNode
 
 ### Logic & Control
 
-- **Routing**: [`nodes-logic-reference`](nodes-logic-reference.md)
+- **Routing**: [`nodes-logic-reference`](../../../.claude/skills/08-nodes-reference/nodes-logic-reference.md)
 - **Conditionals**: `SwitchNode` (outputs: `true_output`, `false_output`)
 - **Loops**: `LoopNode`
 
@@ -257,9 +257,9 @@ from kailash.nodes.code import PythonCodeNode
 
 - **Security**: `ABACPermissionEvaluatorNode`, `ThreatDetectionNode`, `CredentialManagerNode`
 - **Auth**: `SSOAuthenticationNode`, `MultiFactorAuthNode`, `OAuth2Node` (in `api/auth`)
-- **Admin**: [`nodes-admin-reference`](nodes-admin-reference.md)
-- **Monitoring**: [`nodes-monitoring-reference`](nodes-monitoring-reference.md)
-- **Transactions**: [`nodes-transaction-reference`](nodes-transaction-reference.md)
+- **Admin**: [`nodes-admin-reference`](../../../.claude/skills/08-nodes-reference/nodes-admin-reference.md)
+- **Monitoring**: [`nodes-monitoring-reference`](../../../.claude/skills/08-nodes-reference/nodes-monitoring-reference.md)
+- **Transactions**: [`nodes-transaction-reference`](../../../.claude/skills/08-nodes-reference/nodes-transaction-reference.md)
 
 ## Navigation Strategy
 
@@ -285,17 +285,17 @@ from kailash.nodes.code import PythonCodeNode
 
 ## Related Skills
 
-- **Data Nodes**: [`nodes-data-reference`](nodes-data-reference.md)
+- **Data Nodes**: [`nodes-data-reference`](../../../.claude/skills/08-nodes-reference/nodes-data-reference.md)
 - **AI**: Use Kaizen framework (`skills/04-kaizen/SKILL.md`)
-- **API Nodes**: [`nodes-api-reference`](nodes-api-reference.md)
-- **Database Nodes**: [`nodes-database-reference`](nodes-database-reference.md)
-- **Transform Nodes**: [`nodes-transform-reference`](nodes-transform-reference.md)
-- **Code Nodes**: [`nodes-code-reference`](nodes-code-reference.md)
-- **Logic Nodes**: [`nodes-logic-reference`](nodes-logic-reference.md)
-- **File Nodes**: [`nodes-file-reference`](nodes-file-reference.md)
-- **Monitoring Nodes**: [`nodes-monitoring-reference`](nodes-monitoring-reference.md)
-- **Transaction Nodes**: [`nodes-transaction-reference`](nodes-transaction-reference.md)
-- **Admin Nodes**: [`nodes-admin-reference`](nodes-admin-reference.md)
+- **API Nodes**: [`nodes-api-reference`](../../../.claude/skills/08-nodes-reference/nodes-api-reference.md)
+- **Database Nodes**: [`nodes-database-reference`](../../../.claude/skills/08-nodes-reference/nodes-database-reference.md)
+- **Transform Nodes**: [`nodes-transform-reference`](../../../.claude/skills/08-nodes-reference/nodes-transform-reference.md)
+- **Code Nodes**: [`nodes-code-reference`](../../../.claude/skills/08-nodes-reference/nodes-code-reference.md)
+- **Logic Nodes**: [`nodes-logic-reference`](../../../.claude/skills/08-nodes-reference/nodes-logic-reference.md)
+- **File Nodes**: [`nodes-file-reference`](../../../.claude/skills/08-nodes-reference/nodes-file-reference.md)
+- **Monitoring Nodes**: [`nodes-monitoring-reference`](../../../.claude/skills/08-nodes-reference/nodes-monitoring-reference.md)
+- **Transaction Nodes**: [`nodes-transaction-reference`](../../../.claude/skills/08-nodes-reference/nodes-transaction-reference.md)
+- **Admin Nodes**: [`nodes-admin-reference`](../../../.claude/skills/08-nodes-reference/nodes-admin-reference.md)
 
 ## When to Escalate to Subagent
 

@@ -370,7 +370,7 @@ workflow.add_connection(
 
 ## Related Documentation
 
-- [PythonCodeNode Best Practices](../01-core-sdk/pythoncode-best-practices.md)
+- [PythonCodeNode Best Practices](../../../.claude/skills/01-core-sdk/pythoncode-best-practices.md)
 
 ## Related Skills
 

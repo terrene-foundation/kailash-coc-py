@@ -9,7 +9,7 @@ description: "DataFlow installation and setup guide. Use when asking 'install da
 > Category: `dataflow`
 > Priority: `HIGH`
 > SDK Version: `0.9.25+`
-> Related Skills: `dataflow-specialist`, [`dataflow-quickstart`](dataflow-quickstart.md)
+> Related Skills: `dataflow-specialist`, [`dataflow-quickstart`](../../../.claude/skills/02-dataflow/dataflow-quickstart.md)
 
 ## Installation
 

@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 /**
+ * @hook-event: PreToolUse:Bash (guard) — the pending command and signing-key availability can be checked before a tracked mutation or transport operation.
+ * @hook-event: PreToolUse:Edit|NotebookEdit|Write (guard) — the pending target and signing or sibling-worktree state are available before the file mutation.
+ *
  * signing-mutation-guard.js — §2.3 + §4.3 pre-tool-use guard.
  *
  * @coc-codex-edit-gate — STATELESS trust gate (degraded-mode signing-key
@@ -9,8 +12,10 @@
  *   config / explicit env (NOT the multi-operator roster), and the
  *   degraded-mode read-only block is the same behavior already shipped on
  *   the Codex shell lane (DF-AC6-2) — extending it to apply_patch makes
- *   the file-edit lane symmetric with the shell lane. The cc-only
- *   coordination guards deliberately omit this marker.
+ *   the file-edit lane symmetric with the shell lane. Since 2026-10-09 the
+ *   coordination guards carry the marker too: the orchestrator ruling makes
+ *   native execution the default, and an exclusion survives only with a
+ *   written reason plus a compensating control.
  *
  * Shard B3a (workspaces/multi-operator-coc/02-plans/01-architecture.md
  * §2.3 + §4.3 hook-table row + R4-S-02 + R5-S-03).
@@ -91,12 +96,27 @@
 
 "use strict";
 
-const TIMEOUT_MS = 5000;
+/**
+ * @hook-contract
+ * {
+ *   "side_effects": {
+ *     "fs_writes": [],
+ *     "network": false,
+ *     "spawns": ["git","gpg","ssh-keygen"]
+ *   },
+ *   "idempotent": true,
+ *   "may_rewrite_input": false,
+ *   "notes": "spawns: `git ls-files` / `git check-ignore` (wouldMutateWorkingTree), the sibling-porcelain worktree enumeration, lib/state-resolver.js, and lib/operator-id.js::resolveIdentity's key discovery (git / ssh-keygen / gpg). The hook itself performs no durable write: the operator-id hint cache it used to declare (lib/operator-id.js::_writeCache) was REMOVED 2026-10-09 — its reader had already been deleted and nothing in the repo read the file, so the write was dead. lib/instruct-and-wait.js emits to stdout only."
+ * }
+ */
 
-const fallback = setTimeout(() => {
-  process.stdout.write(JSON.stringify({ continue: true }) + "\n");
-  process.exit(1);
-}, TIMEOUT_MS);
+// Raised 5000 -> 20000 (2026-10-08) TOGETHER with its settings.json registration
+// (5s -> 20s, both rows): the sibling-porcelain-scaling BUDGET fixture asserts these
+// move together, so a load-slowed scan is not killed by the internal timer while the
+// harness is still willing to wait. Registered timeouts are [20,20]s.
+const TIMEOUT_MS = 20000;
+
+let fallback = null;
 
 const fs = require("fs");
 const path = require("path");
@@ -115,11 +135,17 @@ const { isMutationTool } = require(
 const { resolveGitBinary, gitEnv } = require(
   path.join(__dirname, "lib", "git-subprocess-env.js"),
 );
-const { isCoordinationEnabled } = require(
+// loom#1896 § THE CONFLATION — signing-mutation refusal fences THE AGENT, not a
+// sibling human, so it asks the GOVERNANCE question. See
+// `lib/coordination-mode.js` § governanceMode.
+const { isGovernanceEnabled } = require(
   path.join(__dirname, "lib", "coordination-mode.js"),
 );
 const { requireMainCheckout } = require(
   path.join(__dirname, "lib", "state-resolver.js"),
+);
+const { resolveRepoDirBound } = require(
+  path.join(__dirname, "lib", "repo-dir-override.js"),
 );
 
 function passthrough() {
@@ -131,12 +157,14 @@ function passthrough() {
 const { readStdinBounded } = require("./lib/read-stdin-bounded.js");
 
 function resolveRepoDir(payload) {
-  const envDir = process.env.COC_OPERATOR_REPO_DIR;
-  if (envDir && fs.existsSync(envDir)) return envDir;
-  if (payload && typeof payload.cwd === "string" && payload.cwd.length > 0) {
-    return payload.cwd;
-  }
-  return process.cwd();
+  // loom#1871 HIGH-1 — the override is now bound to the SESSION REPOSITORY.
+  // It was honoured on the sole evidence that the directory EXISTED, so a
+  // `settings.json` env: line plus a `git init` moved this guard to an
+  // unrelated repo and it passed everything through. See lib/repo-dir-override.js
+  // for the 8-of-8 two-pole measurement, the three arms, and why
+  // `provenCheckoutRoot` does not close it.
+  return resolveRepoDirBound(payload, { hookName: "signing-mutation-guard" })
+    .repoDir;
 }
 
 /**
@@ -341,7 +369,7 @@ function wouldMutateWorkingTree(opKind, repoDir, candidateRel) {
 
 // ---- main -------------------------------------------------------------------
 
-(async function main() {
+async function main() {
   try {
     const payload = await readStdinBounded();
     const hookEvent = payload.hook_event_name || "PreToolUse";
@@ -395,7 +423,7 @@ function wouldMutateWorkingTree(opKind, repoDir, candidateRel) {
       });
       // emit() exits
     }
-    if (!isCoordinationEnabled(mainRes.repoDir)) {
+    if (!isGovernanceEnabled(mainRes.repoDir)) {
       passthrough();
     }
 
@@ -561,4 +589,32 @@ function wouldMutateWorkingTree(opKind, repoDir, candidateRel) {
     }
     process.exit(0);
   }
-})();
+}
+
+// hookMain — the ONE entry, run by the CLI guard at the bottom of this file AND
+// in-process by lib/hook-engine.js (dispatch.js). The fallback timer it arms is
+// the one the file used to arm at load time; main() is the former IIFE.
+function hookMain() {
+  fallback = setTimeout(() => {
+    process.stdout.write(JSON.stringify({ continue: true }) + "\n");
+    process.exit(1);
+  }, TIMEOUT_MS);
+  return main();
+}
+
+module.exports = { hookMain };
+
+// CLI entry. The default path is exactly hookMain() — no engine dependency, so a
+// tree that copies this hook without lib/hook-engine.js runs it unchanged. The
+// selftest path replays the run through the in-process engine (hook-engine.js::runCli).
+if (require.main === module) {
+  if (process.env.COC_HOOK_ENGINE_SELFTEST === "1")
+    require("./lib/hook-engine.js").runCli(hookMain, __filename);
+  else {
+    // FW-TIER2 — a STANDALONE invocation is one hook event, so it opens the same
+    // one-answer-per-question scope the dispatch worker opens. Without it every
+    // asker in this process pays its own `git rev-parse --git-common-dir`.
+    require("./lib/event-git.js").installStandaloneEventScope();
+    hookMain();
+  }
+}

@@ -26,70 +26,70 @@ This skill provides quick access to:
 
 ### Essential Guides
 
-- **[kailash-quick-tips](kailash-quick-tips.md)** - Essential tips for Kailash development
-- **[common-mistakes-catalog](common-mistakes-catalog.md)** - Common pitfalls and solutions
-- **[node-selection-guide](node-selection-guide.md)** - Choosing the right nodes
-- **[workflow-patterns-library](workflow-patterns-library.md)** - Comprehensive pattern library
-- **[README](README.md)** - Cheatsheets overview
+- **[kailash-quick-tips](../../../.claude/skills/06-cheatsheets/kailash-quick-tips.md)** - Essential tips for Kailash development
+- **[common-mistakes-catalog](../../../.claude/skills/06-cheatsheets/common-mistakes-catalog.md)** - Common pitfalls and solutions
+- **[node-selection-guide](../../../.claude/skills/06-cheatsheets/node-selection-guide.md)** - Choosing the right nodes
+- **[workflow-patterns-library](../../../.claude/skills/06-cheatsheets/workflow-patterns-library.md)** - Comprehensive pattern library
+- **[README](../../../.claude/skills/06-cheatsheets/README.md)** - Cheatsheets overview
 
 ### Node References
 
-- **[admin-nodes-reference](admin-nodes-reference.md)** - Admin and management nodes
-- **[asyncsql-advanced](asyncsql-advanced.md)** - AsyncSQL node patterns
-- **[pythoncode-data-science](pythoncode-data-science.md)** - Data science with PythonCode
-- **[directoryreader-patterns](directoryreader-patterns.md)** - File system patterns
-- **[ollama-integration](ollama-integration.md)** - Local LLM integration
-- **[query-builder](query-builder.md)** - Query construction patterns
-- **[query-routing](query-routing.md)** - Intelligent query routing
+- **[admin-nodes-reference](../../../.claude/skills/06-cheatsheets/admin-nodes-reference.md)** - Admin and management nodes
+- **[asyncsql-advanced](../../../.claude/skills/06-cheatsheets/asyncsql-advanced.md)** - AsyncSQL node patterns
+- **[pythoncode-data-science](../../../.claude/skills/06-cheatsheets/pythoncode-data-science.md)** - Data science with PythonCode
+- **[directoryreader-patterns](../../../.claude/skills/06-cheatsheets/directoryreader-patterns.md)** - File system patterns
+- **[ollama-integration](../../../.claude/skills/06-cheatsheets/ollama-integration.md)** - Local LLM integration
+- **[query-builder](../../../.claude/skills/06-cheatsheets/query-builder.md)** - Query construction patterns
+- **[query-routing](../../../.claude/skills/06-cheatsheets/query-routing.md)** - Intelligent query routing
 
 ### Cyclic Workflow Patterns
 
-- **[cyclic-patterns-advanced](cyclic-patterns-advanced.md)** - Advanced cyclic patterns
-- **[cycle-aware-nodes](cycle-aware-nodes.md)** - Cycle-aware node development
-- **[cycle-debugging](cycle-debugging.md)** - Debugging cyclic workflows
-- **[cycle-testing](cycle-testing.md)** - Testing cyclic workflows
-- **[cycle-state-persistence](cycle-state-persistence.md)** - State management in cycles
-- **[cycle-scenarios](cycle-scenarios.md)** - Real-world cycle scenarios
-- **[multi-path-cycles](multi-path-cycles.md)** - Multi-path cyclic patterns
+- **[cyclic-patterns-advanced](../../../.claude/skills/06-cheatsheets/cyclic-patterns-advanced.md)** - Advanced cyclic patterns
+- **[cycle-aware-nodes](../../../.claude/skills/06-cheatsheets/cycle-aware-nodes.md)** - Cycle-aware node development
+- **[cycle-debugging](../../../.claude/skills/06-cheatsheets/cycle-debugging.md)** - Debugging cyclic workflows
+- **[cycle-testing](../../../.claude/skills/06-cheatsheets/cycle-testing.md)** - Testing cyclic workflows
+- **[cycle-state-persistence](../../../.claude/skills/06-cheatsheets/cycle-state-persistence.md)** - State management in cycles
+- **[cycle-scenarios](../../../.claude/skills/06-cheatsheets/cycle-scenarios.md)** - Real-world cycle scenarios
+- **[multi-path-cycles](../../../.claude/skills/06-cheatsheets/multi-path-cycles.md)** - Multi-path cyclic patterns
 
 ### Production & Enterprise
 
-- **[production-patterns](production-patterns.md)** - Production-ready patterns
-- **[production-readiness](production-readiness.md)** - Production checklist
-- **[performance-optimization](performance-optimization.md)** - Performance tuning
-- **[monitoring-alerting](monitoring-alerting.md)** - Monitoring and alerting
-- **[resilience-patterns](resilience-patterns.md)** - Resilience and fault tolerance
-- **[security-config](security-config.md)** - Security configuration
-- **[multi-tenancy-patterns](multi-tenancy-patterns.md)** - Multi-tenant architectures
+- **[production-patterns](../../../.claude/skills/06-cheatsheets/production-patterns.md)** - Production-ready patterns
+- **[production-readiness](../../../.claude/skills/06-cheatsheets/production-readiness.md)** - Production checklist
+- **[performance-optimization](../../../.claude/skills/06-cheatsheets/performance-optimization.md)** - Performance tuning
+- **[monitoring-alerting](../../../.claude/skills/06-cheatsheets/monitoring-alerting.md)** - Monitoring and alerting
+- **[resilience-patterns](../../../.claude/skills/06-cheatsheets/resilience-patterns.md)** - Resilience and fault tolerance
+- **[security-config](../../../.claude/skills/06-cheatsheets/security-config.md)** - Security configuration
+- **[multi-tenancy-patterns](../../../.claude/skills/06-cheatsheets/multi-tenancy-patterns.md)** - Multi-tenant architectures
 
 ### Enterprise Patterns
 
-- **[distributed-transactions](distributed-transactions.md)** - Distributed transaction patterns
-- **[saga-pattern](saga-pattern.md)** - Saga pattern for long transactions
-- **[enterprise-mcp](enterprise-mcp.md)** - Enterprise MCP patterns
-- **[a2a-coordination](a2a-coordination.md)** - Agent-to-agent coordination
-- **[mcp-resource-subscriptions](mcp-resource-subscriptions.md)** - MCP resource patterns
+- **[distributed-transactions](../../../.claude/skills/06-cheatsheets/distributed-transactions.md)** - Distributed transaction patterns
+- **[saga-pattern](../../../.claude/skills/06-cheatsheets/saga-pattern.md)** - Saga pattern for long transactions
+- **[enterprise-mcp](../../../.claude/skills/06-cheatsheets/enterprise-mcp.md)** - Enterprise MCP patterns
+- **[a2a-coordination](../../../.claude/skills/06-cheatsheets/a2a-coordination.md)** - Agent-to-agent coordination
+- **[mcp-resource-subscriptions](../../../.claude/skills/06-cheatsheets/mcp-resource-subscriptions.md)** - MCP resource patterns
 
 ### Development Tools
 
-- **[custom-node-guide](custom-node-guide.md)** - Creating custom nodes
-- **[developer-tools](developer-tools.md)** - Developer tooling
-- **[node-initialization](node-initialization.md)** - Node initialization patterns
-- **[env-variables](env-variables.md)** - Environment variable management
-- **[validation-testing](validation-testing.md)** - Validation and testing patterns
-- **[visualization](visualization.md)** - Workflow visualization
+- **[custom-node-guide](../../../.claude/skills/06-cheatsheets/custom-node-guide.md)** - Creating custom nodes
+- **[developer-tools](../../../.claude/skills/06-cheatsheets/developer-tools.md)** - Developer tooling
+- **[node-initialization](../../../.claude/skills/06-cheatsheets/node-initialization.md)** - Node initialization patterns
+- **[env-variables](../../../.claude/skills/06-cheatsheets/env-variables.md)** - Environment variable management
+- **[validation-testing](../../../.claude/skills/06-cheatsheets/validation-testing.md)** - Validation and testing patterns
+- **[visualization](../../../.claude/skills/06-cheatsheets/visualization.md)** - Workflow visualization
 
 ### Workflow Management
 
-- **[workflow-composition](workflow-composition.md)** - Composing complex workflows
-- **[workflow-design-process](workflow-design-process.md)** - Design process guide
-- **[workflow-api-deployment](workflow-api-deployment.md)** - Deploying workflows as APIs
-- **[workflow-export](workflow-export.md)** - Export and import patterns
+- **[workflow-composition](../../../.claude/skills/06-cheatsheets/workflow-composition.md)** - Composing complex workflows
+- **[workflow-design-process](../../../.claude/skills/06-cheatsheets/workflow-design-process.md)** - Design process guide
+- **[workflow-api-deployment](../../../.claude/skills/06-cheatsheets/workflow-api-deployment.md)** - Deploying workflows as APIs
+- **[workflow-export](../../../.claude/skills/06-cheatsheets/workflow-export.md)** - Export and import patterns
 
 ### Integration Patterns
 
-- **[data-integration](data-integration.md)** - Data integration patterns
-- **[integration-mastery](integration-mastery.md)** - Advanced integration techniques
+- **[data-integration](../../../.claude/skills/06-cheatsheets/data-integration.md)** - Data integration patterns
+- **[integration-mastery](../../../.claude/skills/06-cheatsheets/integration-mastery.md)** - Advanced integration techniques
 
 ## Quick Patterns
 
@@ -153,9 +153,9 @@ Use this skill when you need:
 
 ## Related Skills
 
-- **[01-core-sdk](../01-core-sdk/SKILL.md)** - Core SDK fundamentals
-- **[08-nodes-reference](../08-nodes-reference/SKILL.md)** - Node reference documentation
-- **[17-gold-standards](../17-gold-standards/SKILL.md)** - Mandatory best practices
+- **[01-core-sdk](../../../.claude/skills/01-core-sdk/SKILL.md)** - Core SDK fundamentals
+- **[08-nodes-reference](../../../.claude/skills/08-nodes-reference/SKILL.md)** - Node reference documentation
+- **[17-gold-standards](../../../.claude/skills/17-gold-standards/SKILL.md)** - Mandatory best practices
 
 ## Support
 

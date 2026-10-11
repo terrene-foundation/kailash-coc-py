@@ -20,7 +20,13 @@ The `neutral-body` slot MUST be byte-identical (modulo whitespace normalization)
 ```markdown
 # DO — neutral-body is identical; only examples slot diverges
 
+<!-- slot:neutral-body -->
+
 Every bulk operation MUST log per-row failures at WARN level.
+
+<!-- /slot:neutral-body -->
+
+<!-- slot:examples -->
 
 (CC variant) (Codex variant) (Gemini variant)
 `python                      `python `python
@@ -30,8 +36,11 @@ Agent(                         codex_agent(                   {{ @specialist }}
 
 # DO NOT — CLI-specific carve-outs in neutral-body
 
+<!-- slot:neutral-body -->
+
 Every bulk op MUST log at WARN. On Codex, this applies only to mutating tools.
 
+<!-- /slot:neutral-body -->
 ```
 
 **BLOCKED rationalizations:**

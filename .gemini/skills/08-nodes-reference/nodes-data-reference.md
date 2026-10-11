@@ -11,7 +11,7 @@ Complete reference for file I/O and data processing nodes.
 > Category: `nodes`
 > Priority: `HIGH`
 > SDK Version: `0.9.25+`
-> Related Skills: [`nodes-database-reference`](nodes-database-reference.md), [`nodes-quick-index`](nodes-quick-index.md)
+> Related Skills: [`nodes-database-reference`](../../../.claude/skills/08-nodes-reference/nodes-database-reference.md), [`nodes-quick-index`](../../../.claude/skills/08-nodes-reference/nodes-quick-index.md)
 > Related Subagents: `pattern-expert` (data workflows)
 
 ## Quick Reference
